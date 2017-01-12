@@ -1,354 +1,42 @@
-Установка на vps
+# comet-server
 
+
+### Установка:
+Рекомендуемые ОС ubuntu, debian, centos
+```sh
 apt-get update
-apt-get install cmake make cpp gcc libssl-dev g++ htop nano mc curl nginx haproxy libmysqlclient-dev valgrind mysql-server mysql-client flex mailutils uuid-dev 
-apt-get upgrade
+apt-get install cmake make cpp gcc libssl-dev g++ nginx libmysqlclient-dev mysql-server mysql-client flex mailutils uuid-dev 
+```
 
-# https://romantelychko.com/blog/1300/
-# http://ru.fractalizer.ru/frpost_197/настройка-ядра-linux-для-поддержки-большо/
- sysctl -w net.ipv4.conf.all.accept_redirects=0
- sysctl -w net.ipv4.conf.all.secure_redirects=0
- sysctl -w net.ipv4.conf.all.send_redirects=0
- sysctl -w net.ipv4.tcp_max_orphans=65536
- sysctl -w net.ipv4.tcp_fin_timeout=10
- sysctl -w net.ipv4.tcp_keepalive_time=1800
- sysctl -w net.ipv4.tcp_keepalive_intvl=15
- sysctl -w net.ipv4.tcp_keepalive_probes=5
- sysctl -w net.ipv4.tcp_max_syn_backlog=4096
- sysctl -w net.ipv4.tcp_synack_retries=1
- sysctl -w net.ipv4.tcp_orphan_retries=0
- sysctl -w net.ipv4.tcp_syncookies=1
- sysctl -w net.ipv4.tcp_timestamps=1
- sysctl -w net.ipv4.tcp_sack=1
- sysctl -w net.ipv4.tcp_congestion_control=htcp
- sysctl -w net.ipv4.tcp_no_metrics_save=1
- sysctl -w net.ipv4.route.flush=1
- sysctl -w net.ipv4.conf.all.rp_filter=1
- sysctl -w net.ipv4.conf.lo.rp_filter=1
- sysctl -w net.ipv4.conf.default.rp_filter=1
- sysctl -w net.ipv4.conf.all.accept_source_route=0
- sysctl -w net.ipv4.conf.lo.accept_source_route=0
- sysctl -w net.ipv4.conf.default.accept_source_route=0
- sysctl -w net.ipv4.tcp_tw_reuse=1
- sysctl -w net.ipv4.tcp_window_scaling=1
- sysctl -w net.ipv4.tcp_rfc1337=1
- sysctl -w net.ipv4.ip_forward=0
- sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
- sysctl -w net.ipv4.icmp_echo_ignore_all=1
- sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=1
- sysctl -w net.core.somaxconn=15000
- sysctl -w net.core.netdev_max_backlog=1000
- sysctl -w net.core.rmem_default=65536
- sysctl -w net.core.wmem_default=65536
- sysctl -w net.core.rmem_max=16777216
- sysctl -w net.core.wmem_max=16777216
+### Собираем из исходных кодов:
+```sh
+git clone https://github.com/Levhav/comet-server
+cd comet-server
+cmake .
+make
+```
+
+### Настройки: 
+  - Создайте базу в mysql на основе файла db.sql
+  - В файле comet.conf укажите реквизиты для доступа к бд
+```txt
+db_host 127.0.0.1 # Адрес сервера с бд
+db_pw pass        # Пароль
+db_user comet     # Пользователь
+db_port 3306      # Порт
+db_name comet_db  # Имя базы данных
+```
+- Укажите пароль для доступа к api комет сервера
+```txt
+# пароль для доступа к api комет сервера
+password 0000000000000000000000000000000000000000000000000000000000000000 
+```
+Остальные настройки из файла comet.conf можно не менять.
+**Важно чтоб параметры из comet.conf учитывались они не должны иметь пробелов в начале строки.**
+ 
+License
+----
+
+GPLv3
 
  
- 
-echo "net.ipv4.conf.all.accept_redirects=0" >>  /etc/sysctl.conf
-echo "net.ipv4.conf.all.secure_redirects=0" >>  /etc/sysctl.conf
-echo "net.ipv4.conf.all.send_redirects=0" >>  /etc/sysctl.conf
-echo "net.ipv4.tcp_max_orphans=65536" >>  /etc/sysctl.conf
-echo "net.ipv4.tcp_fin_timeout=10" >>  /etc/sysctl.conf
-echo "net.ipv4.tcp_keepalive_time=1800" >>  /etc/sysctl.conf
-echo "net.ipv4.tcp_keepalive_intvl=15" >>  /etc/sysctl.conf
-echo "net.ipv4.tcp_keepalive_probes=5" >>  /etc/sysctl.conf
-echo "net.ipv4.tcp_max_syn_backlog=4096" >>  /etc/sysctl.conf
-echo "net.ipv4.tcp_synack_retries=1" >>  /etc/sysctl.conf
-echo "net.ipv4.tcp_orphan_retries=0" >>  /etc/sysctl.conf
-echo "net.ipv4.tcp_syncookies=1" >>  /etc/sysctl.conf
-echo "net.ipv4.tcp_timestamps=1" >>  /etc/sysctl.conf
-echo "net.ipv4.tcp_sack=1" >>  /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control=htcp" >>  /etc/sysctl.conf
-echo "net.ipv4.tcp_no_metrics_save=1" >>  /etc/sysctl.conf
-echo "net.ipv4.route.flush=1" >>  /etc/sysctl.conf
-echo "net.ipv4.conf.all.rp_filter=1" >>  /etc/sysctl.conf
-echo "net.ipv4.conf.lo.rp_filter=1" >>  /etc/sysctl.conf
-echo "net.ipv4.conf.default.rp_filter=1" >>  /etc/sysctl.conf
-echo "net.ipv4.conf.all.accept_source_route=0" >>  /etc/sysctl.conf
-echo "net.ipv4.conf.lo.accept_source_route=0" >>  /etc/sysctl.conf
-echo "net.ipv4.conf.default.accept_source_route=0" >>  /etc/sysctl.conf
-echo "net.ipv4.tcp_tw_reuse=1" >>  /etc/sysctl.conf
-echo "net.ipv4.tcp_window_scaling=1" >>  /etc/sysctl.conf
-echo "net.ipv4.tcp_rfc1337=1" >>  /etc/sysctl.conf
-echo "net.ipv4.ip_forward=0" >>  /etc/sysctl.conf
-echo "net.ipv4.icmp_echo_ignore_broadcasts=1" >>  /etc/sysctl.conf
-echo "net.ipv4.icmp_echo_ignore_all=1" >>  /etc/sysctl.conf
-echo "net.ipv4.icmp_ignore_bogus_error_responses=1" >>  /etc/sysctl.conf
-echo "net.core.somaxconn=15000" >>  /etc/sysctl.conf
-echo "net.core.netdev_max_backlog=1000" >>  /etc/sysctl.conf
-echo "net.core.rmem_default=65536" >>  /etc/sysctl.conf
-echo "net.core.wmem_default=65536" >>  /etc/sysctl.conf
-echo "net.core.rmem_max=16777216" >>  /etc/sysctl.conf
-echo "net.core.wmem_max=16777216" >>  /etc/sysctl.conf
-
- // На всякий случай эти параметры не стал менять хотя они рекомендованы статьёй
- #echo "net.ipv4.netfilter.ip_conntrack_max=1048576" >>  /etc/sysctl.conf
- #sysctl -w net.ipv4.netfilter.ip_conntrack_max=1048576
- #sysctl -w net.ipv4.conf.eth0.rp_filter=1
- #sysctl -w net.ipv4.conf.eth0.accept_source_route=0
- #sysctl -w net.ipv4.tcp_mem="50576   64768   98152"
- #sysctl -w net.ipv4.tcp_rmem="4096 87380 16777216"
- #sysctl -w net.ipv4.tcp_wmem="4096 65536 16777216"
- #sysctl -w net.ipv4.ip_local_port_range="1024 65535"
- #echo "net.ipv4.conf.eth0.accept_source_route=0" >>  /etc/sysctl.conf
- #echo "net.ipv4.conf.eth0.rp_filter=1" >>  /etc/sysctl.conf
- #echo "net.ipv4.tcp_mem=50576   64768   98152" >>  /etc/sysctl.conf
- #echo "net.ipv4.tcp_rmem=4096 87380 16777216" >>  /etc/sysctl.conf
- #echo "net.ipv4.tcp_wmem=4096 65536 16777216" >>  /etc/sysctl.conf
- #echo "net.ipv4.ip_local_port_range=1024 65535" >>  /etc/sysctl.conf
- 
-Скопировали конфиг кометсервера и собрали комет сервер.
-Скопировать скрипты запуска для комет сервера.
-установить redis-server указать пароль, перезапустить.
-Скопировали ssl сертификаты
-Настроили nginx:
-
-#
-# HTTPS server
-#
-server {
-	listen 0.0.0.0:443;
-	server_name n1.comet-server.com;
-
-	ssl on;
-	ssl_certificate /root/ssl-key/comet.su.pem;
-	ssl_certificate_key /root/ssl-key/no-pass-comet-su.key;
-  
-    ssl_session_timeout 30m;
-
-	ssl_protocols SSLv3 TLSv1;
-	ssl_ciphers ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP;
-	ssl_prefer_server_ciphers on;
-    ssl_session_cache   shared:SSL:10m;
-
-	keepalive_disable none;
-	lingering_close always;
-	send_timeout 3600s;	
-	
-	location / {
-        proxy_pass http://127.0.0.1:80;
-        
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header Host $http_host;
-        proxy_set_header X-NginX-Proxy true;
-        
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-         
-        proxy_redirect off;
-        keepalive_timeout 900;
-        proxy_read_timeout 900;
-	}
-}
-
-
-Создание ссылки на /etc/init.d
-ln ./comet-service.sh /etc/init.d/star-comet
-
-
-Добавление в автозагрузку:
-update-rc.d /etc/init.d/star-comet start 70 2 3 4 5 . stop 20 0 1 6 .
-Здесь я определил, что мой скриптик должен запускаться попозже остальных(70), и останавливаться пораньше(20). Цифры 2 3 4 5 0 1 6 означают уровни загрузки. 
-Если что-то не понравилось — все можно удалить sudo update-rc.d -f my_script remove
-
-В файл nano /etc/default/locale пишем локальи
-LANGUAGE=ru_RU.UTF-8
-LC_ALL=ru_RU.UTF-8
-LANG=ru_RU.UTF-8
-LC_TYPE=ru_RU.UTF-8
-
-Генерируем локаль
-locale-gen ru_RU.UTF-8
-dpkg-reconfigure locales
-Номер ru_RU.UTF-8 равен был 372
-
-Настроить redis
-echo "requirepass jFDdf4Didfdf5454trRDfddf1q1qqdcxcvvcv" >> /etc/redis/redis.conf
-echo "bind 0.0.0.0" >> /etc/redis/redis.conf
-
-
-
-
-Настроить haproxy ( Добавление в конфиг ) nano /etc/haproxy/haproxy.cfg
-
-backend comet-backend
-    listen mysql-cluster
-    bind 0.0.0.0:3306
-    mode tcp
-    balance roundrobin
-    stats enable
-    option mysql-check user haproxy_check
-    server mysql-1 0.0.0.0:3307  check
-    #server mysql-2 46.36.217.36:3307   check
-    
-    
-frontend http
-    bind 0.0.0.0:81
-    stats uri /
-    stats realm Haproxy\ Statistics
-    stats show-legends
-    stats refresh 5s
-    maxconn 300
-    mode http
-    option httpclose
-    transparent
-    stats auth root:ser32poHJK
-    clitimeout 10000
-    srvtimeout 10000
-    contimeout 4000
-
-
-
-service haproxy restart
-service nginx restart
-service redis-server restart
-service mysql restart
-
-# Установка и настройка mysql
-# mysql pass - jFDdf4Didfdf5454trRDfddf1q1qqdcxcvvcv 
-mysql -uroot -pjFDdf4Didfdf5454trRDfddf1q1qqdcxcvvcv -Dmysql
-UPDATE user SET Host='%' WHERE User='root' AND Host='localhost';
-GRANT ALL PRIVILEGES ON *.* TO comet@localhost IDENTIFIED BY 'b5FGooooooDF79ooooB3Ooo46nffgfgngnf' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
-exit;
-
-echo "bind-address = 0.0.0.0" >> /etc/mysql/mysql.conf.d/mysqld.cnf
-echo "port = 3305" >> /etc/mysql/mysql.conf.d/mysqld.cnf 
-service mysql restart
-
-Положение конфига от phpmyadmin
-sftp://root@5.45.122.228/etc/phpmyadmin/config.inc.php
-
-Дебаг для проверочек
-valgrind --tool=memcheck  ./cpp_comet
-
-
-===================================================================================
-Конфиг сервера
-===================================================================================
-client_thread_num 4     #Количество потоков для обработки соединений с клиентами (браузерами)
-server_thread_num 1     #Количество потоков для обработки соединений с PHP сервером
-mysql_thread_num 2
-
-client_benchmark 10     #Интервал между отчётами о нагрузке от PHP (0 = не замерять) 
-server_benchmark 10     #Интервал между отчётами о нагрузке от Посетителей (0 = не замерять) 
-mysql_benchmark 10
-
-benchmark_to_log 1 #Надо ли использовать сохранение в файл
-benchmark_to_file 1 #Надо ли использовать сохранение в редис
-benchmark_to_redis 1 #Надо ли использовать сохранение в лог
-benchmark_file_save 10 #Сбрасывать файл на диск каждые benchmark_file_save секунд
-
-
-client_ip  0.0.0.0 #IP адрес на котором принимаются сообщения от клиентов
-server_ip  0.0.0.0 #IP адрес на котором принимаются сообщения от PHP сервера (Если PHP и Сервер доставки сообщений на одной машине то 127.0.0.1 )
- 
-redis_host 127.0.0.1 #Хост для redis
-redis_pw jFDdf4Didfdf5454trRDfddf1q1qqdcxcvvcv
-redis_db 0
-
-client_port 80
-server_port 808
-mysql_port 3307
-
-redis_slave_host 127.0.0.1
-redis_slave_pw jFDdf4Didfdf5454trRDfddf1q1qqdcxcvvcv
-redis_slave_db 1
-
-node_name n1
-
-LogLevel 500 # echo 'LogLevel 300' > /tmp/cpp_comet
-TagLog 0 600 #Log_Any
-TagLog 1 200 #Log_TagLoger
-TagLog 2 500 #Log_appConf
-TagLog 3 200 #Log_pipeCommands
-TagLog 4 200 #Log_benchmark
-TagLog 5 200 #Log_removeOldConnectionsLoop
-TagLog 6 200 #Log_MySqlServer
-TagLog 7 200 #Log_UserIndex                 echo 'TagLog 7 200' > /tmp/cpp_comet
-TagLog 8 200 #Log_UserItem                  echo 'TagLog 8 200' > /tmp/cpp_comet
-TagLog 9 200 #Log_ClientServer
-TagLog 10 200 #Log_ServerServer
-TagLog 11 200 #Log_SimpleRedisClient
-TagLog 12 200 #Log_tcpServer
-TagLog 13 500 #Log_CometQLCluster
-TagLog 14 500 #Log_devManager
-
-# Не хило жрёт память
-server_max_conections 5
-client_max_conections 3500
-mysql_max_conections 50
-
-password jT7P20e5EUd8DXK3RgIJrthrDGrtvUzUqFc2ZEgL4LSb5Ml7nwGdfVmS5N3o0zAx # пароль для доступа к api комет сервера
-
-#hl_ip 109.234.34.208
-#hl_port 3306
-#hl_pw lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8
-
-db_host 127.0.0.1
-db_pw b5FGooooooDF79ooooB3Ooo46nffgfgngnf
-db_user comet
-db_port 3305
-db_name comet_db
-================================================================================
-
-
-service star-comet start
-
-
-
-
-
-
-
-
-================================================================================
-Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
-tcp        0      0 46.36.217.36:81         46.36.217.36:47586      CLOSE_WAIT  325/haproxy     
-tcp        0      0 46.36.217.36:80         46.36.217.36:36270      ESTABLISHED -               
-tcp        0      0 46.36.217.36:46773      46.36.217.36:81         FIN_WAIT2   325/haproxy     
-tcp        0      0 46.36.217.36:46595      46.36.217.36:81         FIN_WAIT2   325/haproxy     
-tcp        0      0 46.36.217.36:46848      46.36.217.36:3305       ESTABLISHED -               
-tcp        0      0 46.36.217.36:37269      46.36.217.36:80         ESTABLISHED 323/nginx: worker p
-tcp        0      0 46.36.217.36:80         46.36.217.36:35610      ESTABLISHED -               
-tcp        0      0 46.36.217.36:80         109.226.215.217:64655   ESTABLISHED -               
-tcp        0      0 46.36.217.36:81         46.36.217.36:46586      CLOSE_WAIT  325/haproxy     
-tcp        0      0 46.36.217.36:46704      46.36.217.36:81         FIN_WAIT2   325/haproxy     
-tcp        0      0 46.36.217.36:81         46.36.217.36:47359      CLOSE_WAIT  325/haproxy     
-tcp        0      0 46.36.217.36:80         46.36.217.36:37269      ESTABLISHED -  
-
-
-
-netstat -n -p | grep SYN_REC| awk '{print $5}'|awk -F: '{print $1}' | sort -n | uniq -c | sort -nr | head -n10
-
-netstat -n -p | grep -E "[0-9]+ [0-9.]+:(80|81|3306)" | grep "ESTABLISHED"
-
-
-Статусы
-ESTABLISHED
-CLOSE_WAIT
-FIN_WAIT2
-FIN_WAIT1
-TIME_WAIT
-
-
-netstat -n -p | grep -E "[0-9]+ [0-9.]+:(80|81|3306)" | wc -l
-
-Общее количество абонентов на каждом из портов
-netstat -n -p | grep -E "[0-9]+ [0-9.]+:(443)" | wc -l
-netstat -n -p | grep -E "[0-9]+ [0-9.]+:(80)" | wc -l
-netstat -n -p | grep -E "[0-9]+ [0-9.]+:(84)" | wc -l
-netstat -n -p | grep -E "[0-9]+ [0-9.]+:(3306)" | wc -l
-
-
-Количество абонентов по статусам
-netstat -n -p | grep -E "[0-9]+ [0-9.]+:(80)" | grep "ESTABLISHED" | wc -l
-netstat -n -p | grep -E "[0-9]+ [0-9.]+:(80)" | grep "CLOSE_WAIT" | wc -l
-netstat -n -p | grep -E "[0-9]+ [0-9.]+:(80)" | grep "FIN_WAIT2" | wc -l
-netstat -n -p | grep -E "[0-9]+ [0-9.]+:(80)" | grep "FIN_WAIT1" | wc -l
-netstat -n -p | grep -E "[0-9]+ [0-9.]+:(80)" | grep "TIME_WAIT" | wc -l
-
-Хорошобы в комет статистике выводить не только данные netstat но и данные по iotop и htop
