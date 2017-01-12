@@ -5,8 +5,8 @@
 # Required-Stop:     $local_fs $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: comet service comet-server.com
-# Description:       comet service comet-server.com
+# Short-Description: comet service comet-server.org
+# Description:       comet service comet-server.org
 ### END INIT INFO
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
