@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<!DOCTYPE tsung SYSTEM "/usr/share/tsung/tsung-1.0.dtd">
+<tsung loglevel="debug" dumptraffic="true">
+
+  <clients>
+    <client host="localhost" use_controller_vm="true" />
+  </clients>
+
+  <!-- Server side setup -->
+ <servers>
+  <server host="chat.lovelama.ru" port="802" type="tcp"/>
+ </servers>
+ 
+ <load>
+  <arrivalphase phase="1" duration="1" unit="minute">
+    <users interarrival="3" unit="second"></users>
+  </arrivalphase>
+ </load>
+
+ <sessions>
+  <session probability="100" name="mysql-example" type="ts_mysql">
+      <request>
+        <mysql type="connect" />
+      </request>
+      <request>
+        <mysql type="authenticate" database="CometQL_v1" username="1" password="test" />
+      </request>
+      <request>
+        <mysql type="sql">SHOW TABLES</mysql>
+      </request>
+      <request>
+        <mysql type="sql">SHOW global status</mysql>
+      </request>
+      <request>
+        <mysql type="sql">SHOW status</mysql>
+      </request>
+      <request>
+        <mysql type="sql">SELECT * FROM users_time WHERE id = 2;</mysql>
+      </request>
+      <request>
+        <mysql type="sql">SELECT * FROM users_time WHERE id in( 2, 3, 67, 126657);</mysql>
+      </request>
+      <request>
+        <mysql type="sql">INSERT INTO pipes_messages (name, event, message)VALUES("pipe_name", "event_in_pipe", "text message");</mysql>
+      </request>
+      <request>
+        <mysql type="sql">SELECT * FROM pipes_messages WHERE name = "p10";</mysql>
+      </request>
+      <request>
+        <mysql type="sql">DELETE FROM pipes_messages WHERE name = 'p10';</mysql>
+      </request>
+      <request>
+        <mysql type="sql">SELECT * FROM pipes WHERE name IN( "web_admins", "web_php_chat");</mysql>
+      </request>
+      <request>
+        <mysql type="sql">SELECT * FROM users_in_pipes WHERE name = "web_admins";</mysql>
+      </request>
+      <request>
+        <mysql type="sql">INSERT INTO pipes_settings (name, LENGTH) VALUES ('p10', 10);</mysql>
+      </request>
+      <request>
+        <mysql type="sql">SELECT * FROM pipes_settings WHERE name = 'p10';</mysql>
+      </request>
+      <request>
+        <mysql type="sql">DELETE FROM  pipes_settings WHERE name = 'p10';</mysql>
+      </request>
+      <request>
+        <mysql type="sql">INSERT INTO users_messages (id, event, message)VALUES (2, 'event', 'message');</mysql>
+      </request>
+      <request>
+        <mysql type="sql">SELECT * FROM users_messages WHERE id = 2;</mysql>
+      </request>
+      <request>
+        <mysql type="sql">DELETE FROM users_messages WHERE id = 2;</mysql>
+      </request>
+      <request>
+        <mysql type="sql">SELECT * FROM users_time WHERE id IN( 2, 3, 145);</mysql>
+      </request>
+      <request>
+        <mysql type="sql">INSERT INTO users_auth (id, hash )VALUES (12, 'hash1');</mysql>
+      </request>
+      <request>
+        <mysql type="sql">SELECT * FROM users_auth WHERE id IN(2, 3, 12);</mysql>
+      </request>
+      <request>
+        <mysql type="close">DELETE FROM users_auth WHERE id = 12;</mysql>
+      </request>
+  </session>
+ </sessions>
+</tsung>
