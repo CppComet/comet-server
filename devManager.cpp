@@ -139,6 +139,13 @@ bool devInfo::testDevKey(const char* random20bytes, const char* DevKeyHashStart,
     return false;
 }
 
+void devInfo::incrMessages()
+{
+    messages++; 
+    devManager::instance()->addNetworkEvents(); 
+}
+
+
 //**************************
 //* devManager
 //*************************/

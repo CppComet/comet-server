@@ -386,6 +386,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
                 return 0;
             }
             
+            devManager::instance()->getDevInfo()->incrMessages(); 
             p++;
 
             char* startQuery = p;
@@ -1239,7 +1240,12 @@ int MySql_connection::sql_show_status(thread_data* local_buf, unsigned int Packe
         value[0] = "backend_delete_client_ps";
         snprintf(value[1].clear(), 255, "%.2f", (float)tcpServer <MySql_connection>::instance()->bm.getPsDeleteClient());
         delta = RowPackage(2, value, ++PacketNomber, answer);
-        answer += delta;
+        answer += delta;       
+        
+        value[0] = "network_events"; // Сетевые события только от авторизованных пользователей
+        value[1] = devManager::instance()->getPsNetworkEvents();
+        delta = RowPackage(2, value, ++PacketNomber, answer);
+        answer += delta;  
     }
     else if(local_buf->qInfo.arg_show.flag == FLAG_SESSION || local_buf->qInfo.arg_show.flag == 0)
     {

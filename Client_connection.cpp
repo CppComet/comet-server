@@ -274,6 +274,7 @@ int Client_connection::web_write_error(const char* text, int code, thread_data* 
  */
 char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
 {
+    isAuthUser = false;
     char * mytext = local_buf->buf;
     TagLoger::log(Log_ClientServer, 0, " >Client %d создание cpstring msg\n",client);
 
@@ -404,7 +405,8 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     }
 
     TagLoger::log(Log_ClientServer, 0, "web_user_id[API=%d.%d] web_user_id->%d\n",client_major_version,client_minor_version,  web_user_id);
-
+    
+    isAuthUser = true;
     return web_session;
 }
 
@@ -1680,8 +1682,10 @@ int Client_connection::request(int client, int len, thread_data* local_buf)
         r = web_socket_request_message(client,len, local_buf);
     }
 
-    devManager::instance()->getDevInfo()->incrMessages();
-
+    if(isAuthUser)
+    {
+        devManager::instance()->getDevInfo()->incrMessages();
+    }
     //pthread_mutex_unlock(&request_mutex);
     return r;
 }
@@ -1837,6 +1841,7 @@ int Client_connection::set_offline(thread_data* local_buf)
     online_decr(local_buf);
     //pthread_mutex_lock(&request_mutex);
     isOnLine = false;
+    isAuthUser = false;
     devManager::instance()->getDevInfo()->index->un_link(local_buf, web_user_id, fd);
 
     un_subscription(local_buf);

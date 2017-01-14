@@ -173,6 +173,7 @@ class Client_connection:public connection
      
      
     
+    bool isAuthUser = false;  
     int connection_type = REQUEST_NULL;
     
     int client_major_version = 0;

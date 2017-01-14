@@ -409,7 +409,7 @@ class devInfo
     /**
      *  Инкремент количиства отправленных сообщений в Js от dev_id
      */
-    void incrMessages() { messages++;}
+    void incrMessages();
 
     /**
      * Вернёт количиство отправленных сообщений в Js от dev_id
@@ -435,19 +435,38 @@ class devInfo
 class devManager
 { 
     devInfo* index; 
+    int tps_network_events = 0;
+    float ps_network_events = 0;
+
     public:
-
-
+ 
     static devManager* inst;
     static devManager* instance();
 
     ~devManager();
-    
     devManager()
     {
         index = new devInfo(appConf::instance()->rootPassword); 
-    }
-     
+        intervalLoop::instance()->add([](int uptime, thread_data* local_buf)
+        {
+            if( uptime%appConf::instance()->client_benchmark != 0)
+            {
+                return;
+            }
+            
+            devManager::instance()->ps_network_events = devManager::instance()->tps_network_events / appConf::instance()->client_benchmark;
+            devManager::instance()->tps_network_events = 0;
+        });
+
+    }  
+      
+    float getPsNetworkEvents(){ return ps_network_events; }
+
+    /**
+     * Для учёта общего количества отправленых и пинятых сообщений на сервере от авторизованных пользователей
+     */
+    void addNetworkEvents(){ tps_network_events++; }
+
     /**
      * Вернёт devInfo по dev_id
      * @param dev_id
