@@ -365,12 +365,7 @@ class MySql_connection:public connection
      * Инициализация структуры таблиц
      */
     static void initTables();
-
-
-#ifdef monoKillCode
-    static bool monoUserkCode;
-#endif
-
+ 
     MySql_connection();
     virtual ~MySql_connection();
 

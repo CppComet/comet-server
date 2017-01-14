@@ -53,7 +53,7 @@ mysql -h127.0.0.1 -uroot -p00000000000000000000000000000000000000000000000000000
 - Для подключения к api комет сервера из любых других языков используйте реализацию клиета mysql для выбранного вами языка.
 ```php
 // Например подключение из php
-$link = mysqli_connect("app.comet-server.ru", "15", "lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8", "CometQL_v1");
+$link = mysqli_connect("127.0.0.1", "root", "p0000000000000000000000000000000000000000000000000000000000000000", "CometQL_v1");
             mysqli_query (  $link, "INSERT INTO pipes_messages (name, event, message)VALUES('web_MainPageChat', '', '{ \"text\":\"My text\",\"name\":\"My name\"}' );" );
 ```
 

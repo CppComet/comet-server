@@ -23,9 +23,7 @@ appConf::appConf()
     bzero(client_ip,100); 
     bzero(mysql_ip,100);
     bzero(freeswitch_ip,100);
-    
-    bzero(redis_host,100);
-    bzero(redis_pw,100); 
+     
     bzero(node_name,100);
      
     bzero(base_dir,255);
@@ -35,9 +33,7 @@ appConf::appConf()
     snprintf(client_ip, 100,NULL_IP);  
     snprintf(mysql_ip, 100,NULL_IP); 
     snprintf(freeswitch_ip, 100,NULL_IP);
-    
-    snprintf(redis_host, 100,REDIS_HOST);   
-      
+     
     snprintf(node_name, 100,NODE_NAME);  
     
     
@@ -91,7 +87,6 @@ bool appConf::initFromFile(const char *fileName)
     
     TagLoger::log(Log_appConf, 0, "Чтение конфига\n");
     
-    int i =0;
     while (fgets(line, 999, f) != NULL)
     {
         bzero(key, 500);
@@ -146,35 +141,6 @@ bool appConf::initFromFile(const char *fileName)
             bzero(mysql_ip,100);
             sscanf(val,"%20s",mysql_ip);
             TagLoger::log(Log_appConf, 0, "set mysql_ip %s\n", mysql_ip);
-        }
-        else if(memcmp(key, "redis_port", strlen("redis_port")) == 0)
-        {
-            sscanf(val,"%6d",&redis_port);
-            TagLoger::log(Log_appConf, 0, "set redis_port %d\n", redis_port);
-        }
-        else if(memcmp(key, "redis_host", strlen("redis_host")) == 0)
-        {
-            bzero(redis_host,100);
-            sscanf(val,"%20s",redis_host);
-            TagLoger::log(Log_appConf, 0, "set redis_host %s\n", redis_host);
-        }
-        else if(memcmp(key, "redis_pw", strlen("redis_pw")) == 0)
-        {
-            redis_use_pw = 1;
-            bzero(redis_pw,100);
-            sscanf(val,"%99s",redis_pw);
-            TagLoger::log(Log_appConf, 0, "set redis_pw %s\n", redis_pw);
-            TagLoger::log(Log_appConf, 0, "set redis_use_pw %d\n", redis_use_pw);
-        } 
-        else if(memcmp(key, "redis_use_pw", strlen("redis_use_pw")) == 0)
-        {
-            sscanf(val,"%1d",&redis_use_pw);
-            TagLoger::log(Log_appConf, 0, "set redis_use_pw %d\n", redis_use_pw);
-        }
-        else if(memcmp(key, "redis_db", strlen("redis_db")) == 0)
-        {
-            sscanf(val,"%4d",&redis_db);
-            TagLoger::log(Log_appConf, 0, "set redis_db %d\n", redis_db);
         } 
         else if(memcmp(key, "password", strlen("password")) == 0)
         {

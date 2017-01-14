@@ -1282,11 +1282,7 @@ public:
     stm_users_auth_replace users_auth_replace;
     stm_users_auth_delete users_auth_delete;
     stm_users_auth_select users_auth_select;
-
-#ifndef monoUser 
-    stm_dev_config_select dev_config_select;
-#endif 
-    
+ 
     stm_users_time_select users_time_select;
     stm_pipes_settings_select pipes_settings_select;
     
@@ -1304,10 +1300,7 @@ public:
         users_auth_replace.prepare(mysql);
         users_auth_delete.prepare(mysql);
         users_auth_select.prepare(mysql);
-        
-#ifndef monoUser 
-        dev_config_select.prepare(mysql);
-#endif 
+         
         pipes_settings_select.prepare(mysql);
         users_time_select.prepare(mysql);
     }

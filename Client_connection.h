@@ -211,14 +211,6 @@ class Client_connection:public connection
      */
     static int max_arg_length;
         
-#ifndef monoUser
-    /**
-     * Устанавливает размер Dev индекса
-     * @return 
-     */
-    static void setDevIndexSize(int size);
-#endif
-      
     Client_connection();  
     virtual ~Client_connection();
      

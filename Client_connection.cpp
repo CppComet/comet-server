@@ -1456,14 +1456,10 @@ int Client_connection::http404_answer(int client, int len, thread_data* local_bu
  * @param local_buf
  */
 int Client_connection::get_info_request(int client, int len, thread_data* local_buf)
-{
-#ifdef monoUser
+{ 
     char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:Star.Comet Server\r\nComet-Server:Star.Comet Server\r\nAccess-Control-Allow-Origin: *\
     \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n{\"status\":\"ok\",\"node\":\"__________\"}";
-#else
-    char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:Star.Comet Server\r\nComet-Server:Star.Comet Server\r\nAccess-Control-Allow-Origin: *\
-    \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n{\"status\":\"ok\",\"node\":\"__________\"}";
-#endif
+ 
     int respLen = strlen(resp);
     int nameLen = strlen(appConf::instance()->node_name);
     if(nameLen > 10)
@@ -1626,8 +1622,8 @@ int Client_connection::request(int client, int len, thread_data* local_buf)
         }
         else if( memcmp((char*)local_buf->buf, "GET //ws/", strlen("GET //ws/")) == 0
               || memcmp((char*)local_buf->buf, "GET /ws/", strlen("GET /ws/")) == 0
-              || memcmp((char*)local_buf->buf, "GET //comet-server-com/ws/", strlen("GET //comet-server-com/ws/")) == 0
-              || memcmp((char*)local_buf->buf, "GET /comet-server-com/ws/", strlen("GET /comet-server-com/ws/")) == 0)
+              || memcmp((char*)local_buf->buf, "GET //comet-server/ws/", strlen("GET //comet-server/ws/")) == 0
+              || memcmp((char*)local_buf->buf, "GET /comet-server/ws/", strlen("GET /comet-server/ws/")) == 0)
         {
             // GET Вебсокет
             TagLoger::log(Log_ClientServer, 0, " >WS GET\n");
@@ -1636,7 +1632,7 @@ int Client_connection::request(int client, int len, thread_data* local_buf)
             r = web_socket_request(client,len, local_buf);
         }
         else if( memcmp((char*)local_buf->buf, "GET /info ", strlen("GET /info ")) == 0
-              || memcmp((char*)local_buf->buf, "GET /comet-server-com/info ", strlen("GET /comet-server-com/info ")) == 0 )
+              || memcmp((char*)local_buf->buf, "GET /comet-server/info ", strlen("GET /comet-server/info ")) == 0 )
         {
             // GET Из браузера
             TagLoger::log(Log_ClientServer, 0, " >HTTP GET\n");
@@ -1645,7 +1641,7 @@ int Client_connection::request(int client, int len, thread_data* local_buf)
             r = get_info_request(client,len, local_buf);
         }
         else if( memcmp((char*)local_buf->buf, "GET /favicon.ico ", strlen("GET /favicon.ico ")) == 0
-              || memcmp((char*)local_buf->buf, "GET /comet-server-com/favicon.ico ", strlen("GET /comet-server-com/favicon.ico ")) == 0 )
+              || memcmp((char*)local_buf->buf, "GET /comet-server/favicon.ico ", strlen("GET /comet-server/favicon.ico ")) == 0 )
         {
             // GET Из браузера
             TagLoger::log(Log_ClientServer, 0, " >HTTP GET favicon.ico\n");

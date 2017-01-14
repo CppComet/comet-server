@@ -76,12 +76,6 @@ public:
     char node_name[100];
      
     char rootPassword[DEV_KEY_LEN+1]; 
-    
-    char redis_host[100];
-    char redis_pw[100];
-    int  redis_db = 0;
-    int  redis_port = 6379;
-    int  redis_use_pw = 0;
      
     int client_port = 80; 
     int mysql_port = 3306;

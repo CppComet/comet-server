@@ -58,8 +58,11 @@ class tcpServer_benchmark: public intervalLoopObject
 {
     int addClient = 0;
     int deleteClient = 0;
+    
+    /**
+     * Количество входящих сообщений
+     */
     int handle_message = 0;
-
 
     float ps_addClient = 0;
     float ps_deleteClient = 0;

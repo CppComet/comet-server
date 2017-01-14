@@ -47,15 +47,10 @@ Freeswitch_connection::~Freeswitch_connection(){}
  * @param local_buf
  */
 int Freeswitch_connection::options(int client, int len, thread_data* local_buf)
-{
-
-#ifdef monoUser
-    char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:Star.Comet Server\r\nComet-Server:Star.Comet Server\r\nAccess-Control-Allow-Origin: chat.lovelama.ru\
-    \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n+OK\r\n";
-#else
+{ 
     char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:Star.Comet Server\r\nComet-Server:Star.Comet Server\r\nAccess-Control-Allow-Origin: *\
     \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n+OK\r\n";
-#endif
+ 
     if(web_write( resp ) < 0)
     {
       TagLoger::log(Log_FreeswitchServer, 0, " >Client Не удалось отправить данные %d\n", fd);
@@ -71,14 +66,10 @@ int Freeswitch_connection::options(int client, int len, thread_data* local_buf)
  * @param local_buf
  */
 int Freeswitch_connection::get_request(int client, int len, thread_data* local_buf)
-{
-#ifdef monoUser
-    char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:Star.Comet Server\r\nComet-Server:Star.Comet Server\r\nAccess-Control-Allow-Origin: chat.lovelama.ru\
-    \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n";
-#else
+{ 
     char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:Star.Comet Server\r\nComet-Server:Star.Comet Server\r\nAccess-Control-Allow-Origin: *\
     \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n";
-#endif
+ 
     if(web_write( resp ) < 0 || web_write( logoPage ) < 0)
     {
       TagLoger::log(Log_FreeswitchServer, 0, " >Client Не удалось отправить данные %d\n", fd);
