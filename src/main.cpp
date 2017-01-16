@@ -17,8 +17,7 @@
 #include "devManager.h"
 #include "tcpServer.h"
 #include "Client_connection.h"
-#include "MySql_connection.h"
-#include "Freeswitch_connection.h"
+#include "MySql_connection.h" 
 
 #include "intervalLoop.h"
 
@@ -52,44 +51,7 @@
  * ЗАЛЕПА
  */
 time_t tcpServer_benchmark::start_time = time(0);
-
-
-/**
- * Для обработки сообщений от браузеров
- * @todo Вынести в конфигурационный файл настройки логирования и прочее
- * @param threadid
- * @return
- */
-void th_freeswitchServer(int threadid)
-{
-    if(appConf::instance()->freeswitch_thread_num == 0)
-    {
-        return;
-    }
-
-    TagLoger::log(Log_Any, 0, "Hello World! It's me, th_freeswitchServer #%ld!\n", threadid);
-
-    tcpServer <Freeswitch_connection>::instance()->id = 4;
-    tcpServer <Freeswitch_connection>::instance()->set_thread_num(appConf::instance()->freeswitch_thread_num);
-    tcpServer <Freeswitch_connection>::instance()->epoll_size = appConf::instance()->freeswitch_epoll_size;
-    tcpServer <Freeswitch_connection>::instance()->backlog = appConf::instance()->freeswitch_backlog;
-
-
-
-    if(appConf::instance()->freeswitch_benchmark > 0)
-    {
-        tcpServer <Freeswitch_connection>::instance()->benchmark = 1;
-        tcpServer <Freeswitch_connection>::instance()->bm.stat_interval = appConf::instance()->freeswitch_benchmark;
-    }
-    else
-    {
-        tcpServer <Freeswitch_connection>::instance()->benchmark = 0;
-    }
-
-    tcpServer <Freeswitch_connection>::instance()->start(appConf::instance()->freeswitch_ip, appConf::instance()->freeswitch_port, "FreeswitchServer");
-    return;
-}
-
+ 
 /**
  * Для обработки сообщений от браузеров
  * @todo Вынести в конфигурационный файл настройки логирования и прочее
@@ -522,13 +484,7 @@ int main(int argc, char *argv[])
     //long ql_t = 300;
     //pthread_create(&ql_sthreads, NULL, th_MySqlServer, (void *)ql_t);
     th_MySqlServer(300);
-
-    // Запуск потока обработки сообщений от серверов freeswitch
-    //pthread_t fs_sthreads;
-    //long fs_t = 400;
-    //pthread_create(&fs_sthreads, NULL, th_freeswitchServer, (void *)fs_t);
-    th_freeswitchServer(400);
-
+ 
     command_line_fork();
 
     TagTimer::end(Time_start);

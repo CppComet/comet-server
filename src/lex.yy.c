@@ -699,8 +699,8 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "src/CometQL.l"
-#line 2 "src/CometQL.l"
+#line 1 "CometQL.l"
+#line 2 "CometQL.l"
 #include <stdio.h>
 #include "y.tab.h"   
   
@@ -930,7 +930,7 @@ YY_DECL
 		}
 
 	{
-#line 15 "src/CometQL.l"
+#line 15 "CometQL.l"
 
 #line 936 "lex.yy.c"
 
@@ -991,264 +991,264 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 16 "src/CometQL.l"
+#line 16 "CometQL.l"
 {  setTokData return MORE;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 17 "src/CometQL.l"
+#line 17 "CometQL.l"
 {  setTokData return LESS;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 18 "src/CometQL.l"
+#line 18 "CometQL.l"
 {  setTokData return COMMA;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 19 "src/CometQL.l"
+#line 19 "CometQL.l"
 {  setTokData return EQUALLY;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 20 "src/CometQL.l"
+#line 20 "CometQL.l"
 {  setTokData return ASTERISK;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 21 "src/CometQL.l"
+#line 21 "CometQL.l"
 {  setTokData return BRACKETS_LEFT;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 22 "src/CometQL.l"
+#line 22 "CometQL.l"
 {  setTokData return BRACKETS_RIGHT;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 23 "src/CometQL.l"
+#line 23 "CometQL.l"
 {  setTokData return TOK_IN;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 24 "src/CometQL.l"
+#line 24 "CometQL.l"
 {  setTokData return TOK_OR;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 25 "src/CometQL.l"
+#line 25 "CometQL.l"
 {  setTokData return TOK_AND;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 26 "src/CometQL.l"
+#line 26 "CometQL.l"
 {  setTokData return TOK_USE;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 27 "src/CometQL.l"
+#line 27 "CometQL.l"
 {  setTokData return TOK_ASC;} 
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 28 "src/CometQL.l"
+#line 28 "CometQL.l"
 {  setTokData return FLAG_RAM;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 29 "src/CometQL.l"
+#line 29 "CometQL.l"
 {  setTokData return FLAG_AVG;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 30 "src/CometQL.l"
+#line 30 "CometQL.l"
 {  setTokData return TOK_DESC;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 31 "src/CometQL.l"
+#line 31 "CometQL.l"
 {  setTokData return TOK_SHOW;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 32 "src/CometQL.l"
+#line 32 "CometQL.l"
 {  setTokData return TOK_FROM;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 33 "src/CometQL.l"
+#line 33 "CometQL.l"
 {  setTokData return TOK_INTO;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 34 "src/CometQL.l"
+#line 34 "CometQL.l"
 {  setTokData return TOK_LIKE;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 35 "src/CometQL.l"
+#line 35 "CometQL.l"
 {  setTokData return TOK_LIMIT;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 36 "src/CometQL.l"
+#line 36 "CometQL.l"
 {  setTokData return FLAG_FULL;} 
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 37 "src/CometQL.l"
+#line 37 "CometQL.l"
 {  setTokData return TOK_WHERE;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 38 "src/CometQL.l"
+#line 38 "CometQL.l"
 {  setTokData return TOK_TABLES;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 39 "src/CometQL.l"
+#line 39 "CometQL.l"
 {  setTokData return TOK_DELETE;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 40 "src/CometQL.l"
+#line 40 "CometQL.l"
 {  setTokData return TOK_STATUS;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 41 "src/CometQL.l"
+#line 41 "CometQL.l"
 {  setTokData return TOK_VALUES;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 42 "src/CometQL.l"
+#line 42 "CometQL.l"
 {  setTokData return TOK_SELECT;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 43 "src/CometQL.l"
+#line 43 "CometQL.l"
 {  setTokData return TOK_INSERT;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 44 "src/CometQL.l"
+#line 44 "CometQL.l"
 {  setTokData return TOK_COLUMNS;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 45 "src/CometQL.l"
+#line 45 "CometQL.l"
 {  setTokData return FLAG_GLOBAL;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 46 "src/CometQL.l"
+#line 46 "CometQL.l"
 {  setTokData return FLAG_UPTIME;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 47 "src/CometQL.l"
+#line 47 "CometQL.l"
 {  setTokData return TOK_ORDER_BY;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 48 "src/CometQL.l"
+#line 48 "CometQL.l"
 {  setTokData return FLAG_SESSION;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 49 "src/CometQL.l"
+#line 49 "CometQL.l"
 {  setTokData return TOK_DESCRIBE;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 50 "src/CometQL.l"
+#line 50 "CometQL.l"
 {  setTokData return TOK_DATABASES;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 51 "src/CometQL.l"
+#line 51 "CometQL.l"
 {  setTokData return TOK_DATABASE;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 52 "src/CometQL.l"
+#line 52 "CometQL.l"
 {  setTokData return TOK_VARIABLES;}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 53 "src/CometQL.l"
+#line 53 "CometQL.l"
 {  setTokData return FLAG_FILESYSTEM;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 54 "src/CometQL.l"
+#line 54 "CometQL.l"
 {  setTokData return TOK_PROCESSLIST;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 55 "src/CometQL.l"
+#line 55 "CometQL.l"
 {  setTokData return TOK_TABLE_STATUS;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 56 "src/CometQL.l"
+#line 56 "CometQL.l"
 {  setTokData return VAL_SYSTEM_VARIBLE;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 57 "src/CometQL.l"
+#line 57 "CometQL.l"
 {  setTokData return VAL_INT;}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 58 "src/CometQL.l"
+#line 58 "CometQL.l"
 {  setTokDataNoQUOTE return VAL_INT;}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 59 "src/CometQL.l"
+#line 59 "CometQL.l"
 {  setTokDataNoQUOTE return VAL_INT;}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 60 "src/CometQL.l"
+#line 60 "CometQL.l"
 {  setTokDataNoQUOTE return VAL_INT;}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 61 "src/CometQL.l"
+#line 61 "CometQL.l"
 {  setTokData return VAL_NAME;}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 62 "src/CometQL.l"
+#line 62 "CometQL.l"
 {  setTokDataNoQUOTE return VAL_NAME;}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 63 "src/CometQL.l"
+#line 63 "CometQL.l"
 {  setTokDataNoQUOTE return VAL_NAME;}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 64 "src/CometQL.l"
+#line 64 "CometQL.l"
 {  setTokDataNoQUOTE return VAL_NAME;}
 	YY_BREAK
 case 50:
 /* rule 50 can match eol */
 YY_RULE_SETUP
-#line 65 "src/CometQL.l"
+#line 65 "CometQL.l"
 {  setTokDataNoQUOTE return VAL_QUOTED_STRING;} 
 	YY_BREAK
 case 51:
 /* rule 51 can match eol */
 YY_RULE_SETUP
-#line 66 "src/CometQL.l"
+#line 66 "CometQL.l"
 {  setTokDataNoQUOTE return VAL_QUOTED_STRING;}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 67 "src/CometQL.l"
+#line 67 "CometQL.l"
 ECHO;
 	YY_BREAK
 #line 1255 "lex.yy.c"
@@ -2252,6 +2252,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 67 "src/CometQL.l"
+#line 67 "CometQL.l"
 
 

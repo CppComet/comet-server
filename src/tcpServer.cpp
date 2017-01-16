@@ -12,8 +12,7 @@
 #include "tcpServer.h"
 #include "user_index.h"
 #include "connection.h"
-#include "MySql_connection.h"
-#include "Freeswitch_connection.h"
+#include "MySql_connection.h" 
 
 #include <pthread.h>
 #include <semaphore.h>
@@ -686,8 +685,7 @@ template< class connectionType >
 #include "MySql_connection.h"
 
 template class tcpServer<Client_connection>; 
-template class tcpServer<MySql_connection>;
-template class tcpServer<Freeswitch_connection>;
+template class tcpServer<MySql_connection>; 
 
 
 #endif	/* TCPSERVER_CPP */ 

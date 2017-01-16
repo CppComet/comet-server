@@ -82,16 +82,16 @@ include_directories(${MYSQL_INCLUDE_DIR})
 # Расположение заголовочных файлов
 #include_directories(foo)			
 
-execute_process( COMMAND flex -i CometQL.l)
-execute_process( COMMAND bison -d CometQL.y)
-execute_process( COMMAND yacc -d CometQL.y)
-execute_process( COMMAND bison -d --verbose --debug CometQL.y -o CometQL.cc)
-execute_process( COMMAND yacc -d --verbose --debug CometQL.y -o CometQL.cc)
-execute_process( COMMAND cc -c lex.yy.c -o lex.yy.o)
+execute_process( COMMAND flex -i src/CometQL.l)
+execute_process( COMMAND bison -d src/CometQL.y)
+execute_process( COMMAND yacc -d src/CometQL.y)
+execute_process( COMMAND bison -d --verbose --debug src/CometQL.y -o src/CometQL.cc)
+execute_process( COMMAND yacc -d --verbose --debug src/CometQL.y -o src/CometQL.cc)
+execute_process( COMMAND cc -c src/lex.yy.c -o src/lex.yy.o)
  
 
 # Установка переменной со списком исходников для исполняемого файла
-set(SOURCE_EXE hashlib2plus/src/hl_md5.cpp hashlib2plus/src/hl_md5wrapper.cpp TagLoger.cpp TagTimer.cpp main.cpp appConf.cpp intervalLoop.cpp base64.cpp  sha1.cpp  CometQL.cpp devManager.cpp internalApi.cpp Client_connection.cpp Freeswitch_connection.cpp MySqlProtocol.cpp connection.cpp mystring.cpp MySql_connection.cpp tcpServer.cpp user_index.cpp backtrace.cpp  thread_data.cpp thread_data.h lex.yy.o CometQL.cc) 
+set(SOURCE_EXE src/hashlib2plus/src/hl_md5.cpp src/hashlib2plus/src/hl_md5wrapper.cpp src/TagLoger.cpp src/TagTimer.cpp src/main.cpp src/appConf.cpp src/intervalLoop.cpp src/base64.cpp  src/sha1.cpp src/CometQL.cpp src/devManager.cpp src/internalApi.cpp src/Client_connection.cpp src/MySqlProtocol.cpp src/connection.cpp src/mystring.cpp src/MySql_connection.cpp src/tcpServer.cpp src/user_index.cpp src/backtrace.cpp src/thread_data.cpp src/thread_data.h src/lex.yy.o src/CometQL.cc) 
 
 # Создает исполняемый файл с именем cpp_comet из исходников
 add_executable(cpp_comet ${SOURCE_EXE} )

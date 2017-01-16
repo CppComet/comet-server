@@ -439,11 +439,7 @@ protected:
     int sql_insert_into_users_in_pipes(thread_data* local_buf, unsigned int PacketNomber);
     int sql_insert_into_pipes(thread_data* local_buf, unsigned int PacketNomber);
     int sql_insert_into_pipes_settings(thread_data* local_buf, unsigned int PacketNomber);
-
-    int sql_insert_into_users_conference(thread_data* local_buf, unsigned int PacketNomber);
-    int sql_insert_into_users_dialogs(thread_data* local_buf, unsigned int PacketNomber);
-    
-    
+ 
     int sql_delete_from_users_auth(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_users_time(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_users_messages(thread_data* local_buf, unsigned int PacketNomber);
