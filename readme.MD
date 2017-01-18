@@ -54,7 +54,7 @@ mysql -h127.0.0.1 -uroot -p00000000000000000000000000000000000000000000000000000
 ```php
 // Например подключение из php
 $link = mysqli_connect("127.0.0.1", "root", "0000000000000000000000000000000000000000000000000000000000000000", "CometQL_v1");
-            mysqli_query (  $link, "INSERT INTO pipes_messages (name, event, message)VALUES('web_MainPageChat', '', '{ \"text\":\"My text\",\"name\":\"My name\"}' );" );
+            mysqli_query (  $link, "INSERT INTO pipes_messages (name, event, message)VALUES('web_MainPageChat', '', 'message text, or json text' );" );
 ```
 
 License
