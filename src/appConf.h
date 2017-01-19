@@ -29,15 +29,11 @@ class appConf
     
 public:
     int client_thread_num = 3; 
-    int mysql_thread_num = 3;
-    int freeswitch_thread_num = 3;
+    int mysql_thread_num = 3; 
 
     int client_benchmark = 10; 
-    int mysql_benchmark = 10;
-    int freeswitch_benchmark = 10;
-    
-    int dev_index_size = 1000000 - 1;
-    
+    int mysql_benchmark = 10; 
+     
     /**
      * Надо ли писать в лог запросы от CometQL
      */
@@ -62,24 +58,20 @@ public:
     int benchmark_file_save = 30;
  
     int client_epoll_size = 10000;
-    int mysql_epoll_size  = 10000;
-    int freeswitch_epoll_size = 500;
+    int mysql_epoll_size  = 10000; 
    
     int client_backlog = 1024;
-    int mysql_backlog  = 1024;
-    int freeswitch_backlog = 128;
+    int mysql_backlog  = 1024; 
      
     char client_ip[100]; 
-    char mysql_ip[100];
-    char freeswitch_ip[100];
+    char mysql_ip[100]; 
     
     char node_name[100];
      
     char rootPassword[DEV_KEY_LEN+1]; 
      
     int client_port = 80; 
-    int mysql_port = 3306;
-    int freeswitch_port = 84;
+    int mysql_port = 3306; 
 
     int buf_size = 10384;
     
@@ -110,23 +102,7 @@ public:
     bool isHelp = false;
     
     bool isTest = false;
-    
-    /**
-     * Данные для кластера высокой нагрузки
-     * Ip адреса нод
-     */
-    char hl_ip[MAX_HL_CLUSTER_SIZE][100];
-    /**
-     * Данные для кластера высокой нагрузки
-     * Пароли нод
-     */
-    char hl_pw[MAX_HL_CLUSTER_SIZE][DEV_KEY_LEN+1];
-    /**
-     * Данные для кластера высокой нагрузки
-     * Порты нод
-     */
-    int hl_port[MAX_HL_CLUSTER_SIZE];
-    
+     
     char db_host[100];
     char db_pw[100];
     char db_user[100];

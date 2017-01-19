@@ -21,8 +21,7 @@ appConf::appConf()
     TagLoger::setTagLevel(Log_appConf, LOG_ALL);
     
     bzero(client_ip,100); 
-    bzero(mysql_ip,100);
-    bzero(freeswitch_ip,100);
+    bzero(mysql_ip,100); 
      
     bzero(node_name,100);
      
@@ -31,20 +30,10 @@ appConf::appConf()
     
     bzero(rootPassword,DEV_KEY_LEN); 
     snprintf(client_ip, 100,NULL_IP);  
-    snprintf(mysql_ip, 100,NULL_IP); 
-    snprintf(freeswitch_ip, 100,NULL_IP);
+    snprintf(mysql_ip, 100,NULL_IP);  
      
     snprintf(node_name, 100,NODE_NAME);  
-    
-    
-    bzero(hl_port,MAX_HL_CLUSTER_SIZE);
-    
-    for(int i=0; i< MAX_HL_CLUSTER_SIZE; i++)
-    { 
-        bzero(hl_ip[i],100);
-        bzero(hl_pw[i],DEV_KEY_LEN);
-    }
-    
+     
     bzero(db_host,100);
     bzero(db_pw,100);
     bzero(db_user,100);
@@ -202,35 +191,7 @@ bool appConf::initFromFile(const char *fileName)
         {
             sscanf(val,"%7d",&benchmark_file_save);
             TagLoger::log(Log_appConf, 0, "set benchmark_file_save %d\n", benchmark_file_save);
-        }
-        
-        
-        /**
-         *  mysql hl кластер 
-         */
-        else if(memcmp(key, "hl_ip", strlen("hl_ip")) == 0)
-        {
-            bzero(hl_ip[hl_ip_NodeIndex],100);
-            sscanf(val,"%20s",hl_ip[hl_ip_NodeIndex]);
-            TagLoger::log(Log_appConf, 0, "set hl_ip[%d] %s\n", hl_ip_NodeIndex, hl_ip[hl_ip_NodeIndex]);
-            hl_ip_NodeIndex++;
-            
-        }
-        else if(memcmp(key, "hl_pw", strlen("hl_pw")) == 0)
-        {
-            bzero(hl_pw[hl_pw_NodeIndex],DEV_KEY_LEN);
-            sscanf(val,"%64s",hl_pw[hl_pw_NodeIndex]);
-            TagLoger::log(Log_appConf, 0, "set hl_ip[%d] %s\n", hl_pw_NodeIndex, hl_pw[hl_pw_NodeIndex]);
-            hl_pw_NodeIndex++; 
-        }
-        else if(memcmp(key, "hl_port", strlen("hl_port")) == 0)
-        {
-            hl_port[hl_port_NodeIndex] = 0;
-            sscanf(val, "%7d", &hl_port[hl_port_NodeIndex]);
-            TagLoger::log(Log_appConf, 0, "set hl_port[%d] %d\n", hl_port_NodeIndex, hl_port[hl_port_NodeIndex]);
-            hl_port_NodeIndex++; 
-        }
-        
+        } 
         /**
          *  mysql db 
          */
@@ -267,37 +228,6 @@ bool appConf::initFromFile(const char *fileName)
         {
             sscanf(val,"%2d",&useQueryLoger);
             TagLoger::log(Log_appConf, 0, "set useQueryLoger %d\n", useQueryLoger);  
-        }
-        /**
-         *  FS db 
-         */ 
-        if(memcmp(key, "freeswitch_thread_num", strlen("freeswitch_thread_num")) == 0)
-        {
-            sscanf(val, "%4d",&freeswitch_thread_num);
-            TagLoger::log(Log_appConf, 0, "set freeswitch_thread_num %d\n", freeswitch_thread_num);
-        }
-        else if(memcmp(key, "freeswitch_benchmark", strlen("freeswitch_benchmark")) == 0)
-        {
-            sscanf(val,"%7d",&freeswitch_benchmark);
-            TagLoger::log(Log_appConf, 0, "set freeswitch_benchmark %d\n", freeswitch_benchmark);
-        }
-        else if(memcmp(key, "freeswitch_ip", strlen("freeswitch_ip")) == 0)
-        {
-            bzero(freeswitch_ip,100);
-            sscanf(val,"%20s",freeswitch_ip);
-            TagLoger::log(Log_appConf, 0, "set freeswitch_ip %s\n", freeswitch_ip);
-        }
-        else if(memcmp(key, "freeswitch_port", strlen("freeswitch_port")) == 0)
-        {
-            sscanf(val,"%6d",&freeswitch_port);
-            TagLoger::log(Log_appConf, 0, "set freeswitch_port %d\n", freeswitch_port);
-        } 
-        
-        // backlog
-        else if(memcmp(key, "freeswitch_backlog", strlen("freeswitch_backlog")) == 0)
-        {
-            sscanf(val,"%6d",&freeswitch_backlog);
-            TagLoger::log(Log_appConf, 0, "set freeswitch_backlog %d\n", freeswitch_backlog);
         } 
         else if(memcmp(key, "client_backlog", strlen("client_backlog")) == 0)
         {
@@ -308,14 +238,7 @@ bool appConf::initFromFile(const char *fileName)
         {
             sscanf(val,"%6d",&mysql_backlog);
             TagLoger::log(Log_appConf, 0, "set mysql_backlog %d\n", mysql_backlog);
-        }
-        
-        
-        else if(memcmp(key, "dev_index_size", strlen("dev_index_size")) == 0)
-        {
-            sscanf(val,"%6d",&dev_index_size);
-            TagLoger::log(Log_appConf, 0, "set dev_index_size %d\n", dev_index_size);
-        }
+        } 
     }
     
     fclose(f);
@@ -329,7 +252,7 @@ bool appConf::init(int argc, char *argv[])
         {
             if(strlen(argv[i]) >= strlen("--help")  && memcmp(argv[i],"--help",strlen("--help"))==0)
             {
-                    printf("Справка:\n \thttp://comet-server.ru\n \tsupport@comet-server.ru\n"); 
+                    printf("Справка:\n \thttp://comet-server.com\n \tsupport@comet-server.com\n"); 
                     isHelp = true;
                     return true;
             } 
