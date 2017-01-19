@@ -321,61 +321,13 @@ void command_line_fork()
  * valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-reachable=yes ./cpp_comet --test
  *
  * cppcheck -q -j4 --enable=performance,portability,warning,style .
- *
- * systemVaribleName
- * seregatv.ru
- * mysql -hn2-app.comet.su -u1 -pr3VYAQPxxsgu6P9FxkqH9SjELFEK0PGDWCaY1xCd0xkhmBDHh8hlPV0jgZhhPPBg -DCometQL_v1 -P3307
- * mysql -hn3-app.comet.su -u1 -pr3VYAQPxxsgu6P9FxkqH9SjELFEK0PGDWCaY1xCd0xkhmBDHh8hlPV0jgZhhPPBg -DCometQL_v1 -P3307
- * mysql -happ.comet-server.ru -u2 -pECMp5sWkR6FOjepgT5UN8gDx1dbNLUM3YBriK1KoVhn1MSmc6P7J0k40qhyoA39I -DCometQL_v1 -P3306
- * mysql -hchat.inparadise.info -uroot -pjT7P20e5EUd8DXK3RgIJrthrDGrtvUzUqFc2ZEgL4LSb5Ml7nwGdfVmS5N3o0zAx -DCometQL_v1 -P3308
- *
- * delete FROM `log_query` where query = "show status" or  query = "show global status"
- *
+ * 
  * @param argc
  * @param argv
  * @return
  */
 int main(int argc, char *argv[])
-{
-    /*
-    CP<fastListItem<int> > next1(NULL);
-    printf("isNULL %d\n", (int)next1.isNULL());
-
-    CP<fastListItem<int> > next2;
-    printf("isNULL %d\n", (int)next2.isNULL());
-
-
-    fastList<int> map;
-
-    map.append(1);
-    map.append(100);
-    map.append(100);
-    map.append(2);
-
-    int i = 0;
-    auto it = map.first;
-    while(it)
-    {
-        printf("%d - %d\n", i, it->data);
-        i++;
-        it = it->Next();
-    }
-
-    map.remove(100);
-    map.remove(100);
-    map.remove(200);
-    i = 0;
-    it = map.first;
-    while(it)
-    {
-        printf("%d - %d\n", i, it->data);
-        i++;
-        it = it->Next();
-    }
-
-
-    return 0;*/
-
+{ 
     TagTimer::start(Time_start);
     TagLoger::log(Log_Any, 0, "Старт сервера pid:%d, getrusage:%d\n", getpid());
 
@@ -387,13 +339,13 @@ int main(int argc, char *argv[])
     signal(SIGILL,  posix_log_signal); //  сигнал, посылаемый процессу при попытке выполнить неправильно сформированную, несуществующую или привилегированную инструкцию. (или попытке выполнения инструкции, требующей специальных привилегий. ) ( может быть перехвачен или проигнорирован)
     signal(SIGINT,  posix_log_signal); //  сигнал для остановки процесса пользователем с терминала.
     signal(SIGQUIT, posix_log_signal); //  сигнал, для остановки процесса пользователем, комбинацией «quit» на терминале.
-    signal(SIGTERM, posix_log_signal); // сигнал, для запроса завершения процесса. (В отличие от SIGKILL этот сигнал может быть обработан или проигнорирован программой.)
+    signal(SIGTERM, posix_log_signal); //  сигнал, для запроса завершения процесса. (В отличие от SIGKILL этот сигнал может быть обработан или проигнорирован программой.)
 
-    signal(SIGUSR1, posix_log_signal); // пользовательские сигналы По умолчанию, сигналы SIGUSR1 и SIGUSR2 завершают выполнение процесса.
-    signal(SIGUSR2, posix_log_signal); // пользовательские сигналы По умолчанию, сигналы SIGUSR1 и SIGUSR2 завершают выполнение процесса.
+    signal(SIGUSR1, posix_log_signal); //  пользовательские сигналы По умолчанию, сигналы SIGUSR1 и SIGUSR2 завершают выполнение процесса.
+    signal(SIGUSR2, posix_log_signal); //  пользовательские сигналы По умолчанию, сигналы SIGUSR1 и SIGUSR2 завершают выполнение процесса.
 
     signal(SIGBUS,  posix_log_signal); //  сигнал, сигнализирующий об ошибке шины, при обращении к физической памяти. ( может быть перехвачен или проигнорирован)
-    signal(SIGSYS,  posix_log_signal); // сигнал, предназначенный для посылки программе, при попытке передать неправильный аргумент в системный вызов.
+    signal(SIGSYS,  posix_log_signal); //  сигнал, предназначенный для посылки программе, при попытке передать неправильный аргумент в системный вызов.
     signal(SIGXCPU, posix_log_signal); //  сигнал, посылаемый компьютерной программе, превышающей лимит процессорного времени.
     signal(SIGXFSZ, posix_log_signal); //  сигнал, посылаемый процессу при превышении открытым файлом максимально допустимого размера.
 
@@ -401,11 +353,11 @@ int main(int argc, char *argv[])
 
     //signal(SIGALRM, posix_death_signal);
     //signal(SIGKILL, posix_death_signal);// не может быть перехвачен или проигнорирован
-    signal(SIGPIPE, posix_ignor_signal); //  сигнал, посылаемый процессу при записи в соединение (пайп, сокет) при отсутствии или обрыве соединения с другой (читающей) стороной.
+    signal(SIGPIPE, posix_ignor_signal);  // сигнал, посылаемый процессу при записи в соединение (пайп, сокет) при отсутствии или обрыве соединения с другой (читающей) стороной.
 
     //signal(SIGCHLD, posix_death_signal); // сигнал, посылаемый при изменении статуса дочернего процесса (завершен, приостановлен или возобновлен).
-    //signal(SIGCONT, posix_death_signal);  //  для возобновления выполнения процесса, ранее остановленного сигналом SIGSTOP
-    //signal(SIGSTOP, posix_death_signal); // SIGSTOP не может быть обработан программой или проигнорирован.
+    //signal(SIGCONT, posix_death_signal); //  для возобновления выполнения процесса, ранее остановленного сигналом SIGSTOP
+    //signal(SIGSTOP, posix_death_signal); //  SIGSTOP не может быть обработан программой или проигнорирован.
     //signal(SIGTSTP, posix_death_signal); //  сигнал, посылаемый c терминала для приостановки выполнения процесса (обычно — комбинацией Ctrl-Z) (может быть обработан программой или проигнорирован.)
     //signal(SIGTTIN, posix_death_signal); //  сигнал, посылаемый фоновой задаче при попытке чтения с управляющего терминала. При получении сигнала задача приостанавливается до получения SIGCONT
     //signal(SIGTTOU, posix_death_signal); //  сигнал, посылаемый фоновой задаче при попытке вывода на управляющий терминал.
@@ -422,8 +374,7 @@ int main(int argc, char *argv[])
 
     if(appConf::instance()->isHelp) return 0; // Выйти если был ключ --help
     appConf::instance()->print();
-
-    /* Временно отключаем mysql*/
+ 
     dbLink mydb;
     mydb.init(appConf::instance()->db_host, appConf::instance()->db_user, appConf::instance()->db_pw, appConf::instance()->db_name, appConf::instance()->db_port);
     if(!mydb.connect())
@@ -435,39 +386,7 @@ int main(int argc, char *argv[])
     {
         return 0;
     }
-
-    /*stm_users_queue_insert users_queue_insert;
-    users_queue_insert.prepare(mydb);
-    users_queue_insert.insert("start1", 10, 2, 3, "event1", "message1", strlen("message1"));
-    users_queue_insert.insert("start2", 20, 2, 3, "event2", "message2", strlen("message2"));
-    users_queue_insert.insert("start3", 30, 2, 4, "event3", "message3", strlen("message3"));
-    users_queue_insert.insert("start4", 40, 2, 4, "event4", "message4", strlen("message4"));
-    */
-
-    /*
-    stm_users_queue_select users_queue_select;
-    users_queue_select.prepare(mydb);
-
-    users_queue_select.select(2, 3, 10);
-    int i =0;
-    while(!users_queue_select.fetch())
-    {
-        printf("%d: %d - %s\n", i, users_queue_select.result_message_length, users_queue_select.result_message);
-        i++;
-    }
-    users_queue_select.free();
-    return 0;*/
-
-
-    //stmMapper stmq(mydb.getLink());
-    //stmq.call(1, "query text", strlen("query text"));
-
-    /* @FixMe решить вопрос экранирования данных  - mysql_real_escape_string();
-    if(!mydb.query("INSERT INTO `log_query`(`id`, `dev_id`, `query`) VALUES (NULL, %d, '%s');", "start"))
-    {
-        return 0;
-    }*/
-
+ 
     #ifdef monoURL
         devManager::instance()->getDevInfo()->setDevUrl(monoURL);
     #endif
