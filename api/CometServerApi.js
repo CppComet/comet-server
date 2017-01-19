@@ -312,7 +312,7 @@ var _cometServerApi = function(opt)
 /**
  * @private
  */
-_cometServerApi.prototype.version = "3.20";
+_cometServerApi.prototype.version = "3.21";
 
 /**
  * @private
@@ -322,7 +322,7 @@ _cometServerApi.prototype.options = {};
 /**
  * @private
  */
-_cometServerApi.prototype.options.nodeArray = ["app.comet-server.ru"]// ["n1-app.comet.su", "n2-app.comet.su"]; //
+_cometServerApi.prototype.options.nodeArray = ["app.comet-server.ru"] 
 
 /**
  * @private
@@ -1131,17 +1131,14 @@ _cometServerApi.prototype.start = function(opt, callBack)
 
     _cometServerApi.prototype.UseWebSocket(window.WebSocket !== undefined);
 
-    if(_cometServerApi.prototype.options.dev_id >= 0)
+    if(!_cometServerApi.prototype.options.dev_id)
     {
-        _cometServerApi.prototype.in_abort = false;
-        _cometServerApi.prototype.conect(callBack);
-        return true;
+        _cometServerApi.prototype.options.dev_id = 0;
     }
-    else
-    {
-        console.error("Star.Comet: Не установлен dev_id", _cometServerApi.prototype.options.dev_id)
-        return false;
-    }
+     
+    _cometServerApi.prototype.in_abort = false;
+    _cometServerApi.prototype.conect(callBack);
+    return true; 
 }
 
 _cometServerApi.prototype.stop = function()
