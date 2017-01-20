@@ -1,10 +1,9 @@
 # Documentation and examples
 
-[Documentation and examples](http://comet-server.org/)
-
-# comet-server
 Comet server is written in C++, for storing data using MySQL.   
- 
+
+[Documentation and examples](http://comet-server.org/)
+  
 ### CometQL API: 
 
 CometQL API documentation [EN](http://comet-server.org/doku.php/comet:cometql) or [RU](http://comet-server.org/doku.php/en:comet:cometql)
