@@ -4,7 +4,7 @@ Comet server is written in C++, for storing data using MySQL.
 
 [Documentation and examples](http://comet-server.org/)
   
-### building from source
+### Building from source
 
 How to build and run [EN](http://comet-server.org/doku.php/en:comet:building-from-source) or [RU](http://comet-server.org/doku.php/comet:building-from-source)
 

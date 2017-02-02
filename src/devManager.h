@@ -446,7 +446,7 @@ class devManager
     ~devManager();
     devManager()
     {
-        index = new devInfo(appConf::instance()->rootPassword); 
+        index = new devInfo(appConf::instance()->root_password); 
         intervalLoop::instance()->add([](int uptime, thread_data* local_buf)
         {
             if( uptime%appConf::instance()->client_benchmark != 0)

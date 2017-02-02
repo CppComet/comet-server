@@ -28,7 +28,7 @@ appConf::appConf()
     bzero(base_dir,255);
     strcpy(base_dir, "/var/www/star.comet");
     
-    bzero(rootPassword,DEV_KEY_LEN); 
+    bzero(root_password,DEV_KEY_LEN); 
     snprintf(client_ip, 100,NULL_IP);  
     snprintf(mysql_ip, 100,NULL_IP);  
      
@@ -133,9 +133,9 @@ bool appConf::initFromFile(const char *fileName)
         } 
         else if(memcmp(key, "password", strlen("password")) == 0)
         {
-            bzero(rootPassword,DEV_KEY_LEN);
-            sscanf(val,"%64s",rootPassword); // должно быть равно DEV_KEY_LEN
-            TagLoger::log(Log_appConf, 0, "set password %s\n", rootPassword);
+            bzero(root_password,DEV_KEY_LEN);
+            sscanf(val,"%64s",root_password); // должно быть равно DEV_KEY_LEN
+            TagLoger::log(Log_appConf, 0, "set password %s\n", root_password);
         } 
         else if(memcmp(key, "node_name", strlen("node_name")) == 0)
         { 

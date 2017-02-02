@@ -226,10 +226,19 @@ bool tcpServer<connectionType>::start(const char* Host,const int Port, const cha
             perror("eval");
             exit(-1);
         }
-
+ 
         int yes = 1;
-        setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)); // Устанавливает возможность запуска при ещё не освободившемя сокете, уменьшая время старта после падения. Устраняет проблему "Address Already in Use"
-
+        // Устанавливает возможность запуска при ещё не освободившемя сокете, уменьшая время старта после падения. Устраняет проблему "Address Already in Use"
+        if(setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0)
+        {
+            printf("\x1b[1;31mCannot set SO_REUSEADDR option on listen socket (%s)\x1b[0m\n", strerror(errno));
+        }
+        
+        if(setsockopt(listener, IPPROTO_TCP, TCP_NODELAY, (char *) &yes, sizeof(yes)) < 0)
+        {
+            printf("\x1b[1;31mCannot set TCP_NODELAY option on listen socket (%s)\x1b[0m\n", strerror(errno));
+        }
+        
         //    bind listener to address(addr)
         /**
          * Связывает сокет с конкретным адресом

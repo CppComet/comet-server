@@ -108,7 +108,7 @@ const char* devInfo::getDevKey() const
  */
 bool devInfo::testDevKey(const char* random20bytes, const char* DevKeyHashStart, thread_data* local_buf)
 { 
-    char* devKeyPassword = appConf::instance()->rootPassword; 
+    char* devKeyPassword = appConf::instance()->root_password; 
     
     unsigned char sha1_password[20];
     bzero(sha1_password, 20);

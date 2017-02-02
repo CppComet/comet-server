@@ -68,7 +68,7 @@ public:
     
     char node_name[100];
      
-    char rootPassword[DEV_KEY_LEN+1]; 
+    char root_password[DEV_KEY_LEN+1]; 
      
     int client_port = 80; 
     int mysql_port = 3306; 

@@ -252,7 +252,10 @@ int Client_connection::web_write_error(const char* text, thread_data* local_buf)
 
 int Client_connection::web_write_error(const char* text, int code, thread_data* local_buf)
 {
-    web_socket_receive(local_buf);
+    if(web_socket_receive(local_buf) < 0)
+    {
+        return -1;
+    }
     char messge[250];
     snprintf(messge, 250,"{\"error\":\"%d\",\"data\":\"%s\",\"event_name\":\"CometServerError\"}", code, text);
     short_ws_message(local_buf, messge);
@@ -446,7 +449,7 @@ int Client_connection::web_socket_receive(thread_data* local_buf)
     bzero(answer_key, 100);
     memcpy(answer_key, ws_key, key_len);
     memcpy(answer_key + key_len , "258EAFA5-E914-47DA-95CA-C5AB0DC85B11", 36 );
-    TagLoger::log(Log_ClientServer, 0, "answer_key:%s\n", answer_key);
+    //TagLoger::log(Log_ClientServer, 0, "answer_key:%s\n", answer_key);
 
     unsigned char sha1_data[20];
     bzero(sha1_data, 20);
@@ -611,7 +614,10 @@ int Client_connection::web_socket_request(int client, int len, thread_data* loca
         return -1;
     }
 
-    web_socket_receive(local_buf);
+    if(web_socket_receive(local_buf) < 0)
+    {
+        return -1;
+    }
 
     /**
      *  Инкремент количиства людей удачных конектов
