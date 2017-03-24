@@ -1,5 +1,15 @@
 ![CppComet](https://comet-server.com/img/CppComet.png)
 
+Comet technology – allows sending arbitrary messages to client through server initiative
+
+## How push notification works
+
+* Browser opens page of your site.
+* After loading this page, JavaScript establishes permanent connection with Comet server.
+* While page is open, your server can send random message to client. It appeals via [CometQL API](http://comet-server.org/doku.php/en:comet:cometql) to server and transfer message for browser.
+* Comet server uses open connection with browser. Than server delivers message to browser.
+* [JavaScript API](http://comet-server.org/doku.php/en:comet:javascript_api) delivers this message to your callback.
+
 # Documentation and examples
 
 Comet server is written in C++, for storing data using MySQL.   
@@ -50,9 +60,9 @@ Run in console mode
 
 ### CometQL API: 
 
-CometQL API documentation [EN](http://comet-server.org/doku.php/comet:cometql) or [RU](http://comet-server.org/doku.php/en:comet:cometql)
+CometQL API documentation [EN](http://comet-server.org/doku.php/en:comet:cometql) or [RU](http://comet-server.org/doku.php/comet:cometql)
 
- - To connect to the comet server api from any server-side language is used CometQL [EN](http://comet-server.org/doku.php/comet:cometql) or [RU](http://comet-server.org/doku.php/en:comet:cometql)
+ - To connect to the comet server api from any server-side language is used CometQL [EN](http://comet-server.org/doku.php/en:comet:cometql) or [RU](http://comet-server.org/doku.php/comet:cometql)
  
 ### JavaScript API: 
 
