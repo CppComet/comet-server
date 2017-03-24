@@ -71,7 +71,7 @@
     <html>\
     <head>\
      <meta charset='utf-8'>\
-     <title>Star.Comet</title>\
+     <title>CppComet</title>\
      <link rel='shortcut icon' href='https://comet-server.com/favicon.ico' type='image/x-icon'>\
      <style type='text/css'>\
         #center {\
@@ -90,8 +90,8 @@
                             <tr style='vertical-align: top;'>\
                                     <td> <img src='https://comet-server.org/Logo.png'></td>\
                                 <td style='  padding-left: 10px;'> \
-                                        <div style='font-size: 30px;  font-weight: bold;'>Star.Comet</div>\
-                                            Comet сервер Star.Comet<br>\
+                                        <div style='font-size: 30px;  font-weight: bold;'>CppComet</div>\
+                                            Comet сервер CppComet<br>\
                                             Больше информации смотрите на comet-server.org и support@comet-server.org\
                                     </td>\
                             </tr>\

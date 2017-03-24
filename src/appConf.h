@@ -64,14 +64,14 @@ public:
     int mysql_backlog  = 1024; 
      
     char client_ip[100]; 
-    char mysql_ip[100]; 
+    char cometql_ip[100]; 
     
     char node_name[100];
      
     char root_password[DEV_KEY_LEN+1]; 
      
     int client_port = 80; 
-    int mysql_port = 3306; 
+    int cometql_port = 3306; 
 
     int buf_size = 10384;
     

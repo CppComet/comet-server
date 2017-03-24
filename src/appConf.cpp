@@ -21,16 +21,16 @@ appConf::appConf()
     TagLoger::setTagLevel(Log_appConf, LOG_ALL);
     
     bzero(client_ip,100); 
-    bzero(mysql_ip,100); 
+    bzero(cometql_ip,100); 
      
     bzero(node_name,100);
      
     bzero(base_dir,255);
-    strcpy(base_dir, "/var/www/star.comet");
+    strcpy(base_dir, "/var/www/cpp.comet");
     
     bzero(root_password,DEV_KEY_LEN); 
     snprintf(client_ip, 100,NULL_IP);  
-    snprintf(mysql_ip, 100,NULL_IP);  
+    snprintf(cometql_ip, 100,NULL_IP);  
      
     snprintf(node_name, 100,NODE_NAME);  
      
@@ -43,16 +43,16 @@ appConf::appConf()
 void appConf::print(void)
 {
 
-    TagLoger::log(Log_appConf, 0, "Настройки при старте\n");
+    TagLoger::log(Log_appConf, 0, "Settings at startup\n");
     // ps aux | grep 'mirror_fantasies_server\s*--' | grep 'victor   [0-9]*' -E -o | grep '[0-9]*' -o | xargs pmap -d | grep "^mapped:" | grep 'private: [0-9]+' -E -o | grep '[0-9]+' -o -E
 
     TagLoger::log(Log_appConf, 0, "node_name %s\n",node_name); 
 
     TagLoger::log(Log_appConf, 0, "client_port %d\n",client_port); 
-    TagLoger::log(Log_appConf, 0, "mysql_port %d\n",mysql_port);
+    TagLoger::log(Log_appConf, 0, "cometql_port %d\n",cometql_port);
 
     TagLoger::log(Log_appConf, 0, "client_ip %s\n",client_ip); 
-    TagLoger::log(Log_appConf, 0, "mysql_ip %s\n",mysql_ip);
+    TagLoger::log(Log_appConf, 0, "cometql_ip %s\n",cometql_ip);
       
 
 }
@@ -74,7 +74,7 @@ bool appConf::initFromFile(const char *fileName)
     int hl_pw_NodeIndex = 0;
     int hl_port_NodeIndex = 0;
     
-    TagLoger::log(Log_appConf, 0, "Чтение конфига\n");
+    TagLoger::log(Log_appConf, 0, "Reading the config\n");
     
     while (fgets(line, 999, f) != NULL)
     {
@@ -125,11 +125,11 @@ bool appConf::initFromFile(const char *fileName)
             sscanf(val, "%250s", base_dir);
             TagLoger::log(Log_appConf, 0, "set base_dir %s\n", base_dir);
         }
-        else if(memcmp(key, "mysql_ip", strlen("mysql_ip")) == 0)
+        else if(memcmp(key, "cometql_ip", strlen("cometql_ip")) == 0 || memcmp(key, "mysql_ip", strlen("mysql_ip")) == 0)
         {
-            bzero(mysql_ip,100);
-            sscanf(val,"%20s",mysql_ip);
-            TagLoger::log(Log_appConf, 0, "set mysql_ip %s\n", mysql_ip);
+            bzero(cometql_ip,100);
+            sscanf(val,"%20s",cometql_ip);
+            TagLoger::log(Log_appConf, 0, "set cometql_ip %s\n", cometql_ip);
         } 
         else if(memcmp(key, "password", strlen("password")) == 0)
         {
@@ -143,10 +143,10 @@ bool appConf::initFromFile(const char *fileName)
             sscanf(val,"%99s",node_name);
             TagLoger::log(Log_appConf, 0, "set node_name %s\n", node_name); 
         }  
-        else if(memcmp(key, "mysql_port", strlen("mysql_port")) == 0)
+        else if(memcmp(key, "cometql_port", strlen("cometql_port")) == 0 || memcmp(key, "mysql_port", strlen("mysql_port")) == 0)
         {
-            sscanf(val,"%7d",&mysql_port);
-            TagLoger::log(Log_appConf, 0, "set mysql_port %d\n", mysql_port);
+            sscanf(val,"%7d",&cometql_port);
+            TagLoger::log(Log_appConf, 0, "set cometql_port %d\n", cometql_port);
         }
         else if(memcmp(key, "mysql_benchmark", strlen("mysql_benchmark")) == 0)
         {

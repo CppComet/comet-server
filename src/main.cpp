@@ -123,7 +123,7 @@ void th_MySqlServer(int threadid)
         tcpServer <MySql_connection>::instance()->benchmark = 0;
     }
 
-    tcpServer <MySql_connection>::instance()->start(appConf::instance()->mysql_ip, appConf::instance()->mysql_port, "MySqlServer");
+    tcpServer <MySql_connection>::instance()->start(appConf::instance()->cometql_ip, appConf::instance()->cometql_port, "MySqlServer");
 
     MySql_connection::addIntervalRoutine();
 
@@ -213,7 +213,8 @@ void posix_ignor_signal(int signum)
     signal(signum, SIG_IGN); // перепосылка сигнала
 }
 
-#define NAMEDPIPE_NAME "/tmp/star.comet"
+#define NAMEDPIPE_NAME_OLD "/tmp/star.comet"
+#define NAMEDPIPE_NAME "/tmp/cpp.comet"
 #define BUFSIZE        150
 
 /**
@@ -235,29 +236,29 @@ void posix_ignor_signal(int signum)
  *
  * @todo было бы круто добавить команды изменения уровня логирования на лету
  */
-void command_line_fork()
+void command_line_fork(const char* pipeName)
 {
     int fd;
     char buf[BUFSIZE];
 
-    if ( mkfifo(NAMEDPIPE_NAME, 0777) )
+    if ( mkfifo(pipeName, 0777) )
     {
         perror("mkfifo");
         //return 1;
     }
     else
     {
-        TagLoger::log(Log_pipeCommands, 0, "\x1b[32mСоздан fifo pipe с именем %s\x1b[0m\n", NAMEDPIPE_NAME);
+        TagLoger::log(Log_pipeCommands, 0, "\x1b[32mСоздан fifo pipe с именем %s\x1b[0m\n", pipeName);
     }
 
-    if ( (fd = open(NAMEDPIPE_NAME, O_RDONLY)) <= 0 )
+    if ( (fd = open(pipeName, O_RDONLY)) <= 0 )
     {
         perror("open");
         return;
     }
     else
     {
-        TagLoger::log(Log_pipeCommands, 0, "\x1b[32mОткрыт fifo pipe с именем %s\x1b[0m\n", NAMEDPIPE_NAME);
+        TagLoger::log(Log_pipeCommands, 0, "\x1b[32mОткрыт fifo pipe с именем %s\x1b[0m\n", pipeName);
     }
 
     do {
@@ -276,7 +277,7 @@ void command_line_fork()
             printf("\x1b[31mПолучена команда выхода\x1b[0m\n");
             //kill(pid, SIGTERM);
             close(fd);
-            remove(NAMEDPIPE_NAME);
+            remove(pipeName);
             exit(0);
             return;
         }
@@ -404,7 +405,8 @@ int main(int argc, char *argv[])
     //pthread_create(&ql_sthreads, NULL, th_MySqlServer, (void *)ql_t);
     th_MySqlServer(300);
  
-    command_line_fork();
+    command_line_fork(NAMEDPIPE_NAME);
+    command_line_fork(NAMEDPIPE_NAME_OLD);
 
     TagTimer::end(Time_start);
     pthread_exit(NULL);

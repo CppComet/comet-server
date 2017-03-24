@@ -1417,7 +1417,7 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
  */
 int Client_connection::options(int client, int len, thread_data* local_buf)
 {
-    char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:Star.Comet Server\r\nComet-Server:Star.Comet Server\r\nAccess-Control-Allow-Origin: *\
+    char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
     \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n+OK\r\n";
     if(web_write( resp ) < 0)
     {
@@ -1435,7 +1435,7 @@ int Client_connection::options(int client, int len, thread_data* local_buf)
  */
 int Client_connection::get_request(int client, int len, thread_data* local_buf)
 {
-    char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:Star.Comet Server\r\nComet-Server:Star.Comet Server\r\nAccess-Control-Allow-Origin: *\
+    char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
     \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n";
     if(web_write( resp ) < 0 || web_write( logoPage ) < 0)
     {
@@ -1446,7 +1446,7 @@ int Client_connection::get_request(int client, int len, thread_data* local_buf)
 
 int Client_connection::http404_answer(int client, int len, thread_data* local_buf)
 {
-    char resp[]="HTTP/1.1 404 Not Found\r\nContent-Type:text/html; charset=UTF-8\r\nServer:Star.Comet Server\r\nComet-Server:Star.Comet Server\r\nAccess-Control-Allow-Origin: *\
+    char resp[]="HTTP/1.1 404 Not Found\r\nContent-Type:text/html; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
     \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n";
     if(web_write( resp ) < 0 || web_write( logoPage ) < 0)
     {
@@ -1465,7 +1465,7 @@ int Client_connection::http404_answer(int client, int len, thread_data* local_bu
  */
 int Client_connection::get_info_request(int client, int len, thread_data* local_buf)
 { 
-    char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:Star.Comet Server\r\nComet-Server:Star.Comet Server\r\nAccess-Control-Allow-Origin: *\
+    char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
     \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n{\"status\":\"ok\",\"node\":\"__________\"}";
  
     int respLen = strlen(resp);
@@ -1489,14 +1489,10 @@ int Client_connection::get_info_request(int client, int len, thread_data* local_
 }
 
 int Client_connection::get_favicon_request(int client, int len, thread_data* local_buf)
-{
-#ifdef monoUser
-    char resp[]="HTTP/1.1 301 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:Star.Comet Server\r\nComet-Server:Star.Comet Server\r\nAccess-Control-Allow-Origin: *\
+{ 
+    char resp[]="HTTP/1.1 301 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
     \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\nLocation: http://comet-server.ru/favicon.ico\r\n\r\n";
-#else
-    char resp[]="HTTP/1.1 301 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:Star.Comet Server\r\nComet-Server:Star.Comet Server\r\nAccess-Control-Allow-Origin: *\
-    \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\nLocation: http://comet-server.ru/favicon.ico\r\n\r\n";
-#endif
+ 
     if(web_write( resp ) < 0)
     {
       TagLoger::log(Log_ClientServer, 0, " >Client Не удалось отправить данные %d\n",fd);
@@ -1540,7 +1536,7 @@ int Client_connection::get_custom_request(int client, int len, thread_data* loca
         return http404_answer(client, len, local_buf);
     }
     
-    char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:Star.Comet Server\r\nComet-Server:Star.Comet Server\r\nAccess-Control-Allow-Origin: *\
+    char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
     \r\nAccess-Control-Allow-Methods: GET\r\nAllow: GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n";
     web_write(resp);
     
