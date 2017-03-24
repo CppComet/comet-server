@@ -1,3 +1,5 @@
+![CppComet](https://comet-server.com/img/CppComet.png)
+
 # Documentation and examples
 
 Comet server is written in C++, for storing data using MySQL.   
@@ -23,6 +25,6 @@ JavaScript API documentation [EN](http://comet-server.org/doku.php/en:comet:java
 License
 ----
 
-GPLv3
+GNU AGPLv3
 
  
