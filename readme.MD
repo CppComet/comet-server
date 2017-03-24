@@ -10,6 +10,22 @@ Comet technology – allows sending arbitrary messages to client through server 
 * Comet server uses open connection with browser. Than server delivers message to browser.
 * [JavaScript API](http://comet-server.org/doku.php/en:comet:javascript_api) delivers this message to your callback.
 
+## Demo
+ 
+![Simple chat demo gif](https://comet-server.com/doc/CometQL/CometQL-demo.gif)
+
+For demo access use credentials:
+```
+Login: 15
+Password:lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8
+Host: app.comet-server.ru
+```
+
+Example of connecting to [cometQL api](http://comet-server.org/doku.php/en:comet:cometql) from console using mysql-client:
+```
+mysql -h app.comet-server.ru -u15 -plPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8 -DCometQL_v1 --skip-ssl
+```
+
 # Documentation and examples
 
 Comet server is written in C++, for storing data using MySQL.   
