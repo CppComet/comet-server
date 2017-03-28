@@ -10,6 +10,11 @@ Comet technology – allows sending arbitrary messages to client through server 
 * Comet server uses open connection with browser. Than server delivers message to browser.
 * [JavaScript API](http://comet-server.org/doku.php/en:comet:javascript_api) delivers this message to your callback.
 
+# Features
+
+* Api for more then 9 languages. [CometQL API](http://comet-server.org/doku.php/en:comet:cometql) allows you connect to server by mysql protocol.
+* Good documentation in [Russian](http://comet-server.org/doku.php/ru) and [English](http://comet-server.org/doku.php/en) languages
+
 # Demo
  
 For demo access use credentials:
