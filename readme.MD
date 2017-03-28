@@ -32,8 +32,11 @@ mysql -h app.comet-server.ru -u15 -plPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgL
 
 [Simple chat demo page](http://comet-server.com/doc/CometQL/MainPageChat/index.php)
 ![Simple chat demo gif](https://comet-server.com/doc/CometQL/CometQL-demo.gif)
+
 On this gif animation you see how send message to [web chat](http://comet-server.com/doc/CometQL/MainPageChat/index.php) from CppComet api.
+
 We connect to CppComet by mysql protocol and send [CometQL query](http://comet-server.org/doku.php/en:comet:cometql).
+
 For connect to demo server use this command:
 ```
 mysql -h app.comet-server.ru -u15 -plPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8 -DCometQL_v1 --skip-ssl
