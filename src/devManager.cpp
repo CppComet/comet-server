@@ -112,7 +112,7 @@ bool devInfo::testDevKey(const char* random20bytes, const char* DevKeyHashStart,
     
     unsigned char sha1_password[20];
     bzero(sha1_password, 20);
-    sha1::calc(devKeyPassword, DEV_KEY_LEN ,sha1_password);
+    sha1::calc(devKeyPassword, strlen(devKeyPassword) ,sha1_password);
 
     unsigned char sha1_password2[20];
     bzero(sha1_password2, 20);
