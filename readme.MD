@@ -24,6 +24,9 @@ Password:lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8
 Host: app.comet-server.ru
 ```
 
+CppComet has cloud saas alternative that can be used for testing and demo access.
+In the following examples I will use demonstration access from [comet-server.com](http://comet-server.com) for those who could not or were too lazy to deploy the server on their vps.
+
 Example of connecting to [cometQL api](http://comet-server.org/doku.php/en:comet:cometql) from console using mysql-client:
 ```
 mysql -h app.comet-server.ru -u15 -plPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8 -DCometQL_v1 --skip-ssl
