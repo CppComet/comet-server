@@ -1,0 +1,17 @@
+[Unit]
+Description=Comet server
+After=network.target
+Documentation=http://comet-server.org
+
+[Service]
+Type=forking
+ExecStart=/root/comet/comet-service.sh restart 
+TimeoutStopSec=0
+Restart=always
+User=root
+Group=root
+  
+[Install]
+WantedBy=multi-user.target
+Alias=cppcomet.service
+ 

@@ -81,18 +81,26 @@ In [comet.conf](https://github.com/Levhav/comet-server/blob/master/comet.conf) f
 password 0000000000000000000000000000000000000000000000000000000000000000 
 ```
 
-## Launch
-
-Running in daemon mode
+Add to Startup
 
 ```
-sh ./comet-service.sh start
+cp ./comet.service /etc/systemd/system
+systemctl daemon-reload
+systemctl enable comet.service
+```
+
+## Launch
+ 
+```
+systemctl start comet.service  
 ```
 
 Run in console mode
 ```
 ./cpp_comet
 ```
+
+
 
 ### CometQL API: 
 
