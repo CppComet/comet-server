@@ -2,13 +2,13 @@
 
 ![php chat demo](https://github.com/Levhav/comet-server/blob/master/demo/chat-example/chat.gif)
 
-(Online demo)[https://jsfiddle.net/o35kvmn2/5/]
+[Online demo][https://jsfiddle.net/o35kvmn2/5/]
 
 # Scheme of chat
 
 Tipycal scheme of chat:
 
-!(scheme-of-chat)[https://github.com/Levhav/comet-server/blob/master/demo/chat-example/scheme-of-chat.jpg]
+![scheme-of-chat][https://github.com/Levhav/comet-server/blob/master/demo/chat-example/scheme-of-chat.jpg]
 
 * Connecting to the comet server by websockets
 * Send ajax message for add new massage to chat
@@ -22,11 +22,14 @@ CppComet has cloud saas alternative that can be used for testing and demo access
 
 ```Login: 15
 Password:lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8
-Host: app.comet-server.ru```
+Host: app.comet-server.ru
+```
 
 For connecting to the comet server from JavaScript api use this command:
 
-```cometApi.start({node:"app.comet-server.ru", dev_id:15})```
+```
+cometApi.start({node:"app.comet-server.ru", dev_id:15})
+```
 
 * in parametr node - set hostname of yure ouwn server
 * parametr dev_id - use only if yure use saas servece comet-server.com
@@ -44,12 +47,15 @@ Code of connecting to CppComet by mysql protocol:
 $host = "app.comet-server.ru";
 $user = "15";
 $password = "lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8";
-$comet = mysqli_connect($host, $user, $password, "CometQL_v1");```
+$comet = mysqli_connect($host, $user, $password, "CometQL_v1");
+```
 
 
 Code of send message to pipe "simplechat" and event 'newMessage':
-```$query = "INSERT INTO pipes_messages (name, event, message)VALUES('simplechat', 'newMessage', '".$msg."')"; 
-mysqli_query($comet, $query);```
+```
+$query = "INSERT INTO pipes_messages (name, event, message)VALUES('simplechat', 'newMessage', '".$msg."')"; 
+mysqli_query($comet, $query);
+```
 
 
 # Step 3. recive message from comet server
