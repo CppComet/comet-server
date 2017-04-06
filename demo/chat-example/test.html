@@ -1,0 +1,67 @@
+<!DOCTYPE HTML>
+<html>
+<head> 
+    <meta charset=utf-8>
+    <script language="JavaScript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" ></script>
+    <script src="https://comet-server.com/CometServerApi.js" type="text/javascript"></script>
+    
+    <style>
+    pre{
+        border: 1px solid #ccc;
+        padding: 5px;
+        background-color: #EEE;
+    }
+    </style>
+</head>
+<body>
+
+<div id="web_chat"></div>
+
+<div>
+ Name :<input type="text" id="name"><br><br>
+ Text: <textarea id="text"></textarea><br>
+ <input type="button" onclick="send();" value="send" ><br>
+</div>
+
+<script type="text/javascript">
+
+$(document).ready(function()
+{ 
+    cometApi.start({node:"app.comet-server.ru", dev_id:15 })
+    
+    cometApi.subscription("simplechat.newMessage", function(event){
+        $("#web_chat").append('<b>'+HtmlEncode(event.data.name)+'</b>')
+        $("#web_chat").append('<pre>'+HtmlEncode(event.data.text)+'</pre>')
+        $("#web_chat").append('<br>')
+    })
+})
+
+function HtmlEncode(s)
+{
+  var el = document.createElement("div");
+  el.innerText = el.textContent = s;
+  s = el.innerHTML;
+  return s;
+}
+
+    
+function send()
+{
+   var name = $('#name').val();
+   var text = $('#text').val();
+   
+   $.ajax({
+        url: "http://comet-server.org/doc/CppComet/chat-example/chat.php",
+        type: "POST", 
+        data:"text="+encodeURIComponent(text)+"&name="+encodeURIComponent(name)
+   });
+}
+
+
+
+
+
+
+</script>
+</body>
+</html>
