@@ -2,13 +2,13 @@
 
 ![php chat demo](https://github.com/Levhav/comet-server/blob/master/demo/chat-example/chat.gif)
 
-[Online demo][https://jsfiddle.net/o35kvmn2/5/]
+[Online demo](https://jsfiddle.net/o35kvmn2/5/)
 
 # Scheme of chat
 
 Tipycal scheme of chat:
 
-![scheme-of-chat][https://github.com/Levhav/comet-server/blob/master/demo/chat-example/scheme-of-chat.jpg]
+![scheme-of-chat](https://github.com/Levhav/comet-server/blob/master/demo/chat-example/scheme-of-chat.jpg)
 
 * Connecting to the comet server by websockets
 * Send ajax message for add new massage to chat
