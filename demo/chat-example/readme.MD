@@ -69,3 +69,9 @@ subscription Code to the pipe on comet server. This callback will be called when
         $("#web_chat").append('<br>')
     })
 ```
+
+# Links
+
+* [JavaScript API](http://comet-server.org/doku.php/en:comet:javascript_api)
+* [CometQL API](http://comet-server.org/doku.php/en:comet:cometql)
+* [Online demo](https://jsfiddle.net/o35kvmn2/5/)
