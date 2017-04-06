@@ -25,7 +25,7 @@ Password:lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8
 Host: app.comet-server.ru
 ```
 
-For connecting to the comet server from JavaScript API use this command:
+To connect to the comet server from the JavaScript API, use the following command:
 
 ```
 cometApi.start({node:"app.comet-server.ru", dev_id:15})
@@ -42,7 +42,7 @@ cometApi.start({node:"app.comet-server.ru", dev_id:15})
 
 [code of php back-end](https://github.com/Levhav/comet-server/blob/master/demo/chat-example/chat.php)
 
-Code of connecting to CppComet by MySQL protocol:
+Connection code to CppComet using MySQL protocol:
 ```
 $host = "app.comet-server.ru";
 $user = "15";
@@ -51,7 +51,7 @@ $comet = mysqli_connect($host, $user, $password, "CometQL_v1");
 ```
 
 
-Code of send message to pipe "simplechat" and event 'newMessage':
+The code for sending a message to the pipe "simplechat" and event 'newMessage':
 ```
 $query = "INSERT INTO pipes_messages (name, event, message)VALUES('simplechat', 'newMessage', '".$msg."')"; 
 mysqli_query($comet, $query);
@@ -60,7 +60,7 @@ mysqli_query($comet, $query);
 
 # Step 3. receive message from comet server
 
-Code of subscription to pipe on comet server. This callback will be called when somebody send message to pipe `simplechat`
+subscription Code to the pipe on comet server. This callback will be called when somebody send message into channel `simplechat`
 
 ```
     cometApi.subscription("simplechat.newMessage", function(event){
