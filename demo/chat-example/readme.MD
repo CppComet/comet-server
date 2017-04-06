@@ -1,8 +1,8 @@
 # PHP chat example
 
-![php chat demo](https://github.com/Levhav/comet-server/blob/master/demo/chat-example/chat.gif)
-
 [Online demo](https://jsfiddle.net/o35kvmn2/5/)
+
+![php chat demo](https://github.com/Levhav/comet-server/blob/master/demo/chat-example/chat.gif)
 
 # Scheme of chat
 
