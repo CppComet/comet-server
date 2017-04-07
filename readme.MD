@@ -19,8 +19,7 @@ Comet technology – allows sending arbitrary messages to client through server 
 # Demo
  
 * https://github.com/CppComet/php-chat-example
-* https://github.com/CppComet/comet-server/tree/master/demo/simple-chat
-* http://comet-server.org/doku.php/en:comet:star-comet-chat
+* https://github.com/CppComet/comet-server/tree/master/demo/simple-chat 
 
 ## Demo access to server API
 
