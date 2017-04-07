@@ -15,8 +15,15 @@ Comet technology – allows sending arbitrary messages to client through server 
 * Api for more then 9 languages. [CometQL API](http://comet-server.org/doku.php/en:comet:cometql) allows you connect to server by mysql protocol.
 * Good documentation in [Russian](http://comet-server.org/doku.php/ru) and [English](http://comet-server.org/doku.php/en) languages
 
+ 
 # Demo
  
+* https://github.com/CppComet/php-chat-example
+* https://github.com/CppComet/comet-server/tree/master/demo/simple-chat
+* http://comet-server.org/doku.php/en:comet:star-comet-chat
+
+## Demo access to server API
+
 For demo access use credentials:
 ```
 Login: 15
