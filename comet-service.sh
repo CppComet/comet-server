@@ -5,8 +5,8 @@
 # Required-Stop:     $local_fs $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: comet service comet-server.org
-# Description:       comet service comet-server.org
+# Short-Description: comet service comet-server.com
+# Description:       comet service comet-server.com
 ### END INIT INFO
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
@@ -16,7 +16,7 @@ EXTRAOPTS=
 PIDFILE=
 
 
-echo "Комет сервер"
+echo "CppComet"
  
 cd ${RUNDIR}
  
@@ -28,55 +28,46 @@ case "$1" in
             count=`ps auxH | grep "cpp_comet" | wc -l`
             if [ $count -le 40  ]
             then
-                echo "Запуск комет сервера"
-                nohup ./comet-start.sh > mfcs.out &
+                echo "Starting CppComet"
+                nohup ./comet-start.sh > cpp_comet.log &
             else
-                echo "Комет сервер уже запущен"
+                echo "CppComet already run"
             fi
         else
-            echo "comet-start.sh уже запущен"
+            echo "CppComet already run"
         fi
         ;;
     stop)
-        echo "Остановка комет сервера"
+        echo "Stopping CppComet"
         ps aux | grep -E "comet-start.sh" | grep -o -E "root +([0-9]+)" | grep -o -E "[0-9]+" | xargs kill 
         ps auxH | grep "comet-start.sh" | grep -o -E "root +([0-9]+)" | grep -o -E "[0-9]+" | xargs kill 
         
         
         ps aux | grep -E "cpp_comet" | grep -o -E "root +([0-9]+)" | grep -o -E "[0-9]+" | xargs kill 
         ps auxH | grep "cpp_comet" | grep -o -E "root +([0-9]+)" | grep -o -E "[0-9]+" | xargs kill 
-        
-        echo "" > starComet-old.log
-        #cp mfcs.out starComet-old.log
-        echo "" > mfcs.out
+         
         ;;
-    restart)
-        echo "Остановка комет сервера"
+    *)
+        echo "Stopping CppComet"
         ps aux | grep -E "comet-start.sh" | grep -o -E "root +([0-9]+)" | grep -o -E "[0-9]+" | xargs kill 
         ps auxH | grep "comet-start.sh" | grep -o -E "root +([0-9]+)" | grep -o -E "[0-9]+" | xargs kill 
         
         ps aux | grep -E "cpp_comet" | grep -o -E "root +([0-9]+)" | grep -o -E "[0-9]+" | xargs kill 
         ps auxH | grep "cpp_comet" | grep -o -E "root +([0-9]+)" | grep -o -E "[0-9]+" | xargs kill 
-        echo "" > starComet-old.log
-        #cp mfcs.out starComet-old.log
-        echo "" > mfcs.out
-
+         
         startCount=`ps auxH | grep "comet-start.sh" | wc -l`
         if [ $startCount -ne 2 ]
         then
             count=`ps auxH | grep "cpp_comet" | wc -l`
             if [ $count -le 40  ]
             then
-                echo "Запуск комет сервера"
-                nohup ./comet-start.sh > mfcs.out &
+                echo "Starting CppComet"
+                nohup ./comet-start.sh > cpp_comet.log &
             else
-                echo "Комет сервер уже запущен"
+                echo "CppComet already run"
             fi
         else
-            echo "comet-start.sh уже запущен"
+            echo "CppComet already run"
         fi
-        ;;
-    *)
-        echo "Не верная команда"
-        ;;
+        ;; 
 esac
