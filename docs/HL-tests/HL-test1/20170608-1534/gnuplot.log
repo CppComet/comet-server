@@ -1,0 +1,112 @@
+
+	title is " Request and tcp/udp connection rate", offset at (character 0, 0, 0)
+
+
+	title is " Mean request (and connection) duration", offset at (character 0, 0, 0)
+
+
+	title is " stddev", offset at (character 0, 0, 0)
+
+
+	title is " max_sample", offset at (character 0, 0, 0)
+
+
+	title is " min_sample", offset at (character 0, 0, 0)
+
+
+	title is " Request and tcp/udp connection rate", offset at (character 0, 0, 0)
+
+
+	title is " Mean request (and connection) duration", offset at (character 0, 0, 0)
+
+
+	title is " stddev", offset at (character 0, 0, 0)
+
+
+	title is " max_sample", offset at (character 0, 0, 0)
+
+
+	title is " min_sample", offset at (character 0, 0, 0)
+
+
+	title is " Transaction and page rate", offset at (character 0, 0, 0)
+
+
+	title is " Mean transaction and page duration", offset at (character 0, 0, 0)
+
+
+	title is " stddev", offset at (character 0, 0, 0)
+
+
+	title is " max_sample", offset at (character 0, 0, 0)
+
+Warning: empty y range [37.5181:37.5181], adjusting to [37.1429:37.8932]
+
+	title is " min_sample", offset at (character 0, 0, 0)
+
+Warning: empty y range [0.304932:0.304932], adjusting to [0.301882:0.307981]
+
+	title is " Transaction and page rate", offset at (character 0, 0, 0)
+
+
+	title is " Mean transaction and page duration", offset at (character 0, 0, 0)
+
+
+	title is " stddev", offset at (character 0, 0, 0)
+
+
+	title is " max_sample", offset at (character 0, 0, 0)
+
+Warning: empty y range [37.5181:37.5181], adjusting to [37.1429:37.8932]
+
+	title is " min_sample", offset at (character 0, 0, 0)
+
+Warning: empty y range [0.304932:0.304932], adjusting to [0.301882:0.307981]
+
+	title is " rate", offset at (character 0, 0, 0)
+
+
+	title is " total", offset at (character 0, 0, 0)
+
+
+	title is " rate", offset at (character 0, 0, 0)
+
+
+	title is " total", offset at (character 0, 0, 0)
+
+
+	title is " Simultaneous users and opened TCP/UDP connections", offset at (character 0, 0, 0)
+
+
+	title is " maximum_simultaneous", offset at (character 0, 0, 0)
+
+
+	title is " Simultaneous users and opened TCP/UDP connections", offset at (character 0, 0, 0)
+
+
+	title is " maximum_simultaneous", offset at (character 0, 0, 0)
+
+
+	title is " Users arrival/departure rate", offset at (character 0, 0, 0)
+
+
+	title is " Total users", offset at (character 0, 0, 0)
+
+
+	title is " Users arrival/departure rate", offset at (character 0, 0, 0)
+
+
+	title is " Total users", offset at (character 0, 0, 0)
+
+
+	title is " Network throughput", offset at (character 0, 0, 0)
+
+
+	title is " Total send/receive bytes", offset at (character 0, 0, 0)
+
+
+	title is " Network throughput", offset at (character 0, 0, 0)
+
+
+	title is " Total send/receive bytes", offset at (character 0, 0, 0)
+

@@ -1,0 +1,45 @@
+set style data  linespoint
+set terminal pngcairo 
+set grid
+set style line 11 lc rgb '#808080' lt 1
+set border 3 back ls 11
+set tics nomirror
+set style line 1 lc rgb '#8b1a0e' pt 1 ps 1 lt 2 lw 2
+set style line 2 lc rgb '#5e9c36' pt 6 ps 1 lt 2 lw 2
+set output "images/graphes-Users_Arrival-rate.png"
+set title " Users arrival/departure rate"
+set xlabel "time (sec of the running test)"
+set ylabel "number of users/sec"
+show title
+set key left top
+plot  "data/finish_users_count.txt" using  1:2 title "finish_users_count" ls 1, "data/users_count.txt" using  1:2 title "users_count" ls 2
+set output "images/graphes-Users_Arrival-total.png"
+set title " Total users"
+set xlabel "time (sec of the running test)"
+set ylabel "total"
+show title
+set key left top
+plot  "data/finish_users_count.txt" using  1:3 title "finish_users_count" ls 1, "data/users_count.txt" using  1:3 title "users_count" ls 2
+set size 0.5,0.5
+set style data  linespoint
+set terminal pngcairo 
+set grid
+set style line 11 lc rgb '#808080' lt 1
+set border 3 back ls 11
+set tics nomirror
+set style line 1 lc rgb '#8b1a0e' pt 1 ps 1 lt 2 lw 2
+set style line 2 lc rgb '#5e9c36' pt 6 ps 1 lt 2 lw 2
+set output "images/graphes-Users_Arrival-rate_tn.png"
+set title " Users arrival/departure rate"
+set xlabel "time (sec of the running test)"
+set ylabel "number of users/sec"
+show title
+set key left top
+plot  "data/finish_users_count.txt" using  1:2 title "finish_users_count" ls 1, "data/users_count.txt" using  1:2 title "users_count" ls 2
+set output "images/graphes-Users_Arrival-total_tn.png"
+set title " Total users"
+set xlabel "time (sec of the running test)"
+set ylabel "total"
+show title
+set key left top
+plot  "data/finish_users_count.txt" using  1:3 title "finish_users_count" ls 1, "data/users_count.txt" using  1:3 title "users_count" ls 2

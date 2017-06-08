@@ -1,0 +1,45 @@
+set style data  linespoint
+set terminal pngcairo 
+set grid
+set style line 11 lc rgb '#808080' lt 1
+set border 3 back ls 11
+set tics nomirror
+set style line 1 lc rgb '#8b1a0e' pt 1 ps 1 lt 2 lw 2
+set style line 2 lc rgb '#5e9c36' pt 6 ps 1 lt 2 lw 2
+set output "images/graphes-Users-simultaneous.png"
+set title " Simultaneous users and opened TCP/UDP connections"
+set xlabel "time (sec of the running test)"
+set ylabel "value"
+show title
+set key left top
+plot  "data/connected.txt" using  1:2 title "connected" ls 1, "data/users.txt" using  1:2 title "users" ls 2
+set output "images/graphes-Users-maximum_simultaneous.png"
+set title " maximum_simultaneous"
+set xlabel "time (sec of the running test)"
+set ylabel "total"
+show title
+set key left top
+plot  "data/connected.txt" using  1:3 title "connected" ls 1, "data/users.txt" using  1:3 title "users" ls 2
+set size 0.5,0.5
+set style data  linespoint
+set terminal pngcairo 
+set grid
+set style line 11 lc rgb '#808080' lt 1
+set border 3 back ls 11
+set tics nomirror
+set style line 1 lc rgb '#8b1a0e' pt 1 ps 1 lt 2 lw 2
+set style line 2 lc rgb '#5e9c36' pt 6 ps 1 lt 2 lw 2
+set output "images/graphes-Users-simultaneous_tn.png"
+set title " Simultaneous users and opened TCP/UDP connections"
+set xlabel "time (sec of the running test)"
+set ylabel "value"
+show title
+set key left top
+plot  "data/connected.txt" using  1:2 title "connected" ls 1, "data/users.txt" using  1:2 title "users" ls 2
+set output "images/graphes-Users-maximum_simultaneous_tn.png"
+set title " maximum_simultaneous"
+set xlabel "time (sec of the running test)"
+set ylabel "total"
+show title
+set key left top
+plot  "data/connected.txt" using  1:3 title "connected" ls 1, "data/users.txt" using  1:3 title "users" ls 2

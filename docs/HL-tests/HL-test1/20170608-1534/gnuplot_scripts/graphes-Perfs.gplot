@@ -1,0 +1,81 @@
+set style data  linespoint
+set terminal pngcairo 
+set grid
+set style line 11 lc rgb '#808080' lt 1
+set border 3 back ls 11
+set tics nomirror
+set style line 1 lc rgb '#8b1a0e' pt 1 ps 1 lt 2 lw 2
+set style line 2 lc rgb '#5e9c36' pt 6 ps 1 lt 2 lw 2
+set output "images/graphes-Perfs-rate.png"
+set title " Request and tcp/udp connection rate"
+set xlabel "time (sec of the running test)"
+set ylabel "Requests rate (r/sec)"
+show title
+set key left top
+plot  "data/connect.txt" using  1:2 title "connect" ls 1, "data/request.txt" using  1:2 title "request" ls 2
+set output "images/graphes-Perfs-mean.png"
+set title " Mean request (and connection) duration"
+set xlabel "time (sec of the running test)"
+set ylabel "Requests duration (msec)"
+show title
+set key left top
+plot  "data/connect.txt" using  1:3 title "connect" ls 1, "data/request.txt" using  1:3 title "request" ls 2
+set output "images/graphes-Perfs-stddev.png"
+set title " stddev"
+set xlabel "time (sec of the running test)"
+show title
+set key left top
+plot  "data/connect.txt" using  1:4 title "connect" ls 1, "data/request.txt" using  1:4 title "request" ls 2
+set output "images/graphes-Perfs-max_sample.png"
+set title " max_sample"
+set xlabel "time (sec of the running test)"
+show title
+set key left top
+plot  "data/connect.txt" using  1:5 title "connect" ls 1, "data/request.txt" using  1:5 title "request" ls 2
+set output "images/graphes-Perfs-min_sample.png"
+set title " min_sample"
+set xlabel "time (sec of the running test)"
+show title
+set key left top
+plot  "data/connect.txt" using  1:6 title "connect" ls 1, "data/request.txt" using  1:6 title "request" ls 2
+set size 0.5,0.5
+set style data  linespoint
+set terminal pngcairo 
+set grid
+set style line 11 lc rgb '#808080' lt 1
+set border 3 back ls 11
+set tics nomirror
+set style line 1 lc rgb '#8b1a0e' pt 1 ps 1 lt 2 lw 2
+set style line 2 lc rgb '#5e9c36' pt 6 ps 1 lt 2 lw 2
+set output "images/graphes-Perfs-rate_tn.png"
+set title " Request and tcp/udp connection rate"
+set xlabel "time (sec of the running test)"
+set ylabel "Requests rate (r/sec)"
+show title
+set key left top
+plot  "data/connect.txt" using  1:2 title "connect" ls 1, "data/request.txt" using  1:2 title "request" ls 2
+set output "images/graphes-Perfs-mean_tn.png"
+set title " Mean request (and connection) duration"
+set xlabel "time (sec of the running test)"
+set ylabel "Requests duration (msec)"
+show title
+set key left top
+plot  "data/connect.txt" using  1:3 title "connect" ls 1, "data/request.txt" using  1:3 title "request" ls 2
+set output "images/graphes-Perfs-stddev_tn.png"
+set title " stddev"
+set xlabel "time (sec of the running test)"
+show title
+set key left top
+plot  "data/connect.txt" using  1:4 title "connect" ls 1, "data/request.txt" using  1:4 title "request" ls 2
+set output "images/graphes-Perfs-max_sample_tn.png"
+set title " max_sample"
+set xlabel "time (sec of the running test)"
+show title
+set key left top
+plot  "data/connect.txt" using  1:5 title "connect" ls 1, "data/request.txt" using  1:5 title "request" ls 2
+set output "images/graphes-Perfs-min_sample_tn.png"
+set title " min_sample"
+set xlabel "time (sec of the running test)"
+show title
+set key left top
+plot  "data/connect.txt" using  1:6 title "connect" ls 1, "data/request.txt" using  1:6 title "request" ls 2
