@@ -34,7 +34,7 @@ int Client_connection::max_subscription_event = 50;
 
 int Client_connection::log_level = LOG_ALL;
 
-Client_connection::Client_connection():connection(),fragment_buf(appConf::instance()->fragment_buf_size)
+Client_connection::Client_connection():connection(),fragment_buf(appConf::instance()->get_int("main", "fragment_buf_size"))
 {
     //printf("create Client_connection\n");
     bzero(subscriptions_data, SUBSCRIPTION_DATA_LEN);
@@ -529,10 +529,10 @@ int Client_connection::send_pipe_log(thread_data* local_buf, char* pipe_name, co
         return 0;
     }
 
-    char* tmp = new char[appConf::instance()->buf_size*8];
+    char* tmp = new char[appConf::instance()->get_int("main", "buf_size")*8];
     while(!local_buf->stm.pipe_messages_select.fetch())
     {
-        bzero(tmp, appConf::instance()->buf_size*8);
+        bzero(tmp, appConf::instance()->get_int("main", "buf_size")*8);
         mysql_real_escape_string(local_buf->db.getLink(), tmp,
                 local_buf->stm.pipe_messages_select.result_message, strlen(local_buf->stm.pipe_messages_select.result_message));
 
@@ -703,7 +703,7 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
         //printHexMin(fragment_buf.getData(), fragment_buf.getSize(), Log_ClientServer);
         //printHexMin(local_buf->buf, len, Log_ClientServer);
 
-        if(fragment_buf.getSize() + len >= appConf::instance()->fragment_buf_max_size )
+        if(fragment_buf.getSize() + len >= appConf::instance()->get_int("main", "fragment_buf_max_size") )
         {
             TagLoger::error(Log_ClientServer, LogColorRed, " >fragment_buf=%d переполнен. Client %d[fd=%d, len=%d, start_position=%d, fragment_buf_size=%d]\n"
                                                             ,fragment_buf.getSize() + len,client, fd, len, start_position, fragment_buf.getSize());
@@ -1468,8 +1468,9 @@ int Client_connection::get_info_request(int client, int len, thread_data* local_
     char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
     \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n{\"status\":\"ok\",\"node\":\"__________\"}";
  
+    const char* nodeName = appConf::instance()->get_chars("main", "node_name");
     int respLen = strlen(resp);
-    int nameLen = strlen(appConf::instance()->node_name);
+    int nameLen = strlen(nodeName);
     if(nameLen > 10)
     {
         nameLen = 10;
@@ -1477,7 +1478,7 @@ int Client_connection::get_info_request(int client, int len, thread_data* local_
 
     for(int i =0; i< nameLen; i++)
     {
-        resp[respLen-2-10+i] = appConf::instance()->node_name[i];
+        resp[respLen-2-10+i] = nodeName[i];
     }
 
     if(web_write( resp ) < 0)
@@ -1513,10 +1514,18 @@ int Client_connection::get_custom_request(int client, int len, thread_data* loca
         // 404
         return http404_answer(client, len, local_buf);
     }
+    
+    
 
     p[urlEnd - 1] = 0;
     char *uri = p; 
-    std::string name(appConf::instance()->base_dir);
+    std::string name(appConf::instance()->get_string("main", "base_dir"));
+    if(!name.size())
+    {
+        // 404
+        return http404_answer(client, len, local_buf);
+    }
+    
     name.append(uri); 
     
     TagLoger::log(Log_ClientServer, 0, " >Client GET [%s]\n", name.data());

@@ -307,7 +307,7 @@ protected:
     bool prepare(MYSQL *mysql)
     {
         setParamsCount(1);
-        param_query = new char[appConf::instance()->buf_size];
+        param_query = new char[appConf::instance()->get_int("main", "buf_size")];
 
         int i = 0;
         param[i].buffer_type    = MYSQL_TYPE_STRING;
@@ -324,7 +324,7 @@ public:
 
     int insert(const char* query, unsigned long length)
     {
-        strncpy(param_query, query, appConf::instance()->buf_size);
+        strncpy(param_query, query, appConf::instance()->get_int("main", "buf_size"));
         param_query_length = length;
         return stmBase::insert();
     }
@@ -357,8 +357,8 @@ public:
     {
         setParamsCount(5);
 
-        param_message = new char[appConf::instance()->buf_size];
-        param_message_length = appConf::instance()->buf_size;
+        param_message = new char[appConf::instance()->get_int("main", "buf_size")];
+        param_message_length = appConf::instance()->get_int("main", "buf_size");
 
         int i = 0;
         param[i].buffer_type    = MYSQL_TYPE_STRING;
@@ -413,7 +413,7 @@ public:
 
         bzero(param_id, MYSQL_UUID_LEN);
         bzero(param_event, EVENT_NAME_LEN);
-        bzero(param_message, appConf::instance()->buf_size);
+        bzero(param_message, appConf::instance()->get_int("main", "buf_size"));
 
         param_id_length = strlen(id);
         if(param_id_length > MYSQL_UUID_LEN)
@@ -428,7 +428,7 @@ public:
             param_event_length = EVENT_NAME_LEN;
         }
         strncpy(param_event, event, param_event_length);
-        strncpy(param_message, message, appConf::instance()->buf_size);
+        strncpy(param_message, message, appConf::instance()->get_int("main", "buf_size"));
 
         return stmBase::insert();
     }
@@ -470,8 +470,8 @@ public:
 
     bool prepare(MYSQL *mysql)
     {
-        result_message = new char[appConf::instance()->buf_size];
-        result_message_length = appConf::instance()->buf_size;
+        result_message = new char[appConf::instance()->get_int("main", "buf_size")];
+        result_message_length = appConf::instance()->get_int("main", "buf_size");
 
         setParamsCount(2);
 
@@ -627,8 +627,8 @@ public:
     {
         setParamsCount(6);
 
-        param_message = new char[appConf::instance()->buf_size];
-        param_message_length = appConf::instance()->buf_size;
+        param_message = new char[appConf::instance()->get_int("main", "buf_size")];
+        param_message_length = appConf::instance()->get_int("main", "buf_size");
 
         int i = 0;
         param[i].buffer_type    = MYSQL_TYPE_STRING;
@@ -692,7 +692,7 @@ public:
         bzero(param_id, MYSQL_UUID_LEN);
         bzero(param_event, EVENT_NAME_LEN);
         bzero(param_pipe_name, PIPE_NAME_LEN);
-        bzero(param_message, appConf::instance()->buf_size);
+        bzero(param_message, appConf::instance()->get_int("main", "buf_size"));
 
         param_id_length = strlen(id);
         if(param_id_length > MYSQL_UUID_LEN)
@@ -716,7 +716,7 @@ public:
             param_pipe_name_length = PIPE_NAME_LEN;
         }
         strncpy(param_pipe_name, pipe_name, PIPE_NAME_LEN);
-        strncpy(param_message, message, appConf::instance()->buf_size);
+        strncpy(param_message, message, appConf::instance()->get_int("main", "buf_size"));
 
         return stmBase::insert();
     }
@@ -749,8 +749,8 @@ public:
 
     bool prepare(MYSQL *mysql)
     {
-        result_message = new char[appConf::instance()->buf_size];
-        result_message_length = appConf::instance()->buf_size;
+        result_message = new char[appConf::instance()->get_int("main", "buf_size")];
+        result_message_length = appConf::instance()->get_int("main", "buf_size");
         bzero(result_message, result_message_length);
 
         setParamsCount(2);

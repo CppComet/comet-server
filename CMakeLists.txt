@@ -91,7 +91,7 @@ execute_process( COMMAND cc -c src/lex.yy.c -o src/lex.yy.o)
  
 
 # Установка переменной со списком исходников для исполняемого файла
-set(SOURCE_EXE src/hashlib2plus/src/hl_md5.cpp src/hashlib2plus/src/hl_md5wrapper.cpp src/TagLoger.cpp src/TagTimer.cpp src/main.cpp src/appConf.cpp src/intervalLoop.cpp src/base64.cpp  src/sha1.cpp src/CometQL.cpp src/devManager.cpp src/internalApi.cpp src/Client_connection.cpp src/MySqlProtocol.cpp src/connection.cpp src/mystring.cpp src/MySql_connection.cpp src/tcpServer.cpp src/user_index.cpp src/backtrace.cpp src/thread_data.cpp src/thread_data.h src/lex.yy.o src/CometQL.cc) 
+set(SOURCE_EXE src/hashlib2plus/src/hl_md5.cpp src/hashlib2plus/src/hl_md5wrapper.cpp src/TagLoger.cpp src/TagTimer.cpp src/main.cpp src/appConf.cpp src/intervalLoop.cpp src/tcpServer_benchmark.cpp src/base64.cpp src/sha1.cpp src/CometQL.cpp src/devManager.cpp src/internalApi.cpp src/Client_connection.cpp src/Freeswitch_connection.cpp src/MySqlProtocol.cpp src/connection.cpp src/mystring.cpp src/MySql_connection.cpp src/tcpServer.cpp src/user_index.cpp src/backtrace.cpp src/thread_data.cpp src/thread_data.h src/lex.yy.o src/CometQL.cc src/unit_test.cpp) 
 
 # Создает исполняемый файл с именем cpp_comet из исходников
 add_executable(cpp_comet ${SOURCE_EXE} )

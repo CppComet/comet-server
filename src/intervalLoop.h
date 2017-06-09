@@ -5,14 +5,13 @@
 #ifndef INTERVALLOOP_H
 #define	INTERVALLOOP_H
 
-#include "main.h"
-#include "thread_data.h"
-#include <list>     // подключаем заголовок списка
-
-class intervalLoopObject;
-class intervalLoop;
- 
+#include <list>     // подключаем заголовок списка 
 #include <functional>
+
+class thread_data;
+class intervalLoop;
+class intervalLoopObject;
+
 
 class intervalLoop
 { 

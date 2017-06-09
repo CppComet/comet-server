@@ -394,7 +394,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
             _countUerys++;
             TagLoger::warn(Log_MySqlServer, 0, "QUERY[%d, len=%d][BASE]:%s\n", _countUerys, queryLen, startQuery);
 
-            if(appConf::instance()->useQueryLoger)
+            if(appConf::instance()->get_bool("main", "useQueryLoger"))
             {
                 if(
                     memcmp("set ", startQuery, strlen("set "))                                                          != 0 &&
