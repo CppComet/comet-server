@@ -30,7 +30,43 @@ appConf::appConf():ini_parser()
 bool appConf::initFromFile(const char *fileName)
 {
     parse(fileName);
-     
+    
+    /*
+    ; Объём буфера для сообщения
+    ; Много ставить не надо, комет сервер не расчитан на передачу больших сообщений
+    buf_size = 10384
+
+    ; Максимальное значение размера памяти для Client_connection::fragment_buf
+    ; Должно быть больше 0
+    ; По достижении этого значения соединение просто закрывается
+    fragment_buf_max_size = 10384
+
+    ; Начальное значение размера памяти для Client_connection::fragment_buf Должно быть больше 0
+    fragment_buf_size = 600 
+
+    ; Объём буфера для подготовки ответного сообщения
+    answer_buf_size = 1000000*/
+  
+    if(!is_property_exists("main", "buf_size"))
+    {
+        sections["main"]["buf_size"] = "10384";  
+    }
+        
+    if(!is_property_exists("main", "answer_buf_size"))
+    {
+        sections["main"]["answer_buf_size"] = "1000000";  
+    }   
+    
+    if(!is_property_exists("main", "fragment_buf_size"))
+    {
+        sections["main"]["fragment_buf_size"] = "600";  
+    }   
+    
+    if(!is_property_exists("main", "fragment_buf_max_size"))
+    {
+        sections["main"]["fragment_buf_max_size"] = "10384";  
+    }
+            
     if(!is_property_exists("main", "password"))
     {
         sections["main"]["password"] = MAIN_PASSWORD;  

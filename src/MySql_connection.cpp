@@ -740,7 +740,9 @@ int MySql_connection::sql_show_tables(thread_data* local_buf, unsigned int Packe
     local_buf->sql.getValue(countRows++, 0) = "pipes_settings";
     local_buf->sql.sendAllRowsAndHeaders(local_buf, 1, &column, PacketNomber, countRows, this);
     */
-
+    
+    initTables();
+    
     // Отправляем пакет описания 1 колонки
     const static MySqlResultset_ColumDef column("Tables");
 
@@ -2370,8 +2372,10 @@ int MySql_connection::set_online(thread_data* local_buf)
     isOnLine = true;
     start_online_time = time(0);
 
-    local_buf->answer_buf.lock();
-    char* p = local_buf->answer_buf.getData();
+    char pakbuf[200];
+    bzero(pakbuf, 200);
+    
+    char*p = pakbuf;
 
     // первые 3 байта — длина пакета
     p+=3;
@@ -2438,28 +2442,28 @@ int MySql_connection::set_online(thread_data* local_buf)
     memcpy(p,"mysql_native_password", strlen("mysql_native_password"));
     p+=strlen("mysql_native_password") + 1;
 
-    int dataLen = p - local_buf->answer_buf.getData();
+    int dataLen = p - pakbuf;
     TagLoger::log(Log_MySqlServer, 0, "itit len:%d\n", dataLen);
 
     int t = dataLen - 4;
-    memcpy(local_buf->answer_buf.getData(),  &t, 3); //  Длина пакета
+    memcpy(pakbuf,  &t, 3); //  Длина пакета
 
     if(TagLoger::isLog(Log_MySqlServer, TAGLOG_DEBUG))
     {
         for(int i=0; i < dataLen; i++)
         {
             if(i % 8 == 0)  TagLoger::log(Log_MySqlServer, 0, "!\n%d:\t", i);
-            char c = (char)local_buf->answer_buf[i];
+            char c = (char)pakbuf[i];
             if(c < 32 ) c = '.';
 
-            TagLoger::log(Log_MySqlServer, 0, "!%02x[%c] ",  (unsigned char)local_buf->answer_buf[i], c);
+            TagLoger::log(Log_MySqlServer, 0, "!%02x[%c] ",  (unsigned char)pakbuf[i], c);
         }
         TagLoger::log(Log_MySqlServer, 0, "!\n ");
     }
 
     clientState = STATE_SEND_HANDSHAKE;
     TagLoger::log(Log_MySqlServer, 0, "Соединение не будет закрыто [4] [MySql_connection]\n");
-    return web_write(local_buf->answer_buf.getAndUnlock(), dataLen);
+    return web_write(pakbuf, dataLen);
 }
 
 int MySql_connection::set_offline(thread_data* local_buf)
