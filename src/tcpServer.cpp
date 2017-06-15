@@ -12,21 +12,19 @@
 #include "tcpServer.h"
 #include "user_index.h"
 #include "connection.h"
-#include "MySql_connection.h" 
 
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdio.h>
 #include <errno.h>
 
-
+#include <unordered_map> // @todo Перейти с std::map на std::unordered_map
+ 
 using namespace std;
  
 #ifndef TCPSERVER_CPP
 #define	TCPSERVER_CPP
-
-
-
+ 
 template< class connectionType >
 tcpServer<connectionType> * tcpServer<connectionType>::inst = NULL;
  
@@ -38,7 +36,7 @@ void * tcpServer<connectionType>::add_th_loop(void* arg)
 
     tinfo->parent_server_obj->loop(tinfo);
     TagLoger::log(Log_tcpServer, 0, "\x1b[32mS%d:Завершон поток обработки сообщений\x1b[0m\n",tinfo->parent_server_obj->id);
-
+ 
     return 0;
 }
 
@@ -119,6 +117,26 @@ tcpServer<connectionType>::~tcpServer()
     }
 
     delete[] map_index;
+}
+
+template< class connectionType >
+void tcpServer<connectionType>::init()
+{
+    try
+    {
+        map_index = new std::map<int,CP<connectionType>>[map_index_size+1];
+    }
+    catch (std::bad_alloc& ba)
+    {
+      TagLoger::error(Log_UserIndex, 0, "\x1b[31mbad_alloc caught\x1b[0m\n" ); 
+    }
+
+    request_mutex = new pthread_mutex_t[map_index_size+1];
+
+    for(int i=0; i<map_index_size+1; i++ )
+    {
+        pthread_mutex_init(&request_mutex[i],NULL);
+    }
 }
 
 template< class connectionType >
@@ -220,7 +238,7 @@ bool tcpServer<connectionType>::start(const char* Host,const int Port, const cha
 
         // Устанавливает часть флагов, относящихся к состоянию файла, согласно значению, указанному в 3 аргументе
         // setup nonblocking socket
-        if( fcntl(listener, F_SETFL, fcntl(listener, F_GETFD, 0)|O_NONBLOCK ) < 0 ) // | SO_REUSEADDR  | SOCK_CLOEXEC
+        if( fcntl(listener, F_SETFL, fcntl(listener, F_GETFD, 0)|O_NONBLOCK ) < 0 ) // | SO_REUSEADDR  | SOCK_CLOEXEC | SO_REUSEPORT - https://habrahabr.ru/post/259403/
         {
             printf("\x1b[1;31mService:%s host:%s port:%d\x1b[0m\n",server_name, Host, Port);
             perror("eval");
@@ -233,7 +251,7 @@ bool tcpServer<connectionType>::start(const char* Host,const int Port, const cha
         {
             printf("\x1b[1;31mCannot set SO_REUSEADDR option on listen socket (%s)\x1b[0m\n", strerror(errno));
         }
-        
+ 
         if(setsockopt(listener, IPPROTO_TCP, TCP_NODELAY, (char *) &yes, sizeof(yes)) < 0)
         {
             printf("\x1b[1;31mCannot set TCP_NODELAY option on listen socket (%s)\x1b[0m\n", strerror(errno));
@@ -307,6 +325,11 @@ bool tcpServer<connectionType>::start(const char* Host,const int Port, const cha
 
         TagLoger::log(Log_tcpServer, 0, "Main listener(%d) added to epoll\n", epfd);
          
+        if(appConf::instance()->get_int(name, "uptimeTestInterval") > 0)
+        {
+            intervalLoop::instance()->add((intervalLoopObject*)this);
+        }
+        
         // Создаём потоки обработки соединений и сообщений
         th = new tcpServer_loop_data<connectionType>[thread_num];
         for(int i=0; i<thread_num; i++)
@@ -357,6 +380,54 @@ bool tcpServer<connectionType>::start(const char* Host,const int Port, const cha
 }
 
 template< class connectionType >
+void tcpServer<connectionType>::step(int uptime, thread_data* local_buf)
+{
+    if(uptime % appConf::instance()->get_int(name, "uptimeTestInterval") != 0)
+    {
+        // выполнять один раз в 120 секунд
+        return;
+    }
+
+    int maxUptime = appConf::instance()->get_int(name, "maxUptime");
+    
+    int onlineSum = 0;
+    // Пробегает по всем конектам и проверяет не порали отключить по истичению uptime
+    for(int i =0; i< map_index_size; i++)
+    {
+        if(maxUptime > 0)
+        {
+            pthread_mutex_lock(&request_mutex[i]);
+            auto it = map_index[i].begin(); 
+            while( it != map_index[i].end())
+            { 
+                CP<connectionType> clientObj = it->second;
+                if(!clientObj.isNULL())
+                {
+                    if(clientObj->getUptime() > maxUptime)
+                    {
+                        it = map_index[i].erase(it);
+                        closeClientConnection(clientObj, local_buf);
+                    }
+                    else
+                    {
+                        it++;
+                    }
+                }
+                else
+                {
+                    it++;
+                } 
+            }
+            pthread_mutex_unlock(&request_mutex[i]);
+        } 
+        onlineSum+= map_index[i].size();
+    } 
+    
+    // Правим значение колва онлайн так как сщётчик мог накопить погрешность.
+    if(benchmark) bm.setConections(onlineSum);
+}
+
+template< class connectionType >
 bool tcpServer<connectionType>::crash_stop()
 {
     TagLoger::log(Log_tcpServer, 0, "\x1b[1;31mcrash stop\x1b[0m\n");
@@ -379,6 +450,8 @@ void tcpServer<connectionType>::loop(const tcpServer_loop_data<connectionType>* 
     TagLoger::log(Log_tcpServer, 0, "S%d:Запущен новый поток обработки сообщений на порту %d с идентификатором %d\n",this->id,port,d->thread_id);
 
     thread_data* hm_thread_data = new thread_data(appConf::instance());
+    hm_thread_data->bm = &bm;
+    hm_thread_data->thread_id = d->thread_id;
     
     struct epoll_event loop_ev = d->ev;
     struct sockaddr_in their_addr;                      // define ip & ports for server(addr) and incoming client ip & ports(their_addr)
@@ -484,9 +557,9 @@ void tcpServer<connectionType>::loop(const tcpServer_loop_data<connectionType>* 
                  * @note Дескриптор, который равен нулю в *nix системах, считается легальным, а в Windows - нет
                  */
                 int client_id=accept( listener, (struct sockaddr *) &their_addr, &socklen);
-                if(client_id <= 0 )
+                if(client_id < 0 )
                 {
-                    TagLoger::log(Log_tcpServer, 0, "\x1b[31mS%d:Не удалось установить соединение %d\x1b[0m",this->id, client_id); 
+                    TagLoger::error(Log_tcpServer, 0, "\x1b[31mS%d:Не удалось установить соединение %d\x1b[0m",this->id, client_id); 
                     continue;
                 }
 
@@ -498,44 +571,52 @@ void tcpServer<connectionType>::loop(const tcpServer_loop_data<connectionType>* 
                     continue;
                 }*/
  
-                CP<connectionType> clientObj;                 
-                clientObj->event.events = events[i].events;
-                clientObj->event.data.fd = client_id;  
-                clientObj->event.data.ptr = (void*)clientObj.get();
-                
-                // Решает в какой из потоков обработки сообщений добавить соединение, раскидывает каждому потоку поровну входящих соединений
-                if(next_epfd_index < thread_num - 1)
-                {
-                    next_epfd_index++;
-                }
-                else
-                {
-                    next_epfd_index = 1;
-                } 
-                int c_epfd = th[next_epfd_index].epfd;
- 
-                //addClient(client_id, client_id, hm_thread_data, c_epfd); 
-                TagLoger::log(Log_tcpServer, 0, "S%d:Создаётся новый клиент %d=%d...",this->id,client_id,clientObj->event.data.fd);
-                
-                clientObj->setIp(inet_ntoa(their_addr.sin_addr)); 
-                clientObj->setEpfd(c_epfd);
-                clientObj->setfd(client_id);
-                clientObj->set_online(hm_thread_data);  
-                 
-                // Вставка объекта соединения в std::map
-                pthread_mutex_lock(&request_mutex[client_id%map_index_size]); 
-                getMapToUserId(client_id).insert(std::pair<int, CP<connectionType>>(client_id, clientObj));  
-                pthread_mutex_unlock(&request_mutex[client_id%map_index_size]);
+                try{
+                    CP<connectionType> clientObj;   
+                    clientObj->event.events = events[i].events;
+                    clientObj->event.data.fd = client_id;  
+                    clientObj->event.data.ptr = (void*)clientObj.get();
 
-                if(benchmark) bm.increment_addClient();
- 
-                TagLoger::log(Log_tcpServer, 0, "th(%d) epoll_ctl(c_epfd:%d, next_epfd_index:%d)\n",d->thread_id, c_epfd, next_epfd_index); 
-                if(epoll_ctl(c_epfd, EPOLL_CTL_ADD, client_id, &clientObj->event) != 0)
+                    // Решает в какой из потоков обработки сообщений добавить соединение, раскидывает каждому потоку поровну входящих соединений
+                    if(next_epfd_index < thread_num - 1)
+                    {
+                        next_epfd_index++;
+                    }
+                    else
+                    {
+                        next_epfd_index = 1;
+                    } 
+                    int c_epfd = th[next_epfd_index].epfd;
+
+                    //addClient(client_id, client_id, hm_thread_data, c_epfd); 
+                    TagLoger::log(Log_tcpServer, 0, "S%d:Создаётся новый клиент %d=%d...",this->id,client_id,clientObj->event.data.fd);
+
+                    clientObj->setIp(inet_ntoa(their_addr.sin_addr)); 
+                    clientObj->setEpfd(c_epfd);
+                    clientObj->setfd(client_id);
+                    
+                    // Выполняется в контексте потока приёма входящих сообщений
+                    clientObj->set_online(hm_thread_data);  
+
+                    // Вставка объекта соединения в std::map чтоб объект можно было найти по его client_id
+                    pthread_mutex_lock(&request_mutex[client_id%map_index_size]); 
+                    getMapToUserId(client_id).insert(std::pair<int, CP<connectionType>>(client_id, clientObj));  
+                    pthread_mutex_unlock(&request_mutex[client_id%map_index_size]);
+
+                    if(benchmark) bm.increment_addClient();
+
+                    TagLoger::log(Log_tcpServer, 0, "th(%d) epoll_ctl(c_epfd:%d, next_epfd_index:%d)\n",d->thread_id, c_epfd, next_epfd_index); 
+                    if(epoll_ctl(c_epfd, EPOLL_CTL_ADD, client_id, &clientObj->event) != 0)
+                    {
+                        TagLoger::log(Log_tcpServer, 0, "\x1b[31madd new client to epoll - faile\x1b[0m\n");
+                        close(client_id);
+                        continue;
+                    }
+                }catch(...)
                 {
-                    TagLoger::log(Log_tcpServer, 0, "\x1b[31madd new client to epoll - faile\x1b[0m\n");
-                    close(client_id);
+                    TagLoger::warn(Log_tcpServer, 0, "S%d:Fail in establish new connection");
                     continue;
-                }
+                } 
             }
             else
             {
@@ -570,15 +651,16 @@ int tcpServer<connectionType>::epoll_detached(int fd, int epfd)
 }
   
 /**
- * Удаляет соединение
+ * Удаляет соединение из std::map<int,CP<connectionType>>
+ * Таким образом если ссылок кроме как в std::map не останется то объект будет реально удалён из памяти
  * @param client_id
  * @param local_buf
+ *  
  */
 template< class connectionType >
-void tcpServer<connectionType>::deleteClient(CP<connectionType> clientObj, thread_data* local_buf)
-{ 
-    TagLoger::log(Log_tcpServer, 0, "S%d:tcpServer::deleteClient Epfd=%d, fd=%d\n",this->id, clientObj->getEpfd(), clientObj->getfd());
-
+void tcpServer<connectionType>::deleteClientFromMap(CP<connectionType> clientObj)
+{  
+    TagLoger::log(Log_tcpServer, 0, "S%d:tcpServer::delete-Client Epfd=%d, fd=%d\n",this->id, clientObj->getEpfd(), clientObj->getfd()); 
     pthread_mutex_lock(&request_mutex[clientObj->getfd()%map_index_size]);
 
     auto it = getMapToUserId(clientObj->getfd()).find(clientObj->getfd());
@@ -591,9 +673,25 @@ void tcpServer<connectionType>::deleteClient(CP<connectionType> clientObj, threa
         TagLoger::error(Log_tcpServer, 0, "\x1b[31mS%d:Не удалось найти клиента %d в map_index\x1b[0m\n",this->id, clientObj->getfd());
     }
 
-    pthread_mutex_unlock(&request_mutex[clientObj->getfd()%map_index_size]);
+    pthread_mutex_unlock(&request_mutex[clientObj->getfd()%map_index_size]); 
+}
 
+/**
+ * Закрывает сетевое соединение клиента.
+ * @param client_id
+ * @param local_buf 
+ */
+template< class connectionType >
+void tcpServer<connectionType>::closeClientConnection(CP<connectionType> clientObj, thread_data* local_buf)
+{  
+    TagLoger::log(Log_tcpServer, 0, "S%d:tcpServer::closeClientConnection Epfd=%d, fd=%d\n",this->id, clientObj->getEpfd(), clientObj->getfd()); 
+    /**
+     * Если не ошибаюсь, то после этой строчки событий от клиента в epoll не будет.
+     * И поэтому будет можно безопасно удалить память на которую указывает events[i].data.ptr в событиях epoll
+     */
     epoll_detached(clientObj->getfd(), clientObj->getEpfd());
+    
+    
     if(clientObj->set_offline(local_buf) < 0 )
     {
         TagLoger::error(Log_tcpServer, 0, "\x1b[31mS%d:Не удалось отключить клиента %d\x1b[0m\n",this->id, clientObj->getfd());
@@ -603,11 +701,36 @@ void tcpServer<connectionType>::deleteClient(CP<connectionType> clientObj, threa
         TagLoger::log(Log_tcpServer, 0, "S%d:Удалось set_online false\n",this->id);
     }
       
-    //delete clientObj; // Если начнёт утекать память то надо проверить этот момент.
+    /**
+     * @fixme Если начнёт утекать память то надо проверить этот момент.
+     */
+    //delete clientObj; 
     if(benchmark) bm.increment_deleteClient();
     TagLoger::log(Log_tcpServer, 0, "S%d:Удалось отключить клиента\n",this->id);
 }
 
+/**
+ * Удаляет соединение
+ * @note Не очищает память объекта а просто удаляет ссылку на него из std::map<int,CP<connectionType>>
+ *       Таким образом если ссылок кроме как в std::map не останется то объект будет реально удалён из памяти
+ * @param client_id
+ * @param local_buf
+ *  
+ */
+template< class connectionType >
+void tcpServer<connectionType>::deleteClient(CP<connectionType> clientObj, thread_data* local_buf)
+{ 
+    deleteClientFromMap(clientObj);
+    closeClientConnection(clientObj, local_buf);
+}
+
+/**
+ * Удаляет соединение
+ * @note Не очищает память объекта а просто удаляет ссылку на него из std::map<int,CP<connectionType>>
+ *       Таким образом если ссылок кроме как в std::map не останется то объект будет реально удалён из памяти
+ * @param client_id
+ * @param local_buf
+ */
 template< class connectionType >
 void tcpServer<connectionType>::deleteClient(int client_id, thread_data* local_buf)
 {
@@ -640,31 +763,41 @@ template< class connectionType >
         local_buf->unlockAll();
         int client = clientObj->getfd();
           
+        bm.set_th_status(thread_id, 'R');
+        
+        
         TagLoger::log(Log_tcpServer, 0, "S%d:{thread_id:%d}Try to read from fd(%d)\n",this->id, thread_id, client);
         len = clientObj->web_read(local_buf);
 
+        
         TagLoger::log(Log_tcpServer, 0, "S%d:{%d}clients[%d].web_read() = %d\n\n",this->id, thread_id, client, len);
 
         if(len < 0 )
         {
+            bm.set_th_status(thread_id, 'D');
             TagLoger::warn(Log_tcpServer, 0, "\x1b[31mS%d:{%d}Не удалось принять данные от %d\x1b[0m\n",this->id,thread_id, client);
             deleteClient(clientObj, local_buf);
         }
         else if(len > 0)
         { 
+            bm.set_th_status(thread_id, 'M');
             // Обработка сообщения от клиента
             if(clientObj->request(client, len, local_buf) == -1 )
             {
-                TagLoger::warn(Log_tcpServer, 0, "\x1b[32m{%d} бработка сообщения от клиента return -1 %d\x1b[0m\n",thread_id, client);
+                bm.set_th_status(thread_id, 'D');
+                TagLoger::warn(Log_tcpServer, 0, "\x1b[32m{%d} Обработка сообщения от клиента return -1 %d\x1b[0m\n",thread_id, client);
                 deleteClient(clientObj, local_buf);
             }
         }
         else
-        {    // zero size of len mean the client closed connection
+        { 
+            bm.set_th_status(thread_id, 'D');
+            // zero size of len mean the client closed connection
              TagLoger::warn(Log_tcpServer, 0, "\x1b[32m{%d} zero size of len mean the client closed connection from %d\x1b[0m\n",thread_id, client);
              deleteClient(clientObj, local_buf);
         }
  
+        bm.set_th_status(thread_id, 'E');
         return len;
     }
 
@@ -677,24 +810,26 @@ template< class connectionType >
 template< class connectionType >
     CP<connectionType> tcpServer<connectionType>::get(int client_id)
     {
-         pthread_mutex_lock(&request_mutex[client_id%map_index_size]);
+        pthread_mutex_lock(&request_mutex[client_id%map_index_size]);
 
-         auto it = getMapToUserId(client_id).find(client_id);
-         if( it != getMapToUserId(client_id).end() )
-         {
-             pthread_mutex_unlock(&request_mutex[client_id%map_index_size]);
-             return it->second;
-         }
+        auto it = getMapToUserId(client_id).find(client_id);
+        if( it != getMapToUserId(client_id).end() )
+        {
+            pthread_mutex_unlock(&request_mutex[client_id%map_index_size]);
+            return it->second;
+        }
 
-         pthread_mutex_unlock(&request_mutex[client_id%map_index_size]);
-         return NULL;
+        pthread_mutex_unlock(&request_mutex[client_id%map_index_size]);
+        return NULL;
     }
-
+ 
 #include "Client_connection.h" 
 #include "MySql_connection.h"
+#include "Freeswitch_connection.h"
 
 template class tcpServer<Client_connection>; 
-template class tcpServer<MySql_connection>; 
+template class tcpServer<MySql_connection>;
+template class tcpServer<Freeswitch_connection>;
 
 
 #endif	/* TCPSERVER_CPP */ 

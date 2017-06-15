@@ -446,15 +446,16 @@ class devManager
     ~devManager();
     devManager()
     {
-        index = new devInfo(appConf::instance()->root_password); 
+        index = new devInfo(appConf::instance()->get_chars("main", "password") ); 
         intervalLoop::instance()->add([](int uptime, thread_data* local_buf)
         {
-            if( uptime%appConf::instance()->client_benchmark != 0)
+            int benchmark = appConf::instance()->get_int("ws", "benchmark");
+            if( !benchmark || uptime% benchmark != 0)
             {
                 return;
             }
             
-            devManager::instance()->ps_network_events = devManager::instance()->tps_network_events / appConf::instance()->client_benchmark;
+            devManager::instance()->ps_network_events = devManager::instance()->tps_network_events / benchmark;
             devManager::instance()->tps_network_events = 0;
         });
 

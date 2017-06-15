@@ -62,6 +62,9 @@
 #define ifLog(tag) if(TagLoger::isLog(tag, TAGLOG_LOG))
 #define ifLog(tag) if(TagLoger::isLog(tag, TAGLOG_LOG))
 
+/**
+ * @todo Перевести вывод на syslog http://www.firststeps.ru/linux/r.php?12
+ */
 class TagLoger
 {
     static void full_write(int fd, const char *buf, size_t len)
@@ -125,7 +128,8 @@ public:
      * @param tag
      * @param level
      */
-    static void setAllTagLevel(int level);      
+    static void setAllTagLevel(int level);    
+    static void initTagLevels();      
     
     static int getTagLevel(int tag = Log_Any);
      

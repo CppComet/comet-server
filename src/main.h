@@ -1,12 +1,22 @@
  
+#define MAIN_BUF_SIZE 10384
+#define MAIN_PASSWORD "password"
+
+#define MAIN_NODE_NAME "NoName"
+#define HTTP_BASE_DIR "/var/www/CppComet"
+ 
+
+#define NULL_IP "0.0.0.0" 
+ 
+#define NODE_NAME "NoName" 
+#define MAIN_BACKLOG_SIZE 1024 
+#define MAIN_EPOLL_SIZE 10000 
+
 /**
  * Надо ли вообще проверять с какого урла пишёл запрос.
  */
 #define testUrl
    
-//#define monoURL "78.47.206.108,inparadise.info,demo.inparadise.info,n2.comet-server.com,chat.inparadise.info,demo-chat.inparadise.info,int.dev,social-chat.comet-server.com,chat.emed24.ru"
-//#define monoUrlsCount 8
-      
 /**
  * Максимальная длина имени канала 
  */
@@ -19,11 +29,6 @@
 #define DEV_URL_LEN 255
 #define DEV_MAX_URLS 10
 
-
-#define NULL_IP "0.0.0.0" 
- 
-#define NODE_NAME "NoName" 
- 
 #define LOG_ALL     5
 #define LOG_DEBUG   4
 #define LOG_INFO    3
@@ -71,7 +76,7 @@
     <html>\
     <head>\
      <meta charset='utf-8'>\
-     <title>CppComet</title>\
+     <title>Star.Comet</title>\
      <link rel='shortcut icon' href='https://comet-server.com/favicon.ico' type='image/x-icon'>\
      <style type='text/css'>\
         #center {\
@@ -90,8 +95,8 @@
                             <tr style='vertical-align: top;'>\
                                     <td> <img src='https://comet-server.org/Logo.png'></td>\
                                 <td style='  padding-left: 10px;'> \
-                                        <div style='font-size: 30px;  font-weight: bold;'>CppComet</div>\
-                                            Comet сервер CppComet<br>\
+                                        <div style='font-size: 30px;  font-weight: bold;'>Star.Comet</div>\
+                                            Comet сервер Star.Comet<br>\
                                             Больше информации смотрите на comet-server.org и support@comet-server.org\
                                     </td>\
                             </tr>\
@@ -99,7 +104,7 @@
     </body>\
     </html>" 
  
-#define MYSQL_SERVERNAME "CometServer 2.02"
+#define MYSQL_SERVERNAME "CometServer 2.5"
 
 #define maxValue( a, b ) ( (a) > (b) ? (a) : (b) )
 #define minValue( a, b ) ( (a) < (b) ? (a) : (b) )

@@ -5,18 +5,26 @@
 #ifndef THREAD_DATA_H
 #define	THREAD_DATA_H
 
+class thread_data;
+class tcpServer_benchmark;
+#include "intervalLoop.h"
 
 #include <stdio.h>
 #include <cstdlib>
-#include "main.h" 
-#include "appConf.h"
 #include <string.h>
 #include <exception>
+
+#include "main.h" 
+#include "appConf.h"
 
 #include "dbLink.h"
  
 #include "CometQL.h"
+
+#include "CometQLcluster.h"
  
+
+#include "tcpServer_benchmark.h"
 
 #ifndef ARRAY_BUFFER_SIZE
     #define ARRAY_BUFFER_SIZE 32
@@ -206,6 +214,9 @@ public:
     dbLink db;
     
     stmMapper stm;
+    
+    tcpServer_benchmark* bm;
+    int thread_id = 0;
       
     /**
      * Буфер для сообщения от пользователя.
@@ -238,7 +249,7 @@ public:
     int tmp_bufdataSize[ARRAY_BUFFER_SIZE];
     int tmp_bufdataPrt[ARRAY_BUFFER_SIZE];*/
 
-    thread_data( appConf* app):buf(app->buf_size), messge_buf(app->buf_size), answer_buf(app->answer_buf_size),sql()
+    thread_data( appConf* app):buf(app->get_int("main", "buf_size")), messge_buf(app->get_int("main", "buf_size")), answer_buf(app->get_int("main", "answer_buf_size")),sql(),bm(NULL)
     { 
         /*bzero(tmp_bufdata, ARRAY_BUFFER_SIZE);
         bzero(tmp_bufdataSize, ARRAY_BUFFER_SIZE);
@@ -249,11 +260,13 @@ public:
 
         tmp_bufdataSize[0] = app->buf_size*2;*/
   
-        db.init(app->db_host, app->db_user, app->db_pw, app->db_name, app->db_port);
+        db.init(app->get_chars("db", "host"), app->get_chars("db", "user"), app->get_chars("db", "password"), app->get_chars("db", "name"), app->get_int("db", "port"));
         db.connect();
         
         stm.init(db); 
     }
+    
+    void setThreadStatus(char c);
 
 private:
 

@@ -3,6 +3,7 @@
 
 
 #include "TagLoger.h"
+#include "appConf.h"
 
 #include <cstdlib>
 #include <iostream> 
@@ -82,6 +83,14 @@ int TagLoger::TagsLogLevel[tagsNamesLength];
         }
     }
     
+    void TagLoger::initTagLevels()
+    { 
+        setLogLevel(appConf::instance()->get_int("log", "level"));
+        for(int i =0; i< tagsNamesLength; i++)
+        {
+            setTagLevel(i, appConf::instance()->get_int("log", tagsNames[i])); 
+        }
+    }
     
     int TagLoger::getTagLevel(int tag)
     { 

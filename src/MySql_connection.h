@@ -320,6 +320,7 @@ class MySql_connection:public connection
 {
     friend class tcpServer<MySql_connection>;
 
+protected:
     /**
      * Массив с описанием структуры всех таблиц
      */

@@ -6,6 +6,8 @@
 #include <iterator> // заголовок итераторов
 #include "intervalLoop.h"
 
+#include "thread_data.h"
+ 
 intervalLoop* intervalLoop::inst;
 
 intervalLoop* intervalLoop::instance()
