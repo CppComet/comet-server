@@ -320,7 +320,7 @@ var _cometServerApi = function(opt)
 /**
  * @private
  */
-_cometServerApi.prototype.version = "3.23";
+_cometServerApi.prototype.version = "3.24";
 
 /**
  * @private
@@ -830,6 +830,11 @@ _cometServerApi.prototype.subscription = function(name, callback)
     if(name === undefined )
     {
         return false;
+    }
+
+    if(!/^[A-z0-9_.\-]+$/.test(name))
+    {
+        console.error("Invalid pipe name", name)
     }
 
     var thisObj = _cometServerApi.prototype;
@@ -1930,6 +1935,12 @@ _cometServerApi.prototype.web_pipe_send = function(pipe_name, event_name, msg)
     if(msg === undefined)
     {
         return false;
+    }
+
+    if(!/^web_/.test(pipe_name))
+    {
+        console.error("Invalid channel name `"+pipe_name+"`. The channel should begin with web_", pipe_name);
+        return;
     }
 
     if(_cometServerApi.prototype.LogLevel) console.log(["web_pipe_send", pipe_name, msg]);

@@ -565,8 +565,8 @@ int Client_connection::send_pipe_count(thread_data* local_buf, char* pipe_name, 
     if(memcmp(pipe_name, "web_", 4) != 0)
     {
         // @todo добавить ссылку на описание ошибки
-        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_count] Недопустимое название канала. Канал должен начинатся с web_\"},\"event_name\":\"answer\"}",
-                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_count] Недопустимое название канала. Канал должен начинатся с web_\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_count] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}",
+                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_count] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}") ).data(), "_answer");
         return 0;
     }
 
@@ -1161,8 +1161,8 @@ int Client_connection::web_pipe_msg_v1(thread_data* local_buf, char* event_data,
     else if(memcmp(name, "web_", 4) != 0)
     {
         // @todo добавить ссылку на описание ошибки
-        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg] Недопустимое название канала. Канал должен начинатся с web_\"},\"event_name\":\"answer\"}",
-                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg] Недопустимое название канала. Канал должен начинатся с web_\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}",
+                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}") ).data(), "_answer");
         return -1;
     }
 
@@ -1279,8 +1279,8 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
     {
         TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mweb_pipe_msg_v2 Недопустимое название канала[name=%s]\x1b[0m\n", name);
         // @todo добавить ссылку на описание ошибки
-        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg2] Недопустимое название канала. Канал должен начинатся с web_\"},\"event_name\":\"answer\"}",
-                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg2] Недопустимое название канала. Канал должен начинатся с web_\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg2] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}",
+                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg2] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}") ).data(), "_answer");
         return -1;
     }
 
