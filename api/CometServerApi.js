@@ -320,7 +320,7 @@ var _cometServerApi = function(opt)
 /**
  * @private
  */
-_cometServerApi.prototype.version = "3.22";
+_cometServerApi.prototype.version = "3.23";
 
 /**
  * @private
@@ -1118,6 +1118,11 @@ _cometServerApi.prototype.start = function(opt, callBack)
         {
             _cometServerApi.prototype.options[key] = opt[key];
         }
+    }
+    
+    if(_cometServerApi.prototype.options.wss != undefined)
+    { 
+        _cometServerApi.prototype.UseWss(_cometServerApi.prototype.options.wss)
     }
     
     if(_cometServerApi.prototype.options.node)
@@ -2153,12 +2158,22 @@ _cometServerApi.prototype.conect_to_server = function()
                         setTimeout(function()
                         {
                             //thisObj.conect_to_server();
-                            var node = _cometServerApi.prototype.options.nodeArray[indexInArr]
-                            var socket = new WebSocket(_cometServerApi.prototype.getUrl(node));
+                            var conect = function()
+                            { 
+                                if(navigator.onLine === false)
+                                {
+                                    setTimeout(conect, 300)
+                                    return;
+                                }
+                                
+                                var node = _cometServerApi.prototype.options.nodeArray[indexInArr]
+                                var socket = new WebSocket(_cometServerApi.prototype.getUrl(node));
 
-                            _cometServerApi.prototype.socketArray[indexInArr] = socket;
-                            initSocket(socket, indexInArr);
-
+                                _cometServerApi.prototype.socketArray[indexInArr] = socket;
+                                initSocket(socket, indexInArr);
+                            }
+                            
+                            conect() 
                         }, _cometServerApi.prototype.time_to_reconect_on_close[indexInArr] );
                     }
                     else
@@ -2172,13 +2187,23 @@ _cometServerApi.prototype.conect_to_server = function()
                         // Если это не первый обрыв соединения подряд то переподключаемся не сразу
                         setTimeout(function()
                         {
-                            //thisObj.conect_to_server();
-                            var node = _cometServerApi.prototype.options.nodeArray[indexInArr]
-                            var socket = new WebSocket(_cometServerApi.prototype.getUrl(node));
+                            var conect = function()
+                            { 
+                                if(navigator.onLine === false)
+                                {
+                                    setTimeout(conect, 300)
+                                    return;
+                                }
 
-                            _cometServerApi.prototype.socketArray[indexInArr] = socket;
-                            initSocket(socket, indexInArr);
+                                //thisObj.conect_to_server();
+                                var node = _cometServerApi.prototype.options.nodeArray[indexInArr]
+                                var socket = new WebSocket(_cometServerApi.prototype.getUrl(node));
 
+                                _cometServerApi.prototype.socketArray[indexInArr] = socket;
+                                initSocket(socket, indexInArr);
+                            }
+                            
+                            conect()
                         }, thisObj.time_to_reconect_on_error[indexInArr] );
                     }
                 }
