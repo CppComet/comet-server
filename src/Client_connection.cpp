@@ -116,9 +116,9 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
     int event_data_len = strlen(event_data);
     if(event_data_len > SUBSCRIPTION_DATA_LEN)
     {
-            TagLoger::error(Log_ClientServer, 0, "\x1b[1;31mСлишком много буковок[%d]\x1b[0m\n", event_data_len);
-            message(local_buf, base64_encode( (const unsigned char*) "{\"error\":\"Слишком много буковок\"}",
-                       strlen("{\"error\":\"Слишком много буковок\"}") ).data(), "_answer");
+            TagLoger::error(Log_ClientServer, 0, "\x1b[1;31mToo many letters[%d]\x1b[0m\n", event_data_len);
+            message(local_buf, base64_encode( (const unsigned char*) "{\"error\":\"Too many letters\"}",
+                       strlen("{\"error\":\"Too many letters\"}") ).data(), "_answer");
             return -1;
     }
 
@@ -144,9 +144,9 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
 
             if( i >= MAX_SUBSCRIPTION_PIPE)
             {
-                TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mСлишком много подписок [%d]\x1b[0m\n", i);
-                message(local_buf, base64_encode( (const unsigned char*) "{\"error\":\"Слишком много подписок\"}",
-                       strlen("{\"error\":\"Слишком много подписок\"}") ).data(), "_answer");
+                TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mToo many subscriptions [%d]\x1b[0m\n", i);
+                message(local_buf, base64_encode( (const unsigned char*) "{\"error\":\"Too many subscriptions\"}",
+                       strlen("{\"error\":\"Too many subscriptions\"}") ).data(), "_answer");
                 return 0;
             }
 
@@ -199,9 +199,9 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
 
         if(p - start_subscription_name >= PIPE_NAME_LEN)
         {
-            TagLoger::error(Log_ClientServer, 0, "\x1b[1;31mСлишком длинное название канала [%s]\x1b[0m\n", start_subscription_name);
-            message(local_buf, base64_encode( (const unsigned char*) "{\"error\":\"Слишком длинное название канала\"}",
-                       strlen("{\"error\":\"Слишком длинное название канала\"}") ).data(), "_answer");
+            TagLoger::error(Log_ClientServer, 0, "\x1b[1;31mChannel name is too long [%s]\x1b[0m\n", start_subscription_name);
+            message(local_buf, base64_encode( (const unsigned char*) "{\"error\":\"Channel name is too long\"}",
+                       strlen("{\"error\":\"Channel name is too long\"}") ).data(), "_answer");
             return -1;
         }
     }
@@ -284,7 +284,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     int ses_index = str_find(mytext,'=',300);
     if(ses_index == -1)
     {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mНеправильный запрос [Не найден идентификатор ссесии] \x1b[0m\n");
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [Session ID not found] \x1b[0m\n");
         web_write_error( "Error code 401(Invalid request, session ID not found)", 401, local_buf);
         return 0;
     }
@@ -294,7 +294,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     int uid_index = str_find(mytext,'=',2,0,300);
     if(uid_index == -1)
     {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mНеправильный WS запрос [Не найден идентификатор пользователя] \x1b[0m\n");
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mWrong WS request [No user ID found] \x1b[0m\n");
         web_write_error( "Error code 401(Invalid request, the user ID can not be found)", 401, local_buf);
         return 0;
     }
@@ -309,7 +309,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     int udev_id_index = str_find(mytext,'=',3,0,300);
     if(udev_id_index == -1)
     {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mНеправильный запрос [Не найден идентификатор dev_id] \x1b[0m\n");
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] \x1b[0m\n");
         web_write_error( "Error code 406(Invalid request, no public key found)" , 406, local_buf);
         return 0;
     }
@@ -317,7 +317,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     int version_index = str_find(mytext,'=',4,0,300);
     if(version_index == -1)
     {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mНеправильный запрос [Не передана версия api клиента] \x1b[0m\n");
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No version of api client transferred] \x1b[0m\n");
         web_write_error( "Error code 418(Invalid request Not assigned client api version)\n", 418, local_buf);
         return 0;
     }
@@ -327,7 +327,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
 
     if(client_major_version < 0)
     {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mНеправильный запрос [Не передана версия api клиента] \x1b[0m\n");
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No version of api client transferred] \x1b[0m\n");
         web_write_error( "Error code 418(Invalid request Not assigned client api version)\n", 418, local_buf);
         return 0;
     }
@@ -336,7 +336,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
 
     if(client_minor_version == -1)
     {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mНеправильный запрос [Не передана версия api клиента] \x1b[0m\n");
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No version of api client transferred] \x1b[0m\n");
         web_write_error( "Error code 418(Invalid request Not assigned client api version)\n", 418, local_buf);
         return 0;
     }
@@ -402,7 +402,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
 
     if(host_error && devManager::instance()->getDevInfo()->countDevUrl())
     {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mНеправильный запрос [Запрос с запрещёного домена] \x1b[0m\n");
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [Request from a denied domain] \x1b[0m\n");
         web_write_error( "Error code 423(Access denied, Request from unauthorized domain.)" , 423, local_buf);
         return 0;
     }

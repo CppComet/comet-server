@@ -320,7 +320,7 @@ var _cometServerApi = function(opt)
 /**
  * @private
  */
-_cometServerApi.prototype.version = "3.24";
+_cometServerApi.prototype.version = "3.25";
 
 /**
  * @private
@@ -504,6 +504,9 @@ _cometServerApi.prototype.setLogLevel = function(level)
     }catch (e){}
 }
 
+/** 
+ * @returns {String} Сдучайная строка ровно из 10 символов
+ */
 _cometServerApi.prototype.getCustomString = function()
 {
     var custom = (Math.random()*10)+""+Math.random();
@@ -1947,6 +1950,25 @@ _cometServerApi.prototype.web_pipe_send = function(pipe_name, event_name, msg)
     return _cometServerApi.prototype.send_msg("web_pipe2\n"+pipe_name+"\n"+event_name+"\n*\n"+JSON.stringify(msg));
 }
 
+_cometServerApi.prototype.getTrackPipeUsers = function(pipe_name, callBack)
+{ 
+    if(!/^track_/.test(pipe_name))
+    {
+        console.error("Invalid channel name `"+pipe_name+"`. The channel should begin with track_", pipe_name);
+        return;
+    }
+
+    if(callBack !== undefined)
+    {
+        var marker = _cometServerApi.prototype.getCustomString();
+        _cometServerApi.prototype.subscription(pipe_name)
+        _cometServerApi.prototype.subscription_callBack(pipe_name, callBack, marker);
+    }
+
+    if(_cometServerApi.prototype.LogLevel) console.log(["track_pipe_users", pipe_name]);
+    return _cometServerApi.prototype.send_msg("track_pipe_users\n"+pipe_name+"\n"+marker);
+}
+
 /**
  * Вернёт true в случаи отправки
  * Отчёт о доставке прийдёт в канал _answer
@@ -2033,7 +2055,7 @@ _cometServerApi.prototype.get_pipe_log = function(pipe_name, callBack)
         _cometServerApi.prototype.subscription_callBack(pipe_name, callBack, marker);
     }
 
-    _cometServerApi.prototype.send_msg("pipe_log\n"+pipe_name+"\n"+_cometServerApi.prototype.custom_id+"\n");
+    _cometServerApi.prototype.send_msg("pipe_log\n"+pipe_name+"\n"+marker+"\n");
     return true;
 }
 
