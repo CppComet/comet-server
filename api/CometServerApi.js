@@ -1128,7 +1128,7 @@ _cometServerApi.prototype.start = function(opt, callBack)
         }
     }
     
-    if(_cometServerApi.prototype.options.wss != undefined)
+    if(_cometServerApi.prototype.options.wss !== undefined)
     { 
         _cometServerApi.prototype.UseWss(_cometServerApi.prototype.options.wss)
     }
