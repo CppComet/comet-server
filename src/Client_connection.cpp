@@ -871,47 +871,53 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
     str_data[msg_data_len] = 0;
 
     int res = 0;
-    if( memcmp( str_data, "subscription", 12) == 0)
+    if( memcmp( str_data, "subscription", strlen("subscription")) == 0)
     {
         TagLoger::log(Log_ClientServer, 0, "comand-subscription:\n" );
         un_subscription(local_buf);
-        res = ws_subscription(local_buf, (char*) (str_data +13) , client, msg_data_len);
+        res = ws_subscription(local_buf, (char*) (str_data + strlen("subscription") + 1) , client, msg_data_len);
         if(res == -1) return -1;
     }
-    else if(memcmp( str_data, "user_status", 11) == 0)
+    else if(memcmp( str_data, "user_status", strlen("user_status")) == 0)
     {
         TagLoger::log(Log_ClientServer, 0, "comand-user_status:\n" );
-        res = get_user_last_online_time(local_buf, (char*)(str_data +12), client, msg_data_len);
+        res = get_user_last_online_time(local_buf, (char*)(str_data + strlen("user_status") + 1), client, msg_data_len);
         if(res == -1) return -1;
     }
-    else if(memcmp( str_data, "pipe_count", 10) == 0)
+    else if(memcmp( str_data, "pipe_count", strlen("pipe_count")) == 0)
     {
         TagLoger::log(Log_ClientServer, 0, "comand-pipe_count:\n" );
-        res = get_pipe_count(local_buf, (char*)(str_data +11), client, msg_data_len);
+        res = get_pipe_count(local_buf, (char*)(str_data + strlen("pipe_count") + 1), client, msg_data_len);
         if(res == -1) return -1;
     }
-    else if(memcmp( str_data, "statistics", 10) == 0)
+    else if(memcmp( str_data, "statistics", strlen("statistics")) == 0)
     {
         TagLoger::log(Log_ClientServer, 0, "comand-statistics:\n" );
-        res = log_statistics(local_buf, (char*)(str_data +11), client, msg_data_len);
+        res = log_statistics(local_buf, (char*)(str_data + strlen("statistics") + 1), client, msg_data_len);
         if(res == -1) return -1;
     }
-    else if(memcmp( str_data, "web_pipe2", 9) == 0)
+    else if(memcmp( str_data, "web_pipe2", strlen("web_pipe2")) == 0)
     {
         TagLoger::log(Log_ClientServer, 0, "comand-web_pipe:web_pipe_msg_v2\n" );
-        res = web_pipe_msg_v2(local_buf, (char*)(str_data +10), client, msg_data_len);
+        res = web_pipe_msg_v2(local_buf, (char*)(str_data + strlen("web_pipe2") + 1), client, msg_data_len);
         if(res == -1) return -1;
     }
-    else if(memcmp( str_data, "web_pipe", 8) == 0)
+    else if(memcmp( str_data, "web_pipe", strlen("web_pipe")) == 0)
     {
         TagLoger::log(Log_ClientServer, 0, "comand-web_pipe:web_pipe_msg_v1\n" );
-        res = web_pipe_msg_v1(local_buf, (char*)(str_data +9), client, msg_data_len);
+        res = web_pipe_msg_v1(local_buf, (char*)(str_data + strlen("web_pipe") + 1), client, msg_data_len);
         if(res == -1) return -1;
     }
-    else if(memcmp( str_data, "pipe_log", 8) == 0)
+    else if(memcmp( str_data, "pipe_log", strlen("pipe_log")) == 0)
     {
         TagLoger::log(Log_ClientServer, 0, "comand-pipe_log:\n" );
-        res = get_pipe_log(local_buf, (char*)(str_data +9), client, msg_data_len);
+        res = get_pipe_log(local_buf, (char*)(str_data + strlen("pipe_log") + 1), client, msg_data_len);
+        if(res == -1) return -1;
+    } 
+    else if(memcmp( str_data, "track_pipe_users", strlen("track_pipe_users")) == 0)
+    {
+        TagLoger::log(Log_ClientServer, 0, "comand-web_pipe:track_pipe_users\n" );
+        res = track_pipe_users(local_buf, (char*)(str_data + strlen("track_pipe_users") + 1), client, msg_data_len);
         if(res == -1) return -1;
     }
     else
@@ -950,6 +956,75 @@ int Client_connection::log_statistics(thread_data* local_buf, const char* event_
     //local_buf->clusterRC.lpush_printf("log_statistics \"%s\"", local_buf->answer_buf.getData());
     //local_buf->clusterRC.ltrim("log_statistics", 0, 1000);
 
+    return 0;
+}
+
+/**
+ * Обрабатывает событие пришедшие от js для получения списка подписчиков на канале track_*
+ * @param event_data
+ * @param client
+ * @param len
+ * @return
+ */
+int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data,int client, int len)
+{ 
+    char name[PIPE_NAME_LEN+1];
+    bzero(name, PIPE_NAME_LEN+1);
+    
+    char marker[PIPE_NAME_LEN+1];
+    bzero(marker, PIPE_NAME_LEN+1);
+    sscanf(event_data, "%64s\n%64s\n", name, marker);
+     
+    if(memcmp(name, "track_", strlen("track_")) != 0)
+    {
+        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mtrack_pipe_users Invalid channel name[name=%s]\x1b[0m\n", name);
+        
+        // @todo добавить ссылку на описание ошибки
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"number_users\":-1,\"error\":\"[track_pipe_users] Invalid channel name. The channel should start with track_\"},\"event_name\":\"answer\"}").data(), "_answer");
+        return -1;
+    }
+    
+    
+    std::string usersstr("{\"event_name\":\"answer\",\"data\":{"); 
+
+    char strtmp[200];
+    TagLoger::log(Log_ClientServer, 0, "track_pipe_users pipe:%s\n", name);  
+    CP<Pipe> pipe = devManager::instance()->getDevInfo()->findPipe(std::string(name));
+    if(!pipe.isNULL())
+    {
+        auto it = pipe->subscribers.begin();
+        while(it)
+        {
+            int conection_id = it->data;
+            TagLoger::log(Log_ClientServer, 0, "Answer[]->%d\n", conection_id );
+
+            CP<Client_connection> r = tcpServer <Client_connection>::instance()->get(conection_id);
+            if(r)
+            {
+                bzero(strtmp, 200);
+                snprintf(strtmp, 200, "{\"user_id\":\"%d\",\"uuid\":\"%s\"}", r->web_user_id, r->web_user_uuid);
+                usersstr.append(strtmp);
+            }
+            
+            it = it->Next();
+            if(it)
+            {
+                usersstr.append(",");
+            }
+        }
+    }
+ 
+    usersstr.append("},\"marker\":\"").append(marker).append("\"");
+                
+    std::string rdname("_answer_to_");
+    rdname.append(name);
+ 
+    TagLoger::log(Log_ClientServer, 0, "answer:%s\n", usersstr.data()); 
+    if(message(local_buf, base64_encode( (const char*)usersstr.data()).data() , rdname.data()) < 0)
+    {
+        TagLoger::log(Log_ClientServer, 0, " >Client_connection Не удалось отправить ответ\n");
+        return -1;
+    }
     return 0;
 }
 
