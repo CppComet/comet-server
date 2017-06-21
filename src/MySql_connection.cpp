@@ -27,7 +27,7 @@
 
 #include "CometQL.h"
 #include "y.tab.h"
-#include "sha1.h" 
+#include "sha1.h"
 #include "devManager.h"
 #include <ctime>
 
@@ -99,8 +99,8 @@ int PipeLog::addToLog(thread_data* local_buf, const char* pipe_name, const char*
     {
         // Вставка в бд
         local_buf->stm.pipe_messages_insert.execute(uid, (long int)time(NULL), pipe_name, event_name, msg, msg_length, from_user_id);
-        
-        // @todo Заменить потом на stm выражение 
+
+        // @todo Заменить потом на stm выражение
         local_buf->db.query_format("delete from pipe_messages where pipe_messages.id in( \
                                         select p2.id from ( \
                                             select id FROM `pipe_messages` as p3 where p3.pipe_name = '%s' order by p3.time desc limit %d, 999\
@@ -109,7 +109,7 @@ int PipeLog::addToLog(thread_data* local_buf, const char* pipe_name, const char*
     }
     return 0;
 }
- 
+
 MySql_connection::MySql_connection():connection()
 {
     //printf("create MySql_connection\n");
@@ -234,7 +234,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
     t[3] = 0;
     p+=3;
     TagLoger::log(Log_MySqlServer, 0, "PacketLen:%d\n", PacketLen); // @FixMe добавить проверку длины пакета и длины данных в обе стороны.
- 
+
     unsigned char PacketNomber = *p;
     p++;
     TagLoger::log(Log_MySqlServer, 0, "PacketNomber:%d\n", PacketNomber);
@@ -293,8 +293,8 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
 
         char* name = p;
         p+= strlen(name)+1;
-        TagLoger::log(Log_MySqlServer, 0, "UserName:%s\n", name); 
-        
+        TagLoger::log(Log_MySqlServer, 0, "UserName:%s\n", name);
+
         if(ClientFlags & MYSQL_CLIENT_SECURE_CONNECTION)
         {
             char authDataLen = *p;
@@ -313,7 +313,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
                     Send_Err_Package(SQL_ERR_AUTHENTICATION,"Authentication failure, authDataLen!=20", PacketNomber+1, local_buf, this);
                     return -1;
                 }
-                
+
                 isRootUser = false;
 
                 // Таки решили пустить без пароля
@@ -339,7 +339,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
             {
                 TagLoger::log(Log_MySqlServer, 0, "Авторизация успешна ok\n");
                 devManager::instance()->getDevInfo()->incrBackendOnline();
-                devManager::instance()->getDevInfo()->incrMessages(); 
+                devManager::instance()->getDevInfo()->incrMessages();
                 isRootUser = true;
             }
             else
@@ -385,8 +385,8 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
                 Send_Err_Package(local_buf->qInfo.errorCode, local_buf->qInfo.errorText, PacketNomber+1, local_buf, this);
                 return 0;
             }
-            
-            devManager::instance()->getDevInfo()->incrMessages(); 
+
+            devManager::instance()->getDevInfo()->incrMessages();
             p++;
 
             char* startQuery = p;
@@ -571,7 +571,15 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
                     else if(local_buf->qInfo.tokCompare("pipes_settings",  local_buf->qInfo.tableName))
                     {
                         sql_insert_into_pipes_settings(local_buf,PacketNomber);
-                    } 
+                    }
+                    else if(local_buf->qInfo.tokCompare("conference",  local_buf->qInfo.tableName))
+                    {
+                        sql_insert_into_conference(local_buf,PacketNomber);
+                    }
+                    else if(local_buf->qInfo.tokCompare("dialogs",  local_buf->qInfo.tableName))
+                    {
+                        sql_insert_into_dialogs(local_buf,PacketNomber);
+                    }
                     else
                     {
                         Send_Err_Package(SQL_ERR_NOT_EXIST, "Table doesn't exist", PacketNomber+1, local_buf, this);
@@ -740,9 +748,9 @@ int MySql_connection::sql_show_tables(thread_data* local_buf, unsigned int Packe
     local_buf->sql.getValue(countRows++, 0) = "pipes_settings";
     local_buf->sql.sendAllRowsAndHeaders(local_buf, 1, &column, PacketNomber, countRows, this);
     */
-    
+
     initTables();
-    
+
     // Отправляем пакет описания 1 колонки
     const static MySqlResultset_ColumDef column("Tables");
 
@@ -1234,12 +1242,12 @@ int MySql_connection::sql_show_status(thread_data* local_buf, unsigned int Packe
         value[0] = "backend_delete_client_ps";
         snprintf(value[1].clear(), 255, "%.2f", (float)tcpServer <MySql_connection>::instance()->bm.getPsDeleteClient());
         delta = RowPackage(2, value, ++PacketNomber, answer);
-        answer += delta;       
-        
+        answer += delta;
+
         value[0] = "network_events"; // Сетевые события только от авторизованных пользователей
         value[1] = devManager::instance()->getPsNetworkEvents();
         delta = RowPackage(2, value, ++PacketNomber, answer);
-        answer += delta;  
+        answer += delta;
     }
     else if(local_buf->qInfo.arg_show.flag == FLAG_SESSION || local_buf->qInfo.arg_show.flag == 0)
     {
@@ -2360,7 +2368,179 @@ int MySql_connection::sql_delete_from_pipes_settings(thread_data* local_buf, uns
     Send_OK_Package(0, 0, PacketNomber+1, local_buf, this);
     return 0;
 }
- 
+
+int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigned int PacketNomber)
+{
+    TagLoger::log(Log_MySqlServer, 0, " >MySql_connection::conference\n");
+
+    const static char* columDef[MAX_COLUMNS_COUNT] = {
+        "name",         // имя конференции (только цифры)
+        "user_id",      // пользователь
+        "caller_id",    // инициатор звонка
+        "message",      // сообщение
+        "mode"          // Режим  video_*, audio_*
+    };
+
+    if(!local_buf->sql.prepare_columns_for_insert(columDef, local_buf->qInfo))
+    {
+        Send_Err_Package(local_buf->qInfo.errorCode, local_buf->qInfo.errorText, PacketNomber+1, local_buf, this);
+        return 0;
+    }
+
+    if(local_buf->sql.columPositions[0] < 0)
+    {
+        Send_Err_Package(SQL_ERR_INVALID_DATA, "field `name` is required", PacketNomber+1, local_buf, this);
+        return 0;
+    }
+
+    if(local_buf->sql.columPositions[1] < 0)
+    {
+        Send_Err_Package(SQL_ERR_INVALID_DATA, "field `user_id` is required", PacketNomber+1, local_buf, this);
+        return 0;
+    }
+
+    int caller_id = 0;
+    if(local_buf->sql.columPositions[2] >= 0)
+    {
+        caller_id = local_buf->qInfo.tokToInt(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[2]]);
+    }
+
+    if(local_buf->sql.columPositions[3] < 0)
+    {
+        Send_Err_Package(SQL_ERR_INVALID_DATA, "field `message` is required", PacketNomber+1, local_buf, this);
+        return 0;
+    }
+
+    int user_id = local_buf->qInfo.tokToInt(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]]);
+    if(user_id < 0)
+    {
+        Send_Err_Package(SQL_ERR_INVALID_DATA, "The id field must be non-negative", PacketNomber+1, local_buf, this);
+        return 0;
+    }
+
+    char* name = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]]);
+    name[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]].tokLen] = 0;
+
+    char default_mode[] = "audio";
+    char* mode = default_mode;
+    if(local_buf->sql.columPositions[4] >= 0)
+    {
+        mode = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[4]]);
+        mode[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[4]].tokLen] = 0;
+    }
+
+    // В начале шесть нулей для совместимости
+    std::string sipNumber("000000");
+
+    // Определение типа видеорежима
+    bool isAudio = false;
+    bool isVideo = false;
+
+    isAudio = strcmp(mode, "audio") == 0;
+    isVideo = strcmp(mode, "video") == 0;
+    // isVideo = strcmp(mode, "videoMux") == 0;
+    // isVideo = strcmp(mode, "videoMux2") == 0;
+
+
+    if(isAudio)
+    {
+        sipNumber.append("0001");
+    }
+    else if(isVideo)
+    {
+        sipNumber.append("0003");
+    }
+    else
+    {
+        Send_Err_Package(SQL_ERR_INVALID_DATA, "field `mode` has invalid value", PacketNomber+1, local_buf, this);
+        return 0;
+    }
+
+    sipNumber.append(name);
+    TagLoger::log(Log_MySqlServer, 0, " >sipNumber=%s", sipNumber.data());
+
+    char serverPort[] = "7443";
+    char serverName[] = "app.comet-server.ru";
+
+    char callKey[37];
+    bzero(callKey, 37);
+    uid37(callKey);
+
+
+    char srcHash[255];
+    char salt[] = "fg5fgmFbfE5FFf7mgh";
+    sprintf(srcHash, "%s_%s_%s_%d_%s", sipNumber.data(), serverName, serverPort, dev_id, salt);
+
+    unsigned char sha1_data[20];
+    bzero(sha1_data, 20);
+    sha1::calc(srcHash,  strlen(srcHash) ,sha1_data);
+
+
+    char callPipe[255];
+    sprintf(callPipe, "web_syscall_v1_%s", sha1_data);
+
+    char* message = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]]);
+    message[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen] = 0;
+
+    local_buf->answer_buf.lock();
+    mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen);
+
+    /*
+        $msg = json_encode(
+            array(
+                "user_id" => $user_id,
+                "room_id" => $room_id,
+                "tabUUID" => $tabUUID,
+                "type" => $type,
+                "conference" => $isConference,
+                "sys" => array(
+                    "conference" => $isConference,
+                    "serverName" => $serverName,
+                    "callPipe" => $callPipe,
+                    "serverPort" => $serverPort,
+                    "sipNumber" => $sipNumber,
+                    "callKey" => md5(uniqid(true)),
+                    "type" => $type,                // 'audio' | 'video'
+                    "caller_id" => $user_id         // Идентификатор того кто начал звонок
+                )
+            )
+        );
+    */
+
+    char* msgData = new char[appConf::instance()->get_int("main", "buf_size")];
+    bzero(msgData, appConf::instance()->get_int("main", "buf_size"));
+
+    snprintf(msgData, appConf::instance()->get_int("main", "buf_size"),
+            "{\"message\":\"%s\",\"sys\":{\"conference\":true,\"serverName\":\"%s\",\"serverPort\":\"%s\",\"callKey\":\"%s\",\"callPipe\":\"%s\",\"sipNumber\":\"%s\",\"caller_id\":\"%d\",\"mode\":\"%s\",\"conference_name\":\"%s\"}}",
+            local_buf->answer_buf.getData(),
+            serverName,
+            serverPort,
+            callKey,
+            callPipe,
+            sipNumber.data(),
+            caller_id,
+            mode,
+            name);
+
+    local_buf->answer_buf.unlock();
+
+    local_buf->answer_buf.lock();
+    mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), msgData, strlen(msgData));
+
+    internalApi::send_to_user(local_buf, user_id, "sys_sipCall", local_buf->answer_buf.getData());
+
+    local_buf->answer_buf.unlock();
+
+    Send_OK_Package(1, 0, PacketNomber+1, local_buf, this);
+    return 0;
+}
+
+int MySql_connection::sql_insert_into_dialogs(thread_data* local_buf, unsigned int PacketNomber)
+{
+    Send_Err_Package(SQL_ERR_READ_ONLY, "Table `dialogs` is not ready yet", PacketNomber+1, local_buf, this);
+    return 0;
+}
+
 int MySql_connection::set_online(thread_data* local_buf)
 {
     if(isOnLine)
@@ -2374,7 +2554,7 @@ int MySql_connection::set_online(thread_data* local_buf)
 
     char pakbuf[200];
     bzero(pakbuf, 200);
-    
+
     char*p = pakbuf;
 
     // первые 3 байта — длина пакета
@@ -2477,7 +2657,7 @@ int MySql_connection::set_offline(thread_data* local_buf)
     devManager::instance()->getDevInfo()->decrBackendOnline();
     api_version = 0;
     start_online_time = 0;
- 
+
     isOnLine = false;
     return web_close();
 }

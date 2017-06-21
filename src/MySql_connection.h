@@ -420,6 +420,9 @@ protected:
     int sql_select_from_pipes(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_from_pipes_settings(thread_data* local_buf, unsigned int PacketNomber);
 
+    int sql_insert_into_conference(thread_data* local_buf, unsigned int PacketNomber);
+    int sql_insert_into_dialogs(thread_data* local_buf, unsigned int PacketNomber);
+    
     /**
      * Эквивалент таблицы содержащей ключи авторизации пользователей
      * @param local_buf
