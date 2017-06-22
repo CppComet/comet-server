@@ -102,7 +102,7 @@ bool appConf::initFromFile(const char *fileName)
          
     if(!is_property_exists("log", "level"))
     {
-        sections["log"]["level"] = "500"; 
+        sections["log"]["level"] = "200"; 
     } 
           
     /**
