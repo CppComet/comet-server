@@ -198,7 +198,7 @@ int Freeswitch_connection::get_directory_request(int client, int len, thread_dat
         TagLoger::log(Log_FreeswitchServer, 0, "\x1b[35mНет данных авторизации user:%d [%s]\x1b[0m\n", userId, user);
         return -1;
     }
-    TagLoger::log(Log_FreeswitchServer, 0, "\x1b[34mАвторизация пройдена user:%d [%s], hash=%32s\x1b[0m\n", userId, user, hash);
+    TagLoger::log(Log_FreeswitchServer, 0, "\x1b[34mАвторизация пройдена user:%d [%s], hash=%s\x1b[0m\n", userId, user, hash);
 
     local_buf->answer_buf.lock();
     snprintf(local_buf->answer_buf, local_buf->answer_buf.getSize(),
@@ -215,7 +215,7 @@ Access-Control-Allow-Methods:GET\r\nAllow: GET\r\nAccess-Control-Allow-Headers: 
                     <users>\n\
                         <user id=\"%s\">\n\
                             <params>\n\
-                                <param name=\"password\" value=\"%32s\"/>\n\
+                                <param name=\"password\" value=\"%s\"/>\n\
                             </params>\n\
                             <variables>\n\
                                 <variable name=\"toll_allow\" value=\"domestic,international,local\"/>\n\

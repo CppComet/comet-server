@@ -2455,21 +2455,26 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
         Send_Err_Package(SQL_ERR_INVALID_DATA, "field `mode` has invalid value", PacketNomber+1, local_buf, this);
         return 0;
     }
-
+    
+    if(!appConf::instance()->is_property_exists("sip", "host"))
+    {
+        Send_Err_Package(SQL_ERR_INTERNAL_SERVER, "field in ini file not set option `host` in section `sip`", PacketNomber+1, local_buf, this);
+        return 0;
+    }
+    
     sipNumber.append(name);
     TagLoger::log(Log_MySqlServer, 0, " >sipNumber=%s", sipNumber.data());
 
-    char serverPort[] = "7443";
-    char serverName[] = "app.comet-server.ru";
+    int serverPort = appConf::instance()->get_int("sip", "port");
+    std::string serverName(appConf::instance()->get_string("sip", "host"));
 
     char callKey[37];
     bzero(callKey, 37);
     uid37(callKey);
 
 
-    char srcHash[255];
-    char salt[] = "fg5fgmFbfE5FFf7mgh";
-    sprintf(srcHash, "%s_%s_%s_%d_%s", sipNumber.data(), serverName, serverPort, dev_id, salt);
+    char srcHash[255]; 
+    sprintf(srcHash, "%s_%s_%d_%s", sipNumber.data(), serverName.data(), serverPort,  appConf::instance()->get_chars("sip", "pipesalt"));
 
     unsigned char sha1_data[20];
     bzero(sha1_data, 20);
@@ -2477,8 +2482,19 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
 
 
     char callPipe[255];
-    sprintf(callPipe, "web_syscall_v1_%s", sha1_data);
-
+    snprintf(callPipe, 255, "web_syscall_v1_%s", base64_encode(sha1_data, 20).data());
+    for(int i =0; i<255; i++)
+    {
+        if(callPipe[i] == 0)
+        {
+            break;
+        }
+        else if(callPipe[i] < 'A' || callPipe[i] > 'z' )
+        {
+            callPipe[i] = 'A';
+        }
+    }
+    
     char* message = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]]);
     message[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen] = 0;
 
@@ -2511,9 +2527,9 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
     bzero(msgData, appConf::instance()->get_int("main", "buf_size"));
 
     snprintf(msgData, appConf::instance()->get_int("main", "buf_size"),
-            "{\"message\":\"%s\",\"sys\":{\"conference\":true,\"serverName\":\"%s\",\"serverPort\":\"%s\",\"callKey\":\"%s\",\"callPipe\":\"%s\",\"sipNumber\":\"%s\",\"caller_id\":\"%d\",\"mode\":\"%s\",\"conference_name\":\"%s\"}}",
+            "{\"message\":\"%s\",\"sys\":{\"conference\":true,\"serverName\":\"%s\",\"serverPort\":\"%d\",\"callKey\":\"%s\",\"callPipe\":\"%s\",\"sipNumber\":\"%s\",\"caller_id\":\"%d\",\"mode\":\"%s\",\"conference_name\":\"%s\"}}",
             local_buf->answer_buf.getData(),
-            serverName,
+            serverName.data(),
             serverPort,
             callKey,
             callPipe,
