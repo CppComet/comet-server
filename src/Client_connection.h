@@ -151,6 +151,7 @@ class Client_connection:public connection
     int get_pipe_log(thread_data* local_buf, char* event_data,int client, int len);
     int get_user_last_online_time(thread_data* local_buf, char* event_data,int client, int len);
     int get_pipe_count(thread_data* local_buf, char* event_data,int client, int len);
+    int track_pipe_users(thread_data* local_buf, char* event_data,int client, int len);
      
     bool online_incr(thread_data* local_buf);
     bool online_decr(thread_data* local_buf);

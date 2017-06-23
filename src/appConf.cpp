@@ -47,6 +47,16 @@ bool appConf::initFromFile(const char *fileName)
     ; Объём буфера для подготовки ответного сообщения
     answer_buf_size = 1000000*/
   
+    if(!is_property_exists("sip", "pipesalt"))
+    {
+        sections["sip"]["pipesalt"] = "pipesalt";  
+    }
+    
+    if(!is_property_exists("sip", "port"))
+    {
+        sections["sip"]["port"] = "7443";  
+    }
+         
     if(!is_property_exists("main", "buf_size"))
     {
         sections["main"]["buf_size"] = "10384";  
@@ -102,7 +112,7 @@ bool appConf::initFromFile(const char *fileName)
          
     if(!is_property_exists("log", "level"))
     {
-        sections["log"]["level"] = "500"; 
+        sections["log"]["level"] = "200"; 
     } 
           
     /**

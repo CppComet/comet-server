@@ -320,7 +320,7 @@ var _cometServerApi = function(opt)
 /**
  * @private
  */
-_cometServerApi.prototype.version = "3.22";
+_cometServerApi.prototype.version = "3.25";
 
 /**
  * @private
@@ -504,6 +504,9 @@ _cometServerApi.prototype.setLogLevel = function(level)
     }catch (e){}
 }
 
+/** 
+ * @returns {String} Сдучайная строка ровно из 10 символов
+ */
 _cometServerApi.prototype.getCustomString = function()
 {
     var custom = (Math.random()*10)+""+Math.random();
@@ -832,6 +835,11 @@ _cometServerApi.prototype.subscription = function(name, callback)
         return false;
     }
 
+    if(!/^[A-z0-9_.\-]+$/.test(name))
+    {
+        console.error("Invalid pipe name", name)
+    }
+
     var thisObj = _cometServerApi.prototype;
     var nameArray = name.split("\n");
     if(nameArray.length > 1)
@@ -1118,6 +1126,11 @@ _cometServerApi.prototype.start = function(opt, callBack)
         {
             _cometServerApi.prototype.options[key] = opt[key];
         }
+    }
+    
+    if(_cometServerApi.prototype.options.wss !== undefined)
+    { 
+        _cometServerApi.prototype.UseWss(_cometServerApi.prototype.options.wss)
     }
     
     if(_cometServerApi.prototype.options.node)
@@ -1927,8 +1940,33 @@ _cometServerApi.prototype.web_pipe_send = function(pipe_name, event_name, msg)
         return false;
     }
 
+    if(!/^web_/.test(pipe_name))
+    {
+        console.error("Invalid channel name `"+pipe_name+"`. The channel should begin with web_", pipe_name);
+        return;
+    }
+
     if(_cometServerApi.prototype.LogLevel) console.log(["web_pipe_send", pipe_name, msg]);
     return _cometServerApi.prototype.send_msg("web_pipe2\n"+pipe_name+"\n"+event_name+"\n*\n"+JSON.stringify(msg));
+}
+
+_cometServerApi.prototype.getTrackPipeUsers = function(pipe_name, callBack)
+{ 
+    if(!/^track_/.test(pipe_name))
+    {
+        console.error("Invalid channel name `"+pipe_name+"`. The channel should begin with track_", pipe_name);
+        return;
+    }
+
+    if(callBack !== undefined)
+    {
+        var marker = _cometServerApi.prototype.getCustomString();
+        _cometServerApi.prototype.subscription(pipe_name)
+        _cometServerApi.prototype.subscription_callBack(pipe_name, callBack, marker);
+    }
+
+    if(_cometServerApi.prototype.LogLevel) console.log(["track_pipe_users", pipe_name]);
+    return _cometServerApi.prototype.send_msg("track_pipe_users\n"+pipe_name+"\n"+marker);
 }
 
 /**
@@ -2017,7 +2055,7 @@ _cometServerApi.prototype.get_pipe_log = function(pipe_name, callBack)
         _cometServerApi.prototype.subscription_callBack(pipe_name, callBack, marker);
     }
 
-    _cometServerApi.prototype.send_msg("pipe_log\n"+pipe_name+"\n"+_cometServerApi.prototype.custom_id+"\n");
+    _cometServerApi.prototype.send_msg("pipe_log\n"+pipe_name+"\n"+marker+"\n");
     return true;
 }
 
@@ -2153,12 +2191,22 @@ _cometServerApi.prototype.conect_to_server = function()
                         setTimeout(function()
                         {
                             //thisObj.conect_to_server();
-                            var node = _cometServerApi.prototype.options.nodeArray[indexInArr]
-                            var socket = new WebSocket(_cometServerApi.prototype.getUrl(node));
+                            var conect = function()
+                            { 
+                                if(navigator.onLine === false)
+                                {
+                                    setTimeout(conect, 300)
+                                    return;
+                                }
+                                
+                                var node = _cometServerApi.prototype.options.nodeArray[indexInArr]
+                                var socket = new WebSocket(_cometServerApi.prototype.getUrl(node));
 
-                            _cometServerApi.prototype.socketArray[indexInArr] = socket;
-                            initSocket(socket, indexInArr);
-
+                                _cometServerApi.prototype.socketArray[indexInArr] = socket;
+                                initSocket(socket, indexInArr);
+                            }
+                            
+                            conect() 
                         }, _cometServerApi.prototype.time_to_reconect_on_close[indexInArr] );
                     }
                     else
@@ -2172,13 +2220,23 @@ _cometServerApi.prototype.conect_to_server = function()
                         // Если это не первый обрыв соединения подряд то переподключаемся не сразу
                         setTimeout(function()
                         {
-                            //thisObj.conect_to_server();
-                            var node = _cometServerApi.prototype.options.nodeArray[indexInArr]
-                            var socket = new WebSocket(_cometServerApi.prototype.getUrl(node));
+                            var conect = function()
+                            { 
+                                if(navigator.onLine === false)
+                                {
+                                    setTimeout(conect, 300)
+                                    return;
+                                }
 
-                            _cometServerApi.prototype.socketArray[indexInArr] = socket;
-                            initSocket(socket, indexInArr);
+                                //thisObj.conect_to_server();
+                                var node = _cometServerApi.prototype.options.nodeArray[indexInArr]
+                                var socket = new WebSocket(_cometServerApi.prototype.getUrl(node));
 
+                                _cometServerApi.prototype.socketArray[indexInArr] = socket;
+                                initSocket(socket, indexInArr);
+                            }
+                            
+                            conect()
                         }, thisObj.time_to_reconect_on_error[indexInArr] );
                     }
                 }

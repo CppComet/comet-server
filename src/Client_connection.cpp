@@ -116,9 +116,9 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
     int event_data_len = strlen(event_data);
     if(event_data_len > SUBSCRIPTION_DATA_LEN)
     {
-            TagLoger::error(Log_ClientServer, 0, "\x1b[1;31mСлишком много буковок[%d]\x1b[0m\n", event_data_len);
-            message(local_buf, base64_encode( (const unsigned char*) "{\"error\":\"Слишком много буковок\"}",
-                       strlen("{\"error\":\"Слишком много буковок\"}") ).data(), "_answer");
+            TagLoger::error(Log_ClientServer, 0, "\x1b[1;31mToo many letters[%d]\x1b[0m\n", event_data_len);
+            message(local_buf, base64_encode( (const unsigned char*) "{\"error\":\"Too many letters\"}",
+                       strlen("{\"error\":\"Too many letters\"}") ).data(), "_answer");
             return -1;
     }
 
@@ -144,9 +144,9 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
 
             if( i >= MAX_SUBSCRIPTION_PIPE)
             {
-                TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mСлишком много подписок [%d]\x1b[0m\n", i);
-                message(local_buf, base64_encode( (const unsigned char*) "{\"error\":\"Слишком много подписок\"}",
-                       strlen("{\"error\":\"Слишком много подписок\"}") ).data(), "_answer");
+                TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mToo many subscriptions [%d]\x1b[0m\n", i);
+                message(local_buf, base64_encode( (const unsigned char*) "{\"error\":\"Too many subscriptions\"}",
+                       strlen("{\"error\":\"Too many subscriptions\"}") ).data(), "_answer");
                 return 0;
             }
 
@@ -199,9 +199,9 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
 
         if(p - start_subscription_name >= PIPE_NAME_LEN)
         {
-            TagLoger::error(Log_ClientServer, 0, "\x1b[1;31mСлишком длинное название канала [%s]\x1b[0m\n", start_subscription_name);
-            message(local_buf, base64_encode( (const unsigned char*) "{\"error\":\"Слишком длинное название канала\"}",
-                       strlen("{\"error\":\"Слишком длинное название канала\"}") ).data(), "_answer");
+            TagLoger::error(Log_ClientServer, 0, "\x1b[1;31mChannel name is too long [%s]\x1b[0m\n", start_subscription_name);
+            message(local_buf, base64_encode( (const unsigned char*) "{\"error\":\"Channel name is too long\"}",
+                       strlen("{\"error\":\"Channel name is too long\"}") ).data(), "_answer");
             return -1;
         }
     }
@@ -284,7 +284,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     int ses_index = str_find(mytext,'=',300);
     if(ses_index == -1)
     {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mНеправильный запрос [Не найден идентификатор ссесии] \x1b[0m\n");
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [Session ID not found] \x1b[0m\n");
         web_write_error( "Error code 401(Invalid request, session ID not found)", 401, local_buf);
         return 0;
     }
@@ -294,7 +294,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     int uid_index = str_find(mytext,'=',2,0,300);
     if(uid_index == -1)
     {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mНеправильный WS запрос [Не найден идентификатор пользователя] \x1b[0m\n");
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mWrong WS request [No user ID found] \x1b[0m\n");
         web_write_error( "Error code 401(Invalid request, the user ID can not be found)", 401, local_buf);
         return 0;
     }
@@ -309,7 +309,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     int udev_id_index = str_find(mytext,'=',3,0,300);
     if(udev_id_index == -1)
     {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mНеправильный запрос [Не найден идентификатор dev_id] \x1b[0m\n");
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] \x1b[0m\n");
         web_write_error( "Error code 406(Invalid request, no public key found)" , 406, local_buf);
         return 0;
     }
@@ -317,7 +317,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     int version_index = str_find(mytext,'=',4,0,300);
     if(version_index == -1)
     {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mНеправильный запрос [Не передана версия api клиента] \x1b[0m\n");
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No version of api client transferred] \x1b[0m\n");
         web_write_error( "Error code 418(Invalid request Not assigned client api version)\n", 418, local_buf);
         return 0;
     }
@@ -327,7 +327,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
 
     if(client_major_version < 0)
     {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mНеправильный запрос [Не передана версия api клиента] \x1b[0m\n");
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No version of api client transferred] \x1b[0m\n");
         web_write_error( "Error code 418(Invalid request Not assigned client api version)\n", 418, local_buf);
         return 0;
     }
@@ -336,7 +336,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
 
     if(client_minor_version == -1)
     {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mНеправильный запрос [Не передана версия api клиента] \x1b[0m\n");
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No version of api client transferred] \x1b[0m\n");
         web_write_error( "Error code 418(Invalid request Not assigned client api version)\n", 418, local_buf);
         return 0;
     }
@@ -402,7 +402,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
 
     if(host_error && devManager::instance()->getDevInfo()->countDevUrl())
     {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mНеправильный запрос [Запрос с запрещёного домена] \x1b[0m\n");
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [Request from a denied domain] \x1b[0m\n");
         web_write_error( "Error code 423(Access denied, Request from unauthorized domain.)" , 423, local_buf);
         return 0;
     }
@@ -565,8 +565,8 @@ int Client_connection::send_pipe_count(thread_data* local_buf, char* pipe_name, 
     if(memcmp(pipe_name, "web_", 4) != 0)
     {
         // @todo добавить ссылку на описание ошибки
-        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_count] Недопустимое название канала. Канал должен начинатся с web_\"},\"event_name\":\"answer\"}",
-                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_count] Недопустимое название канала. Канал должен начинатся с web_\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_count] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}",
+                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_count] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}") ).data(), "_answer");
         return 0;
     }
 
@@ -871,47 +871,53 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
     str_data[msg_data_len] = 0;
 
     int res = 0;
-    if( memcmp( str_data, "subscription", 12) == 0)
+    if( memcmp( str_data, "subscription", strlen("subscription")) == 0)
     {
         TagLoger::log(Log_ClientServer, 0, "comand-subscription:\n" );
         un_subscription(local_buf);
-        res = ws_subscription(local_buf, (char*) (str_data +13) , client, msg_data_len);
+        res = ws_subscription(local_buf, (char*) (str_data + strlen("subscription") + 1) , client, msg_data_len);
         if(res == -1) return -1;
     }
-    else if(memcmp( str_data, "user_status", 11) == 0)
+    else if(memcmp( str_data, "user_status", strlen("user_status")) == 0)
     {
         TagLoger::log(Log_ClientServer, 0, "comand-user_status:\n" );
-        res = get_user_last_online_time(local_buf, (char*)(str_data +12), client, msg_data_len);
+        res = get_user_last_online_time(local_buf, (char*)(str_data + strlen("user_status") + 1), client, msg_data_len);
         if(res == -1) return -1;
     }
-    else if(memcmp( str_data, "pipe_count", 10) == 0)
+    else if(memcmp( str_data, "pipe_count", strlen("pipe_count")) == 0)
     {
         TagLoger::log(Log_ClientServer, 0, "comand-pipe_count:\n" );
-        res = get_pipe_count(local_buf, (char*)(str_data +11), client, msg_data_len);
+        res = get_pipe_count(local_buf, (char*)(str_data + strlen("pipe_count") + 1), client, msg_data_len);
         if(res == -1) return -1;
     }
-    else if(memcmp( str_data, "statistics", 10) == 0)
+    else if(memcmp( str_data, "statistics", strlen("statistics")) == 0)
     {
         TagLoger::log(Log_ClientServer, 0, "comand-statistics:\n" );
-        res = log_statistics(local_buf, (char*)(str_data +11), client, msg_data_len);
+        res = log_statistics(local_buf, (char*)(str_data + strlen("statistics") + 1), client, msg_data_len);
         if(res == -1) return -1;
     }
-    else if(memcmp( str_data, "web_pipe2", 9) == 0)
+    else if(memcmp( str_data, "web_pipe2", strlen("web_pipe2")) == 0)
     {
         TagLoger::log(Log_ClientServer, 0, "comand-web_pipe:web_pipe_msg_v2\n" );
-        res = web_pipe_msg_v2(local_buf, (char*)(str_data +10), client, msg_data_len);
+        res = web_pipe_msg_v2(local_buf, (char*)(str_data + strlen("web_pipe2") + 1), client, msg_data_len);
         if(res == -1) return -1;
     }
-    else if(memcmp( str_data, "web_pipe", 8) == 0)
+    else if(memcmp( str_data, "web_pipe", strlen("web_pipe")) == 0)
     {
         TagLoger::log(Log_ClientServer, 0, "comand-web_pipe:web_pipe_msg_v1\n" );
-        res = web_pipe_msg_v1(local_buf, (char*)(str_data +9), client, msg_data_len);
+        res = web_pipe_msg_v1(local_buf, (char*)(str_data + strlen("web_pipe") + 1), client, msg_data_len);
         if(res == -1) return -1;
     }
-    else if(memcmp( str_data, "pipe_log", 8) == 0)
+    else if(memcmp( str_data, "pipe_log", strlen("pipe_log")) == 0)
     {
         TagLoger::log(Log_ClientServer, 0, "comand-pipe_log:\n" );
-        res = get_pipe_log(local_buf, (char*)(str_data +9), client, msg_data_len);
+        res = get_pipe_log(local_buf, (char*)(str_data + strlen("pipe_log") + 1), client, msg_data_len);
+        if(res == -1) return -1;
+    } 
+    else if(memcmp( str_data, "track_pipe_users", strlen("track_pipe_users")) == 0)
+    {
+        TagLoger::log(Log_ClientServer, 0, "comand-web_pipe:track_pipe_users\n" );
+        res = track_pipe_users(local_buf, (char*)(str_data + strlen("track_pipe_users") + 1), client, msg_data_len);
         if(res == -1) return -1;
     }
     else
@@ -950,6 +956,75 @@ int Client_connection::log_statistics(thread_data* local_buf, const char* event_
     //local_buf->clusterRC.lpush_printf("log_statistics \"%s\"", local_buf->answer_buf.getData());
     //local_buf->clusterRC.ltrim("log_statistics", 0, 1000);
 
+    return 0;
+}
+
+/**
+ * Обрабатывает событие пришедшие от js для получения списка подписчиков на канале track_*
+ * @param event_data
+ * @param client
+ * @param len
+ * @return
+ */
+int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data,int client, int len)
+{ 
+    char name[PIPE_NAME_LEN+1];
+    bzero(name, PIPE_NAME_LEN+1);
+    
+    char marker[PIPE_NAME_LEN+1];
+    bzero(marker, PIPE_NAME_LEN+1);
+    sscanf(event_data, "%64s\n%64s\n", name, marker);
+     
+    if(memcmp(name, "track_", strlen("track_")) != 0)
+    {
+        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mtrack_pipe_users Invalid channel name[name=%s]\x1b[0m\n", name);
+        
+        // @todo добавить ссылку на описание ошибки
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"number_users\":-1,\"error\":\"[track_pipe_users] Invalid channel name. The channel should start with track_\"},\"event_name\":\"answer\"}").data(), "_answer");
+        return -1;
+    }
+    
+    
+    std::string usersstr("{\"event_name\":\"answer\",\"data\":{"); 
+
+    char strtmp[200];
+    TagLoger::log(Log_ClientServer, 0, "track_pipe_users pipe:%s\n", name);  
+    CP<Pipe> pipe = devManager::instance()->getDevInfo()->findPipe(std::string(name));
+    if(!pipe.isNULL())
+    {
+        auto it = pipe->subscribers.begin();
+        while(it)
+        {
+            int conection_id = it->data;
+            TagLoger::log(Log_ClientServer, 0, "Answer[]->%d\n", conection_id );
+
+            CP<Client_connection> r = tcpServer <Client_connection>::instance()->get(conection_id);
+            if(r)
+            {
+                bzero(strtmp, 200);
+                snprintf(strtmp, 200, "{\"user_id\":\"%d\",\"uuid\":\"%s\"}", r->web_user_id, r->web_user_uuid);
+                usersstr.append(strtmp);
+            }
+            
+            it = it->Next();
+            if(it)
+            {
+                usersstr.append(",");
+            }
+        }
+    }
+ 
+    usersstr.append("},\"marker\":\"").append(marker).append("\"");
+                
+    std::string rdname("_answer_to_");
+    rdname.append(name);
+ 
+    TagLoger::log(Log_ClientServer, 0, "answer:%s\n", usersstr.data()); 
+    if(message(local_buf, base64_encode( (const char*)usersstr.data()).data() , rdname.data()) < 0)
+    {
+        TagLoger::log(Log_ClientServer, 0, " >Client_connection Не удалось отправить ответ\n");
+        return -1;
+    }
     return 0;
 }
 
@@ -1161,8 +1236,8 @@ int Client_connection::web_pipe_msg_v1(thread_data* local_buf, char* event_data,
     else if(memcmp(name, "web_", 4) != 0)
     {
         // @todo добавить ссылку на описание ошибки
-        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg] Недопустимое название канала. Канал должен начинатся с web_\"},\"event_name\":\"answer\"}",
-                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg] Недопустимое название канала. Канал должен начинатся с web_\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}",
+                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}") ).data(), "_answer");
         return -1;
     }
 
@@ -1279,8 +1354,8 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
     {
         TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mweb_pipe_msg_v2 Недопустимое название канала[name=%s]\x1b[0m\n", name);
         // @todo добавить ссылку на описание ошибки
-        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg2] Недопустимое название канала. Канал должен начинатся с web_\"},\"event_name\":\"answer\"}",
-                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg2] Недопустимое название канала. Канал должен начинатся с web_\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg2] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}",
+                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg2] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}") ).data(), "_answer");
         return -1;
     }
 
