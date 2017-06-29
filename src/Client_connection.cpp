@@ -1266,7 +1266,7 @@ int Client_connection::web_pipe_msg_v1(thread_data* local_buf, char* event_data,
     }
 
     TagLoger::log(Log_ClientServer, 0, "msg:%s\n", msg);
-    PipeLog::addToLog(local_buf, name, "undefined", "*" , web_user_id , p, strlen(p));
+    PipeLog::addToLog(local_buf, name, "undefined", web_user_id , p, strlen(p));
 
     CP<Pipe> pipe = devManager::instance()->getDevInfo()->findPipe(std::string(name));
 
@@ -1378,11 +1378,7 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
     *p = 0;
     p++;
     // auth_type длина всегда 1 символ
-    // По умолчанию как * тоесть сообщение для всех
-    // Если authType == 1 то не отправляем сообщение не авторизованным пользователям.
-    // Если authType == 0 то не отправляем сообщение авторизованным пользователям.
-    // @todo Добавить валидацию auth_type здесь и в других местах
-    // @todo Добавить использование значения auth_type здесь а не просто его отправка в лог.
+    // @note auth_type будет удалён.
     char* auth_type = p;
     p++;
     if(auth_type[1] != '\n')
@@ -1399,7 +1395,6 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
 
     TagLoger::log(Log_ClientServer, 0, "pipe:%s\n", name);
     TagLoger::log(Log_ClientServer, 0, "event:%s\n", event_name);
-    TagLoger::log(Log_ClientServer, 0, "auth_type:%s\n", auth_type);
     TagLoger::log(Log_ClientServer, 0, "msg:%s\n", msg);
 
     local_buf->answer_buf.lock();
@@ -1408,7 +1403,7 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
 
 
     TagLoger::log(Log_ClientServer, 0, "json_msg:%s\n", local_buf->answer_buf.getData());
-    PipeLog::addToLog(local_buf, name, event_name, auth_type , set_user_id , msg, strlen(msg));
+    PipeLog::addToLog(local_buf, name, event_name, set_user_id , msg, strlen(msg));
 
     // Дополнительные данные в json отправляемые сервером.
     char addData[EVENT_NAME_LEN + 64];

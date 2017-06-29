@@ -84,7 +84,7 @@ using namespace std;
 class PipeLog
 {
 public:
-    static int addToLog(thread_data* local_buf, const char* pipe_name, const char* event_name, const char* auth_type, unsigned int from_user_id, const char* msg, unsigned int msg_length);
+    static int addToLog(thread_data* local_buf, const char* pipe_name, const char* event_name, unsigned int from_user_id, const char* msg, unsigned int msg_length);
 };
 
 

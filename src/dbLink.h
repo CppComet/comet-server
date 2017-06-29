@@ -916,6 +916,42 @@ public:
     }
 };
 
+
+class stm_pipe_messages_delete_by_message_id: public stmBase{
+
+    friend stmMapper;
+    char param_id[MYSQL_UUID_LEN];
+    unsigned long param_id_length = MYSQL_UUID_LEN;
+     
+public:
+    bool prepare(MYSQL *mysql)
+    {
+        setParamsCount(1);
+
+        int i = 0;
+        param[i].buffer_type    = MYSQL_TYPE_STRING;
+        param[i].buffer         = (void *)&param_id;
+        param[i].is_unsigned    = 0;
+        param[i].is_null        = 0;
+        param[i].length         = &param_id_length;
+ 
+        return init(mysql, "DELETE FROM `pipe_messages` where id = ? ");
+    }
+
+    stm_pipe_messages_delete_by_message_id()
+    { 
+        bzero(param_id, MYSQL_UUID_LEN);
+    }
+
+    int execute(const char* id)
+    {
+        bzero(param_id, MYSQL_UUID_LEN);
+        strncpy(param_id, id, MYSQL_UUID_LEN); 
+          
+        return stmBase::insert();
+    }
+};
+
 class stm_users_auth_replace: public stmBase{
 
     friend stmMapper;
@@ -1278,6 +1314,7 @@ public:
     stm_pipe_messages_insert pipe_messages_insert;
     stm_pipe_messages_select pipe_messages_select;
     stm_pipe_messages_delete pipe_messages_delete;
+    stm_pipe_messages_delete_by_message_id pipe_messages_delete_by_message_id;
 
     stm_users_auth_replace users_auth_replace;
     stm_users_auth_delete users_auth_delete;
@@ -1296,6 +1333,7 @@ public:
         pipe_messages_insert.prepare(mysql);
         pipe_messages_select.prepare(mysql);
         pipe_messages_delete.prepare(mysql);
+        pipe_messages_delete_by_message_id.prepare(mysql);
 
         users_auth_replace.prepare(mysql);
         users_auth_delete.prepare(mysql);
