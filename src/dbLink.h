@@ -65,7 +65,7 @@ protected:
         int count = mysql_stmt_param_count(stmt);
         if(count != param_count)
         {
-            TagLoger::error(Log_dbLink, 0, "mysql_stmt_prepare Не инициализированы параметнры: %d > %d [query=%s]\n", count, param_count, q);
+            TagLoger::error(Log_dbLink, 0, "mysql_stmt_prepare parameters not initialized: %d > %d [query=%s]\n", count, param_count, q);
         }
 
         // Bind param structure to statement
@@ -283,13 +283,13 @@ public:
 
         if(mysql_errno(&mysqlLink))
         {
-            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL соединение не уставновлено\n%s\nip=%s:%d user=%s [errno=%d]\x1b[0m", mysql_error(&mysqlLink),
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL connection not established\n%s\nip=%s:%d user=%s [errno=%d]\x1b[0m", mysql_error(&mysqlLink),
                     db_host, db_port, db_user, mysql_errno(&mysqlLink));
             return false;
         }
 
 
-        TagLoger::log(Log_dbLink, 0, "\x1b[1;32mMySQL соединение уставновлено\nip=%s:%d user=%s\x1b[0m", db_host, db_port, db_user);
+        TagLoger::log(Log_dbLink, 0, "\x1b[1;32mMySQL connection established\nip=%s:%d user=%s\x1b[0m", db_host, db_port, db_user);
         return true;
 
         //return query("SET CHARACTER SET 'utf8' ");

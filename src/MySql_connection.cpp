@@ -207,7 +207,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
     // если len = 0 то соединение закрыто.
     if(TagLoger::isLog(Log_MySqlServer, TAGLOG_LOG))
     {
-        TagLoger::log(Log_MySqlServer, 0, "Обработка mySQL запроса ------------------------[%d]\n", local_buf->buf[len-1]);
+        TagLoger::log(Log_MySqlServer, 0, "Processing MYSQL query ------------------------[%d]\n", local_buf->buf[len-1]);
         for(int i=0; i < len; i++)
         {
             if(i % 8 == 0)  TagLoger::log(Log_MySqlServer, 0, "!\n%d:\t", i);
@@ -298,12 +298,12 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
 
             if(authDataLen == 0)
             {
-                TagLoger::log(Log_MySqlServer, 0, "Авторизация без пароля authDataLen=%d\n", authDataLen);
+                TagLoger::log(Log_MySqlServer, 0, "Authorization without password authDataLen=%d\n", authDataLen);
 
                 // Здесь проверка для того можно ли пускать без пароля по имени пользователя
                 if(memcmp(name, "haproxy_check", strlen("haproxy_check")) != 0)
                 {
-                    TagLoger::log(Log_MySqlServer, 0, "Авторизация не прошла, не ожиданный размер authDataLen=%d\n", authDataLen);
+                    TagLoger::warn(Log_MySqlServer, 0, "Authorization failed, not expected size authDataLen=%d\n", authDataLen);
                     Send_Err_Package(SQL_ERR_AUTHENTICATION,"Authentication failure, authDataLen!=20", PacketNomber+1, local_buf, this);
                     return -1;
                 }
@@ -313,12 +313,12 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
                 // Таки решили пустить без пароля
                 Send_OK_Package(PacketNomber+1, local_buf, this);
                 clientState = STATE_RECEIVED_HANDSHAKE;
-                TagLoger::log(Log_MySqlServer, 0, "Соединение не будет закрыто [1] [MySql_connection]\n");
+                TagLoger::debug(Log_MySqlServer, 0, "Connection will not be closed [1] [MySql_connection]\n");
                 return 0;
             }
             else if(authDataLen != 20)
             {
-                TagLoger::error(Log_MySqlServer, 0, "Авторизация не прошла, не ожиданный размер authDataLen=%d\n", authDataLen);
+                TagLoger::error(Log_MySqlServer, 0, "Authorization failed, not expected size authDataLen=%d\n", authDataLen);
                 Send_Err_Package(SQL_ERR_AUTHENTICATION,"Authentication failure, authDataLen!=20", PacketNomber+1, local_buf, this);
                 return -1;
             }
@@ -331,7 +331,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
 
             if(devInfo::testDevKey(random20bytes, DevKeyHashStart, local_buf))
             {
-                TagLoger::log(Log_MySqlServer, 0, "Авторизация успешна ok\n");
+                TagLoger::debug(Log_MySqlServer, 0, "Authorization successful ok\n");
                 devManager::instance()->getDevInfo()->incrBackendOnline();
                 devManager::instance()->getDevInfo()->incrMessages();
                 isRootUser = true;
@@ -339,7 +339,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
             else
             {
                 isRootUser = false;
-                TagLoger::error(Log_MySqlServer, 0, "Авторизация не прошла");
+                TagLoger::error(Log_MySqlServer, 0, "Authorization failed");
                 Send_Err_Package(SQL_ERR_AUTHENTICATION,"Authentication failure", PacketNomber+1, local_buf, this);
                 return -1;
             }
@@ -363,7 +363,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
 
         Send_OK_Package(PacketNomber+1, local_buf, this);
         clientState = STATE_RECEIVED_HANDSHAKE;
-        TagLoger::log(Log_MySqlServer, 0, "Соединение не будет закрыто [2] [MySql_connection]\n");
+        TagLoger::log(Log_MySqlServer, 0, "Connection will not be closed [2] [MySql_connection]\n");
         return 0;
     }
     else if(clientState == STATE_RECEIVED_HANDSHAKE)
@@ -660,11 +660,11 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
             Send_EOF_Package(PacketNomber+1, local_buf, this); // Send_EOF_Package
         }
 
-        TagLoger::log(Log_MySqlServer, 0, "Соединение не будет закрыто [3] [MySql_connection]\n");
+        TagLoger::log(Log_MySqlServer, 0, "Connection will not be closed [3] [MySql_connection]\n");
         return 0;
     }
 
-    TagLoger::log(Log_MySqlServer, 0, "Завершение обработки подключения [MySql_connection]\n");
+    TagLoger::log(Log_MySqlServer, 0, "Terminate the connection processing [MySql_connection]\n");
     return -1;
 }
 
@@ -865,7 +865,7 @@ int MySql_connection::sql_show_table_status(thread_data* local_buf, unsigned int
     values[++i] = "utf8_general_ci"; // Collation
     values[++i] = "";                // Checksum
     values[++i] = "";                // Create_options
-    values[++i] = "Таблица с данными авторизации пользователей"; // Comment
+    values[++i] = "Table with authorization data for users"; // Comment
 
     delta = RowPackage(18, values, ++PacketNomber, answer);
     answer += delta;
@@ -1269,7 +1269,7 @@ int MySql_connection::sql_show_status(thread_data* local_buf, unsigned int Packe
     {
         // не известный флаг, ошибка в граматике
         value[0] = "flag";
-        value[1] = "Не известный флаг, ошибка в граматике";
+        value[1] = "Unknown flag, grammar error";
 
         delta = RowPackage(2, value, ++PacketNomber, answer);
         answer += delta;
@@ -1449,7 +1449,7 @@ int MySql_connection::sql_insert_into_users_auth(thread_data* local_buf, unsigne
 
     if(!validation_string(hash, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[1]].tokLen))
     {
-        Send_Err_Package(SQL_ERR_INVALID_DATA, "Сontains any invalid characters in the string hash", PacketNomber+1, local_buf, this);
+        Send_Err_Package(SQL_ERR_INVALID_DATA, "Contains an invalid characters in the string hash", PacketNomber+1, local_buf, this);
         return 0;
     }
 
@@ -1532,13 +1532,13 @@ int MySql_connection::sql_delete_from_users_auth(thread_data* local_buf, unsigne
                 }
                 else
                 {
-                    TagLoger::log(Log_MySqlServer, 0, "Не найден объект соединения\n");
+                    TagLoger::log(Log_MySqlServer, 0, "Connection object is not found\n");
                 }
             }
         }
         else
         {
-            TagLoger::log(Log_MySqlServer, 0, "Не найден идентификатор соединения\n");
+            TagLoger::log(Log_MySqlServer, 0, "Connection ID not found\n");
         }
 
 
@@ -2677,7 +2677,7 @@ int MySql_connection::set_online(thread_data* local_buf)
     }
 
     clientState = STATE_SEND_HANDSHAKE;
-    TagLoger::log(Log_MySqlServer, 0, "Соединение не будет закрыто [4] [MySql_connection]\n");
+    TagLoger::log(Log_MySqlServer, 0, "Connection will not be closed [4] [MySql_connection]\n");
     return web_write(pakbuf, dataLen);
 }
 

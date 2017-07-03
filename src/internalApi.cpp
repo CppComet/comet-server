@@ -37,17 +37,17 @@ int internalApi::send_to_user(thread_data* local_buf, int user_id, const char* p
             }
             else if(r)
             {
-                TagLoger::log(Log_MySqlServer, 0, "Не найден объект соединения i=%d, conection_id=%d\n", i, conection_id[i]);
+                TagLoger::log(Log_MySqlServer, 0, "Connection object is found i=%d, conection_id=%d\n", i, conection_id[i]);
             }
             else
             {
-                TagLoger::log(Log_MySqlServer, 0, "Не найден объект соединения i=%d, conection_id=%d\n", i, conection_id[i]);
+                TagLoger::log(Log_MySqlServer, 0, "Connection object is found i=%d, conection_id=%d\n", i, conection_id[i]);
             }
         }
     }
     else
     {
-        TagLoger::log(Log_MySqlServer, 0, "Не найден идентификатор соединения\n");
+        TagLoger::log(Log_MySqlServer, 0, "Connection ID not found\n");
     }
  
     if(isSend != 0)

@@ -12,7 +12,7 @@ add_definitions(-DCMAKE_BUILD_TYPE=debug)
 # Поиск библиотеки pthreads
 find_package(Threads REQUIRED)
 if(NOT Threads_FOUND)
-    message(SEND_ERROR "Не найден Threads.")
+    message(SEND_ERROR "Threads - Not Found")
     return()
 else()
     include_directories(${Threads_INCLUDE_DIRS})

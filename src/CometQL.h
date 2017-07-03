@@ -378,7 +378,7 @@ public:
     {
         if(column >= MAX_COLUMNS_COUNT)
         {
-            printf("useColumn column=%d больше чем MAX_COLUMNS_COUNT=%d\n", column, MAX_COLUMNS_COUNT);
+            printf("useColumn column=%d more than MAX_COLUMNS_COUNT=%d\n", column, MAX_COLUMNS_COUNT);
             return false;
         }
         
@@ -396,13 +396,13 @@ public:
         if(line >= MAX_LINES_IN_ANSWER)
         {
             line = MAX_LINES_IN_ANSWER - 1;
-            printf("Не хватило памяти для строки row=%d, MAX_LINES_IN_ANSWER=%d\n", line, MAX_LINES_IN_ANSWER);
+            printf("Not enough memory for the line row=%d, MAX_LINES_IN_ANSWER=%d\n", line, MAX_LINES_IN_ANSWER);
         }
         
         if(column >= MAX_COLUMNS_COUNT)
         {
             column = MAX_COLUMNS_COUNT - 1;
-            printf("Не хватило памяти для колонки column=%d, MAX_COLUMNS_COUNT=%d\n", column, MAX_COLUMNS_COUNT);
+            printf("Not enough memory for the field column=%d, MAX_COLUMNS_COUNT=%d\n", column, MAX_COLUMNS_COUNT);
         }
         
         return values[line][columPositions[column]];
@@ -449,7 +449,7 @@ public:
             if(numColumns * MAX_COLUMN_SIZE >=  buffSize - (answer - buff))
             {
                 // Не хватило памяти в буфере вернём то что поместилось.
-                printf("Не хватило памяти в буфере вернём то что поместилось. row=%d, buffSize=%d, free=%ld\n", i, buffSize, buffSize - (answer - buff));
+                printf("There was not enough memory in the buffer to return what was fit. row=%d, buffSize=%d, free=%ld\n", i, buffSize, buffSize - (answer - buff));
                 return answer - buff;
             }
             

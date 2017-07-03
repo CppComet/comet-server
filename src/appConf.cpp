@@ -29,7 +29,10 @@ appConf::appConf():ini_parser()
      
 bool appConf::initFromFile(const char *fileName)
 {
-    parse(fileName);
+    if(!parse(fileName))
+    {
+        return false;
+    }
     
     /*
     ; Объём буфера для сообщения
@@ -164,26 +167,42 @@ bool appConf::initFromFile(const char *fileName)
     {
         // Ошибочка, параметр обязателен
     }  
+    return true;
 }
 
 bool appConf::init(int argc, char *argv[])
 {
+    int conf_path = -1;
     if(argc > 1)
     {
         for(int i=0; i<argc; i++)
         {
-            if(strlen(argv[i]) >= strlen("--help")  && memcmp(argv[i],"--help",strlen("--help"))==0)
+            if(strcmp(argv[i],"--help") == 0)
             {
-                    printf("Справка:\n \thttp://comet-server.ru\n \tsupport@comet-server.ru\n"); 
+                    printf("Help:\n \thttp://comet-server.com\n \tsupport@comet-server.ru\n"); 
                     isHelp = true;
-                    return true;
-            } 
+                    return false;
+            }
+            
+            if(strcmp(argv[i],"--conf") == 0)
+            { 
+                    conf_path = i+1;
+                    i++;
+                    
+                    if(argc <= i)
+                    {
+                        printf("Error: argument --conf mast have valid value.\n");
+                        return false;
+                    }
+            }
         }
-        return true;
     }
-    else
+    
+    if(conf_path == -1)
     {
-        return false;
+        return initFromFile("comet.ini"); 
     }
+    
+    return initFromFile(argv[conf_path]);  
 }
 

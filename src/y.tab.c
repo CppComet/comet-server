@@ -77,7 +77,7 @@
         {
             QueryData *qData = static_cast<struct QueryData*>(qInfo);
             qData->hasError = 1;
-            fprintf(stderr,"ошибка: %s\n",str);
+            fprintf(stderr,"Error: %s\n",str);
         }
         
         int yylex(void*);  

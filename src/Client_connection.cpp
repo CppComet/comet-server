@@ -278,9 +278,7 @@ int Client_connection::web_write_error(const char* text, int code, thread_data* 
 char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
 {
     isAuthUser = false;
-    char * mytext = local_buf->buf;
-    TagLoger::log(Log_ClientServer, 0, " >Client %d создание cpstring msg\n",client);
-
+    char * mytext = local_buf->buf; 
     int ses_index = str_find(mytext,'=',300);
     if(ses_index == -1)
     {
@@ -630,7 +628,7 @@ int Client_connection::web_socket_request(int client, int len, thread_data* loca
 
     if(devManager::instance()->getDevInfo()->index->get_link(local_buf, web_user_id, newHash))
     {
-        TagLoger::log(Log_ClientServer, 0, " >Client Авторизован %ld\n",web_user_id);
+        TagLoger::log(Log_ClientServer, 0, " >Client Authorized %ld\n",web_user_id);
 
 
         if(!devManager::instance()->getDevInfo()->index->get_hash(local_buf, web_user_id, newHash))
@@ -649,7 +647,7 @@ int Client_connection::web_socket_request(int client, int len, thread_data* loca
     else
     {
         message(local_buf, "", "undefined", MESSAGE_TEXT, "\"authorized\":false");
-        TagLoger::log(Log_ClientServer, 0, " >Client Не вторизован user_id=%ld\n", web_user_id);
+        TagLoger::log(Log_ClientServer, 0, " >Client not Authorized user_id=%ld\n", web_user_id);
         web_user_id = 0;
     }
 
@@ -698,14 +696,14 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
         // Ожидается продолжение фрагментированного пакета.
         // Продолжение фрагметированого пакета не может быть в центре сообщения а значет в нутри этого условия всегда start_position = 0
 
-        TagLoger::warn(Log_ClientServer, LogColorGreen, " >Собираем фрагменты. Client %d[fd=%d, len=%d, start_position=%d, fragment_buf_size=%d]\n",client, fd, len, start_position, fragment_buf.getSize());
+        TagLoger::warn(Log_ClientServer, LogColorGreen, " >Collecting fragments. Client %d[fd=%d, len=%d, start_position=%d, fragment_buf_size=%d]\n",client, fd, len, start_position, fragment_buf.getSize());
 
         //printHexMin(fragment_buf.getData(), fragment_buf.getSize(), Log_ClientServer);
         //printHexMin(local_buf->buf, len, Log_ClientServer);
 
         if(fragment_buf.getSize() + len >= appConf::instance()->get_int("main", "fragment_buf_max_size") )
         {
-            TagLoger::error(Log_ClientServer, LogColorRed, " >fragment_buf=%d переполнен. Client %d[fd=%d, len=%d, start_position=%d, fragment_buf_size=%d]\n"
+            TagLoger::error(Log_ClientServer, LogColorRed, " >fragment_buf=%d overcrowded. Client %d[fd=%d, len=%d, start_position=%d, fragment_buf_size=%d]\n"
                                                             ,fragment_buf.getSize() + len,client, fd, len, start_position, fragment_buf.getSize());
             return -1;
         }
@@ -723,7 +721,7 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
         fragment_buf.unlock();
         hasFragmentInBuffer = false;
 
-        TagLoger::log(Log_ClientServer, 0, "Результат сборки пакета [client=%d, fd=%d, len=%d, start_position=%d, fragment_buf_size=%d]\n",client, fd, len, start_position, fragment_buf.getSize());
+        TagLoger::debug(Log_ClientServer, 0, "The result of the package assembly [client=%d, fd=%d, len=%d, start_position=%d, fragment_buf_size=%d]\n",client, fd, len, start_position, fragment_buf.getSize());
     }
 
     // printHexMin(local_buf->buf.getData() + start_position, len, Log_ClientServer);
@@ -736,7 +734,7 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
          * 0x88 - первый байт правильного пакета означающего намеренье браузера закрыть соединение
          *
          */
-        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;32mПолучен фрейм закрытия = %2x %2x\x1b[0m\n", p[2], p[3]);
+        TagLoger::log(Log_ClientServer, 0, "\x1b[1;32mClosed frame received = %2x %2x\x1b[0m\n", p[2], p[3]);
         return -1;
     }
 
@@ -746,7 +744,7 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
          * 0x8a - первый байт правильного PONG пакета
          *
          */
-        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;32mПолучен PONG фрейм = %2x %2x\x1b[0m\n", p[2], p[3]);
+        TagLoger::log(Log_ClientServer, 0, "\x1b[1;32mReceived PONG frame = %2x %2x\x1b[0m\n", p[2], p[3]);
         return 0;
     }
 
@@ -756,15 +754,15 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
          * 0x82 - первый байт правильного пакета ( RSV1 = 0, RSV2 = 0, RSV3 = 0, FIN = 1, опкод = 0x1)
          * Или равно 0 в том случаии если это рекурсивный вызов произошедший из за слипания 2 пакетов. ( об этом говорит start_position != 0 )
          */
-        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mПолучен ошибочный фрейм = %2x \x1b[0m\n", p[0]);
+        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mReceived error frame = %2x \x1b[0m\n", p[0]);
         return -1;
     }
 
 
     if(p[1] == 0 )
     {
-        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mЗаголовок пакета пришёл не полностью[1] [start_position=%d len=%d]\x1b[0m\n", start_position, len);
-        // Заголовок пакета пришёл не полностью
+        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mThe package header did not come fully[1] [start_position=%d len=%d]\x1b[0m\n", start_position, len);
+        // The package header did not come fully
         // скопируем сообщение в fragment_buf для хранение его до тех пор пока не придёт ещё часть сообщения.
         hasFragmentInBuffer = true;
         fragment_buf.setSize(len);
@@ -790,8 +788,8 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
     {
         if(len < 4)
         {
-            TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mЗаголовок пакета пришёл не полностью[2] [start_position=%d len=%d, msg_data_len-%d]\x1b[0m\n", start_position, len, msg_data_len);
-            // Заголовок пакета пришёл не полностью
+            TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mThe package header did not come fully[2] [start_position=%d len=%d, msg_data_len-%d]\x1b[0m\n", start_position, len, msg_data_len);
+            // The package header did not come fully
             // скопируем сообщение в fragment_buf для хранение его до тех пор пока не придёт ещё часть сообщения.
             hasFragmentInBuffer = true;
             fragment_buf.setSize(len);
@@ -813,7 +811,7 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
     else if( msg_data_len == 127)
     {
         // Нет поддержки сообщений длинее 65 536 байт
-        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mНет поддержки сообщений длинее 65 536 байт\x1b[0m\n");
+        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mNo message support longer 65 536 byte\x1b[0m\n");
         return -1;
     }
     else
@@ -827,7 +825,7 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
     if( (int)msg_data_len > len - delta_len)
     {
         // Проверка для того чтоб длина указанная не была больше длины всего сообщения
-        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mОшибка протокола, указанная длина больше длины всего сообщения. [msg_data_len=%u delta_len=%d len=%d]\x1b[0m\n", msg_data_len, delta_len, len);
+        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mProtocol error, the specified length is longer than the length of the entire message. [msg_data_len=%u delta_len=%d len=%d]\x1b[0m\n", msg_data_len, delta_len, len);
         //return -1; /** @FixME отключена поддержка фрагментированных пакетов */
 
         // Если так то возможно пришол фрагментированный пакет
@@ -1021,8 +1019,7 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
  
     TagLoger::log(Log_ClientServer, 0, "answer:%s\n", usersstr.data()); 
     if(message(local_buf, base64_encode( (const char*)usersstr.data()).data() , rdname.data()) < 0)
-    {
-        TagLoger::log(Log_ClientServer, 0, " >Client_connection Не удалось отправить ответ\n");
+    { 
         return -1;
     }
     return 0;
@@ -1038,9 +1035,8 @@ int Client_connection::get_pipe_log(thread_data* local_buf, char* event_data,int
     char* pMarker = checking_channel_name( local_buf, pipe_name);
     if(pMarker == NULL)
     {
-        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31msget_pipe_log недопустимое имя канала\x1b[0m\n" );
-        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"Недопустимое название канала.\"},\"event_name\":\"answer\"}",
-                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"Недопустимое название канала.\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31msget_pipe_log Invalid channel name\x1b[0m\n" );
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"number_messages\":-1,\"error\":\"Invalid channel name.\"},\"event_name\":\"answer\"}").data(), "_answer");
         return -1;
     }
 
@@ -1050,17 +1046,15 @@ int Client_connection::get_pipe_log(thread_data* local_buf, char* event_data,int
     char *end_pMarker = checking_channel_name( local_buf, pMarker);
     if(end_pMarker == NULL)
     {
-        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31msget_pipe_log недопустимое значение маркера\x1b[0m\n" );
-        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"Недопустимое название канала.\"},\"event_name\":\"answer\"}",
-                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"Недопустимое название канала.\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31msget_pipe_log Invalid marker value\x1b[0m\n" );
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"number_messages\":-1,\"error\":\"Invalid marker value.\"},\"event_name\":\"answer\"}").data(), "_answer");
         return -1;
     }
 
     if( pMarker == 0 || end_pMarker == 0)
     {
         TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mget_pipe_log argument error\x1b[0m\n");
-        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"get_pipe_log argument error\"},\"event_name\":\"answer\"}",
-                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"get_pipe_log argument error\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"number_messages\":-1,\"error\":\"get_pipe_log argument error\"},\"event_name\":\"answer\"}").data(), "_answer");
         return -1;
     }
 
@@ -1111,8 +1105,7 @@ int Client_connection::get_pipe_count(thread_data* local_buf, char* event_data,i
     char* pMarker = checking_channel_name( local_buf, pipe_name);
     if(pMarker == NULL)
     {
-        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"Недопустимое название канала.\"},\"event_name\":\"answer\"}",
-                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"Недопустимое название канала.\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"number_messages\":-1,\"error\":\"Invalid pipe name.\"},\"event_name\":\"answer\"}").data(), "_answer");
         return -1;
     }
 
@@ -1122,8 +1115,7 @@ int Client_connection::get_pipe_count(thread_data* local_buf, char* event_data,i
     char *end_pMarker = checking_channel_name( local_buf, pMarker);
     if(end_pMarker == NULL)
     {
-        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"Недопустимое название канала.\"},\"event_name\":\"answer\"}",
-                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"Недопустимое название канала.\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"number_messages\":-1,\"error\":\"Invalid pipe name.\"},\"event_name\":\"answer\"}").data(), "_answer");
         return -1;
     }
 
@@ -1135,8 +1127,7 @@ int Client_connection::get_pipe_count(thread_data* local_buf, char* event_data,i
     else
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[1;31mget_pipe_count argument error\x1b[0m\n");
-        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"get_pipe_count argument error\"},\"event_name\":\"answer\"}",
-                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"get_pipe_count argument error\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"number_messages\":-1,\"error\":\"get_pipe_count argument error\"},\"event_name\":\"answer\"}").data(), "_answer");
         return -1;
     }
     return 0;
@@ -1159,18 +1150,16 @@ char* Client_connection::checking_channel_name(thread_data* local_buf, const cha
         {
             if(*p != '\n' )
             {
-                TagLoger::warn(Log_ClientServer, 0, "\x1b[31mchecking_channel_name Недопустимое название канала[name=%s]\x1b[0m\n", pipe_start);
-                message(local_buf, base64_encode((const unsigned char*)"{\"data\":{\"error\":\"Имя канала может содержать только символы A-Za-z0-9_-\"},\"event_name\":\"answer\"}",
-                               strlen("{\"data\":{\"error\":\"Имя канала может содержать только символы A-Za-z0-9_-\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+                TagLoger::warn(Log_ClientServer, 0, "\x1b[31mchecking_channel_name Invalid pipe name [name=%s]\x1b[0m\n", pipe_start);
+                message(local_buf, base64_encode((const char*)"{\"data\":{\"error\":\"The channel name can only contain characters A-Za-z0-9_-\"},\"event_name\":\"answer\"}").data(), "_answer");
                 return 0;
             }
         }
 
         if(delta > PIPE_NAME_LEN)
         {
-            TagLoger::warn(Log_ClientServer, 0, "\x1b[31mchecking_channel_name Недопустимое длина названия канала[name=%s]\x1b[0m\n", pipe_start);
-            message(local_buf, base64_encode((const unsigned char*)"{\"data\":{\"error\":\"Недопустимая длина названия канала\"},\"event_name\":\"answer\"}",
-                           strlen("{\"data\":{\"error\":\"Недопустимая длина названия канала\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+            TagLoger::warn(Log_ClientServer, 0, "\x1b[31mchecking_channel_name Invalid pipe name length[name=%s]\x1b[0m\n", pipe_start);
+            message(local_buf, base64_encode((const char*)"{\"data\":{\"error\":\"Invalid pipe name length\"},\"event_name\":\"answer\"}").data(), "_answer");
             return 0;
         }
 
@@ -1192,18 +1181,16 @@ char* Client_connection::checking_event_name(thread_data* local_buf, const char*
         {
             if(*p != '\n' )
             {
-                TagLoger::warn(Log_ClientServer, 0, "\x1b[31mchecking_channel_name Недопустимое имя события[name=%s]\x1b[0m\n", name_start);
-                message(local_buf, base64_encode((const unsigned char*)"{\"data\":{\"error\":\"Имя события может содержать только символы A-Za-z0-9_-\"},\"event_name\":\"answer\"}",
-                               strlen("{\"data\":{\"error\":\"Имя события может содержать только символы A-Za-z0-9_-\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+                TagLoger::warn(Log_ClientServer, 0, "\x1b[31mchecking_channel_name Invalid event name [name=%s]\x1b[0m\n", name_start);
+                message(local_buf, base64_encode((const char*)"{\"data\":{\"error\":\"The event name can only contain characters A-Za-z0-9_-\"},\"event_name\":\"answer\"}").data(), "_answer");
                 return 0;
             }
         }
 
         if(delta > EVENT_NAME_LEN)
         {
-            TagLoger::warn(Log_ClientServer, 0, "\x1b[31mchecking_channel_name Недопустимое длина события[name=%s]\x1b[0m\n", name_start);
-            message(local_buf, base64_encode((const unsigned char*)"{\"data\":{\"error\":\"Недопустимая длина названия события\"},\"event_name\":\"answer\"}",
-                           strlen("{\"data\":{\"error\":\"Недопустимая длина названия события\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+            TagLoger::warn(Log_ClientServer, 0, "\x1b[31mchecking_channel_name Invalid event name length [name=%s]\x1b[0m\n", name_start);
+            message(local_buf, base64_encode((const char*)"{\"data\":{\"error\":\"Invalid event name length\"},\"event_name\":\"answer\"}").data(), "_answer");
             return 0;
         }
 
@@ -1236,16 +1223,14 @@ int Client_connection::web_pipe_msg_v1(thread_data* local_buf, char* event_data,
     else if(memcmp(name, "web_", 4) != 0)
     {
         // @todo добавить ссылку на описание ошибки
-        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}",
-                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}").data(), "_answer");
         return -1;
     }
 
     char* p = checking_channel_name( local_buf, name);
     if( p == 0)
     {
-        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg] Недопустимое название канала.\"},\"event_name\":\"answer\"}",
-                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg] Недопустимое название канала.\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg] Invalid channel name.\"},\"event_name\":\"answer\"}").data(), "_answer");
         return -1;
     }
 
@@ -1326,8 +1311,7 @@ int Client_connection::web_pipe_msg_v1(thread_data* local_buf, char* event_data,
     TagLoger::log(Log_ClientServer, 0, "answer:%s\n", (char*)local_buf->answer_buf);
 
     if(message(local_buf, base64_encode( (const unsigned char*)local_buf->answer_buf.getAndUnlock(), answer_len ).data() , rdname) < 0)
-    {
-        TagLoger::log(Log_ClientServer, 0, " >Client_connection Не удалось отправить ответ\n");
+    { 
         return -1;
     }
     return 0;
@@ -1352,10 +1336,9 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
     }
     else if(memcmp(name, "web_", 4) != 0)
     {
-        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mweb_pipe_msg_v2 Недопустимое название канала[name=%s]\x1b[0m\n", name);
+        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mweb_pipe_msg_v2 Invalid channel name [name=%s]\x1b[0m\n", name);
         // @todo добавить ссылку на описание ошибки
-        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg2] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}",
-                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg2] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg2] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}").data(), "_answer");
         return -1;
     }
 
@@ -1384,8 +1367,7 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
     if(auth_type[1] != '\n')
     {
         // @todo добавить ссылку на описание ошибки
-        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"Недопустимое значение auth_type.\"},\"event_name\":\"answer\"}",
-                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"Недопустимое значение auth_type.\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"number_messages\":-1,\"error\":\"Invalid value auth_type.\"},\"event_name\":\"answer\"}").data(), "_answer");
         return -1;
     }
 
@@ -1471,8 +1453,7 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
     TagLoger::log(Log_ClientServer, 0, "answer:%s\n", (char*)local_buf->answer_buf);
 
     if(message(local_buf, base64_encode( (const unsigned char*)local_buf->answer_buf.getAndUnlock(), answer_len ).data() , rdname) < 0)
-    {
-        TagLoger::log(Log_ClientServer, 0, " >Client_connection Не удалось отправить ответ\n");
+    { 
         return -1;
     }
     return 0;
@@ -1491,7 +1472,7 @@ int Client_connection::options(int client, int len, thread_data* local_buf)
     \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n+OK\r\n";
     if(web_write( resp ) < 0)
     {
-      TagLoger::log(Log_ClientServer, 0, " >Client Не удалось отправить данные %d\n",fd);
+      TagLoger::log(Log_ClientServer, 0, " >Client Failed to send data %d\n",fd);
     }
 
     return -1;
@@ -1509,7 +1490,7 @@ int Client_connection::get_request(int client, int len, thread_data* local_buf)
     \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n";
     if(web_write( resp ) < 0 || web_write( logoPage ) < 0)
     {
-      TagLoger::log(Log_ClientServer, 0, " >Client Не удалось отправить данные %d\n",fd);
+      TagLoger::log(Log_ClientServer, 0, " >Client Failed to send data %d\n",fd);
     }
     return -1;
 }
@@ -1520,7 +1501,7 @@ int Client_connection::http404_answer(int client, int len, thread_data* local_bu
     \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n";
     if(web_write( resp ) < 0 || web_write( logoPage ) < 0)
     {
-        TagLoger::log(Log_ClientServer, 0, " >Client Не удалось отправить данные %d\n",fd);
+        TagLoger::log(Log_ClientServer, 0, " >Client Failed to send data %d\n",fd);
     }
     return -1;
 }
@@ -1553,7 +1534,7 @@ int Client_connection::get_info_request(int client, int len, thread_data* local_
 
     if(web_write( resp ) < 0)
     {
-      TagLoger::log(Log_ClientServer, 0, " >Client Не удалось отправить данные %d\n",fd);
+      TagLoger::log(Log_ClientServer, 0, " >Client Failed to send data %d\n",fd);
     }
 
     return -1;
@@ -1566,7 +1547,7 @@ int Client_connection::get_favicon_request(int client, int len, thread_data* loc
  
     if(web_write( resp ) < 0)
     {
-      TagLoger::log(Log_ClientServer, 0, " >Client Не удалось отправить данные %d\n",fd);
+      TagLoger::log(Log_ClientServer, 0, " >Client Failed to send data %d\n",fd);
     }
 
     return -1;
@@ -1654,7 +1635,7 @@ int Client_connection::request(int client, int len, thread_data* local_buf)
     {
         if(  connection_type != REQUEST_WS)
         {
-            TagLoger::log(Log_ClientServer, 0, "Обработка запроса - [Client_connection] -----------------------%d\n[%s]\n------------------------\n",len, (char*)local_buf->buf);
+            TagLoger::log(Log_ClientServer, 0, "Processing request - [Client_connection] -----------------------%d\n[%s]\n------------------------\n",len, (char*)local_buf->buf);
 //            for(int i =0; i< len; i++)
 //            {
 //                TagLoger::log(Log_ClientServer, 0, "[%c|%d]",local_buf->buf[i],local_buf->buf[i]);
@@ -1662,7 +1643,7 @@ int Client_connection::request(int client, int len, thread_data* local_buf)
         }
         else
         {
-            TagLoger::log(Log_ClientServer, 0, "Обработка WS запроса - [Client_connection] -----------------------%d\n",len);
+            TagLoger::log(Log_ClientServer, 0, "Processing WS request - [Client_connection] -----------------------%d\n",len);
         }
     }
     int r = -1;
@@ -1681,7 +1662,7 @@ int Client_connection::request(int client, int len, thread_data* local_buf)
             len += fragment_buf.getSize();
             delete[] tmpMsgData;
             fragment_buf.unlock();
-            TagLoger::log(Log_ClientServer, 0, "\x1b[1;32mСобран HTTP WS GET заголовок len=%d\x1b[0m\n[%s]\n",len, (char*)local_buf->buf);
+            TagLoger::log(Log_ClientServer, 0, "\x1b[1;32mAssembled HTTP WS GET header len=%d\x1b[0m\n[%s]\n",len, (char*)local_buf->buf);
         }
 
         if(local_buf->buf[len-2] != '\r' && local_buf->buf[len-1] != '\n' && memcmp((char*)local_buf->buf, "POST", strlen("POST"))!=0 )
@@ -1691,7 +1672,7 @@ int Client_connection::request(int client, int len, thread_data* local_buf)
 
             fragment_buf.lock();
             fragment_buf.setSize(len);
-            TagLoger::log(Log_ClientServer, 0, "\x1b[1;31mНе полностью пришёл HTTP WS GET заголовок len=%d\x1b[0m\n[%s]\n",len, (char*)local_buf->buf);
+            TagLoger::debug(Log_ClientServer, 0, "\x1b[1;31mThe HTTP WS GET header did not fully come len=%d\x1b[0m\n[%s]\n",len, (char*)local_buf->buf);
             memcpy(fragment_buf.getData(), local_buf->buf.getData(), len);
             return 0;
         }
@@ -1744,7 +1725,7 @@ int Client_connection::request(int client, int len, thread_data* local_buf)
         {
             connection_type = REQUEST_POST;
             // Long-Polling
-            TagLoger::log(Log_ClientServer, 0, " >HTTP Long-Polling протокол (Отключён!)\n");
+            TagLoger::log(Log_ClientServer, 0, " >HTTP Long-Polling Protocol (Disconnected!)\n");
             //
             //connection_type = REQUEST_LONG_POLLING;
             //r = long_polling_request(client,len, local_buf);
@@ -1820,7 +1801,7 @@ int Client_connection::message(thread_data* local_buf, const char* msg, const ch
 
     int msg_len = strlen(msg) + server_data_len;
 
-    TagLoger::log(Log_ClientServer, 0, "| Отправка данных message[web_user_id=%ld, msg_len=%d, connection_type=%d, fd=%d]\n", web_user_id, msg_len, connection_type, fd);
+    TagLoger::log(Log_ClientServer, 0, "| Sending data message[web_user_id=%ld, msg_len=%d, connection_type=%d, fd=%d]\n", web_user_id, msg_len, connection_type, fd);
 
     char* messge = local_buf->messge_buf.lock();
     int answer_messge_len = 0;
@@ -1861,13 +1842,10 @@ int Client_connection::message(thread_data* local_buf, const char* msg, const ch
 
     if(web_write(messge, answer_messge_len)  < 0)
     {
-        TagLoger::log(Log_ClientServer, 0, " >Client Не удалось отправить данные %d\n",this->fd);
+        TagLoger::log(Log_ClientServer, 0, " >Client Failed to send data %d\n",this->fd);
         ret = -1;
     }
-    else
-    {
-        TagLoger::log(Log_ClientServer, 0, " >Client Удалось отправить данные %d\n",this->fd);
-    }
+    
     local_buf->messge_buf.unlock();
 
     //delete messge;
@@ -1900,7 +1878,7 @@ int Client_connection::set_online(thread_data* local_buf)
 {
     if(isOnLine)
     {
-        TagLoger::warn(Log_ClientServer, 0, "\x1b[31mset_online: Повторный вызов fd=%d\x1b[0m\n", fd);
+        TagLoger::warn(Log_ClientServer, 0, "\x1b[31mset_online: Recalling fd=%d\x1b[0m\n", fd);
         return 0;
     }
     start_online_time = time(0);
@@ -1915,7 +1893,7 @@ int Client_connection::set_offline(thread_data* local_buf)
 {
     if(!isOnLine)
     {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mset_offline: Повторный вызов fd=%d\x1b[0m\n", fd);
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mset_offline: Recalling fd=%d\x1b[0m\n", fd);
         return 0;
     }
 

@@ -275,7 +275,7 @@ class ini_parser
             return true;
         }
          
-        void parse(const std::string& FileName)
+        bool parse(const std::string& FileName)
         {
             filename = FileName;
             
@@ -285,7 +285,7 @@ class ini_parser
             {
                 std::printf("error: could not open \"%s\". terminated parsing.\n", filename.c_str());
                 file.close();
-                return;
+                return false;
             }
 
             std::string line;
@@ -309,6 +309,7 @@ class ini_parser
                     handle_assignment(line);
                 }
             }
+            return true;
         }
 
     protected:
