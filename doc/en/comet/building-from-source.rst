@@ -1,0 +1,146 @@
+====== Install ======
+
+Recommended OS ubuntu, debian, centos
+<code sh>
+apt-get update
+apt-get install cmake make cpp gcc libssl-dev g++ nginx libmysqlclient-dev mysql-server mysql-client flex mailutils uuid-dev 
+</code>
+
+====== Building it from source code ======
+<code sh>
+git clone https://github.com/Levhav/comet-server
+cd comet-server
+cmake .
+make
+</code>
+
+====== Settings ======
+CppComet use mysql database for storage users credentials for authorization on server. And to store the time when the user was on the online. And for storing temporary data, such as undelivered messages and other data.
+ 
+  * Create a database in mysql based on [[https://github.com/Levhav/comet-server/blob/master/db.sql|db.sql]] file
+  * In [[https://github.com/CppComet/comet-server/blob/master/comet.ini|comet.ini]] file, set the details to access the database
+<code ini>
+[db]
+host = localhost   # The server address database
+user = root        # User
+password = root    # Password
+name = comet_db    # database name
+port = 3305        # Port
+</code>
+Enter the password to access the comet-server api
+<code ini>
+[main]  
+password = 0000000000000000000000000000000000000000000000000000000000000000
+</code>
+ 
+====== Launch ======
+Run in console mode
+<code sh>
+./cpp_comet
+</code>
+Running in daemon mode
+<code sh>
+systemctl start comet.service
+</code>
+
+===== Add to Startup =====
+ 
+<code sh>cp ./comet.service /etc/systemd/system
+systemctl daemon-reload
+systemctl enable comet.service</code>
+
+After successes run server we can begin create chat. If you get error create issue in [[https://github.com/Levhav/comet-server/issues|github repository]].
+
+====== Configuring nginx as a reverse proxy ======
+
+In order to configure the operation of comets on one machine with a web server, or just have the ability to work not only on http but also on https, you need to configure the reverse proxy.
+
+The following is an example of the nginx configuration for proxy traffic to comet servers with /comet-server to the comet server running on port 82 and all other traffic to the web server running on port 8080
+
+<file text default>
+server {
+	listen 0.0.0.0:80;   
+	server_name comet-server.com;
+ 
+	location / {
+		proxy_pass http://127.0.0.1:8080;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $remote_addr;
+		proxy_connect_timeout 120;
+		proxy_send_timeout 120;
+		proxy_read_timeout 180;
+	}
+
+	keepalive_disable none;
+	lingering_close always;
+	send_timeout 3600s;
+
+	location /comet-server {
+        proxy_pass http://127.0.0.1:82;
+        
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-NginX-Proxy true;
+        
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        
+        proxy_redirect off;
+        keepalive_timeout 900;
+        proxy_read_timeout 900;
+	} 
+}
+
+# HTTPS server
+
+
+server {
+	listen 0.0.0.0:443;  
+	server_name comet-server.com;
+
+	ssl on;
+	ssl_certificate /etc/letsencrypt/live/comet-server.com/fullchain.pem;
+	ssl_certificate_key /etc/letsencrypt/live/comet-server.com/privkey.pem;
+	 
+	ssl_session_timeout 70m;
+
+	ssl_protocols SSLv3 TLSv1;
+	ssl_ciphers ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP;
+	ssl_prefer_server_ciphers on;
+
+	keepalive_disable none;
+	lingering_close always;
+	send_timeout 3600s;
+ 
+	location / {
+		proxy_pass http://127.0.0.1:8080;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $remote_addr;
+		proxy_connect_timeout 120;
+		proxy_send_timeout 120;
+		proxy_read_timeout 180;
+		 
+	}
+	 
+	location /comet-server {
+        proxy_pass http://127.0.0.1:82;
+        
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-NginX-Proxy true;
+        
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        
+        proxy_redirect off; 
+        keepalive_timeout 900;
+        proxy_read_timeout 900;
+	}
+}
+</file>

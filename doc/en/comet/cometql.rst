@@ -1,0 +1,283 @@
+====== CometQL ======
+
+**CometQL** - it’s an API for work with comet server through MySQL protocol.
+
+Advantages of CometQL:
+ 
+  -  Unified API for more than 12 programming languages.
+  -  Simple and intelligible query view.
+  -  PHP includes resources for maintaining persistent connections with MySQL and now you can use it for co-working with comet server.
+
+So, data is stored in tables and commands for select or insert perform some actions. For example, for receiving information when user was online, you can perform next query:
+<code sql>select * from users_time where id = 2;</code>
+And what we can see:
+<code sql>
+mysql> select * from users_time where id in( 2, 3, 145);
++-----+------------+
+| id  | time       |
++-----+------------+
+| 2   | 0          |
+| 3   | 1438245468 |
+| 145 | -1         |
++-----+------------+
+3 rows in set (0.31 sec)
+</code>
+Here user with id=2 at the moment online, user with id=3 was online at July 30 and for user with id=145 there is no available data.
+===== How to connect and try by yourself =====
+You can by yourself connect to demo data and try it now. We recommend you to connect via console, because there are some graphics MySQL clients, which work inappropriate with comet server. 
+<code bash>
+# Server app.comet-server.ru
+# Login 15
+# Password lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8
+# Database CometQL_v1
+
+# Line to connect from command prompt
+mysql -h app.comet-server.ru -u15 -plPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8 -DCometQL_v1  --skip-ssl
+</code>
+
+Else you can use [[en:comet:cometql:cli|online command prompt]]. You can find it on the bottom of the right corner on all of the pages.  
+
+<note tip>[[en:comet:cometql:cli|Here you can test source code based on PHP with CometQL]] using for online command prompt implementation.</note>
+ 
+An example of connecting to a comet server from php.
+<code php>
+$dev_id = "15"; // Used as login
+$dev_key = "lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8"; // Used as a password
+
+// The connection looks like we connected to the database. You can use the functions to work with mysql
+// But in fact you are connecting to the comet server.
+$link = mysqli_connect("app.comet-server.ru", $dev_id, $dev_key, "CometQL_v1");
+if(!$link)
+{  
+    die("Could not create connection with CometQL");
+}
+
+$result = mysqli_query (  $link, "show status" ); 
+if(mysqli_errno($link) != 0)
+{
+    echo "Error code:<a href='https://comet-server.com/wiki/doku.php/en:comet:cometql:error'  target='_blank' >".mysqli_errno($link)."</a>";
+    echo "Error text:<a href='https://comet-server.com/wiki/doku.php/en:comet:cometql:error' target='_blank' >".mysqli_error($link)."</a>";
+    exit;
+}
+
+while($row = mysqli_fetch_assoc($result))
+{
+    echo "<pre>";
+    var_dump($row);
+    echo "</pre><br>";
+}  
+
+</code>
+====== Table description ====== 
+
+<note important>Names of tables and columns always use in lower case.</note>
+
+Notes of current implementation of CometSQL:
+  * CometSQL doesn’t implement all methods of SQL. A part of functions planned to realize in future. But some notes were applied in order to optimize inner structure of Comet server.
+  * To [[en:comet:cometql:optimization_for_the_cluster|optimize internal logics]], such operations like delete and insert doesn’t return amount of used lines (it belongs to CometQL v.1.0).
+  * Supporting such operators like AND, OR and ORDER BY in queries will be realize soon.
+
+<note warning>Some of hosting providers determine forbiddance (или ban) on external connections – you can face with this on some free or half-free hosting services. In order to check ability to use CometQL, you can take advantage of [[en:comet:testhosting|hosting verification script]]. </note>
+===== Table pipes_messages =====
+
+The table pipes_messages contains messages which transported via channels. For sending messages via channel you need to perform query of insert (INSERT) in this table
+<code sql>
+mysql> insert into pipes_messages (name, event, message)values("pipe_name", "event_in_pipe", "text message");
+Query OK, 0 rows affected (0.13 sec)
+</code> 
+
+Fields “name” and “event” must match to next regular term [0-9A-z=+/_].
+
+<note tip>Find out quantity of attendance on channel is possible by sending query to pipes table, because this message sends to all channel’s subscribers. In this way you can enquire amount of attendance, which get this message.</note>
+ 
+Selection query from pipes_messages returns history of messages of current channel if the save-function was activate for this channel.
+<code sql>
+mysql> select * from pipes_messages where name = "p10";
++------+-------+-------+--------------+
+| name | index | event | message      |
++------+-------+-------+--------------+
+| p10  | 0     | event | msgData      |
+| p10  | 1     | event | msgqqrrata   |
+| p10  | 2     | evt3  | msgqqrrata   |
++------+-------+-------+--------------+
+3 rows in set (0.00 sec)
+</code>
+
+Clears messages history of this channel.
+<code sql>
+mysql> delete from pipes_messages where name = 'p10';
+Query OK, 0 rows affected (0.13 sec)
+</code>
+
+=== Online example ===
+Input channel name “pipe _name” and click “subscribe”.
+<html>
+<iframe src="//comet-server.com/doc/example/7/subscriptionTest.php" width="910px"></iframe>
+</html>
+Now perform with online command prompt insert-query with pipes_messages and check the result.
+<code sql>
+mysql> insert into pipes_messages (name, event, message)values("pipe_name", "event_in_pipe", "text message");
+</code> 
+===== Table pipes  =====
+The table “pipes” contains information about quantity of subscribers on messages from channels. This table is available only for reading. 
+<code sql>
+mysql> select * from pipes where name in( "web_admins", "web_php_chat");
++--------------+-------+
+| name         | users |
++--------------+-------+
+| web_admins   | 0     |
+| web_php_chat | 0     |
++--------------+-------+
+2 rows in set (0.30 sec)
+</code>
+ 
+=== Online example ===
+
+Perform this query:
+<code sql>
+mysql> select * from pipes where name in( "web_admins", "web_php_chat");
+</code>
+Input channel name “web_admins” and click “subscribe”. 
+<html>
+<iframe src="//comet-server.com/doc/example/7/subscriptionTest.php" width="910px"></iframe>
+</html>
+Now perform query again and you will see that amount of subscribers are increase.
+===== Table users_in_pipes =====
+The table “users_in_pipes” contains data about [[en:comet:authentication|authorized users]] which subscribe on channel. This table is available only for reading.  
+<code sql>
+mysql> select * from users_in_pipes where name = "web_admins";
++------------+---------+
+| name       | user_id |
++------------+---------+
+| web_admins | 2       |
+| web_admins | 4       |
+| web_admins | 14      |
+| web_admins | 9       |
++------------+---------+
+4 row in set (0.32 sec)
+</code>
+
+<note important>Field user in table pipes contain aggregate amount of subscribers ([[en:comet:authentication|authorized and non-authorized]]), besides of table users_in_pipes includes only authorized subscribers list.</note>
+
+===== Table pipes_settings  =====
+The table “pipes_settings” contains settings of logging channels. By default, messages which passes through the channel, doesn’t store. If you activate logging mechanism for channel, comet server will be store last “n” messages. 
+To activate logging mechanism you must perform next query:
+<code sql>
+mysql> insert into pipes_settings ("name", "length") values ('p10', 10);
+Query OK, 1 row affected (0.00 sec)
+</code>
+Here parameter length – it’s a number of last stored messages. It takes values from 0 to 99.
+
+To get setting values, need to perform selection query from pipes_settings.
+<code sql>
+mysql> select * from pipes_settings where name = 'p10';
++------+--------+
+| name | length |
++------+--------+
+| p10  | 10     |
++------+--------+
+1 row in set (0.00 sec)
+</code>
+
+To deactivate logging mechanism, need to delete from pipes_settings settings record.
+<code sql>
+mysql> delete from  pipes_settings where name = 'p10';
+Query OK, 0 rows affected (0.00 sec)
+</code>
+
+===== Table users_messages =====
+The table “users_messages” intended sending messages to [[en:comet:authentication|authorized users]] by their identifiers.
+<note tip>Sending messages by identifiers gives more powerful protection tools while data is transferring. Also it increases probability to deliver message to right user.</note>
+For example, for sending message to user with id=2 and message body “message” you must perform next query:
+<code sql>
+mysql> insert into users_messages (id, event, message)values (2, 'event', 'message');
+Query OK, 0 row affected (0.00 sec)
+</code>
+Message put into queue to be send to user soon or send immediately. 
+
+If you want to get all of the undelivered messages and which stuck in queue, perform the query “select”
+<code sql>
+mysql> select * from users_messages where id = 2;
++----+-------+-------+---------+
+| id | index | event | message |
++----+-------+-------+---------+
+| 2  | 0     | evnt1 | message |
+| 2  | 1     | evnt2 | messag2 |
++----+-------+-------+---------+
+2 rows in set (0.00 sec)
+</code>
+Now 2 messages wait for sending. They will be sending at once when user becomes online. This table contains 4 columns.
+  - id - user’s identifier.
+  - index - message’s number in queue.
+  - event - name of event.
+  - message - message’s body.
+
+To clearing queue use “delete” query.
+<code sql>
+mysql> delete from users_messages where id = 2;
+Query OK, 0 rows affected (0.08 sec)
+</code>
+<note>After delivering message to user, it will be automatically deleted from queue.</note>
+
+===== Table users_time =====
+The table users_time contains data about users were online. This table is available only for reading. Data timing stores in UNIX-time.
+<code sql>
+mysql> select * from users_time where id in( 2, 3, 145);
++-----+------------+
+| id  | time       |
++-----+------------+
+| 2   | 0          |
+| 3   | 1438245468 |
+| 145 | -1         |
++-----+------------+
+3 rows in set (0.31 sec)
+</code>
+Here user with id=2 at that moment online, user with id=3 – was online at July 30, and for user with id=145 data is unavailable.
+ 
+===== Table users_auth =====
+
+The table users_auth contains data of user’s [[en:comet:authentication|authorizing]] on comet server. 
+<code sql>
+mysql> insert into users_auth (id, hash )values (12, 'hash1');
+Query OK, 1 row affected (0.13 sec)
+
+mysql> select * from users_auth where id in(2, 3, 12);
++----+----------------------------+
+| id | hash                       |
++----+----------------------------+
+| 2  | bjl6knotdb2t1oov958mhuian7 |
+| 12 | hash1                      |
++----+----------------------------+
+2 rows in set (0.32 sec)
+</code>
+Here for user with id=3 no data available, for users with id=2 and id=12 data is exist.
+<note important>In field hash you can transmit only lines (strings) less than 32 symbols and it must match with regular term [0-9A-z=+/_].</note>
+To deleting data of [[comet:authentication|user’s authorizing]], you can use “delete” query.
+<code sql>
+delete from users_auth where id = 12;
+Query OK, 0 rows affected (0.00 sec)
+</code>
+<note>To optimize internal logics, such operations like delete and insert doesn’t return amount of used lines (it belongs to CometQL v.1.0).</note>
+
+===== Other information =====
+
+  * [[en:comet:cometql-bash-example|Example of sending messages from bash.]]
+  * [[en:comet:cometql:error|Error code in CometQL]]
+  * [[en:comet:javascript_api:pipe-types|Reserved channel names]]
+  * [[en:comet:javascript_api|JavaScript API]]
+  * [[en:comet:dev_id|What it is and why do we need "A public developer token" and "Secret developer key?"]]
+
+====== Reserved channels names ======
+
+Main article [[en:comet:javascript_api:pipe-types|Reserved channels names and channels with extra properties]].
+<note warning>We don’t recommend to use in our project such channels names as «bin_*», «big_*», «push_*», «comet_*» и «sys_*». These names could be used for new functions. And they can have some special properties besides of current channels names.</note>
+
+
+Also we already have some channels with extra properties:
+  * msg – used for sending messages in order to authorizing data;
+  * user_status_* - used for automatic notification JS API about users’ status;
+  * web_* - channels which can receive messages from CometQL and JS API. 
+
+====== Wrapping over CometQL api ======
+
+If you have written a wrapper for working with CometQL api for which a framework that would be great if you share its running time with other users. Send us links to your repository on the wrapper support@comet-server.com
