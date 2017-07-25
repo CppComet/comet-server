@@ -95,16 +95,15 @@
                             <tr style='vertical-align: top;'>\
                                     <td> <img src='https://comet-server.org/Logo.png'></td>\
                                 <td style='  padding-left: 10px;'> \
-                                        <div style='font-size: 30px;  font-weight: bold;'>Star.Comet</div>\
-                                            Comet сервер Star.Comet<br>\
-                                            Больше информации смотрите на comet-server.org и support@comet-server.org\
+                                        <div style='font-size: 30px;  font-weight: bold;'>CppComet</div>\
+                                            For more information, see <a href='http://comet-server.com' target='_blank'>comet-server.com</a> and support@comet-server.com\
                                     </td>\
                             </tr>\
-            </table> \
+            </table>\
     </body>\
     </html>" 
  
-#define MYSQL_SERVERNAME "CometServer 2.5"
+#define MYSQL_SERVERNAME "CometServer 3.1"
 
 #define maxValue( a, b ) ( (a) > (b) ? (a) : (b) )
 #define minValue( a, b ) ( (a) < (b) ? (a) : (b) )
