@@ -625,33 +625,37 @@ int Client_connection::web_socket_request(int client, int len, thread_data* loca
     char newHash[USER_HASH_LEN+1];
     bzero(newHash, USER_HASH_LEN+1);
     strncpy(newHash, web_session, USER_HASH_LEN);
-
+    
+    std::string addInfo("\"server\":\"");
+    addInfo.append(MYSQL_SERVERNAME).append("\",");
+    
     if(devManager::instance()->getDevInfo()->index->get_link(local_buf, web_user_id, newHash))
     {
         TagLoger::log(Log_ClientServer, 0, " >Client Authorized %ld\n",web_user_id);
+        addInfo.append("\"authorized\":true");
 
 
         if(!devManager::instance()->getDevInfo()->index->get_hash(local_buf, web_user_id, newHash))
         {
             TagLoger::error(Log_ClientServer, 0, " >Client get_hash return false %ld\n",web_user_id);
-            message(local_buf, "", "undefined", MESSAGE_TEXT, "\"authorized\":\"true\"");
+            message(local_buf, "", "undefined", MESSAGE_TEXT, addInfo.data());
         }
         else
         {
-            message(local_buf, newHash, "undefined", MESSAGE_TEXT, "\"authorized\":\"true\"");
+            message(local_buf, newHash, "undefined", MESSAGE_TEXT, addInfo.data());
         }
-        msg_queue_send(client, len, local_buf);
 
+        msg_queue_send(client, len, local_buf);
         devManager::instance()->getDevInfo()->index->set_link(local_buf, web_user_id,client);
     }
     else
     {
-        message(local_buf, "", "undefined", MESSAGE_TEXT, "\"authorized\":false");
+        addInfo.append("\"authorized\":false");
+        message(local_buf, "", "undefined", MESSAGE_TEXT, addInfo.data());
         TagLoger::log(Log_ClientServer, 0, " >Client not Authorized user_id=%ld\n", web_user_id);
         web_user_id = 0;
     }
-
-
+ 
     online_incr(local_buf);
     return 0;
 }

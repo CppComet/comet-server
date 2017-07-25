@@ -15,3 +15,4 @@ FEATURES:
  * Added CODE_OF_CONDUCT.md
  * Added CONTRIBUTING.md
  * Added CHANGELOG.md
+ * Added server version to ws answer
