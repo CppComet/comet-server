@@ -21,7 +21,8 @@ Comet technology – allows sending arbitrary messages to client through server 
 # Demo
  
 * https://github.com/CppComet/php-chat-example
-* https://github.com/CppComet/comet-server/tree/master/demo/simple-chat 
+* https://github.com/CppComet/comet-server/tree/master/demo/simple-chat
+* https://github.com/CppComet/auth-example
 
 ## Demo access to server API
 
@@ -63,56 +64,10 @@ Comet server is written in C++, for storing data using MySQL.
 
 [Documentation and examples](http://comet-server.org/)
   
-### Building from source
+### Building from source and launch
 
 How to build and run [EN](http://comet-server.org/doku.php/en:comet:building-from-source) or [RU](http://comet-server.org/doku.php/comet:building-from-source)
-
-```
-apt-get update
-apt-get install cmake make cpp gcc libssl-dev g++ nginx libmysqlclient-dev mysql-server mysql-client flex mailutils uuid-dev 
-git clone https://github.com/CppComet/comet-server
-cd comet-server
-cmake .
-make
-```
-
-Create a database in mysql based on [db.sql](https://github.com/CppComet/comet-server/blob/master/db.sql) file
-In [comet.conf](https://github.com/CppComet/comet-server/blob/master/comet.conf) file, set the details to access the database
-
-```
-db_host 127.0.0.1 # The server address database
-db_pw pass        # Password
-db_user comet     # User
-db_port 3306      # Port
-db_name comet_db  # database name
-```
-
-In [comet.conf](https://github.com/CppComet/comet-server/blob/master/comet.conf) file, set the password to access the cometql api
-```
-password 0000000000000000000000000000000000000000000000000000000000000000 
-```
-
-Add to Startup
-
-```
-cp ./comet.service /etc/systemd/system
-systemctl daemon-reload
-systemctl enable comet.service
-```
-
-## Launch
- 
-```
-systemctl start comet.service  
-```
-
-Run in console mode
-```
-./cpp_comet
-```
-
-
-
+  
 ### CometQL API: 
 
 CometQL API documentation [EN](http://comet-server.org/doku.php/en:comet:cometql) or [RU](http://comet-server.org/doku.php/comet:cometql)
