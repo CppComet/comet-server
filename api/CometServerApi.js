@@ -172,7 +172,7 @@ comet_server_signal.emitAll = function (signal_name, param)
  */
 comet_server_signal.setState = function(name, value, minTime)
 {
-    console.log("setState", name, value, minTime)
+    //console.log("setState", name, value, minTime)
     var time = new Date()
     try{ 
         if(minTime)
@@ -320,7 +320,7 @@ var _cometServerApi = function(opt)
 /**
  * @private
  */
-_cometServerApi.prototype.version = "3.25";
+_cometServerApi.prototype.version = "3.26";
 
 /**
  * @private
@@ -330,7 +330,7 @@ _cometServerApi.prototype.options = {};
 /**
  * @private
  */
-_cometServerApi.prototype.options.nodeArray = ["app.comet-server.ru"]// ["n1-app.comet.su", "n2-app.comet.su"]; //
+_cometServerApi.prototype.options.nodeArray = ["app.comet-server.ru"]
 _cometServerApi.prototype.options.node = undefined
 
 /**
@@ -1170,10 +1170,11 @@ _cometServerApi.prototype.start = function(opt, callBack)
         {
             console.warn("Comet: Not set dev_id", _cometServerApi.prototype.options.dev_id)
             console.warn("Comet: set dev_id = 15 for testing and demo access. Do not use this in production.", _cometServerApi.prototype.options.dev_id)
+            console.warn("Comet: See https://comet-server.com/wiki/doku.php/en:comet:dev_id or https://comet-server.com/wiki/doku.php/comet:dev_id")
             _cometServerApi.prototype.options.dev_id = "15" 
         }
         else
-        { 
+        {
             _cometServerApi.prototype.options.dev_id = "0" 
         }
     }

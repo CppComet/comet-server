@@ -16,3 +16,6 @@ FEATURES:
  * Added CONTRIBUTING.md
  * Added CHANGELOG.md
  * Added server version to ws answer
+ * Js Api version 3.26
+ * Removed message `setState` from console log in Js Api
+ * Fixed bug when Js api in offline
