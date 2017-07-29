@@ -217,7 +217,7 @@ void command_line_fork()
     }
     else
     {
-        TagLoger::log(Log_pipeCommands, 0, "\x1b[32mСоздан fifo pipe с именем %s\x1b[0m\n", NAMEDPIPE_NAME);
+        TagLoger::debug(Log_pipeCommands, 0, "\x1b[32mCreated fifo pipe with name %s\x1b[0m\n", NAMEDPIPE_NAME);
     }
 
     if ( (fd = open(NAMEDPIPE_NAME, O_RDONLY)) <= 0 )
@@ -227,7 +227,7 @@ void command_line_fork()
     }
     else
     {
-        TagLoger::log(Log_pipeCommands, 0, "\x1b[32mОткрыт fifo pipe с именем %s\x1b[0m\n", NAMEDPIPE_NAME);
+        TagLoger::debug(Log_pipeCommands, 0, "\x1b[32mOpen fifo pipe with name %s\x1b[0m\n", NAMEDPIPE_NAME);
     }
 
     do {
@@ -239,11 +239,11 @@ void command_line_fork()
             continue;
         }
 
-        TagLoger::log(Log_pipeCommands, 0, "\x1b[32mВходящее сообщение через pipe(%d): %s\x1b[0m\n", len, buf);
+        TagLoger::log(Log_pipeCommands, 0, "\x1b[32mIncoming message from pipe(%d): %s\x1b[0m\n", len, buf);
 
         if( strncmp(buf,"exit", strlen("exit") ) == 0 )
         {
-            printf("\x1b[31mПолучена команда выхода\x1b[0m\n");
+            printf("\x1b[31mExit command received\x1b[0m\n");
             //kill(pid, SIGTERM);
             close(fd);
             remove(NAMEDPIPE_NAME);
@@ -278,7 +278,7 @@ void command_line_fork()
         }
         else
         {
-            TagLoger::error(Log_pipeCommands, 0, "\x1b[31mНе известная команда:%s\x1b[0m\n", buf);
+            TagLoger::error(Log_pipeCommands, 0, "\x1b[31mUnknown command:%s\x1b[0m\n", buf);
         }
 
     } while ( 1 );
@@ -298,7 +298,6 @@ void command_line_fork()
 int main(int argc, char *argv[])
 { 
     TagTimer::start(Time_start);
-    TagLoger::log(Log_Any, 0, "Старт сервера pid:%d, getrusage:%d\n", getpid());
 
     // Назначает обработчик на сигнал смерти
     signal(SIGSEGV, posix_death_signal);
@@ -337,13 +336,15 @@ int main(int argc, char *argv[])
     //signal(SIGVTALRM, posix_death_signal); //  сигнал, посылаемый процессу по истечении времени заданном в «виртуальном» таймере.
 
 
-    // Чтение конфига и ключей запуска
-    appConf::instance()->initFromFile("comet.ini");
-    appConf::instance()->init(argc, argv);
+    // Чтение конфига и ключей запуска 
+    if(!appConf::instance()->init(argc, argv))
+    {
+        return 0;
+    } 
+    
+    TagLoger::log(Log_Any, 0, "Server starting pid:%d, getrusage:%d\n", getpid());
     TagLoger::initTagLevels();
-
-    if(appConf::instance()->isHelp) return 0; // Выйти если был ключ --help
-     
+ 
     dbLink mydb;
     mydb.init(appConf::instance()->get_chars("db", "host"),
             appConf::instance()->get_chars("db", "user"),
@@ -352,7 +353,7 @@ int main(int argc, char *argv[])
             appConf::instance()->get_int("db", "port"));
     if(!mydb.connect())
     {
-        TagLoger::error(Log_Any, 0, "\x1b[1;31mMySQL соединение не уставновлено\x1b[0m");
+        TagLoger::error(Log_Any, 0, "\x1b[1;31mError: MySQL connection not established\x1b[0m");
     }
 
     if(!mydb.query_format("INSERT INTO `log_event`(`id`, `text`) VALUES (NULL,'start-%s');", appConf::instance()->get_chars("main", "node_name")))

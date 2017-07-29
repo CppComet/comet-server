@@ -32,10 +32,10 @@ template< class connectionType >
 void * tcpServer<connectionType>::add_th_loop(void* arg)
 {
     struct tcpServer_loop_data<connectionType> *tinfo = (struct tcpServer_loop_data<connectionType> *) arg;
-    TagLoger::log(Log_tcpServer, 0, "\x1b[32mS%d:Создан новый поток обработки сообщений\x1b[0m\n",tinfo->parent_server_obj->id);
+    TagLoger::debug(Log_tcpServer, 0, "\x1b[32mS%d:A new thread has been created for processing messages\x1b[0m\n",tinfo->parent_server_obj->id);
 
     tinfo->parent_server_obj->loop(tinfo);
-    TagLoger::log(Log_tcpServer, 0, "\x1b[32mS%d:Завершон поток обработки сообщений\x1b[0m\n",tinfo->parent_server_obj->id);
+    TagLoger::debug(Log_tcpServer, 0, "\x1b[32mS%d:Terminated thread for processing messages\x1b[0m\n",tinfo->parent_server_obj->id);
  
     return 0;
 }
@@ -146,9 +146,9 @@ bool tcpServer<connectionType>::start(const char* Host,const int Port, const cha
     if(benchmark) bm.start(this->id,thread_num, server_name);
   
     #ifdef EPOL_CTL_DISABLE
-        TagLoger::log(Log_tcpServer, 0, "\x1b[1;33mИспользуется EPOL_CTL_DISABLE\x1b[0m\n");
+        TagLoger::debug(Log_tcpServer, 0, "\x1b[1;33mUsing EPOL_CTL_DISABLE\x1b[0m\n");
     #else
-        TagLoger::log(Log_tcpServer, 0, "\x1b[1;33mИспользуется EPOLL_CTL_DEL\x1b[0m\n");
+        TagLoger::debug(Log_tcpServer, 0, "\x1b[1;33mUsing EPOLL_CTL_DEL\x1b[0m\n");
     #endif
 
     host= new char[200];
@@ -356,8 +356,7 @@ bool tcpServer<connectionType>::start(const char* Host,const int Port, const cha
             th[i].ev = gev;
             th[i].listener = listener;
             th[i].parent_server_obj=this;
-
-            TagLoger::log(Log_tcpServer, 0, "Создаётся новый поток обработки сообщений %d\n",i);
+ 
             pthread_create(&th[i].th_id, NULL, add_th_loop , (void *)&th[i]);
         }
 
@@ -447,7 +446,7 @@ template< class connectionType >
 void tcpServer<connectionType>::loop(const tcpServer_loop_data<connectionType>* d)
 {
     bm.set_th_status(d->thread_id,'-');
-    TagLoger::log(Log_tcpServer, 0, "S%d:Запущен новый поток обработки сообщений на порту %d с идентификатором %d\n",this->id,port,d->thread_id);
+    TagLoger::log(Log_tcpServer, 0, "S%d:A new thread has been started to process messages on port %d with the identifier %d\n",this->id,port,d->thread_id);
 
     thread_data* hm_thread_data = new thread_data(appConf::instance());
     hm_thread_data->bm = &bm;
@@ -473,7 +472,7 @@ void tcpServer<connectionType>::loop(const tcpServer_loop_data<connectionType>* 
 
             if(epoll_events_count < 0 )
             {
-                TagLoger::log(Log_tcpServer, 0, "\x1b[31m[Критическая ошибка]epoll_events_count %d\x1b[0m\n",epoll_events_count);
+                TagLoger::error(Log_tcpServer, 0, "\x1b[31m[Critical error]epoll_events_count %d\x1b[0m\n",epoll_events_count);
                 bm.set_th_status(d->thread_id,'X');
                 perror("epoll_wait");
                 continue;
@@ -559,7 +558,7 @@ void tcpServer<connectionType>::loop(const tcpServer_loop_data<connectionType>* 
                 int client_id=accept( listener, (struct sockaddr *) &their_addr, &socklen);
                 if(client_id < 0 )
                 {
-                    TagLoger::error(Log_tcpServer, 0, "\x1b[31mS%d:Не удалось установить соединение %d\x1b[0m",this->id, client_id); 
+                    TagLoger::error(Log_tcpServer, 0, "\x1b[31mS%d:Could not connect %d\x1b[0m",this->id, client_id); 
                     continue;
                 }
 
@@ -589,7 +588,7 @@ void tcpServer<connectionType>::loop(const tcpServer_loop_data<connectionType>* 
                     int c_epfd = th[next_epfd_index].epfd;
 
                     //addClient(client_id, client_id, hm_thread_data, c_epfd); 
-                    TagLoger::log(Log_tcpServer, 0, "S%d:Создаётся новый клиент %d=%d...",this->id,client_id,clientObj->event.data.fd);
+                    TagLoger::debug(Log_tcpServer, 0, "S%d:A new client is created %d=%d...",this->id,client_id,clientObj->event.data.fd);
 
                     clientObj->setIp(inet_ntoa(their_addr.sin_addr)); 
                     clientObj->setEpfd(c_epfd);
@@ -624,7 +623,7 @@ void tcpServer<connectionType>::loop(const tcpServer_loop_data<connectionType>* 
                 TagLoger::log(Log_tcpServer, 0, "th(%d) events[i].data.fd[%d] != listener[%d]\n", d->thread_id, events[i].data.fd, listener);
                 if( handle_message(CP<connectionType>((connectionType*)events[i].data.ptr), d->thread_id, hm_thread_data) < 0 )
                 {
-                    TagLoger::log(Log_tcpServer, 0, "\x1b[31m[Критическая ошибка] handle_message вернула -1\x1b[0m\n");
+                    TagLoger::log(Log_tcpServer, 0, "\x1b[31mhandle_message return -1\x1b[0m\n");
                 }
             }
         }
@@ -670,7 +669,7 @@ void tcpServer<connectionType>::deleteClientFromMap(CP<connectionType> clientObj
     }
     else
     {
-        TagLoger::error(Log_tcpServer, 0, "\x1b[31mS%d:Не удалось найти клиента %d в map_index\x1b[0m\n",this->id, clientObj->getfd());
+        TagLoger::error(Log_tcpServer, 0, "\x1b[31mS%d:Could not find user %d in map_index\x1b[0m\n",this->id, clientObj->getfd());
     }
 
     pthread_mutex_unlock(&request_mutex[clientObj->getfd()%map_index_size]); 
@@ -694,11 +693,11 @@ void tcpServer<connectionType>::closeClientConnection(CP<connectionType> clientO
     
     if(clientObj->set_offline(local_buf) < 0 )
     {
-        TagLoger::error(Log_tcpServer, 0, "\x1b[31mS%d:Не удалось отключить клиента %d\x1b[0m\n",this->id, clientObj->getfd());
+        TagLoger::error(Log_tcpServer, 0, "\x1b[31mS%d:Failed to disconnect client %d\x1b[0m\n",this->id, clientObj->getfd());
     }
     else
     {
-        TagLoger::log(Log_tcpServer, 0, "S%d:Удалось set_online false\n",this->id);
+        TagLoger::debug(Log_tcpServer, 0, "S%d:Succeeded set_online false\n",this->id);
     }
       
     /**
@@ -706,7 +705,7 @@ void tcpServer<connectionType>::closeClientConnection(CP<connectionType> clientO
      */
     //delete clientObj; 
     if(benchmark) bm.increment_deleteClient();
-    TagLoger::log(Log_tcpServer, 0, "S%d:Удалось отключить клиента\n",this->id);
+    TagLoger::debug(Log_tcpServer, 0, "S%d:Succeeded disconnect client\n",this->id);
 }
 
 /**
@@ -775,7 +774,7 @@ template< class connectionType >
         if(len < 0 )
         {
             bm.set_th_status(thread_id, 'D');
-            TagLoger::warn(Log_tcpServer, 0, "\x1b[31mS%d:{%d}Не удалось принять данные от %d\x1b[0m\n",this->id,thread_id, client);
+            TagLoger::warn(Log_tcpServer, 0, "\x1b[31mS%d:{%d}Failed to receive data from %d\x1b[0m\n",this->id,thread_id, client);
             deleteClient(clientObj, local_buf);
         }
         else if(len > 0)
@@ -785,7 +784,7 @@ template< class connectionType >
             if(clientObj->request(client, len, local_buf) == -1 )
             {
                 bm.set_th_status(thread_id, 'D');
-                TagLoger::warn(Log_tcpServer, 0, "\x1b[32m{%d} Обработка сообщения от клиента return -1 %d\x1b[0m\n",thread_id, client);
+                TagLoger::warn(Log_tcpServer, 0, "\x1b[32m{%d} Processing a message from the client return -1 %d\x1b[0m\n",thread_id, client);
                 deleteClient(clientObj, local_buf);
             }
         }

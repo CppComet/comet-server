@@ -123,12 +123,12 @@ public:
             if(conection_ids[i] <= 0)
             {
                 conection_ids[i] = Conection_id;
-                TagLoger::log(Log_UserItem, 0, "\x1b[34mДобавление Conection_id=%d к user_id=%d i=%d\x1b[0m\n", Conection_id,  user_id, i);
+                TagLoger::log(Log_UserItem, 0, "\x1b[34mAdd Conection_id=%d to user_id=%d i=%d\x1b[0m\n", Conection_id,  user_id, i);
                 return 1;
             }
         }
 
-        TagLoger::log(Log_UserItem, 0, "\x1b[34mДобавление Conection_id=%d к user_id=%d i=%d\x1b[0m\n", Conection_id,  user_id, -1);
+        TagLoger::log(Log_UserItem, 0, "\x1b[34mAdd Conection_id=%d to user_id=%d i=%d\x1b[0m\n", Conection_id,  user_id, -1);
         return 0;
     }
 
@@ -152,7 +152,7 @@ public:
         {
             if(conection_ids[i] == Conection_id)
             {
-                TagLoger::log(Log_UserItem, 0, "\x1b[34munsetConection_id=%d из user_id=%d, i=%d\x1b[0m\n", Conection_id,  user_id, i);
+                TagLoger::log(Log_UserItem, 0, "\x1b[34munsetConection_id=%d from user_id=%d, i=%d\x1b[0m\n", Conection_id,  user_id, i);
                 conection_ids[i] = USER_INDEX_NO_CONNECT;
                 break;
             }
@@ -749,11 +749,11 @@ public:
             pthread_mutex_unlock(&request_mutex[user_id%map_index_size]);
             if( it->second->testHash(local_buf, hash) )
             {
-                TagLoger::log(Log_UserIndex, 0, "\x1b[34m[get_link]Хеши пользователя %d совпадают\x1b[0m\n",user_id);
+                TagLoger::log(Log_UserIndex, 0, "\x1b[34m[get_link]User's hashes of %d match\x1b[0m\n",user_id);
                 return true;
             }
 
-            TagLoger::log(Log_UserIndex, 0, "\x1b[35m[get_link]Хеши пользователя %d не совпадают\x1b[0m\n",user_id);
+            TagLoger::log(Log_UserIndex, 0, "\x1b[35m[get_link]User's hashes of %d not match\x1b[0m\n",user_id);
             return false;
         }
         else
@@ -762,11 +762,11 @@ public:
 
             if(useritem::testHash(local_buf, hash,  user_id))
             {
-                TagLoger::log(Log_UserIndex, 0, "\x1b[34m[get_link][static]Хеши пользователя %d совпадают\x1b[0m\n",user_id);
+                TagLoger::log(Log_UserIndex, 0, "\x1b[34m[get_link][static]User's hashes of %d match\x1b[0m\n",user_id);
                 return true;
             }
 
-            TagLoger::log(Log_UserIndex, 0, "\x1b[35m[get_link][static]Хеши пользователя %d не совпадают\x1b[0m\n",user_id);
+            TagLoger::log(Log_UserIndex, 0, "\x1b[35m[get_link][static]User's hashes of %d not match\x1b[0m\n",user_id);
             return false;
         }
     }
@@ -790,12 +790,12 @@ public:
             it->second->user_id = user_id;
             it->second->setConection_id(local_buf, conection_id);
 
-            TagLoger::log(Log_UserIndex, 0, "\x1b[34m[set_link]Пользователь %d авторизован на соединении %d\x1b[0m\n",user_id,conection_id);
+            TagLoger::log(Log_UserIndex, 0, "\x1b[34m[set_link]User %d is authorized on the connection %d\x1b[0m\n",user_id,conection_id);
         }
         else
         {
             getMapToUserId(user_id).insert(std::pair<int,useritem*>(user_id,new useritem(local_buf, user_id,conection_id)));
-            TagLoger::log(Log_UserIndex, 0, "\x1b[34m[set_link]Пользователь %d авторизован на соединении %d\x1b[0m\n",user_id,conection_id);
+            TagLoger::log(Log_UserIndex, 0, "\x1b[34m[set_link]User %d is authorized on the connection %d\x1b[0m\n",user_id,conection_id);
         }
 
         pthread_mutex_unlock(&request_mutex[user_id%map_index_size]);
@@ -816,8 +816,8 @@ public:
         std::map<int,useritem*>::const_iterator it = getMapToUserId(user_id).find(user_id);
         if( it != getMapToUserId(user_id).end() )
         {
-            TagLoger::log(Log_UserIndex, 0, "\x1b[34m[un_link]Пользователь %d отключён от соединения %d\x1b[0m\n",user_id, conection_id);
-            TagLoger::log(Log_UserIndex, 0, "\x1b[34m[un_link]Пользователю %d обновлено значение last_online_time\x1b[0m\n",user_id);
+            TagLoger::log(Log_UserIndex, 0, "\x1b[34m[un_link]User %d is disconnected from the connection %d\x1b[0m\n",user_id, conection_id);
+            TagLoger::log(Log_UserIndex, 0, "\x1b[34m[un_link]User %d has updated the value of last_online_time\x1b[0m\n",user_id);
 
             it->second->user_id = user_id;
             it->second->unsetConection_id(local_buf, conection_id);

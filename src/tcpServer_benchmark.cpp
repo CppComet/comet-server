@@ -9,7 +9,7 @@ void tcpServer_benchmark::start(int Servewr_id, int th_Num, const char* server_n
     bzero(name, sizeof(char) * 299);
     memcpy(name, server_name, strlen(server_name));
 
-    TagLoger::log(Log_benchmark, 0, "Запуск benchmark %d [%s]\n",Servewr_id, name);
+    TagLoger::log(Log_benchmark, 0, "Starting benchmark %d [%s]\n",Servewr_id, name);
     if(th_id == 0)
     {
         th_num = th_Num;

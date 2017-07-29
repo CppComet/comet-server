@@ -65,7 +65,7 @@ protected:
         int count = mysql_stmt_param_count(stmt);
         if(count != param_count)
         {
-            TagLoger::error(Log_dbLink, 0, "mysql_stmt_prepare Не инициализированы параметнры: %d > %d [query=%s]\n", count, param_count, q);
+            TagLoger::error(Log_dbLink, 0, "mysql_stmt_prepare parameters not initialized: %d > %d [query=%s]\n", count, param_count, q);
         }
 
         // Bind param structure to statement
@@ -283,13 +283,13 @@ public:
 
         if(mysql_errno(&mysqlLink))
         {
-            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL соединение не уставновлено\n%s\nip=%s:%d user=%s [errno=%d]\x1b[0m", mysql_error(&mysqlLink),
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL connection not established\n%s\nip=%s:%d user=%s [errno=%d]\x1b[0m", mysql_error(&mysqlLink),
                     db_host, db_port, db_user, mysql_errno(&mysqlLink));
             return false;
         }
 
 
-        TagLoger::log(Log_dbLink, 0, "\x1b[1;32mMySQL соединение уставновлено\nip=%s:%d user=%s\x1b[0m", db_host, db_port, db_user);
+        TagLoger::log(Log_dbLink, 0, "\x1b[1;32mMySQL connection established\nip=%s:%d user=%s\x1b[0m", db_host, db_port, db_user);
         return true;
 
         //return query("SET CHARACTER SET 'utf8' ");
@@ -916,6 +916,42 @@ public:
     }
 };
 
+
+class stm_pipe_messages_delete_by_message_id: public stmBase{
+
+    friend stmMapper;
+    char param_id[MYSQL_UUID_LEN];
+    unsigned long param_id_length = MYSQL_UUID_LEN;
+     
+public:
+    bool prepare(MYSQL *mysql)
+    {
+        setParamsCount(1);
+
+        int i = 0;
+        param[i].buffer_type    = MYSQL_TYPE_STRING;
+        param[i].buffer         = (void *)&param_id;
+        param[i].is_unsigned    = 0;
+        param[i].is_null        = 0;
+        param[i].length         = &param_id_length;
+ 
+        return init(mysql, "DELETE FROM `pipe_messages` where id = ? ");
+    }
+
+    stm_pipe_messages_delete_by_message_id()
+    { 
+        bzero(param_id, MYSQL_UUID_LEN);
+    }
+
+    int execute(const char* id)
+    {
+        bzero(param_id, MYSQL_UUID_LEN);
+        strncpy(param_id, id, MYSQL_UUID_LEN); 
+          
+        return stmBase::insert();
+    }
+};
+
 class stm_users_auth_replace: public stmBase{
 
     friend stmMapper;
@@ -1278,6 +1314,7 @@ public:
     stm_pipe_messages_insert pipe_messages_insert;
     stm_pipe_messages_select pipe_messages_select;
     stm_pipe_messages_delete pipe_messages_delete;
+    stm_pipe_messages_delete_by_message_id pipe_messages_delete_by_message_id;
 
     stm_users_auth_replace users_auth_replace;
     stm_users_auth_delete users_auth_delete;
@@ -1296,6 +1333,7 @@ public:
         pipe_messages_insert.prepare(mysql);
         pipe_messages_select.prepare(mysql);
         pipe_messages_delete.prepare(mysql);
+        pipe_messages_delete_by_message_id.prepare(mysql);
 
         users_auth_replace.prepare(mysql);
         users_auth_delete.prepare(mysql);

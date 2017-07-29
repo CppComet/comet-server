@@ -73,7 +73,7 @@ void CometQLcluster::replicateQuery()
          
         if(mysql_real_query(&mysql[i], query, queryLen) != 0)
         {
-            TagLoger::warn(Log_CometQLCluster, 0, "\x1b[1;31mCometQL запрос не выполнен\n%s\n%s\nnode=%d ip=%s:%d pw=%s\x1b[0m", 
+            TagLoger::warn(Log_CometQLCluster, 0, "\x1b[1;31mCometQL query not executed\n%s\n%s\nnode=%d ip=%s:%d pw=%s\x1b[0m", 
                     mysql_error(&mysql[i]),
                     query,
                     i,
@@ -90,12 +90,11 @@ void CometQLcluster::replicateQuery()
 void CometQLcluster::start()
 { 
     if(appConf::instance()->hl_port[0] == 0)
-    {
-        TagLoger::log(Log_CometQLCluster, 0, "Запуск CometQL кластера отменён\n");
+    { 
         return;
     }
     
-    TagLoger::log(Log_CometQLCluster, 0, "Запуск CometQL кластера\n");
+    TagLoger::log(Log_CometQLCluster, 0, "Running the CometQL cluster\n");
     
     for(int i = 0; i < MAX_HL_CLUSTER_SIZE; i++)
     {
@@ -103,19 +102,19 @@ void CometQLcluster::start()
         {
             break;
         }
-        TagLoger::log(Log_CometQLCluster, 0, "CometQL кластер node=%d ip=%s:%d pw=%s\n", i, appConf::instance()->hl_ip[i], appConf::instance()->hl_port[i], appConf::instance()->hl_pw[i]); 
+        TagLoger::log(Log_CometQLCluster, 0, "CometQL cluster node=%d ip=%s:%d pw=%s\n", i, appConf::instance()->hl_ip[i], appConf::instance()->hl_port[i], appConf::instance()->hl_pw[i]); 
         
         mysql_init(&mysql[i]);
         mysql_real_connect(&mysql[i], appConf::instance()->hl_ip[i], "15", appConf::instance()->hl_pw[i], "CometQL_v1", appConf::instance()->hl_port[i], NULL, 0);
         
         if(mysql_errno(&mysql[i]))
         {
-            TagLoger::error(Log_CometQLCluster, 0, "\x1b[1;31mCometQL соединение не уствановлено\n%s\nnode=%d ip=%s:%d pw=%s\x1b[0m", mysql_error(&mysql[i]),
+            TagLoger::error(Log_CometQLCluster, 0, "\x1b[1;31mCometQL Connection not established\n%s\nnode=%d ip=%s:%d pw=%s\x1b[0m", mysql_error(&mysql[i]),
                     i, appConf::instance()->hl_ip[i], appConf::instance()->hl_port[i], appConf::instance()->hl_pw[i]); 
         }
         else
         {
-            TagLoger::error(Log_CometQLCluster, 0, "\x1b[1;32mCometQL соединение уствановлено\nnode=%d ip=%s:%d pw=%s\x1b[0m", 
+            TagLoger::error(Log_CometQLCluster, 0, "\x1b[1;32mCometQL Connection established\nnode=%d ip=%s:%d pw=%s\x1b[0m", 
                     i, appConf::instance()->hl_ip[i], appConf::instance()->hl_port[i], appConf::instance()->hl_pw[i]); 
             
         }

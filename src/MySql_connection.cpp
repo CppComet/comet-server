@@ -51,14 +51,8 @@ pthread_mutex_t MySql_connection::QLParsing_mutex;
  *
  * @todo добавить обработку authType в логирование канала.
  */
-int PipeLog::addToLog(thread_data* local_buf, const char* pipe_name, const char* event_name, const char* auth_type, unsigned int from_user_id, const char* msg,  unsigned int msg_length)
+int PipeLog::addToLog(thread_data* local_buf, const char* pipe_name, const char* event_name, unsigned int from_user_id, const char* msg,  unsigned int msg_length)
 {
-    char def_auth_type[] = "*";
-    if(auth_type == NULL || strlen(auth_type) == 0)
-    {
-        auth_type = def_auth_type;
-    }
-
     char def_event_name[] = "undefined";
     if(event_name == NULL || strlen(event_name) == 0)
     {
@@ -213,7 +207,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
     // если len = 0 то соединение закрыто.
     if(TagLoger::isLog(Log_MySqlServer, TAGLOG_LOG))
     {
-        TagLoger::log(Log_MySqlServer, 0, "Обработка mySQL запроса ------------------------[%d]\n", local_buf->buf[len-1]);
+        TagLoger::log(Log_MySqlServer, 0, "Processing MYSQL query ------------------------[%d]\n", local_buf->buf[len-1]);
         for(int i=0; i < len; i++)
         {
             if(i % 8 == 0)  TagLoger::log(Log_MySqlServer, 0, "!\n%d:\t", i);
@@ -304,12 +298,12 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
 
             if(authDataLen == 0)
             {
-                TagLoger::log(Log_MySqlServer, 0, "Авторизация без пароля authDataLen=%d\n", authDataLen);
+                TagLoger::log(Log_MySqlServer, 0, "Authorization without password authDataLen=%d\n", authDataLen);
 
                 // Здесь проверка для того можно ли пускать без пароля по имени пользователя
                 if(memcmp(name, "haproxy_check", strlen("haproxy_check")) != 0)
                 {
-                    TagLoger::log(Log_MySqlServer, 0, "Авторизация не прошла, не ожиданный размер authDataLen=%d\n", authDataLen);
+                    TagLoger::warn(Log_MySqlServer, 0, "Authorization failed, not expected size authDataLen=%d\n", authDataLen);
                     Send_Err_Package(SQL_ERR_AUTHENTICATION,"Authentication failure, authDataLen!=20", PacketNomber+1, local_buf, this);
                     return -1;
                 }
@@ -319,12 +313,12 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
                 // Таки решили пустить без пароля
                 Send_OK_Package(PacketNomber+1, local_buf, this);
                 clientState = STATE_RECEIVED_HANDSHAKE;
-                TagLoger::log(Log_MySqlServer, 0, "Соединение не будет закрыто [1] [MySql_connection]\n");
+                TagLoger::debug(Log_MySqlServer, 0, "Connection will not be closed [1] [MySql_connection]\n");
                 return 0;
             }
             else if(authDataLen != 20)
             {
-                TagLoger::error(Log_MySqlServer, 0, "Авторизация не прошла, не ожиданный размер authDataLen=%d\n", authDataLen);
+                TagLoger::error(Log_MySqlServer, 0, "Authorization failed, not expected size authDataLen=%d\n", authDataLen);
                 Send_Err_Package(SQL_ERR_AUTHENTICATION,"Authentication failure, authDataLen!=20", PacketNomber+1, local_buf, this);
                 return -1;
             }
@@ -337,7 +331,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
 
             if(devInfo::testDevKey(random20bytes, DevKeyHashStart, local_buf))
             {
-                TagLoger::log(Log_MySqlServer, 0, "Авторизация успешна ok\n");
+                TagLoger::debug(Log_MySqlServer, 0, "Authorization successful ok\n");
                 devManager::instance()->getDevInfo()->incrBackendOnline();
                 devManager::instance()->getDevInfo()->incrMessages();
                 isRootUser = true;
@@ -345,7 +339,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
             else
             {
                 isRootUser = false;
-                TagLoger::error(Log_MySqlServer, 0, "Авторизация не прошла");
+                TagLoger::error(Log_MySqlServer, 0, "Authorization failed");
                 Send_Err_Package(SQL_ERR_AUTHENTICATION,"Authentication failure", PacketNomber+1, local_buf, this);
                 return -1;
             }
@@ -369,7 +363,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
 
         Send_OK_Package(PacketNomber+1, local_buf, this);
         clientState = STATE_RECEIVED_HANDSHAKE;
-        TagLoger::log(Log_MySqlServer, 0, "Соединение не будет закрыто [2] [MySql_connection]\n");
+        TagLoger::log(Log_MySqlServer, 0, "Connection will not be closed [2] [MySql_connection]\n");
         return 0;
     }
     else if(clientState == STATE_RECEIVED_HANDSHAKE)
@@ -666,11 +660,11 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
             Send_EOF_Package(PacketNomber+1, local_buf, this); // Send_EOF_Package
         }
 
-        TagLoger::log(Log_MySqlServer, 0, "Соединение не будет закрыто [3] [MySql_connection]\n");
+        TagLoger::log(Log_MySqlServer, 0, "Connection will not be closed [3] [MySql_connection]\n");
         return 0;
     }
 
-    TagLoger::log(Log_MySqlServer, 0, "Завершение обработки подключения [MySql_connection]\n");
+    TagLoger::log(Log_MySqlServer, 0, "Terminate the connection processing [MySql_connection]\n");
     return -1;
 }
 
@@ -871,7 +865,7 @@ int MySql_connection::sql_show_table_status(thread_data* local_buf, unsigned int
     values[++i] = "utf8_general_ci"; // Collation
     values[++i] = "";                // Checksum
     values[++i] = "";                // Create_options
-    values[++i] = "Таблица с данными авторизации пользователей"; // Comment
+    values[++i] = "Table with authorization data for users"; // Comment
 
     delta = RowPackage(18, values, ++PacketNomber, answer);
     answer += delta;
@@ -1275,7 +1269,7 @@ int MySql_connection::sql_show_status(thread_data* local_buf, unsigned int Packe
     {
         // не известный флаг, ошибка в граматике
         value[0] = "flag";
-        value[1] = "Не известный флаг, ошибка в граматике";
+        value[1] = "Unknown flag, grammar error";
 
         delta = RowPackage(2, value, ++PacketNomber, answer);
         answer += delta;
@@ -1455,7 +1449,7 @@ int MySql_connection::sql_insert_into_users_auth(thread_data* local_buf, unsigne
 
     if(!validation_string(hash, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[1]].tokLen))
     {
-        Send_Err_Package(SQL_ERR_INVALID_DATA, "Сontains any invalid characters in the string hash", PacketNomber+1, local_buf, this);
+        Send_Err_Package(SQL_ERR_INVALID_DATA, "Contains an invalid characters in the string hash", PacketNomber+1, local_buf, this);
         return 0;
     }
 
@@ -1538,13 +1532,13 @@ int MySql_connection::sql_delete_from_users_auth(thread_data* local_buf, unsigne
                 }
                 else
                 {
-                    TagLoger::log(Log_MySqlServer, 0, "Не найден объект соединения\n");
+                    TagLoger::log(Log_MySqlServer, 0, "Connection object is not found\n");
                 }
             }
         }
         else
         {
-            TagLoger::log(Log_MySqlServer, 0, "Не найден идентификатор соединения\n");
+            TagLoger::log(Log_MySqlServer, 0, "Connection ID not found\n");
         }
 
 
@@ -1810,11 +1804,13 @@ int MySql_connection::sql_delete_from_users_messages(thread_data* local_buf, uns
     return 0;
 }
 
-
+ 
 // pipes_messages
 int MySql_connection::sql_select_from_pipes_messages(thread_data* local_buf, unsigned int PacketNomber)
 {
     const static char* columDef[MAX_COLUMNS_COUNT] = {
+        "id",
+        "time",
         "name",
         "index",
         "event",
@@ -1828,8 +1824,7 @@ int MySql_connection::sql_select_from_pipes_messages(thread_data* local_buf, uns
         return 0;
     }
 
-    int idExprPos = local_buf->sql.expressionsPositions[0];
-
+    int idExprPos = local_buf->sql.expressionsPositions[2];
     if(idExprPos == -1)
     {
         Send_Err_Package(SQL_ERR_WHERE_EXPRESSIONS, "Selection without transferring the requested values of the primary key is not supported", PacketNomber+1, local_buf, this);
@@ -1856,11 +1851,13 @@ int MySql_connection::sql_select_from_pipes_messages(thread_data* local_buf, uns
         local_buf->stm.pipe_messages_select.execute(pipe_name, 99);
         while(!local_buf->stm.pipe_messages_select.fetch())
         {
-            if(local_buf->sql.useColumn(0)) local_buf->sql.getValue(countRows, 0) = pipe_name;
-            if(local_buf->sql.useColumn(1)) local_buf->sql.getValue(countRows, 1) = countRows;
-            if(local_buf->sql.useColumn(2)) local_buf->sql.getValue(countRows, 2) = local_buf->stm.pipe_messages_select.result_event;
-            if(local_buf->sql.useColumn(3)) local_buf->sql.getValue(countRows, 3) = local_buf->stm.pipe_messages_select.result_message;
-            if(local_buf->sql.useColumn(4)) local_buf->sql.getValue(countRows, 4) = (long)local_buf->stm.pipe_messages_select.result_user_id;
+            if(local_buf->sql.useColumn(0)) local_buf->sql.getValue(countRows, 0) = local_buf->stm.pipe_messages_select.result_id;
+            if(local_buf->sql.useColumn(1)) local_buf->sql.getValue(countRows, 1) = (long)local_buf->stm.pipe_messages_select.result_time;
+            if(local_buf->sql.useColumn(2)) local_buf->sql.getValue(countRows, 2) = pipe_name;
+            if(local_buf->sql.useColumn(3)) local_buf->sql.getValue(countRows, 3) = countRows;
+            if(local_buf->sql.useColumn(4)) local_buf->sql.getValue(countRows, 4) = local_buf->stm.pipe_messages_select.result_event;
+            if(local_buf->sql.useColumn(5)) local_buf->sql.getValue(countRows, 5) = local_buf->stm.pipe_messages_select.result_message;
+            if(local_buf->sql.useColumn(6)) local_buf->sql.getValue(countRows, 6) = (long)local_buf->stm.pipe_messages_select.result_user_id;
 
             countRows++;
         }
@@ -1876,10 +1873,13 @@ int MySql_connection::sql_insert_into_pipes_messages(thread_data* local_buf, uns
     TagLoger::log(Log_MySqlServer, 0, " >MySql_connection::insert_into_pipes_messages\n");
 
     const static char* columDef[MAX_COLUMNS_COUNT] = {
+        "id",
+        "time",
         "name",
         "index",
         "event",
-        "message"
+        "message",
+        "user_id"
     };
 
     if(!local_buf->sql.prepare_columns_for_insert(columDef, local_buf->qInfo))
@@ -1888,65 +1888,65 @@ int MySql_connection::sql_insert_into_pipes_messages(thread_data* local_buf, uns
         return 0;
     }
 
-    if(local_buf->sql.columPositions[0] < 0)
+    if(local_buf->sql.columPositions[2] < 0)
     {
         Send_Err_Package(SQL_ERR_INVALID_DATA, "field `name` is required", PacketNomber+1, local_buf, this);
         return 0;
     }
 
-    if(local_buf->sql.columPositions[2] < 0)
+    if(local_buf->sql.columPositions[4] < 0)
     {
         Send_Err_Package(SQL_ERR_INVALID_DATA, "field `event` is required", PacketNomber+1, local_buf, this);
         return 0;
     }
 
-    if(local_buf->sql.columPositions[3] < 0)
+    if(local_buf->sql.columPositions[5] < 0)
     {
         Send_Err_Package(SQL_ERR_INVALID_DATA, "field `message` is required", PacketNomber+1, local_buf, this);
         return 0;
     }
 
-    char* pipe_name = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]]);
-    pipe_name[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]].tokLen] = 0;
-    if(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]].tokLen > PIPE_NAME_LEN)
+    char* pipe_name = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[2]]);
+    pipe_name[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[2]].tokLen] = 0;
+    if(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[2]].tokLen > PIPE_NAME_LEN)
     {
         Send_Err_Package(SQL_ERR_OVERFLOW, "Channel name is too long", PacketNomber+1, local_buf, this);
         return 0;
     }
 
-    if(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]].tokLen < 3)
+    if(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[2]].tokLen < 3)
     {
         Send_Err_Package(SQL_ERR_EMPTY, "Channel name is too short", PacketNomber+1, local_buf, this);
         return 0;
     }
 
-    if(!AZ09test(pipe_name, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]].tokLen))
+    if(!AZ09test(pipe_name, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[2]].tokLen))
     {
         Send_Err_Package(SQL_ERR_INVALID_DATA, "The channel name can contain only the characters A-Za-z0-9_-", PacketNomber+1, local_buf, this);
         return 0;
     }
 
-    char* pipe_event = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[2]]);
-    pipe_event[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[2]].tokLen] = 0;
+    char* pipe_event = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[4]]);
+    pipe_event[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[4]].tokLen] = 0;
 
-    if(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[2]].tokLen > EVENT_NAME_LEN)
+    if(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[4]].tokLen > EVENT_NAME_LEN)
     {
         Send_Err_Package(SQL_ERR_OVERFLOW, "Channel event_name is too long", PacketNomber+1, local_buf, this);
         return 0;
     }
 
-    if(!AZ09test(pipe_event, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[2]].tokLen))
+    if(!AZ09test(pipe_event, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[4]].tokLen))
     {
         Send_Err_Package(SQL_ERR_INVALID_DATA, "The channel name can contain only the characters A-Za-z0-9_-", PacketNomber+1, local_buf, this);
         return 0;
     }
 
-    char* message = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]]);
-    message[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen] = 0;
+    char* message = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[5]]);
+    message[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[5]].tokLen] = 0;
 
     local_buf->answer_buf.lock();
-    //json_escape_string(message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen, local_buf->answer_buf.getData());
-    mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen);
+    //json_escape_string(message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[5]].tokLen, local_buf->answer_buf.getData());
+    mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[5]].tokLen);
 
 
     char serverData[EVENT_NAME_LEN+64];
@@ -1954,7 +1954,7 @@ int MySql_connection::sql_insert_into_pipes_messages(thread_data* local_buf, uns
 
     TagLoger::log(Log_MySqlServer, 0, "message:%s\n", local_buf->answer_buf.getData());
 
-    PipeLog::addToLog(local_buf, pipe_name, pipe_event, 0, 0, message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen);
+    PipeLog::addToLog(local_buf, pipe_name, pipe_event, 0, message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[5]].tokLen);
     internalApi::send_event_to_pipe(local_buf, pipe_name, local_buf->answer_buf.getData(), serverData);
 
     local_buf->answer_buf.unlock();
@@ -1970,13 +1970,13 @@ int MySql_connection::sql_insert_into_pipes_messages(thread_data* local_buf, uns
 int MySql_connection::sql_delete_from_pipes_messages(thread_data* local_buf, unsigned int PacketNomber)
 {
     const static char* columDef[MAX_COLUMNS_COUNT] = {
+        "id",
+        "time",
         "name",
         "index",
         "event",
         "message",
-        "auth_type" // По умолчанию как * тоесть сообщение для всех
-                    // Если authType == 1 то не отправляем сообщение не авторизованным пользователям.
-                    // Если authType == 0 то не отправляем сообщение авторизованным пользователям.
+        "user_id"  
     };
 
     if(!local_buf->sql.prepare_where_expressions(columDef, local_buf->qInfo))
@@ -1985,39 +1985,66 @@ int MySql_connection::sql_delete_from_pipes_messages(thread_data* local_buf, uns
         return 0;
     }
 
-    int idExprPos = local_buf->sql.expressionsPositions[0];
-
-    if(idExprPos == -1)
+    if(local_buf->sql.expressionsPositions[0] == -1 && local_buf->sql.expressionsPositions[2] == -1)
     {
         Send_Err_Package(SQL_ERR_WHERE_EXPRESSIONS, "Selection without transferring the requested values of the primary key is not supported", PacketNomber+1, local_buf, this);
         return 0;
     }
 
-    int countRows = 0;
-    for(int i=0; i< MAX_EXPRESSIONS_VALUES; i++)
+    if(local_buf->sql.expressionsPositions[2] != -1)
     {
-        if(local_buf->qInfo.where.whereExprValue[idExprPos][i].isNull())
+        int idExprPos = local_buf->sql.expressionsPositions[2];
+        int countRows = 0;
+        for(int i=0; i< MAX_EXPRESSIONS_VALUES; i++)
         {
-            // Значения закончились
-            break;
-        }
+            if(local_buf->qInfo.where.whereExprValue[idExprPos][i].isNull())
+            {
+                // Значения закончились
+                break;
+            }
 
-        char* pipe_name = local_buf->qInfo.where.whereExprValue[idExprPos][i].Start(local_buf->qInfo);
-        int nameLen = local_buf->qInfo.where.whereExprValue[idExprPos][i].tokLen;
-        pipe_name[nameLen] = 0;
-        if(nameLen < 3 || nameLen > PIPE_NAME_LEN || !AZ09test(pipe_name, nameLen))
+            char* pipe_name = local_buf->qInfo.where.whereExprValue[idExprPos][i].Start(local_buf->qInfo);
+            int nameLen = local_buf->qInfo.where.whereExprValue[idExprPos][i].tokLen;
+            pipe_name[nameLen] = 0;
+            if(nameLen < 3 || nameLen > PIPE_NAME_LEN || !AZ09test(pipe_name, nameLen))
+            {
+                continue;
+            }
+
+            local_buf->stm.pipe_messages_delete.execute(0x7FFFFFFF-1, pipe_name); // максимальное значение unixtime
+            countRows++;
+        }
+    }
+
+    if(local_buf->sql.expressionsPositions[0] != -1)
+    {
+        int idExprPos = local_buf->sql.expressionsPositions[0];
+        int countRows = 0;
+        for(int i=0; i< MAX_EXPRESSIONS_VALUES; i++)
         {
-            continue;
-        }
+            if(local_buf->qInfo.where.whereExprValue[idExprPos][i].isNull())
+            {
+                // Значения закончились
+                break;
+            }
 
-        local_buf->stm.pipe_messages_delete.execute(0x7FFFFFFF-1, pipe_name); // максимальное значение unixtime
-        countRows++;
+            char* msg_uuid = local_buf->qInfo.where.whereExprValue[idExprPos][i].Start(local_buf->qInfo);
+            int uuidLen = local_buf->qInfo.where.whereExprValue[idExprPos][i].tokLen;
+            msg_uuid[uuidLen] = 0;
+            if(uuidLen < 3 || uuidLen > PIPE_NAME_LEN || !AZ09test(msg_uuid, uuidLen))
+            {
+                continue;
+            }
+
+            local_buf->stm.pipe_messages_delete_by_message_id.execute(msg_uuid); // максимальное значение unixtime
+            countRows++;
+        }
     }
 
     /**
      * Для операций удаления affectedRows возвращатся не будет в целях оптимизации.
      */
-    Send_OK_Package(0, 0, PacketNomber+1, local_buf, this);
+    Send_OK_Package(0, 0, PacketNomber+1, local_buf, this); 
     return 0;
 }
 
@@ -2125,7 +2152,7 @@ int MySql_connection::sql_delete_from_users_in_pipes(thread_data* local_buf, uns
 }
 
 
-// users_in_pipes
+// pipes
 int MySql_connection::sql_select_from_pipes(thread_data* local_buf, unsigned int PacketNomber)
 {
     const static char* columDef[MAX_COLUMNS_COUNT] = {
@@ -2163,21 +2190,13 @@ int MySql_connection::sql_select_from_pipes(thread_data* local_buf, unsigned int
         {
             continue;
         }
-
-
+ 
         CP<Pipe> pipe = devManager::instance()->getDevInfo()->findPipe(std::string(pipe_name));
 
-        TagLoger::log(Log_MySqlServer, 0, "text>%s\n",pipe_name);
-        if( !pipe.isNULL() && pipe->empty() )
-        {
-            if(local_buf->sql.useColumn(0)) local_buf->sql.getValue(countRows, 0) = pipe_name;
-            if(local_buf->sql.useColumn(1)) local_buf->sql.getValue(countRows, 1) = pipe->size();
-        }
-        else
-        {
-            continue;
-        }
-
+        TagLoger::log(Log_MySqlServer, 0, "text>%s\n",pipe_name); 
+        if(local_buf->sql.useColumn(0)) local_buf->sql.getValue(countRows, 0) = pipe_name;
+        if(local_buf->sql.useColumn(1)) local_buf->sql.getValue(countRows, 1) = pipe->size();
+ 
         countRows++;
     }
 
@@ -2658,7 +2677,7 @@ int MySql_connection::set_online(thread_data* local_buf)
     }
 
     clientState = STATE_SEND_HANDSHAKE;
-    TagLoger::log(Log_MySqlServer, 0, "Соединение не будет закрыто [4] [MySql_connection]\n");
+    TagLoger::log(Log_MySqlServer, 0, "Connection will not be closed [4] [MySql_connection]\n");
     return web_write(pakbuf, dataLen);
 }
 
