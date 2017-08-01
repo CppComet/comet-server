@@ -16,289 +16,261 @@
  *
  */
 
-
-function getCookie(name)
+if(!window.tabSignal)
 {
-     var cookie = " " + document.cookie;
-     var search = " " + name + "=";
-     var setStr = null;
-     var offset = 0;
-     var end = 0;
-     if (cookie.length > 0) {
-             offset = cookie.indexOf(search);
-             if (offset != -1) {
-                     offset += search.length;
-                     end = cookie.indexOf(";", offset)
-                     if (end == -1) {
-                             end = cookie.length;
-                     }
-                     setStr = unescape(cookie.substring(offset, end));
-             }
-     }
-     return(setStr);
-}
-
-
-function comet_server_signal()
-{
-    if(this.init === undefined) this.init = false;
-    return comet_server_signal;
-}
-
-comet_server_signal.slotArray = new Array();
-comet_server_signal.debug = false;
-
-comet_server_signal.sigId = 0;
-
-comet_server_signal.tabUUID = undefined;
-comet_server_signal.getTabUUID = function()
-{
-    if(!comet_server_signal.tabUUID)
+    function tabSignal()
     {
-        comet_server_signal.tabUUID = "";
-        for(var i = 0; i< 16; i++)
+        return tabSignal;
+    }
+
+    tabSignal.slotArray = new Array();
+    tabSignal.debug = false;
+
+    tabSignal.sigId = 0;
+
+    tabSignal.tabUUID = undefined;
+    tabSignal.getTabUUID = function()
+    {
+        if(!tabSignal.tabUUID)
         {
-            comet_server_signal.tabUUID += "qwertyuiopasdfghjklzxcvbnm1234567890QWERTYUIOPASDFGHJKLZXCVBNM"[Math.floor(Math.random()*62)];
-        }
-    }
-    return comet_server_signal.tabUUID;
-}
-
-/**
- * Подписывает слот на сигнал
- *
- * Если передать два параметра то они обработаются как  connect( signal_name, slot_function )
- * Если передать три параметра то они обработаются как  connect( slot_name, signal_name, slot_function )
- *
- * @param slot_name Имя слота
- * @param signal_name Имя сигнала
- * @param slot_function Функция вызваемая при вызове слота, должна иметь следующию сигнатуру function(param, signal_name){}
- *
- * <code>
- * Пример использования
- * new new signal().emit("catalogControl.OpenObject",{})
- *
- * </code>
- */
-comet_server_signal.connect = function(slot_name, signal_name, slot_function)
-{
-    if(slot_function === undefined)
-    {
-        slot_function = signal_name;
-        signal_name = slot_name;
-        slot_name = "sig" + (comet_server_signal.sigId++)
-    }
-
-    if (comet_server_signal.slotArray[signal_name] === undefined)
-    {
-        comet_server_signal.slotArray[signal_name] = {}
-    }
-    comet_server_signal.slotArray[signal_name][slot_name] = slot_function;
-    if(comet_server_signal.debug) console.log("На прослушивание сигнала " + signal_name + " добавлен слот " + slot_name + "", comet_server_signal.slotArray)
-    return slot_name;
-}
-
-
-/**
- * Отписывает слот slot_name от сигнала signal_name
- */
-comet_server_signal.disconnect = function(slot_name, signal_name)
-{
-    if (comet_server_signal.slotArray[signal_name] !== undefined)
-    {
-        if (comet_server_signal.slotArray[signal_name][slot_name] !== undefined)
-        {
-            comet_server_signal.slotArray[signal_name][slot_name] = undefined;
-            return true
-        }
-    }
-    return false
-}
-
-/**
- * Вызывает слоты подписаные на сигнал signal_name и каждому из них передаёт аруметы signal_name - имя вызвавшего сигнала, и param - объект с параметрами для слота)
- * В добавок ретранслирует сигнал в дочернии iframe если они есть и в родительское окно если оно есть
- * @param signal_name Имя сигнала
- * @param param Параметры переданые слоту при вызове в втором аргументе
- * @param SignalNotFromThisTab Если false то значит это сигнал пришёл из другой вкладки
- */
-comet_server_signal.emit = function(signal_name, param, SignalNotFromThisTab)
-{
-    if (comet_server_signal.slotArray[signal_name] === undefined)
-    {
-        if(comet_server_signal.debug) console.log("На сигнал " + signal_name + " нет подписчиков")
-    }
-    else
-    {
-        if(comet_server_signal.debug) console.log("Сигнал " + signal_name + " подписаны слоты")
-        var obj = comet_server_signal.slotArray[signal_name];
-        for (var slot in obj)
-        {
-            if( obj.hasOwnProperty(slot) &&  obj[slot] !== undefined)
+            tabSignal.tabUUID = "";
+            for(var i = 0; i< 16; i++)
             {
-                obj[slot](param,signal_name, SignalNotFromThisTab === true)
+                tabSignal.tabUUID += "qwertyuiopasdfghjklzxcvbnm1234567890QWERTYUIOPASDFGHJKLZXCVBNM"[Math.floor(Math.random()*62)];
             }
         }
-
+        return tabSignal.tabUUID;
     }
-}
 
-/*
- *  генерация события будут оповещены и соседние вкладки
- *  @eName string - имя события
- *  использование .emit('любое название события', [ Параметры события ])
- */
-comet_server_signal.emitAll = function (signal_name, param)
-{
-    comet_server_signal.emit(signal_name, param)
-
-    try{
-        if(window['localStorage'] !==undefined  )
+    /**
+     * Подписывает слот на сигнал
+     *
+     * Если передать два параметра то они обработаются как  connect( signal_name, slot_function )
+     * Если передать три параметра то они обработаются как  connect( slot_name, signal_name, slot_function )
+     *
+     * @param slot_name Имя слота
+     * @param signal_name Имя сигнала
+     * @param slot_function Функция вызваемая при вызове слота, должна иметь следующию сигнатуру function(param, signal_name){}
+     *
+     * <code>
+     * Пример использования
+     * new new signal().emit("catalogControl.OpenObject",{})
+     *
+     * </code>
+     */
+    tabSignal.connect = function(slot_name, signal_name, slot_function)
+    {
+        if(slot_function === undefined)
         {
-            var curent_custom_id = Math.random()+"_"+Math.random()+"_"+Math.random()+"_"+Math.random()+"_"+Math.random()
-            window['localStorage']['comet_server_signal_storage_emit']= JSON.stringify({name:signal_name, custom_id:curent_custom_id, param:param});
+            slot_function = signal_name;
+            signal_name = slot_name;
+            slot_name = "sig" + (tabSignal.sigId++)
         }
-        return true
-    }catch (e){
+
+        if (tabSignal.slotArray[signal_name] === undefined)
+        {
+            tabSignal.slotArray[signal_name] = {}
+        }
+        tabSignal.slotArray[signal_name][slot_name] = slot_function;
+        if(tabSignal.debug) console.log("На прослушивание сигнала " + signal_name + " добавлен слот " + slot_name + "", tabSignal.slotArray)
+        return slot_name;
+    }
+
+
+    /**
+     * Отписывает слот slot_name от сигнала signal_name
+     */
+    tabSignal.disconnect = function(slot_name, signal_name)
+    {
+        if (tabSignal.slotArray[signal_name] !== undefined)
+        {
+            if (tabSignal.slotArray[signal_name][slot_name] !== undefined)
+            {
+                tabSignal.slotArray[signal_name][slot_name] = undefined;
+                return true
+            }
+        }
         return false
     }
-}
 
-/**
- * Запись состояния общего для всех вкладок
- * @param {string} name
- * @param {object} value
- * @param {number} minTime минимальный возраст данных меньше которого данные перезаписватся не должны в том случаии если они записанны не этой вкладкой
- */
-comet_server_signal.setState = function(name, value, minTime)
-{
-    //console.log("setState", name, value, minTime)
-    var time = new Date()
-    try{ 
-        if(minTime)
+    /**
+     * Вызывает слоты подписаные на сигнал signal_name и каждому из них передаёт аруметы signal_name - имя вызвавшего сигнала, и param - объект с параметрами для слота)
+     * В добавок ретранслирует сигнал в дочернии iframe если они есть и в родительское окно если оно есть
+     * @param signal_name Имя сигнала
+     * @param param Параметры переданые слоту при вызове в втором аргументе
+     * @param SignalNotFromThisTab Если false то значит это сигнал пришёл из другой вкладки
+     */
+    tabSignal.emit = function(signal_name, param, SignalNotFromThisTab)
+    {
+        if (tabSignal.slotArray[signal_name] === undefined)
         {
+            if(tabSignal.debug) console.log("На сигнал " + signal_name + " нет подписчиков")
+        }
+        else
+        {
+            if(tabSignal.debug) console.log("Сигнал " + signal_name + " подписаны слоты")
+            var obj = tabSignal.slotArray[signal_name];
+            for (var slot in obj)
+            {
+                if( obj.hasOwnProperty(slot) &&  obj[slot] !== undefined)
+                {
+                    obj[slot](param,signal_name, SignalNotFromThisTab === true)
+                }
+            }
+
+        }
+    }
+
+    /*
+     *  генерация события будут оповещены и соседние вкладки
+     *  @eName string - имя события
+     *  использование .emit('любое название события', [ Параметры события ])
+     */
+    tabSignal.emitAll = function (signal_name, param)
+    {
+        tabSignal.emit(signal_name, param)
+
+        try{
+            if(window['localStorage'] !==undefined  )
+            {
+                var curent_custom_id = Math.random()+"_"+Math.random()+"_"+Math.random()+"_"+Math.random()+"_"+Math.random()
+                window['localStorage']['tabSignal_storage_emit']= JSON.stringify({name:signal_name, custom_id:curent_custom_id, param:param});
+            }
+            return true
+        }catch (e){
+            return false
+        }
+    }
+
+    /**
+     * Запись состояния общего для всех вкладок
+     * @param {string} name
+     * @param {object} value
+     * @param {number} minTime минимальный возраст данных меньше которого данные перезаписватся не должны в том случаии если они записанны не этой вкладкой
+     */
+    tabSignal.setState = function(name, value, minTime)
+    { 
+        var time = new Date()
+        try{ 
+            if(minTime)
+            {
+                var value = window.localStorage["tabSignal_"+name];
+                if(value)
+                {
+                    var val = JSON.parse(value)
+
+                    if(val.time + minTime > time.getTime() && val.tabUUID != tabSignal.getTabUUID() )
+                    {
+                        // Возраст данных меньше minTime и они записаны не этой вкладкой, а значит мы их перезаписывать не будем
+                        return false
+                    }
+                }
+            }
+
+            window.localStorage["tabSignal_"+name] = JSON.stringify({time: time.getTime(), value: value, tabUUID: tabSignal.getTabUUID()})
+            return true
+        }catch (e){
+            return false
+        }
+    }
+
+    /**
+     * Обновление с интервалом данных чтоб их не перезаписала другая вкладка
+     * @param {type} name
+     * @param {type} value
+     * @param {type} minTime
+     * @returns {undefined}
+     */
+    tabSignal.intervalUpdateState = function(name, value, minTime)
+    {
+        if(tabSignal.setState(name, value, minTime))
+        {
+            return setInterval(tabSignal.setState, minTime/3, name, value, minTime)
+        }
+        return undefined
+    }
+    /**
+     * Чтение состояния общего для всех вкладок
+     * @param {string} name
+     * @param {number} maxTime Максимальный возраст данных в милесекундах после чего они считаются не действительными.
+     * @returns {Window.localStorage}
+     */
+    tabSignal.getState = function(name, maxTime)
+    {
+        try{ 
+            var time = new Date()
             var value = window.localStorage["tabSignal_"+name];
             if(value)
             {
                 var val = JSON.parse(value)
 
-                if(val.time + minTime > time.getTime() && val.tabUUID != comet_server_signal.getTabUUID() )
+                if(!maxTime)
                 {
-                    // Возраст данных меньше minTime и они записаны не этой вкладкой, а значит мы их перезаписывать не будем
-                    return false
+                    // Нам не важен возраст данных
+                    return val.value
                 }
-            }
+
+                if(val.time + maxTime > time.getTime())
+                {
+                    // Возраст данных меньше maxTime
+                    return val.value
+                }
+                return undefined
+            } 
+        }catch (e){ }
+        return undefined
+    }
+
+    tabSignal.send_emit = tabSignal.emitAll; // Для совместимости с прошлой версией.
+ 
+
+    if(!tabSignal.init)
+    {
+        tabSignal.init = true
+        if( window.addEventListener )
+        {
+            window.addEventListener('storage', function(e)
+            {
+                if(e.key && e.key == 'tabSignal_storage_emit')
+                {// !testThis
+                    try{
+                        var data = JSON.parse(e.newValue);
+                        if(data !== undefined && data.name !== undefined  )
+                        {
+                            if(tabSignal.debug > 1) console.log( data )
+                            tabSignal.emit( data.name, data.param, true )
+                        }
+                    }
+                    catch (failed)
+                    {
+                    }
+                }
+            }, false);
         }
-
-        window.localStorage["tabSignal_"+name] = JSON.stringify({time: time.getTime(), value: value, tabUUID: comet_server_signal.getTabUUID()})
-        return true
-    }catch (e){
-        return false
-    }
-}
-
-/**
- * Обновление с интервалом данных чтоб их не перезаписала другая вкладка
- * @param {type} name
- * @param {type} value
- * @param {type} minTime
- * @returns {undefined}
- */
-comet_server_signal.intervalUpdateState = function(name, value, minTime)
-{
-    if(comet_server_signal.setState(name, value, minTime))
-    {
-        return setInterval(comet_server_signal.setState, minTime/3, name, value, minTime)
-    }
-    return undefined
-}
-/**
- * Чтение состояния общего для всех вкладок
- * @param {string} name
- * @param {number} maxTime Максимальный возраст данных в милесекундах после чего они считаются не действительными.
- * @returns {Window.localStorage}
- */
-comet_server_signal.getState = function(name, maxTime)
-{
-    try{ 
-        var time = new Date()
-        var value = window.localStorage["tabSignal_"+name];
-        if(value)
+        else
         {
-            var val = JSON.parse(value)
-
-            if(!maxTime)
+            document.attachEvent('onstorage', function(e)
             {
-                // Нам не важен возраст данных
-                return val.value
-            }
-
-            if(val.time + maxTime > time.getTime())
-            {
-                // Возраст данных меньше maxTime
-                return val.value
-            }
-            return undefined
-        } 
-    }catch (e){ }
-    return undefined
-}
-
-/**
- * Для совместимости с прошлой версией.
- *
- * Библиотека TabSignal.js (https://github.com/Levhav/TabSignal.js) полностью реализована
- * объектом comet_server_signal так как является составной частью JavaScript CometServerApi
- */
-tabSignal = comet_server_signal;
-comet_server_signal.send_emit = comet_server_signal.emitAll; // Для совместимости с прошлой версией.
-
-
-if(!comet_server_signal.prototype.init)
-{
-    comet_server_signal.prototype.init = true
-    if( window.addEventListener )
-    {
-        window.addEventListener('storage', function(e)
-        {
-            if(e.key && e.key == 'comet_server_signal_storage_emit')
-            {// !testThis
-                try{
-                    var data = JSON.parse(e.newValue);
-                    if(data !== undefined && data.name !== undefined  )
+                if(e.key && e.key == 'tabSignal_storage_emit')
+                {// !testThis
+                    try{
+                        var data = JSON.parse(e.newValue);
+                        if(data !== undefined && data.name !== undefined  )
+                        {
+                            if(tabSignal.debug > 1) console.log( data )
+                            tabSignal.emit( data.name, data.param, true )
+                        }
+                    }
+                    catch (failed)
                     {
-                        if(comet_server_signal.debug > 1) console.log( data )
-                        comet_server_signal().emit( data.name, data.param, true )
                     }
                 }
-                catch (failed)
-                {
-                }
-            }
-        }, false);
-    }
-    else
-    {
-        document.attachEvent('onstorage', function(e)
-        {
-            if(e.key && e.key == 'comet_server_signal_storage_emit')
-            {// !testThis
-                try{
-                    var data = JSON.parse(e.newValue);
-                    if(data !== undefined && data.name !== undefined  )
-                    {
-                        if(comet_server_signal.debug > 1) console.log( data )
-                        comet_server_signal().emit( data.name, data.param, true )
-                    }
-                }
-                catch (failed)
-                {
-                }
-            }
-        } );
-    }
-}
+            } );
+        }
+    } 
 
+
+}
 
 var _cometServerApi = function(opt)
 {
@@ -320,7 +292,7 @@ var _cometServerApi = function(opt)
 /**
  * @private
  */
-_cometServerApi.prototype.version = "3.26";
+_cometServerApi.prototype.version = "3.28";
 
 /**
  * @private
@@ -332,6 +304,15 @@ _cometServerApi.prototype.options = {};
  */
 _cometServerApi.prototype.options.nodeArray = ["app.comet-server.ru"]
 _cometServerApi.prototype.options.node = undefined
+
+/**
+ * Режим кластеризации
+ * @type Boolean
+ * 
+ * True - подключаемся к одной ноде, если не авторизованы то к случайной, если авторизованы то выбираем на основе user_id
+ * False - подключаемся ко всем нодам из списка, отправляем сообщения на одну ноду из списка
+ */
+_cometServerApi.prototype.options.roundrobin = false
 
 /**
  * @private
@@ -518,7 +499,7 @@ _cometServerApi.prototype.getCustomString = function()
  */
 _cometServerApi.prototype.getTabUUID = function()
 {
-    return comet_server_signal().getTabUUID()
+    return tabSignal.getTabUUID()
 }
 
 /**
@@ -686,7 +667,7 @@ _cometServerApi.prototype.subscription_callBack = function(name, callBack, speci
     if(specialMarker === undefined)
     {
         // Подписка на сообщения от сервера для нашей вкладки
-        sigId += comet_server_signal().connect(name, function(param)
+        sigId += tabSignal.connect(name, function(param)
         {
             //console.log("marker", param.server_info.marker, thisObj.custom_id)
             if(param.server_info.marker !== thisObj.custom_id && param.server_info.marker !== undefined)
@@ -700,7 +681,7 @@ _cometServerApi.prototype.subscription_callBack = function(name, callBack, speci
     else
     {
         // Подписка на сообщения от сервера доставленые специально и единоразово для переданного callBack
-        sigId += comet_server_signal().connect(specialMarker, name,  function(param)
+        sigId += tabSignal.connect(specialMarker, name,  function(param)
         {
             if(param.server_info.marker !== specialMarker)
             {
@@ -708,7 +689,7 @@ _cometServerApi.prototype.subscription_callBack = function(name, callBack, speci
                return 0;
             }
 
-            comet_server_signal().disconnect(specialMarker, name);
+            tabSignal.disconnect(specialMarker, name);
             callBack(param);
         });
     }
@@ -733,7 +714,7 @@ _cometServerApi.prototype.unsubscriptionAll = function()
 
         var sigName = val.replace(/^(.*)&&.*$/, "$1");
         var slotName = val.replace(/^.*&&(.*)$/, "$1");
-        comet_server_signal().disconnect(slotName, sigName);
+        tabSignal.disconnect(slotName, sigName);
     }
 
     _cometServerApi.prototype.subscription_slot_array = []
@@ -760,7 +741,7 @@ _cometServerApi.prototype.unsubscription = function(sigId)
 
     var sigName = sigId.replace(/^(.*)&&.*$/, "$1");
     var slotName = sigId.replace(/^.*&&(.*)$/, "$1");
-    return comet_server_signal().disconnect(slotName, sigName);
+    return tabSignal.disconnect(slotName, sigName);
 }
 
 
@@ -861,7 +842,7 @@ _cometServerApi.prototype.subscription = function(name, callback)
     if(typeof name === "function" )
     {
         // Подписка на все входищие сообщения из всех каналов на которые подписан этот клиент
-        var sigId = "comet_server_msg&&" + comet_server_signal().connect("comet_server_msg", name);
+        var sigId = "comet_server_msg&&" + tabSignal.connect("comet_server_msg", name);
         _cometServerApi.prototype.subscription_slot_array.push(sigId);
         return sigId;
     }
@@ -961,7 +942,7 @@ _cometServerApi.prototype.subscription = function(name, callback)
     else
     {
         // Мы slave вкладка
-        comet_server_signal().send_emit('comet_msg_slave_add_subscription_and_restart',_cometServerApi.prototype.subscription_array.join("\n"))
+        tabSignal.send_emit('comet_msg_slave_add_subscription_and_restart',_cometServerApi.prototype.subscription_array.join("\n"))
     }
     return sigId;
 }
@@ -1051,12 +1032,12 @@ _cometServerApi.prototype.getUserKey = function()
 
 _cometServerApi.prototype.getRealUserKey = function()
 {
-    return comet_server_signal().getState("real_user_key")
+    return tabSignal.getState("real_user_key")
 }
 
 _cometServerApi.prototype.setRealUserKey = function(real_user_key)
 {
-    comet_server_signal().setState("real_user_key", real_user_key)
+    tabSignal.setState("real_user_key", real_user_key)
 }
 
 _cometServerApi.prototype.getDevId = function()
@@ -1105,6 +1086,8 @@ _cometServerApi.prototype.UseWss = function(use)
     return _cometServerApi.prototype.protocol === "s"
 }
 
+_cometServerApi.prototype.options.isStart = false;
+
 /**
  * @returns {Boolean} Используется ли сейчас wss
  */
@@ -1120,6 +1103,8 @@ _cometServerApi.prototype.isUseWss = function()
  */
 _cometServerApi.prototype.start = function(opt, callBack)
 {
+    _cometServerApi.prototype.options.isStart = true;
+    
     if(opt !== undefined)
     {
         for(var key in opt)
@@ -1128,7 +1113,7 @@ _cometServerApi.prototype.start = function(opt, callBack)
         }
     }
     
-    if(_cometServerApi.prototype.options.wss !== undefined)
+    if(_cometServerApi.prototype.options.wss != undefined)
     { 
         _cometServerApi.prototype.UseWss(_cometServerApi.prototype.options.wss)
     }
@@ -1139,27 +1124,7 @@ _cometServerApi.prototype.start = function(opt, callBack)
         _cometServerApi.prototype.options.nodeArray = [_cometServerApi.prototype.options.node]
     }
 
-    if(_cometServerApi.prototype.LogLevel) console.log([_cometServerApi.prototype.custom_id , opt])
-
-    if(!_cometServerApi.prototype.options.CookieKyeName)
-    {
-        _cometServerApi.prototype.options.CookieKyeName = 'CometUserKey'
-    }
-
-    if(!_cometServerApi.prototype.options.CookieIdName)
-    {
-        _cometServerApi.prototype.options.CookieIdName = 'CometUserid'
-    }
-
-    if(!_cometServerApi.prototype.options.user_key)
-    {
-        _cometServerApi.prototype.options.user_key = getCookie(_cometServerApi.prototype.options.CookieKyeName)
-    }
-
-    if(!_cometServerApi.prototype.options.user_id)
-    {
-        _cometServerApi.prototype.options.user_id = getCookie(_cometServerApi.prototype.options.CometUserid)
-    }
+    if(_cometServerApi.prototype.LogLevel) console.log("start", [_cometServerApi.prototype.custom_id , opt])
 
     _cometServerApi.prototype.UseWebSocket(window.WebSocket !== undefined);
     
@@ -1208,19 +1173,23 @@ _cometServerApi.prototype.stop = function()
     }
     else
     {
-        comet_server_signal().send_emit('comet_msg_slave_signal_stop')
+        tabSignal.send_emit('comet_msg_slave_signal_stop')
     }
 }
 
 
 /**
- * Выполняет переподключение, если вызвать несколько раз переподключение будет одно
- * Переподключение начинается спустя секунду после вызова
- * @param function callback
- * @param array callback_arg
+ * Выполняет переподключение
+ * @param opt опции для переподключения
+ * @note не гарантирует правильное переподключение при смене адреса для подключения. Только смена логина и пароля.
  */
 _cometServerApi.prototype.restart = function(opt)
 {
+    if(!_cometServerApi.prototype.options.isStart)
+    {
+        return _cometServerApi.prototype.start(opt);
+    }
+    
     if(opt !== undefined)
     {
         for(var key in opt)
@@ -1231,19 +1200,17 @@ _cometServerApi.prototype.restart = function(opt)
 
     if(_cometServerApi.prototype.isMaster())
     {
-        if(_cometServerApi.prototype.restart_time_id !== false)
-        {
-            clearTimeout( _cometServerApi.prototype.restart_time_id );
-        }
-
-        _cometServerApi.prototype.in_abort = true;
         if(_cometServerApi.prototype.UseWebSocket())
         {
-            //_cometServerApi.prototype.socket.close();
             for(var i = 0; i < _cometServerApi.prototype.socketArray.length; i++)
             {
                 if(_cometServerApi.prototype.socketArray[i])
                 {
+                    if(_cometServerApi.prototype.LogLevel)
+                    {
+                        console.log('restart socket', i);
+                    }
+
                     _cometServerApi.prototype.socketArray[i].close();
                 }
             }
@@ -1252,17 +1219,10 @@ _cometServerApi.prototype.restart = function(opt)
         {
             _cometServerApi.prototype.request.abort();
         }
-
-        // Таймер задержки рестарта чтоб не выполнять рестарт чаще раза в секунду.
-        _cometServerApi.prototype.restart_time_id = setTimeout(function()
-        {
-            _cometServerApi.prototype.in_abort = false;
-            _cometServerApi.prototype.conect_to_server();
-        },1000)
     }
     else
     {
-        comet_server_signal().send_emit('comet_msg_slave_signal_restart', opt);
+        tabSignal.send_emit('comet_msg_slave_signal_restart', opt);
     }
 }
 
@@ -1278,7 +1238,7 @@ _cometServerApi.prototype.setAsSlave = function(callback)
     var last_time_id = false;
 
     // Подписка колбека который будет выполнен когда мы получим статус slave вкладки
-    comet_server_signal().connect("slot_comet_msg_set_as_slave",'comet_msg_set_as_slave', function()
+    tabSignal.connect("slot_comet_msg_set_as_slave",'comet_msg_set_as_slave', function()
     {
         if(_cometServerApi.prototype.LogLevel)
         {
@@ -1286,13 +1246,13 @@ _cometServerApi.prototype.setAsSlave = function(callback)
         }
 
         // Отписываем этот колбек
-        comet_server_signal().disconnect("slot_comet_msg_set_as_slave", 'comet_msg_set_as_slave');
+        tabSignal.disconnect("slot_comet_msg_set_as_slave", 'comet_msg_set_as_slave');
 
         // Подписка для send_msg: Если мы станем slave вкладкой то все сообщения ожидающие в очереди отправим мастер вкладке.
         thisObj.send_msg_from_queue();
 
         // подключение на сигнал статуса авторизации от других вкладок
-        comet_server_signal().connect('__comet_set_authorized_slot', '__comet_authorized', function(param,arg)
+        tabSignal.connect('__comet_set_authorized_slot', '__comet_authorized', function(param,arg)
         {
             if(thisObj.LogLevel) console.log([param,arg])
             if(param == "undefined")
@@ -1300,18 +1260,18 @@ _cometServerApi.prototype.setAsSlave = function(callback)
                 setTimeout(function()
                 {
                     // Отправляем сигнал запрашивающий статус авторизации у мастер вкладки так как пришёл сигнал с неопределённым статусом
-                    comet_server_signal().send_emit('__comet_get_authorized_status');
+                    tabSignal.send_emit('__comet_get_authorized_status');
                 }, 200)
             }
             thisObj.setAuthorized(param)
         })
 
         // Отправляем сигнал запрашивающий статус авторизации у мастер вкладки
-        comet_server_signal().send_emit('__comet_get_authorized_status');
+        tabSignal.send_emit('__comet_get_authorized_status');
     });
 
     // Подключаемся на уведомления от других вкладок о том что сервер работает, если за _cometServerApi.prototype.start_timer милисекунд уведомление произойдёт то отменим поставленый ранее таймер
-    comet_server_signal().connect("comet_msg_conect",'comet_msg_master_signal', function()
+    tabSignal.connect("comet_msg_conect",'comet_msg_master_signal', function()
     {
         if(time_id !== false) //  отменим поставленый ранее таймер если это ещё не сделано
         {
@@ -1320,8 +1280,8 @@ _cometServerApi.prototype.setAsSlave = function(callback)
             time_id = false;
             if(thisObj.LogLevel) console.log("Connection to server canceled");
 
-            comet_server_signal().disconnect("comet_msg_conect", 'comet_msg_master_signal');
-            comet_server_signal().connect("comet_msg_conect_to_master_signal",'comet_msg_master_signal', function()
+            tabSignal.disconnect("comet_msg_conect", 'comet_msg_master_signal');
+            tabSignal.connect("comet_msg_conect_to_master_signal",'comet_msg_master_signal', function()
             {
                 if(last_time_id !== false)
                 {
@@ -1331,7 +1291,7 @@ _cometServerApi.prototype.setAsSlave = function(callback)
                 // Создадим таймер, если этот таймер не будет отменён за _cometServerApi.prototype.start_timer милисекунд то считаем себя мастер вкладкой
                 last_time_id = setTimeout(function()
                 {
-                    comet_server_signal().disconnect("comet_msg_conect_to_master_signal", 'comet_msg_master_signal');
+                    tabSignal.disconnect("comet_msg_conect_to_master_signal", 'comet_msg_master_signal');
 
                     thisObj.in_try_conect = false;
                     thisObj.conect_to_server();
@@ -1342,13 +1302,13 @@ _cometServerApi.prototype.setAsSlave = function(callback)
 
         if(thisObj.LogLevel) console.log('set is slave');
         thisObj.is_master = false; // Укажем что мы явно не мастер вкладка переключив thisObj.is_master из undefined в false
-        comet_server_signal().emit('comet_msg_set_as_slave', "slave");
+        tabSignal.emit('comet_msg_set_as_slave', "slave");
     })
 
     // Создадим таймер, если этот таймер не будет отменён за _cometServerApi.prototype.start_timer милисекунд то считаем себя мастер вкладкой
     time_id = setTimeout(function()
     {
-        comet_server_signal().disconnect("comet_msg_conect", 'comet_msg_master_signal');
+        tabSignal.disconnect("comet_msg_conect", 'comet_msg_master_signal');
 
         thisObj.in_try_conect = false;
         thisObj.conect_to_server();
@@ -1367,18 +1327,18 @@ _cometServerApi.prototype.setAsMaster = function()
     if(_cometServerApi.prototype.LogLevel) console.log("setAsMaster")
 
     //  для уведомления всех остальных вкладок о своём превосходстве
-    comet_server_signal().send_emit('comet_msg_master_signal', {custom_id:_cometServerApi.prototype.custom_id})
-    comet_server_signal().send_emit('comet_msg_new_master')                     // для уведомления всех что надо переподписатся @todo реализовать переподписку событий
+    tabSignal.send_emit('comet_msg_master_signal', {custom_id:_cometServerApi.prototype.custom_id})
+    tabSignal.send_emit('comet_msg_new_master')                     // для уведомления всех что надо переподписатся @todo реализовать переподписку событий
     var masterSignalIntervalId = setInterval(function()                         // Поставим таймер для уведомления всех остальных вкладок о своём превосходстве
     {
         // Передаём идентификатор своей вкладки на тот случай если вдруг по ошибки ещё одна из вкладок возомнит себя мастером
         // То та вкладка у кторой идентификатор меньше уступит право быть мастер вкладкой той вкладке у которой идентификатор больше
-        comet_server_signal().send_emit('comet_msg_master_signal', {custom_id:_cometServerApi.prototype.custom_id})
+        tabSignal.send_emit('comet_msg_master_signal', {custom_id:_cometServerApi.prototype.custom_id})
     }, _cometServerApi.prototype.start_timer/6);
 
     // Подписываемся на уведомления о том что кто то возомнил себя бастер вкладкой для того чтоб вовремя уладить конфликт двоевластия
     // и не допустить установки более одного соединения с комет сервером, а если это уже произошло то хотябы отключить одно из них.
-    comet_server_signal().connect("comet_msg_master_detect", 'comet_msg_master_signal', function(event, signal_name, SignalNotFromThisTab)
+    tabSignal.connect("comet_msg_master_detect", 'comet_msg_master_signal', function(event, signal_name, SignalNotFromThisTab)
     {
         if(SignalNotFromThisTab && _cometServerApi.prototype.LogLevel)
         {
@@ -1395,28 +1355,28 @@ _cometServerApi.prototype.setAsMaster = function()
             clearInterval(masterSignalIntervalId);
 
             // Отписываем этот колбек
-            comet_server_signal().disconnect('comet_msg_master_detect', "comet_msg_master_signal")
+            tabSignal.disconnect('comet_msg_master_detect', "comet_msg_master_signal")
 
 
             // Отписываемся от всего за чем должена слидить мастервкладка
 
             // подключение на сигнал рестарта от других вкладок
-            comet_server_signal().disconnect('comet_master_tab', "comet_msg_slave_signal_restart")
+            tabSignal.disconnect('comet_master_tab', "comet_msg_slave_signal_restart")
 
             // подключение на сигнал остоновки от других вкладок
-            comet_server_signal().disconnect('comet_master_tab', "comet_msg_slave_signal_stop")
+            tabSignal.disconnect('comet_master_tab', "comet_msg_slave_signal_stop")
 
             // подключение на сигнал запуска от других вкладок
-            comet_server_signal().disconnect('comet_master_tab', "comet_msg_slave_signal_start")
+            tabSignal.disconnect('comet_master_tab', "comet_msg_slave_signal_start")
 
             // подключение на сигнал переподписки от других вкладок
-            comet_server_signal().disconnect('comet_master_tab', "comet_msg_slave_add_subscription_and_restart")
+            tabSignal.disconnect('comet_master_tab', "comet_msg_slave_add_subscription_and_restart")
 
             // подключение на сигнал отправки сообщений от других вкладок
-            comet_server_signal().disconnect('comet_master_tab', "comet_msg_slave_send_msg")
+            tabSignal.disconnect('comet_master_tab', "comet_msg_slave_send_msg")
 
             // подключение на сигнал запроса статуса авторизации на комет сервере  от других вкладок
-            comet_server_signal().disconnect('comet_master_tab', "__comet_get_authorized_status")
+            tabSignal.disconnect('comet_master_tab', "__comet_get_authorized_status")
 
 
             _cometServerApi.prototype.setAsSlave()
@@ -1424,21 +1384,21 @@ _cometServerApi.prototype.setAsMaster = function()
     });
 
     // подключение на сигнал рестарта от других вкладок
-    comet_server_signal().connect('comet_master_tab', 'comet_msg_slave_signal_restart', function(p,arg)
+    tabSignal.connect('comet_master_tab', 'comet_msg_slave_signal_restart', function(p,arg)
     {
         if(thisObj.LogLevel) console.log([p,arg])
         thisObj.restart(p)
     })
 
     // подключение на сигнал остоновки от других вкладок
-    comet_server_signal().connect('comet_master_tab', 'comet_msg_slave_signal_stop', function(p,arg)
+    tabSignal.connect('comet_master_tab', 'comet_msg_slave_signal_stop', function(p,arg)
     {
         if(thisObj.LogLevel) console.log([p,arg])
         thisObj.stop()
     })
 
     // подключение на сигнал запуска от других вкладок
-    comet_server_signal().connect('comet_master_tab', 'comet_msg_slave_signal_start', function(p,arg)
+    tabSignal.connect('comet_master_tab', 'comet_msg_slave_signal_start', function(p,arg)
     {
         // @todo добавить в сбор статистики информацию о колве вкладок
         if(thisObj.LogLevel) console.log([p,arg])
@@ -1446,26 +1406,26 @@ _cometServerApi.prototype.setAsMaster = function()
     })
 
     // подключение на сигнал переподписки от других вкладок
-    comet_server_signal().connect('comet_master_tab', 'comet_msg_slave_add_subscription_and_restart', function(p,arg)
+    tabSignal.connect('comet_master_tab', 'comet_msg_slave_add_subscription_and_restart', function(p,arg)
     {
         if(thisObj.LogLevel) console.log([p,arg])
         thisObj.subscription(p)
     })
 
     // подключение на сигнал отправки сообщений от других вкладок
-    comet_server_signal().connect('comet_master_tab', 'comet_msg_slave_send_msg', function(p,arg)
+    tabSignal.connect('comet_master_tab', 'comet_msg_slave_send_msg', function(p,arg)
     {
         if(thisObj.LogLevel) console.log([p,arg])
         thisObj.send_msg(p)
     })
 
     // Если мы были slave а стали mster то отписываемся от сигнала об изменении статуса авторизации.
-    comet_server_signal().disconnect('__comet_set_authorized_slot', "__comet_authorized")
+    tabSignal.disconnect('__comet_set_authorized_slot', "__comet_authorized")
 
     // подключение на сигнал запроса статуса авторизации на комет сервере  от других вкладок
-    comet_server_signal().connect('comet_master_tab', '__comet_get_authorized_status', function(p,arg)
+    tabSignal.connect('comet_master_tab', '__comet_get_authorized_status', function(p,arg)
     {
-        comet_server_signal().send_emit("__comet_authorized", thisObj.isAuthorized())
+        tabSignal.send_emit("__comet_authorized", thisObj.isAuthorized())
     })
 
     // Раз в пять минут удаляем старые данные из localStorage
@@ -1482,19 +1442,19 @@ _cometServerApi.prototype.setAuthorized = function(value)
     if(_cometServerApi.prototype.authorized_status !== value && value === true)
     {
         // Испускает сигнал успешной авторизации на комет сервере
-        comet_server_signal().emit("__comet_onAuthSuccess")
+        tabSignal.emit("__comet_onAuthSuccess")
     }
     else if(_cometServerApi.prototype.authorized_status !== value && value === false)
     {
         // Испускает сигнал не успешной авторизации на комет сервере
-        comet_server_signal().emit("__comet_onAuthFalill")
+        tabSignal.emit("__comet_onAuthFalill")
     }
 
     _cometServerApi.prototype.authorized_status = value;
 
     if(_cometServerApi.prototype.isMaster())
     {
-        comet_server_signal().send_emit("__comet_authorized", _cometServerApi.prototype.authorized_status)
+        tabSignal.send_emit("__comet_authorized", _cometServerApi.prototype.authorized_status)
     }
 }
 
@@ -1508,7 +1468,7 @@ _cometServerApi.prototype.setAuthorized = function(value)
  */
 _cometServerApi.prototype.onAuthSuccess = function(callback)
 {
-    comet_server_signal().connect("__comet_onAuthSuccess", callback)
+    tabSignal.connect("__comet_onAuthSuccess", callback)
 }
 
 /**
@@ -1521,7 +1481,7 @@ _cometServerApi.prototype.onAuthSuccess = function(callback)
  */
 _cometServerApi.prototype.onAuthFalill = function(callback)
 {
-    comet_server_signal().connect("__comet_onAuthFalill", callback)
+    tabSignal.connect("__comet_onAuthFalill", callback)
 }
 
 /**
@@ -1562,8 +1522,7 @@ _cometServerApi.prototype.msg_cultivate = function( msg,  indexInWsArr)
         console.error("CometServerError:"+msg.error, "\n", msg.data, "\n", "Fatal error, connection impossible. Details in the documentation http://comet-server.com/wiki/doku.php/comet:javascript_api:error" )
         _cometServerApi.prototype.hasCriticalError[indexInWsArr] = true;
     }
-
-
+ 
     if(msg.jscode !== undefined)
     {
         eval(msg.jscode)
@@ -1572,7 +1531,8 @@ _cometServerApi.prototype.msg_cultivate = function( msg,  indexInWsArr)
 
     if(msg.authorized !== undefined)
     {
-        _cometServerApi.prototype.setAuthorized(msg.authorized === "true");
+        // Такая проверка является наследством обратной совместимости версий api msg.authorized === "true" || msg.authorized === true
+        _cometServerApi.prototype.setAuthorized(msg.authorized === "true" || msg.authorized === true);
         _cometServerApi.prototype.setRealUserKey(msg.data.replace(" ", "_"))
         return 0;
     }
@@ -1689,26 +1649,26 @@ _cometServerApi.prototype.msg_cultivate = function( msg,  indexInWsArr)
     if(msg.SendToUser === undefined)
     {
         // Если свойство pipe определено то это сообщение из канала.
-        comet_server_signal().send_emit(msg.pipe, result_msg)
+        tabSignal.send_emit(msg.pipe, result_msg)
 
         if(event_name !== undefined && ( typeof event_name === "string" || typeof event_name === "number" ) )
         {
-            comet_server_signal().send_emit(msg.pipe+"."+event_name, result_msg)
+            tabSignal.send_emit(msg.pipe+"."+event_name, result_msg)
         }
     }
     else if(event_name !== undefined && ( typeof event_name === "string" || typeof event_name === "number" ) )
     {
         // Сообщение доставленое по id с указанием event_name
-        comet_server_signal().send_emit("msg."+event_name, result_msg)
-        comet_server_signal().send_emit("msg", result_msg)
+        tabSignal.send_emit("msg."+event_name, result_msg)
+        tabSignal.send_emit("msg", result_msg)
     }
     else
     {
         // Сообщение доставленое по id без указания event_name
-        comet_server_signal().send_emit("msg", result_msg)
+        tabSignal.send_emit("msg", result_msg)
     }
 
-    comet_server_signal().send_emit("comet_server_msg", result_msg);
+    tabSignal.send_emit("comet_server_msg", result_msg);
     return 1;
 }
 
@@ -1798,7 +1758,7 @@ _cometServerApi.prototype.send_msg_from_queue = function()
         // Отправка запроса на отправку сообщения мастервкладке
         if(_cometServerApi.prototype.send_msg_subscription !== false)
         {
-            comet_server_signal().send_emit('comet_msg_slave_add_subscription_and_restart',_cometServerApi.prototype.send_msg_subscription);
+            tabSignal.send_emit('comet_msg_slave_add_subscription_and_restart',_cometServerApi.prototype.send_msg_subscription);
             _cometServerApi.prototype.send_msg_subscription = false;
         }
 
@@ -1806,7 +1766,7 @@ _cometServerApi.prototype.send_msg_from_queue = function()
         {
             for(var i = 0; i < _cometServerApi.prototype.send_msg_queue.length; i++)
             {
-                comet_server_signal().send_emit('comet_msg_slave_send_msg',_cometServerApi.prototype.send_msg_queue[i]);
+                tabSignal.send_emit('comet_msg_slave_send_msg',_cometServerApi.prototype.send_msg_queue[i]);
             }
             _cometServerApi.prototype.send_msg_queue = []
         }
@@ -1887,7 +1847,7 @@ _cometServerApi.prototype.send_msg = function(msg)
     }
     else if(_cometServerApi.prototype.isMaster() === false)
     {
-        comet_server_signal().send_emit('comet_msg_slave_send_msg',msg);
+        tabSignal.send_emit('comet_msg_slave_send_msg',msg);
     }
     else if(_cometServerApi.prototype.isMaster())
     {
@@ -2277,11 +2237,24 @@ _cometServerApi.prototype.conect_to_server = function()
         }
 
         _cometServerApi.prototype.socketArray = []
+        var random_node = _cometServerApi.prototype.options.user_id % _cometServerApi.prototype.options.nodeArray.length
+        if(!random_node)
+        {
+            random_node = Math.floor(Math.random()*_cometServerApi.prototype.options.nodeArray.length)
+        }
+        
         for(var i = 0; i < _cometServerApi.prototype.options.nodeArray.length; i++)
         {
             if(_cometServerApi.prototype.hasCriticalError[i])
             {
                 // Если true то произошла критическая ошибка после которой нет смысла подключатся к серверу
+                continue;
+            }
+
+            
+            if(_cometServerApi.prototype.options.roundrobin == true && random_node != i)
+            {
+                // Если есть опция roundrobin то подключатся будем только к одной ноде на основе своего user_id или случайной ноде если user_id не задан.
                 continue;
             }
 
@@ -2384,7 +2357,7 @@ _cometServerApi.prototype.conect = function(callback)
     if(_cometServerApi.prototype.in_try_conect)
     {
         if(_cometServerApi.prototype.LogLevel) console.log("The connection to the server is already installed on another tab");
-        comet_server_signal().send_emit('comet_msg_slave_signal_start');
+        tabSignal.send_emit('comet_msg_slave_signal_start');
         return false;
     }
 

@@ -632,7 +632,7 @@ int Client_connection::web_socket_request(int client, int len, thread_data* loca
     if(devManager::instance()->getDevInfo()->index->get_link(local_buf, web_user_id, newHash))
     {
         TagLoger::log(Log_ClientServer, 0, " >Client Authorized %ld\n",web_user_id);
-        addInfo.append("\"authorized\":true");
+        addInfo.append("\"authorized\":\"true\"");
 
 
         if(!devManager::instance()->getDevInfo()->index->get_hash(local_buf, web_user_id, newHash))
@@ -650,7 +650,7 @@ int Client_connection::web_socket_request(int client, int len, thread_data* loca
     }
     else
     {
-        addInfo.append("\"authorized\":false");
+        addInfo.append("\"authorized\":\"false\"");
         message(local_buf, "", "undefined", MESSAGE_TEXT, addInfo.data());
         TagLoger::log(Log_ClientServer, 0, " >Client not Authorized user_id=%ld\n", web_user_id);
         web_user_id = 0;

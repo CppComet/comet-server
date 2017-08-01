@@ -5,7 +5,12 @@ FEATURES:
 IMPROVEMENTS: 
 BUG FIXES:
 
+## v3.2
 
+BUG FIXES:
+ * Js Api version 3.28 (Fix bug in auth callbacks)
+ * Fix bug in auth callbacks
+ 
 ## v3.1
  
 FEATURES: 
