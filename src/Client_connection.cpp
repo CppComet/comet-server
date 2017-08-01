@@ -987,7 +987,7 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
     }
     
     
-    std::string usersstr("{\"event_name\":\"answer\",\"data\":{"); 
+    std::string usersstr("{\"event_name\":\"answer\",\"data\":{\"users\":["); 
 
     char strtmp[200];
     TagLoger::log(Log_ClientServer, 0, "track_pipe_users pipe:%s\n", name);  
@@ -1016,7 +1016,7 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
         }
     }
  
-    usersstr.append("},\"marker\":\"").append(marker).append("\"");
+    usersstr.append("]},\"marker\":\"").append(marker).append("\"");
                 
     std::string rdname("_answer_to_");
     rdname.append(name);
