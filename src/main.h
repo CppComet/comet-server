@@ -103,7 +103,7 @@
     </body>\
     </html>" 
  
-#define MYSQL_SERVERNAME "CppComet 3.1"
+#define MYSQL_SERVERNAME "CppComet 3.2"
 
 #define maxValue( a, b ) ( (a) > (b) ? (a) : (b) )
 #define minValue( a, b ) ( (a) < (b) ? (a) : (b) )
