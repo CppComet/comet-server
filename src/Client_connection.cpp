@@ -1016,7 +1016,7 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
         }
     }
  
-    usersstr.append("]},\"marker\":\"").append(marker).append("\"");
+    usersstr.append("]},\"marker\":\"").append(marker).append("\"}");
                 
     std::string rdname("_answer_to_");
     rdname.append(name);
