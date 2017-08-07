@@ -1003,8 +1003,9 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
             CP<Client_connection> r = tcpServer <Client_connection>::instance()->get(conection_id);
             if(r)
             {
+                // @todo отдавать всем не uuid а его солёный хеш.
                 bzero(strtmp, 200);
-                snprintf(strtmp, 200, "{\"user_id\":\"%d\",\"uuid\":\"%s\"}", r->web_user_id, r->web_user_uuid);
+                snprintf(strtmp, 200, "{\"user_id\":%d,\"uuid\":\"%s\"}", r->web_user_id, r->web_user_uuid);
                 usersstr.append(strtmp);
             }
             
@@ -1016,13 +1017,15 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
         }
     }
  
-    usersstr.append("]},\"marker\":\"").append(marker).append("\"}");
+    usersstr.append("]}}");
                 
     std::string rdname("_answer_to_");
     rdname.append(name);
+    std::string addData("\"marker\":\"");
+    addData.append(marker).append("\"");
  
     TagLoger::log(Log_ClientServer, 0, "answer:%s\n", usersstr.data()); 
-    if(message(local_buf, base64_encode( (const char*)usersstr.data()).data() , rdname.data()) < 0)
+    if(message(local_buf, base64_encode( (const char*)usersstr.data()).data() , rdname.data(), MESSAGE_TEXT, addData.data()) < 0)
     { 
         return -1;
     }
