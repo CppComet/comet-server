@@ -10,6 +10,7 @@ BUG FIXES:
 BUG FIXES:
  * Js Api version 3.28 (Fix bug in auth callbacks)
  * Fix bug in auth callbacks
+ * complete api function getTrackPipeUsers
  
 ## v3.1
  
