@@ -1,27 +1,42 @@
 ![CppComet](https://comet-server.com/img/CppComet.png)
 
-Comet technology – allows sending arbitrary messages to client through server initiative
-
-## How it works
-
-* Browser opens page of your site.
-* After loading this page JavaScript Api establishes a persistent connection to CppComet using websockets.
-* While page is open, your server can send text message to client. It appeals via [CometQL API](http://comet-server.org/doku.php/en:comet:cometql) to CppComet and transfer message for browser.
-* CppComet uses open connection with browser for delivers message in to JavaScript api in browser.
-* [JavaScript API](http://comet-server.org/doku.php/en:comet:javascript_api) delivers this message to your callback.
+Comet server is written in C++, for storing data using MySQL.   
 
 # Features
 
+Comet technology – allows sending arbitrary messages to client through server initiative
+
 * Api for more then 9 languages. [CometQL API](http://comet-server.org/doku.php/en:comet:cometql) allows you connect to server by mysql protocol.
 * Good documentation in [Russian](http://comet-server.org/doku.php/ru) and [English](http://comet-server.org/doku.php/en) languages
-* Allow sending a private message to users
-* Supports users authenticating on the server
-* Allows you to send public messages to users via channels
+* [Supports users authenticating on the server](https://comet-server.com/wiki/doku.php/en:comet:authentication#users_authorization_on_the_cometserver)
+* [Allow sending a private message to users](https://comet-server.com/wiki/doku.php/en:comet:cometql#table_users_messages)
+* [Allows you to send public messages to users via channels](https://comet-server.com/wiki/doku.php/en:comet:cometql#table_pipes_messages)
+* [Allows subscription from JavaScript to changing other user’s status](https://comet-server.com/wiki/doku.php/en:comet:javascript_api#subscribe_to_receive_messages_from_channel)
+* [Allows subscription to updates of online users list in real-time](https://comet-server.com/wiki/doku.php/en:comet:javascript_api#list_of_online_users_channels_track)
+* [Sending messages to channel from JS](https://comet-server.com/wiki/doku.php/en:comet:javascript_api#sending_messages_to_channel_from_js_pipes_web)
+* [Allows get information when users were online](https://comet-server.com/wiki/doku.php/en:comet:cometql#table_users_time)
  
+# How it fast
+
+[Report about load testing](https://comet-server.com/wiki/doku.php/en:comet:load-testing-result#report_about_testing_of_64000_connections_online) of 64,000 connections online
+
+# How it works
+
+* Introduction to comet technology [EN](https://comet-server.com/wiki/doku.php/en:comet:introduction-to-comet#introduction) and [RU](https://comet-server.com/wiki/doku.php/comet:introduction-to-comet#introduction) 
+
+# Documentation and examples
+
+Documentation in [Russian](http://comet-server.org/doku.php/ru) and [English](http://comet-server.org/doku.php/en) languages
+ 
+ * How to build and run [EN](http://comet-server.org/doku.php/en:comet:building-from-source) or [RU](http://comet-server.org/doku.php/comet:building-from-source)
+ * CometQL API documentation [EN](http://comet-server.org/doku.php/en:comet:cometql) or [RU](http://comet-server.org/doku.php/comet:cometql) (To connect to the comet server api from any server-side language is used CometQL)
+ * JavaScript API documentation [EN](http://comet-server.org/doku.php/en:comet:javascript_api) or [RU](http://comet-server.org/doku.php/comet:javascript_api) (To connect to the server from JavaScript API use file from [api/CometServerApi.js](https://github.com/CppComet/comet-server/tree/master/api) )
+
 # Demo
  
 * https://github.com/CppComet/php-chat-example
-* https://github.com/CppComet/comet-server/tree/master/demo/simple-chat
+* https://jsfiddle.net/Levhav/o35kvmn2/21/
+* https://cppcomet.github.io/comet-server/demo/simple-chat/simple-chat.html
 * https://github.com/CppComet/auth-example
 
 ## Demo access to server API
@@ -57,28 +72,6 @@ For send message to demo chat use this query:
 ```
 INSERT INTO pipes_messages (name, event, message)VALUES("web_MainPageChat", "", '{ "text":"My text","name":"My name"}' );
 ```
-
-# Documentation and examples
-
-Comet server is written in C++, for storing data using MySQL.   
-
-[Documentation and examples](http://comet-server.org/)
-  
-### Building from source and launch
-
-How to build and run [EN](http://comet-server.org/doku.php/en:comet:building-from-source) or [RU](http://comet-server.org/doku.php/comet:building-from-source)
-  
-### CometQL API: 
-
-CometQL API documentation [EN](http://comet-server.org/doku.php/en:comet:cometql) or [RU](http://comet-server.org/doku.php/comet:cometql)
-
- - To connect to the comet server api from any server-side language is used CometQL [EN](http://comet-server.org/doku.php/en:comet:cometql) or [RU](http://comet-server.org/doku.php/comet:cometql)
- 
-### JavaScript API: 
-
-JavaScript API documentation [EN](http://comet-server.org/doku.php/en:comet:javascript_api) or [RU](http://comet-server.org/doku.php/comet:javascript_api)
-
-- To connect to the server from JavaScript API use file from api/CometServerApi.js
 
 License
 ----

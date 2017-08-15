@@ -29,6 +29,7 @@
 
 char* getGETdata(const char* c,int& user_id);
 
+std::map<std::string, const char*> Client_connection::ram_file_cache;
 int Client_connection::request_mutex_init = 0;
 int Client_connection::max_subscription_event = 50;
 
@@ -1476,7 +1477,7 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
 int Client_connection::options(int client, int len, thread_data* local_buf)
 {
     char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
-    \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n+OK\r\n";
+    \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nCache-Control: max-age=3600\r\nConnection: close\r\n\r\n+OK\r\n";
     if(web_write( resp ) < 0)
     {
       TagLoger::log(Log_ClientServer, 0, " >Client Failed to send data %d\n",fd);
@@ -1494,7 +1495,7 @@ int Client_connection::options(int client, int len, thread_data* local_buf)
 int Client_connection::get_request(int client, int len, thread_data* local_buf)
 {
     char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
-    \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n";
+    \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nCache-Control: max-age=3600\r\nConnection: close\r\n\r\n";
     if(web_write( resp ) < 0 || web_write( logoPage ) < 0)
     {
       TagLoger::log(Log_ClientServer, 0, " >Client Failed to send data %d\n",fd);
@@ -1505,7 +1506,7 @@ int Client_connection::get_request(int client, int len, thread_data* local_buf)
 int Client_connection::http404_answer(int client, int len, thread_data* local_buf)
 {
     char resp[]="HTTP/1.1 404 Not Found\r\nContent-Type:text/html; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
-    \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n";
+    \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nCache-Control: max-age=3600\r\nConnection: close\r\n\r\n";
     if(web_write( resp ) < 0 || web_write( logoPage ) < 0)
     {
         TagLoger::log(Log_ClientServer, 0, " >Client Failed to send data %d\n",fd);
@@ -1513,6 +1514,16 @@ int Client_connection::http404_answer(int client, int len, thread_data* local_bu
     return -1;
 }
 
+int Client_connection::http403_answer(int client, int len, thread_data* local_buf)
+{
+    char resp[]="HTTP/1.1 403 Forbidden\r\nContent-Type:text/html; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
+    \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nCache-Control: max-age=3600\r\nConnection: close\r\n\r\n";
+    if(web_write( resp ) < 0 || web_write( logoPage ) < 0)
+    {
+        TagLoger::log(Log_ClientServer, 0, " >Client Failed to send data %d\n",fd);
+    }
+    return -1;
+}
 /**
  * Отвечает  на запрос get с урлом /info
  * Ответ всегда выглядит {"status":"ok"}
@@ -1550,7 +1561,7 @@ int Client_connection::get_info_request(int client, int len, thread_data* local_
 int Client_connection::get_favicon_request(int client, int len, thread_data* local_buf)
 { 
     char resp[]="HTTP/1.1 301 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
-    \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\nLocation: http://comet-server.ru/favicon.ico\r\n\r\n";
+    \r\nAccess-Control-Allow-Methods:POST, GET\r\nAllow: POST, GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nCache-Control: max-age=3600\r\nConnection: close\r\nLocation: http://comet-server.com/favicon.ico\r\n\r\n";
  
     if(web_write( resp ) < 0)
     {
@@ -1562,6 +1573,9 @@ int Client_connection::get_favicon_request(int client, int len, thread_data* loc
 
 int Client_connection::get_custom_request(int client, int len, thread_data* local_buf)
 {
+    char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
+    \r\nAccess-Control-Allow-Methods: GET\r\nAllow: GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nCache-Control: max-age=3600\r\nConnection: close\r\n\r\n";
+    
     char *p = local_buf->buf.getData();
     int urlStart = strlen("GET ");
     p = p + urlStart;
@@ -1572,8 +1586,6 @@ int Client_connection::get_custom_request(int client, int len, thread_data* loca
         // 404
         return http404_answer(client, len, local_buf);
     }
-    
-    
 
     p[urlEnd - 1] = 0;
     char *uri = p; 
@@ -1581,19 +1593,31 @@ int Client_connection::get_custom_request(int client, int len, thread_data* loca
     if(!name.size())
     {
         // 404
-        return http404_answer(client, len, local_buf);
+        return http403_answer(client, len, local_buf);
     }
     
     name.append(uri); 
     
     TagLoger::log(Log_ClientServer, 0, " >Client GET [%s]\n", name.data());
-    if(name.find("..", 0) != std::string::npos)
+    if(name.find("..") != std::string::npos)
     {
         // Проверка на две точки в урле.
         TagLoger::log(Log_ClientServer, 0, " >Client GET error403 [.. in url] [%s]\n", name.data());
-        return http404_answer(client, len, local_buf);
+        return http403_answer(client, len, local_buf);
+    }
+    
+    auto it = ram_file_cache.find(name);
+    if(it != ram_file_cache.end())
+    {
+        TagLoger::debug(Log_ClientServer, 0, " >send name=%s from ram cache\n", name.data());
+        web_write(resp);
+        web_write(it->second); 
+        return -1;
     }
       
+    /** 
+     * @todo дополнить белым списком запрашиваемых файлов чтоб исключить нагрузку от левых запросов.
+     */ 
     int fp = open(name.data(), O_RDONLY);
     if(fp < 0)
     {
@@ -1603,9 +1627,9 @@ int Client_connection::get_custom_request(int client, int len, thread_data* loca
         return http404_answer(client, len, local_buf);
     }
     
-    char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
-    \r\nAccess-Control-Allow-Methods: GET\r\nAllow: GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n";
     web_write(resp);
+    
+    std::string response;
     
     int size = 0;
     while(size = read(fp, local_buf->answer_buf.getData(),  local_buf->answer_buf.getSize()))
@@ -1615,10 +1639,12 @@ int Client_connection::get_custom_request(int client, int len, thread_data* loca
             break;
         }
         
+        response.append(local_buf->answer_buf.getData());
         web_write( local_buf->answer_buf.getData(), size);
-        TagLoger::debug(Log_ClientServer, 0, " >send size=%d [%s]\n", size, local_buf->answer_buf.getData());
+        TagLoger::debug(Log_ClientServer, 0, " >send name=%s from disk [size=%d]\n", name.data(), size);
     }
 
+    ram_file_cache.insert(std::pair<std::string,const char*>(name, response.data()));
     return -1;
 }
 

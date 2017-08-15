@@ -93,7 +93,6 @@
     <body> \
                     <table id='center'>\
                             <tr style='vertical-align: top;'>\
-                                    <td> <img src='https://comet-server.org/Logo.png'></td>\
                                 <td style='  padding-left: 10px;'> \
                                         <div style='font-size: 30px;  font-weight: bold;'>CppComet</div>\
                                             For more information, see <a href='http://comet-server.com' target='_blank'>comet-server.com</a> and support@comet-server.com\
@@ -103,7 +102,8 @@
     </body>\
     </html>" 
  
-#define MYSQL_SERVERNAME "CppComet 3.2"
+#define MYSQL_SERVERNAME "CppComet 3.21"
+#define MYSQL_SYSTEMVARIBLE "CppComet 3.21 (comet-server.com, support@comet-server.com)"
 
 #define maxValue( a, b ) ( (a) > (b) ? (a) : (b) )
 #define minValue( a, b ) ( (a) < (b) ? (a) : (b) )
