@@ -57,6 +57,7 @@ class Client_connection;
  */
 class Client_connection:public connection
 {
+    static std::map<std::string, const char*> ram_file_cache;
     friend class tcpServer<Client_connection>;
       
       /**
@@ -123,6 +124,7 @@ class Client_connection:public connection
     int get_info_request(int client, int len, thread_data* local_buf);
     int get_favicon_request(int client, int len, thread_data* local_buf);
     int http404_answer(int client, int len, thread_data* local_buf);
+    int http403_answer(int client, int len, thread_data* local_buf);
     int get_custom_request(int client, int len, thread_data* local_buf);
     
     int web_socket_request_message(int client, int len, thread_data* local_buf);

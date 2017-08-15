@@ -1310,7 +1310,7 @@ int MySql_connection::sql_select_systemvarible(thread_data* local_buf, unsigned 
     answer += HeadAnswer(1, local_buf->sql.columns, PacketNomber, answer);
     //printf("systemVaribleName %s\n", local_buf->qInfo.tokStart(local_buf->qInfo.arg_select.systemVaribleName));
     MySqlResulValue values;
-    values = "StarComet (comet-server.ru, support@comet-server.ru)";
+    values = MYSQL_SYSTEMVARIBLE;
 
     answer += RowPackage(1, &values, ++PacketNomber, answer);
 

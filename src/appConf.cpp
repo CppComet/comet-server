@@ -179,7 +179,7 @@ bool appConf::init(int argc, char *argv[])
         {
             if(strcmp(argv[i],"--help") == 0)
             {
-                    printf("Help:\n \thttp://comet-server.com\n \tsupport@comet-server.ru\n"); 
+                    printf("Help:\n \thttp://comet-server.com\n \tsupport@comet-server.com\n"); 
                     isHelp = true;
                     return false;
             }

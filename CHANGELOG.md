@@ -5,6 +5,13 @@ FEATURES:
 IMPROVEMENTS: 
 BUG FIXES:
 
+## v3.21
+
+IMPROVEMENTS:
+
+* Added caching in memory for sending static files
+* Added cache-control headers for get requests
+ 
 ## v3.2
 
 BUG FIXES:
