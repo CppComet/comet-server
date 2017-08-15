@@ -41,15 +41,15 @@ Documentation in [Russian](http://comet-server.org/doku.php/ru) and [English](ht
 
 ## Demo access to server API
 
+For testing CppComet without install on vps  you can use [free cloud service with same api](https://comet-server.com/). 
+In the all examples I will use demonstration access from [comet-server.com](http://comet-server.com) for those who could not or were too lazy to deploy the server on their vps.
+
 For demo access use credentials:
 ```
 Login: 15
 Password:lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8
 Host: app.comet-server.ru
 ```
-
-CppComet has cloud saas alternative that can be used for testing and demo access.
-In the following examples I will use demonstration access from [comet-server.com](http://comet-server.com) for those who could not or were too lazy to deploy the server on their vps.
 
 Example of connecting to [cometQL api](http://comet-server.org/doku.php/en:comet:cometql) from console using mysql-client:
 ```
