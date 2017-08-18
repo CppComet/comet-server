@@ -5,6 +5,13 @@ FEATURES:
 IMPROVEMENTS: 
 BUG FIXES:
 
+## v3.22
+
+IMPROVEMENTS:
+
+* Added dosc in dokuwiki format
+* Was translated comments in comet.ini
+ 
 ## v3.21
 
 IMPROVEMENTS:
