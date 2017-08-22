@@ -339,6 +339,19 @@ public:
         if(appConf::instance()->get_bool("benchmark", "to_file")) filePrint();   
     } 
 };
-
-
+ 
+class usage_statistics: public intervalLoopObject
+{
+public:
+    
+    /**
+     * Отправка данных статистики через curl
+     * @param data данные
+     * @return 
+     */
+    static bool send(std::string data);
+  
+    void static start();
+};
+ 
 #endif	/* TCPSERVER_BENCHMARK_H */

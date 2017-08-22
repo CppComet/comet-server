@@ -34,8 +34,8 @@ Documentation in [Russian](http://comet-server.org/doku.php/ru) and [English](ht
 
 # Demo
  
-* https://github.com/CppComet/php-chat-example
-* https://jsfiddle.net/Levhav/o35kvmn2/21/
+* https://github.com/CppComet/php-chat-example  ( [One of the simplest way to create php websockets chat with CppComet](https://medium.com/one-of-the-simplest-way-to-create-php-websockets/one-of-the-simplest-way-to-create-websockets-chat-with-php-and-cppcomet-bad0a7e47df0) )
+* https://codepen.io/Levhav/pen/vJWWqW ( [Creating a simple chat using CppComet](https://medium.com/one-of-the-simplest-way-to-create-php-websockets/creating-a-simple-chat-using-cppcomet-e0e68664afe1) )
 * https://cppcomet.github.io/comet-server/demo/simple-chat/simple-chat.html
 * https://github.com/CppComet/auth-example
 

@@ -94,7 +94,7 @@ class ini_parser
                 return std::stoi(sections.at(section).at(name));
             }catch(...)
             {
-                printf("\x1b[1;31mget_int exeption section=%s name=%s\x1b[0m\n", section.data(), name.data());
+                printf("\x1b[1;31mget_int exeption section=%s name=%s data=%s\x1b[0m\n", section.data(), name.data(), sections.at(section).at(name).data());
                 return 0;
             }
         }
@@ -149,7 +149,7 @@ class ini_parser
                 return std::stol(sections.at(section).at(name));
             }catch(...)
             {
-                printf("\x1b[1;31mget_long exeption section=%s name=%s\x1b[0m\n", section.data(), name.data());
+                printf("\x1b[1;31mget_long exeption section=%s name=%s data=%s\x1b[0m\n", section.data(), name.data(), sections.at(section).at(name).data()); 
                 return 0;
             } 
         }
@@ -166,7 +166,7 @@ class ini_parser
                 return std::stof(sections.at(section).at(name));
             }catch(...)
             {
-                printf("\x1b[1;31mget_float exeption section=%s name=%s\x1b[0m\n", section.data(), name.data());
+                printf("\x1b[1;31mget_float exeption section=%s name=%s data=%s\x1b[0m\n", section.data(), name.data(), sections.at(section).at(name).data());  
                 return 0;
             }  
         }
@@ -183,7 +183,7 @@ class ini_parser
                 return std::stod(sections.at(section).at(name));
             }catch(...)
             {
-                printf("\x1b[1;31mget_double exeption section=%s name=%s\x1b[0m\n", section.data(), name.data());
+                printf("\x1b[1;31mget_double exeption section=%s name=%s data=%s\x1b[0m\n", section.data(), name.data(), sections.at(section).at(name).data());  
                 return 0;
             }   
         }
@@ -309,6 +309,7 @@ class ini_parser
                     handle_assignment(line);
                 }
             }
+            
             return true;
         }
 
@@ -336,6 +337,7 @@ class ini_parser
             std::string key = extract_key(line);
             std::string value = extract_value(line);
 
+            //printf("assignment:%s[%s]=%s\n", current_section.data(), key.data(), value.data());
             set_value(current_section, key, value); 
         }
 
