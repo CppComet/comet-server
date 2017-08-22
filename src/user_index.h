@@ -467,7 +467,7 @@ protected:
         last_online_time = time(0); 
         if(user_id > 0)
         {
-            local_buf->db.query_format("replace into `users_time` (`user_id`, `time`) VALUES ('%d', '%d', '%d')", user_id, last_online_time); 
+            local_buf->db.query_format("replace into `users_time` (`user_id`, `time`) VALUES ('%d', '%d')", user_id, last_online_time); 
             char pipe_name[100];
             snprintf(pipe_name, 100,"user_status_%d", user_id);
             internalApi::send_event_to_pipe(local_buf, pipe_name, "{\\\"data\\\":\\\"offline\\\",\\\"event_name\\\":\\\"offline\\\"}", NULL);
@@ -483,7 +483,7 @@ protected:
         last_online_time = 0;
         if(user_id > 0)
         {
-            local_buf->db.query_format("replace into `users_time` (`user_id`, `time`) VALUES ('%d', '%d', 0)", user_id);  // Подусать может этот запрос не нужен 
+            local_buf->db.query_format("replace into `users_time` (`user_id`, `time`) VALUES ('%d', 0)", user_id);  // Подусать может этот запрос не нужен 
             char pipe_name[100];
             snprintf(pipe_name, 100, "user_status_%d", user_id);
             internalApi::send_event_to_pipe(local_buf, pipe_name, "{\\\"data\\\":\\\"online\\\",\\\"event_name\\\":\\\"online\\\"}", NULL);
