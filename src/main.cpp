@@ -250,6 +250,15 @@ void command_line_fork()
             exit(0);
             return;
         }
+        else if( strncmp(buf,"restart", strlen("restart") ) == 0 )
+        {
+            printf("\x1b[31mExit command received\x1b[0m\n");
+            //kill(pid, SIGTERM);
+            close(fd);
+            remove(NAMEDPIPE_NAME);
+            exit(-1);
+            return;
+        }
         else if( strncmp(buf,"version", strlen("version") ) == 0 )
         {
             printf("\x1b[31mCPPcomet v.1.38\x1b[0m\n");
