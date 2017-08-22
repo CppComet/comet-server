@@ -283,26 +283,6 @@ void command_line_fork()
 
     } while ( 1 );
 }
-
-/**
- * Отправка данных статистики через curl
- * @param data данные
- * @return 
- */
-bool send_statistics(std::string data)
-{
-    char cli[600];
-    std::string cmd;
-    cmd.append("curl -d \"").append(data).append("\" --connect-timeout 1 --max-time 1 -H \"Content-Type: text/plain\" -X POST http://statistics.comet-server.ru/api/statistics"); 
-    if(exec(cmd.data(), cli, 600))
-    {
-        return true;
-    }
-    
-    return false;
-}
-
-
  
 /**
  * valgrind --tool=memcheck --track-origins=yes --leak-check=yes ./cpp_comet
@@ -380,11 +360,13 @@ int main(int argc, char *argv[])
         return 0;
     }
  
-    #ifdef monoURL
-        devManager::instance()->getDevInfo()->setDevUrl(monoURL);
-    #endif
+    if(!appConf::instance()->get_string("main", "host").empty())
+    {
+        devManager::instance()->getDevInfo()->setDevUrl(appConf::instance()->get_chars("main", "host"));
+    }
 
     intervalLoop::instance()->start();
+    usage_statistics::start(); 
   
     // Запуск потока обработки сообщений от браузеров
     th_startServer<Client_connection>(1, "ws");

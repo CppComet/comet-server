@@ -21,7 +21,7 @@ const char* tagsNames[] = {
     "TagLoger",
     "appConf",
     "pipeCommands",
-    "benchmark",
+    "statistics",
     "removeOldConnections",
     "MySqlServer",
     "UserIndex",

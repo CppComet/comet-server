@@ -1573,9 +1573,6 @@ int Client_connection::get_favicon_request(int client, int len, thread_data* loc
 
 int Client_connection::get_custom_request(int client, int len, thread_data* local_buf)
 {
-    char resp[]="HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
-    \r\nAccess-Control-Allow-Methods: GET\r\nAllow: GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nCache-Control: max-age=3600\r\nConnection: close\r\n\r\n";
-    
     char *p = local_buf->buf.getData();
     int urlStart = strlen("GET ");
     p = p + urlStart;
@@ -1590,13 +1587,21 @@ int Client_connection::get_custom_request(int client, int len, thread_data* loca
     p[urlEnd - 1] = 0;
     char *uri = p; 
     std::string name(appConf::instance()->get_string("main", "base_dir"));
-    if(!name.size())
+    if(name.empty())
     {
-        // 404
+        // 403
         return http403_answer(client, len, local_buf);
     }
     
-    name.append(uri); 
+    name.append(uri);  
+    
+    auto pos = name.rfind('.');
+    if(pos <= 0)
+    {
+        // 404
+        return http404_answer(client, len, local_buf);
+    }
+    
     
     TagLoger::log(Log_ClientServer, 0, " >Client GET [%s]\n", name.data());
     if(name.find("..") != std::string::npos)
@@ -1606,15 +1611,34 @@ int Client_connection::get_custom_request(int client, int len, thread_data* loca
         return http403_answer(client, len, local_buf);
     }
     
-    auto it = ram_file_cache.find(name);
+    /*auto it = ram_file_cache.find(name);
     if(it != ram_file_cache.end())
     {
-        TagLoger::debug(Log_ClientServer, 0, " >send name=%s from ram cache\n", name.data());
-        web_write(resp);
+        TagLoger::debug(Log_ClientServer, 0, " >send name=%s from ram cache\n", name.data()); 
         web_write(it->second); 
         return -1;
-    }
+    }*/
       
+    /**
+     * @todo add parameter  to .ini file for http headers control
+     * And make class for return correct headers for HTTP response 
+     */
+    
+    char resp[]="HTTP/1.1 200 OK\r\nContent-Type:%s; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
+    \r\nAccess-Control-Allow-Methods: GET\r\nAllow: GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nCache-Control: max-age=3600\r\nConnection: close\r\n\r\n";
+    
+    std::string ext = name.substr(pos+1, 10);
+    std::string headers(appConf::instance()->get_string("content-type", ext));
+    if(headers.empty())
+    {
+        TagLoger::log(Log_ClientServer, 0, " >Client GET [%s][ext=%s] not found\n", name.data(), ext.data());
+        // 404
+        return http404_answer(client, len, local_buf);
+    }
+    
+    char headers_resp[1024];
+    snprintf(headers_resp, 1024, resp, headers.data());
+     
     /** 
      * @todo дополнить белым списком запрашиваемых файлов чтоб исключить нагрузку от левых запросов.
      */ 
@@ -1626,10 +1650,9 @@ int Client_connection::get_custom_request(int client, int len, thread_data* loca
         perror("error404:");
         return http404_answer(client, len, local_buf);
     }
-    
-    web_write(resp);
-    
-    std::string response;
+     
+    web_write(headers_resp);
+    //std::string response(headers_resp);
     
     int size = 0;
     while(size = read(fp, local_buf->answer_buf.getData(),  local_buf->answer_buf.getSize()))
@@ -1639,12 +1662,12 @@ int Client_connection::get_custom_request(int client, int len, thread_data* loca
             break;
         }
         
-        response.append(local_buf->answer_buf.getData());
+        //response.append(local_buf->answer_buf.getData());
         web_write( local_buf->answer_buf.getData(), size);
         TagLoger::debug(Log_ClientServer, 0, " >send name=%s from disk [size=%d]\n", name.data(), size);
     }
 
-    ram_file_cache.insert(std::pair<std::string,const char*>(name, response.data()));
+    //ram_file_cache.insert(std::pair<std::string,const char*>(name, response.data()));
     return -1;
 }
 

@@ -34,6 +34,35 @@ bool appConf::initFromFile(const char *fileName)
         return false;
     }
     
+    // Для обратной совместимости с конфигами прошлых версий
+    if(is_property_exists("log", "benchmark"))
+    {
+        sections["log"]["statistics"] = sections["log"]["benchmark"];  
+    }
+    
+    // Для обратной совместимости с конфигами прошлых версий
+    if(is_property_exists("cometql", "benchmark"))
+    {
+        sections["cometql"]["statistics"] = sections["cometql"]["benchmark"];  
+    }
+    
+    // Для обратной совместимости с конфигами прошлых версий
+    if(is_property_exists("ws", "benchmark"))
+    {
+        sections["ws"]["statistics"] = sections["ws"]["benchmark"];  
+    }
+    
+    // Для обратной совместимости с конфигами прошлых версий
+    if(is_property_exists("benchmark", "to_log"))
+    {
+        sections["statistics"]["to_log"] = sections["benchmark"]["to_log"];  
+    }
+      
+    if(!is_property_exists("statistics", "interval"))
+    {
+        sections["statistics"]["interval"] = "3600";  
+    }
+     
     /*
     ; Объём буфера для сообщения
     ; Много ставить не надо, комет сервер не расчитан на передачу больших сообщений
