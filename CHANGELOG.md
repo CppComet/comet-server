@@ -7,6 +7,10 @@ BUG FIXES:
 
 ## v3.22
 
+BUG FIXES:
+
+ * last online time did not save
+
 IMPROVEMENTS:
 
 * Added functions for aggregating statistics of using server
