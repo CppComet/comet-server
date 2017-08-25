@@ -747,7 +747,7 @@ void tcpServer<connectionType>::deleteClient(int client_id, thread_data* local_b
 
 /**
  * Обрабатывает сообщения от подключённых клиентов
- * @todo отказывать в подключении если прислано слишком много данных
+ * @todo simpleTask | отказывать в подключении если прислано слишком много данных | количество указывать в конфиге
  * @param client
  * @param thread_id
  * @return

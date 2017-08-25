@@ -36,7 +36,7 @@ class Client_connection;
 
 /**
  * Максимально количество подписок на каналы
- * @todo вынести в конфигурационный файл
+ * @todo вынести в конфигурационный файл | а лучше и экономичнее выделять память по мере надобности
  */
 #define	MAX_SUBSCRIPTION_PIPE   32
 #define	SUBSCRIPTION_DATA_LEN   MAX_SUBSCRIPTION_PIPE*(PIPE_NAME_LEN+4)
@@ -60,17 +60,20 @@ class Client_connection:public connection
     static std::map<std::string, const char*> ram_file_cache;
     friend class tcpServer<Client_connection>;
       
-      /**
-       * Подписки на каналы
-       * @note Содержит указатели на память принадлежащию масиву subscriptions_data
-       */
-      char *subscriptions[MAX_SUBSCRIPTION_PIPE]; 
-      
-      /**
-       * Подписки на каналы
-       */
-      char subscriptions_data[SUBSCRIPTION_DATA_LEN]; 
-        
+    /**
+     * Подписки на каналы
+     * @note Содержит указатели на память принадлежащию масиву subscriptions_data
+     * 
+     * @todo Заменить на динамически выделяемые данные [opt1 -MAX_SUBSCRIPTION_PIPE*ws_online]
+     */
+    char *subscriptions[MAX_SUBSCRIPTION_PIPE]; 
+
+    /**
+     * Подписки на каналы
+     * @todo Заменить на динамически выделяемые данные [opt1 -SUBSCRIPTION_DATA_LEN*ws_online]
+     */
+    char subscriptions_data[SUBSCRIPTION_DATA_LEN]; 
+
       
     /**
      * Для хранения фрагментов сообщений которые пришли не полностью.
@@ -198,11 +201,23 @@ class Client_connection:public connection
     
     /**
      * Самоназвание клиента (для случаев если надо идентифицировать и дифференцировать не авторизованных пользователей)
+     * @todo Заменить на динамически выделяемые данные + добавить параметр на отключение парсинга этой строкм [opt1 -USER_UUID_LEN*ws_online]
      */
     char web_user_uuid[USER_UUID_LEN+1];
     
+    /** 
+     * @todo Заменить на динамически выделяемые данные + добавить параметр на отключение парсинга этой строкм [opt1 -USER_UUID_LEN*ws_online]
+     */
     char web_user_agent[USER_AGENT_LEN+1];
+    
+    /** 
+     * @todo Заменить на динамически выделяемые данные + добавить параметр на отключение парсинга этой строкм [opt1 -USER_UUID_LEN*ws_online]
+     */
     char web_user_host[USER_HOST_LEN+1];
+    
+    /** 
+     * @todo Заменить на динамически выделяемые данные + добавить параметр на отключение парсинга этой строкм [opt1 -USER_UUID_LEN*ws_online]
+     */
     char web_user_language[USER_LANGUAGE_LEN+1];
      
     /**

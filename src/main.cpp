@@ -195,15 +195,14 @@ void posix_ignor_signal(int signum)
  * Запись в pipe производится командой echo 'Hello, my named pipe!' > /tmp/wpcomet
  * Воспринимает команду exit и version
  *
- * echo 'exit' > /tmp/star.comet
- * echo 'version' > /tmp/star.comet
+ * echo 'exit' > /tmp/cpp.comet
+ * echo 'version' > /tmp/cpp.comet
  *
- * echo 'LogLevel 600' > /tmp/star.comet -- Логирует всё
- * echo 'LogLevel 500' > /tmp/star.comet -- Логирует если разрешено по тегу
+ * echo 'LogLevel 600' > /tmp/cpp.comet -- Логирует всё
+ * echo 'LogLevel 500' > /tmp/cpp.comet -- Логирует если разрешено по тегу
  *
- * echo 'TagLog 0 600' > /tmp/star.comet -- Установить тегу разрешение на полный лог.
- *
- * @todo было бы круто добавить команды изменения уровня логирования на лету
+ * echo 'TagLog 0 600' > /tmp/cpp.comet -- Установить тегу разрешение на полный лог.
+ * 
  */
 void command_line_fork()
 {

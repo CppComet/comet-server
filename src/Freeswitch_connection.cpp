@@ -318,9 +318,7 @@ int Freeswitch_connection::request(int client, int len, thread_data* local_buf)
 
 /**
  * Устанавливает соединению статус
- * Вызывается при создании соединения с аргументом true и при удалении соединения с аргументом false
- * @todo Было бы круто разделить на 2 функции set_online и set_offline
- *
+ * Вызывается при создании соединения с аргументом true и при удалении соединения с аргументом false 
  * @param local_buf
  * @param IsOnLine статус который надо постивить online или offline
  * @return

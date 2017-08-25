@@ -54,7 +54,7 @@
 
 /**
  * Максимальный размер сообщения
- * @todo вынести в конфигурационный файл
+ * @todo вынести в конфигурационный файл  | а лучше и экономичнее выделять память по мере надобности
  */
 #define  MAX_MESSAGE_SIZE 9000
 #define  MAX_OFLINE_TIME 90  
@@ -62,13 +62,13 @@
 
 /**
  * Максимальная длина очереди сообщений на пользователя
- * @todo вынести в конфигурационный файл
+ * @todo simpleTask вынести в конфигурационный файл
  */
 #define  MAX_QUEUE_LENGTH 100
 
 /**
  * Максимальная длина лога сообщений в канале
- * @todo вынести в конфигурационный файл
+ * @todo simpleTask вынести в конфигурационный файл
  */
 #define  MAX_LOG_LENGTH 1000
   
@@ -122,8 +122,7 @@ public:
     /**
      * Сохраняет настройки канала
      * @param local_buf
-     * @return
-     * @todo добавить проверку на то что если длина логирования меньше чем было то надо из лога удалить лишние сообщения
+     * @return 
      */
     int save(thread_data* local_buf)
     {
@@ -131,8 +130,7 @@ public:
         {
             return -1;
         }
-
-        /* Временно отключаем mysql*/
+ 
         // Сохраняем настройки канала в бд
         local_buf->db.query_format("REPLACE INTO `pipes_settings`(`name`, `type`, `length`) VALUES ('%s', '0', %d);", pipe_name, log_length);
         local_buf->db.query_format("DELETE FROM `pipes_log` WHERE `name` = '%s' ORDER BY `time` DESC limit %d, 99999", pipe_name, log_length);
