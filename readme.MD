@@ -1,6 +1,6 @@
-
-[![Gitter](https://gitter.im/CppComet/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link) 
-
+ 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/CppComet/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
+ 
 ![CppComet](https://comet-server.com/img/CppComet.png)
 
 Comet server is written in C++, for storing data using MySQL.   
