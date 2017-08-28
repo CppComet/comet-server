@@ -1,10 +1,10 @@
 
 # PHP chat example
 
-An example of using the [CppComet](https///github.com/CppComet/comet-server).md server to create a chat.   
+An example of using the [CppComet](https://github.com/CppComet/comet-server) server to create a chat.   
 
-  * [jsfiddle.net online demo](https///jsfiddle.net/Levhav/o35kvmn2/17/).md
-  * [Github repo](https///github.com/CppComet/php-chat-example).md
+  * [jsfiddle.net online demo](https://jsfiddle.net/Levhav/o35kvmn2/17/)
+  * [Github repo](https://github.com/CppComet/php-chat-example)
 
 {{ :en:comet:chat.gif |chat demo}}
 
@@ -22,7 +22,7 @@ Typical scheme of chat:
  
 # Step 1. Connecting to the comet server
 
-[CppComet](https///github.com/CppComet/comet-server).md has cloud saas alternative that can be used for testing and demo access. In the following examples I will use demonstration access from https://comet-server.com for those who could not or were too lazy to [deploy the server on their VPS](https///github.com/CppComet/comet-server#building-from-source).md
+[CppComet](https://github.com/CppComet/comet-server) has cloud saas alternative that can be used for testing and demo access. In the following examples I will use demonstration access from https://comet-server.com for those who could not or were too lazy to [deploy the server on their VPS](https://github.com/CppComet/comet-server#building-from-source)
 
 
 ```
@@ -51,7 +51,7 @@ cometApi.start({node:"app.comet-server.ru", dev_id:15})
 * Send ajax query to php back-end
 * Send CometQL query for comet server
 
-[code of php back-end](https///github.com/CppComet/php-chat-example/blob/master/chat.php).md
+[code of php back-end](https://github.com/CppComet/php-chat-example/blob/master/chat.php)
 
 Connection code to CppComet using MySQL protocol:
 
@@ -101,8 +101,8 @@ subscription Code to the pipe on comet server. This callback will be called when
 
 # Links
 
-  * [JavaScript API](en/comet/javascript_api).md
-  * [CometQL API](en/comet/cometql).md
-  * [Online demo](https///jsfiddle.net/o35kvmn2/5/).md
-  * [CppComet](https///github.com/CppComet/comet-server).md
-  * [Creating a simple chat using CppComet](https///www.codeproject.com/script/Articles/ArticleVersion.aspx?waid=235463&aid=1181698).md
+  * [JavaScript API](en/comet/javascript_api.md)
+  * [CometQL API](en/comet/cometql.md)
+  * [Online demo](https://jsfiddle.net/o35kvmn2/5/)
+  * [CppComet](https://github.com/CppComet/comet-server)
+  * [Creating a simple chat using CppComet](https://www.codeproject.com/script/Articles/ArticleVersion.aspx?waid=235463&aid=1181698)

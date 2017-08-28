@@ -3,7 +3,7 @@
 
 It’s ready-made plugin chat which could embed on your site for private correspondence between users.
 
-Source codes you can find on [GitHub](https///github.com/Levhav/Star.Comet-Chat).md, [Demo version](http///comet-server.ru/doc/CometQL/Star.Comet-Chat/backend-example/index.php).md
+Source codes you can find on [GitHub](https://github.com/Levhav/Star.Comet-Chat), [Demo version](http://comet-server.ru/doc/CometQL/Star.Comet-Chat/backend-example/index.php)
 # Chat functionality
 
   * Possibility to transmit text messages with any attachments;
@@ -39,7 +39,7 @@ ___
 
 This chat can be located on separate server and on the same server, where you site has been existed. This chat can cooperate with your site via API. A lot of chat’s data can be held by its database. New information such as about users or some other data for authorization it receives from special queries.
 
-For installing this chat on your server you need to download all of the examples from [here](https///github.com/Levhav/Star.Comet-Chat).md
+For installing this chat on your server you need to download all of the examples from [here](https://github.com/Levhav/Star.Comet-Chat)
 
 One of the source files “Database.sql” includes tables’ structure, which this chat uses for correct work.  This file will be based for our database.
 

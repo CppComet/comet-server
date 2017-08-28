@@ -1,8 +1,8 @@
 
 # JavaScript API
 
-  * [Download CometServerApi.js](http///comet-server.com/CometServerApi.js).md
-  * [GitHab repository with CometServerApi.js](https///github.com/Levhav/CometServerApi.js).md
+  * [Download CometServerApi.js](http://comet-server.com/CometServerApi.js)
+  * [GitHab repository with CometServerApi.js](https://github.com/Levhav/CometServerApi.js)
 
 # Connection with server
 
@@ -13,10 +13,10 @@ The function start accepts connection settings and opens new connection. Here op
 cometApi.start({dev_id:15, user_id:1, user_key:"userHash", node:"app.comet-server.ru"})
 ```
 
-  * dev_id it’s a binding parameter – [public developers’ key](en/comet/dev_id).md. 
-  * user_id it’s a non-binding parameter – user’s identifier is necessary to  [authorization on the comet server](en/comet/authentication).md; 
-  * user_key it’s non-binding parameter – it is an authorization hash which necessary to [authorize user on the comet server](en/comet/authentication).md.  
-  * node - If you deploy [CppComet](https///github.com/CppComet/comet-server).md on your server, you must specify the address of your server
+  * dev_id it’s a binding parameter – [public developers’ key](en/comet/dev_id.md). 
+  * user_id it’s a non-binding parameter – user’s identifier is necessary to  [authorization on the comet server](en/comet/authentication.md); 
+  * user_key it’s non-binding parameter – it is an authorization hash which necessary to [authorize user on the comet server](en/comet/authentication.md).  
+  * node - If you deploy [CppComet](https://github.com/CppComet/comet-server) on your server, you must specify the address of your server
 
 To reconnecting to server use the restart function.
 
@@ -67,7 +67,7 @@ cometApi.subscription(function(e){ console.log(e)})
 ```
 
 
-An example with online demo [How to accept message from channel in JavaScript](en/comet/faq/js-api-subscription).md
+An example with online demo [How to accept message from channel in JavaScript](en/comet/faq/js-api-subscription.md)
 
 # Unsubscription of receiving messages from channel
 
@@ -87,7 +87,7 @@ cometApi.unsubscription(subscriptionId)
 
 # Reserved channel names
 
-The main article [reserved channel names](en/comet/javascript_api/pipe-types).md.
+The main article [reserved channel names](en/comet/javascript_api/pipe-types.md).
 
 ___
 We don’t recommend to use in our project such channels names as «bin_*», «big_*», «push_*», «comet_*» и «sys_*». These names could be used for new functions. And they can have some special properties besides of current channels names.
@@ -115,7 +115,7 @@ cometApi.subscription("msg.event_name", function(e){ console.log(e)})
 
 
 ___
-More details about authorization mechanism on comet server you and about private messages look in article “[User’s authorization on comet server](en/comet/authentication).md”
+More details about authorization mechanism on comet server you and about private messages look in article “[User’s authorization on comet server](en/comet/authentication.md)”
 ___
 
 
@@ -165,7 +165,7 @@ cometApi.Subscription("track_online.unsubscription", function(msg)
 
 
 This type of channel is designed specifically to facilitate the creation of dynamically updated lists of online users.
-Main article [list of online users](en/comet/faq/realtime-users-list).md
+Main article [list of online users](en/comet/faq/realtime-users-list.md)
 # Sending messages to channel from JS (pipes web_*)
 
 The function web_pipe_send lets from JavaScript send messages to channel bypassing your server (directly calls comet server). It allows resending messages between clients without loading your server. Also owing to direct call to comet server, delivery time of message from client to client is minimal.
@@ -219,7 +219,7 @@ Field server_info.user_id in incoming message fills out by some information besi
 The comet server includes possibility to activate storing the last N messages mechanism for some channels.
 
 ___
-Logging of transferred messages may be activate by CometQL query to table “[pipes_settings](en/comet/cometql).md”.
+Logging of transferred messages may be activate by CometQL query to table “[pipes_settings](en/comet/cometql.md)”.
 ___
  
 
@@ -247,11 +247,11 @@ cometApi.count_users_in_pipe("web_chat_pipe", function(res)
 ```
 
 
-Besides of [CometQL query](en/comet/cometql).md, this function can show a number of subscribers only for those channels which name begins with “web_” (for example, for “web_chat_pipe” it will work but for “chat_pipe” – will not work). This limitation entered in order to be able to create such a channel which a number of subscribers can’t be accessible for anyone via JS API.
+Besides of [CometQL query](en/comet/cometql.md), this function can show a number of subscribers only for those channels which name begins with “web_” (for example, for “web_chat_pipe” it will work but for “chat_pipe” – will not work). This limitation entered in order to be able to create such a channel which a number of subscribers can’t be accessible for anyone via JS API.
  
 # Determination of authorization status on comet server
 
-The main article [An authorization on comet server](en/comet/authentication).md
+The main article [An authorization on comet server](en/comet/authentication.md)
 
 The comet server has an opportunity to authorize users. An authorizing can be useful for determination of sender, who create message.
 
@@ -296,7 +296,7 @@ cometApi.isMaster()
 
 Determination of which tab can be the master tab may be useful if you want to perform some action just on one tab. For example, you have opened a chat by 3 pages and at every income message plays audio notification. Here might be a good thing if just only one of these tabs will be make a sound, rather than all.
 
-For more details about cooperation between these tabs, search in article [Message exchange between browser tabs](https///habrahabr.ru/company/comet-server/blog/250719/).md.
+For more details about cooperation between these tabs, search in article [Message exchange between browser tabs](https://habrahabr.ru/company/comet-server/blog/250719/).
 
 # References
 
@@ -308,11 +308,11 @@ In some cases file CometServer.js is inserted in the following way:
 
 ```
 
-This approach can be right just only for tests and during developing period but not for permanent using. You can find the last version of JavaScript API [here](http///comet-server.ru/CometServerApi.js).md. Check it please to avoid some situation of incompatibility of your app with this soft. New version of JavaScript API might appear as soon as possible.  
+This approach can be right just only for tests and during developing period but not for permanent using. You can find the last version of JavaScript API [here](http://comet-server.ru/CometServerApi.js). Check it please to avoid some situation of incompatibility of your app with this soft. New version of JavaScript API might appear as soon as possible.  
 To prevent this situation you can just only once download the file with CometServerApi.js on your server and you can use it until you won’t need updating.
   
 # Additional Information
  
-  * [Reserved channel names](en/comet/javascript_api/pipe-types).md
-  * [CometQL API](en/comet/cometql).md
-  * [What is and why do we need "A public developer token" and "Secret developer key"](en/comet/dev_id).md
+  * [Reserved channel names](en/comet/javascript_api/pipe-types.md)
+  * [CometQL API](en/comet/cometql.md)
+  * [What is and why do we need "A public developer token" and "Secret developer key"](en/comet/dev_id.md)

@@ -27,8 +27,8 @@ make
 
 CppComet использует базу данных mysql для хранения данных пользователей для авторизации на сервере. И хранения времени, когда пользователь был в сети. И для хранения временных данных, таких как не доставленные сообщения и другие данные.
 
-  * Создайте базу в mysql на основе файла [db.sql](https///github.com/Levhav/comet-server/blob/master/db.sql).md
-  * В файле [comet.ini](https///github.com/CppComet/comet-server/blob/master/comet.ini).md укажите реквизиты для доступа к бд в секции [db]
+  * Создайте базу в mysql на основе файла [db.sql](https://github.com/Levhav/comet-server/blob/master/db.sql)
+  * В файле [comet.ini](https://github.com/CppComet/comet-server/blob/master/comet.ini) укажите реквизиты для доступа к бд в секции [db]
 
 ```
 
@@ -51,11 +51,11 @@ password = 0000000000000000000000000000000000000000000000000000000000000000
 
 ```
 
-Остальные настройки из файла [comet.ini](https///github.com/CppComet/comet-server/blob/master/comet.ini).md можно не менять.
+Остальные настройки из файла [comet.ini](https://github.com/CppComet/comet-server/blob/master/comet.ini) можно не менять.
 
 
 ___
-Весь перечень настроек в статье [Настройка файла comet.ini](comet/ini-file).md 
+Весь перечень настроек в статье [Настройка файла comet.ini](comet/ini-file.md) 
 ___
 
   

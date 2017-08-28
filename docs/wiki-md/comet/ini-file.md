@@ -7,7 +7,7 @@
 
 
 ___
-Статья расчитана на версию [CppComet 3.22](https///github.com/CppComet/comet-server/releases/tag/3.22).md и старше
+Статья расчитана на версию [CppComet 3.22](https://github.com/CppComet/comet-server/releases/tag/3.22) и старше
 ___
 
 # Секция [main]

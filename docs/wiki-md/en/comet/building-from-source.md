@@ -25,8 +25,8 @@ make
 # Settings
 CppComet use mysql database for storage users credentials for authorization on server. And to store the time when the user was on the online. And for storing temporary data, such as undelivered messages and other data.
  
-  * Create a database in mysql based on [db.sql](https///github.com/Levhav/comet-server/blob/master/db.sql).md file
-  * In [comet.ini](https///github.com/CppComet/comet-server/blob/master/comet.ini).md file, set the details to access the database
+  * Create a database in mysql based on [db.sql](https://github.com/Levhav/comet-server/blob/master/db.sql) file
+  * In [comet.ini](https://github.com/CppComet/comet-server/blob/master/comet.ini) file, set the details to access the database
 
 ```
 
@@ -77,7 +77,7 @@ systemctl enable comet.service
 ```
 
 
-After successes run server we can begin create chat. If you get error create issue in [github repository](https///github.com/Levhav/comet-server/issues).md.
+After successes run server we can begin create chat. If you get error create issue in [github repository](https://github.com/Levhav/comet-server/issues).
 
 # Configuring nginx as a reverse proxy
 

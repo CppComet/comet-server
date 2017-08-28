@@ -34,8 +34,8 @@ http://comet-server.ru/cometapi.php?query=show+tables&id=15&key=lPXBFPqNg3f661Jc
 
 
   * query это CometQL запрос
-  * id это [идентификатор разработчика](comet/dev_id).md
-  * key это [секретный ключ разработчика](comet/dev_id).md
+  * id это [идентификатор разработчика](comet/dev_id.md)
+  * key это [секретный ключ разработчика](comet/dev_id.md)
 
 Ответ придёт в json формате. В случаи успеха ответ будет таким
 

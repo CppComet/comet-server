@@ -13,6 +13,6 @@ Messenger это система диалогов с использованием
   * сортировка диалогов по дате последнего сообщения и количеству новых уведомлений,
   * выделение пользователей, находящихся онлайн.
 
-[Плагин чата для modx](https///modstore.pro/packages/users/messenger).md
+[Плагин чата для modx](https://modstore.pro/packages/users/messenger)
 
 {{ :user:app:modx-messenger.png?direct&900 |Плагин чата для modx messenger}}
