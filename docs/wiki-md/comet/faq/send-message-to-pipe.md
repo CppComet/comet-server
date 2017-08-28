@@ -1,0 +1,40 @@
+
+# Из CometQL
+Для того что бы отправить сообщение в канал выполните следующий [CometQL запрос](/docs/wiki-md/comet/cometql.md). (Вы можете использовать онлайн командную строку. Она расположена в правом нижнем углу экрана на всех старицах.)
+
+```
+
+INSERT INTO pipes_messages (name, event, message)VALUES("Pipe_name", "event_in_pipe", '{"text":"message"}');
+
+```
+
+
+# С помощью PHP
+
+
+```
+
+<?php
+
+$link = mysqli_connect("app.comet-server.ru", "15", "lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8", "CometQL_v1");
+ 
+if ( !$link )
+{ 
+    die("Невозможно подключение к CometQL");
+}
+ 
+/**
+ * Отправка данных в канал с именем Pipe_name передаётся сообщение с именем event_name и содержимым указанным в поле message.
+ */
+$result = mysqli_query (  $link, 'INSERT INTO pipes_messages (name, event, message)VALUES("Pipe_name", "event_name", \'{"text":"текст сообщения","param2":"ещё что угодно"}\')' );
+
+if(mysqli_errno($link) != 0)
+{
+    die("error:". mysqli_errno($link)." text:".mysqli_error($link)." see:https://comet-server.ru/wiki/doku.php/comet:cometql:error");
+}
+
+?>
+
+```
+
+ 
