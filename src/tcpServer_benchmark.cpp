@@ -71,6 +71,11 @@ void usage_statistics::start()
         {
             return;
         }
+         
+        if(!appConf::instance()->get_bool("statistics", "allow"))
+        {
+            return;
+        }
 
         if( uptime != 60 && uptime != 600 && uptime % interval != 0)
         {

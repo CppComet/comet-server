@@ -5,6 +5,13 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v3.23
+
+IMPROVEMENTS:
+
+ * added parametr `allow` to section `statistics` in .ini file
+ * added ini file documentation in to file ./docs/comet.ini.md
+
 ## v3.22
 
 BUG FIXES:
