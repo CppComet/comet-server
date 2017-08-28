@@ -30,7 +30,7 @@ The first process in the list was processed most of all as it was engaged in rec
 Other processes for already received connections processed incoming messages;
 The PcS column indicates how many network events were processed in the last second (there are no zeros on the gif animation) Zero since the connections are accepted and hang in anticipation of incoming messages, but with this test scenario we do not send any additional events.
   
-{{:comet:out.png?direct |CppComet}}
+![CppComet](:comet:out.png?direct )
 
 # The output of htop # 
 
@@ -40,13 +40,13 @@ Comet server processes (It can be seen that he spent 4891 MB of RAM);
 tsung processes (It can be seen that he spent 2262 MB of RAM);
 Total memory consumption (The rest was consumed by the operating system and other programs started at the time of testing). 
 
-{{:comet:htop.png?direct |htop}}
+![htop](:comet:htop.png?direct )
 
 # The testing process # 
 
 Gif-animation of the testing process. It is seen that there is an increase of about 2,500 connections per second and that all the kernels are loaded almost evenly. You can also see an increase in memory consumption. 
 
-{{https://comet-server.com/doc/CppComet/HL-test2-64000.gif}}
+![https://comet-server.com/doc/CppComet/HL-test2-64000.gif](https://comet-server.com/doc/CppComet/HL-test2-64000.gif)
 
 # The tsung report # 
 
@@ -58,9 +58,9 @@ ___
 
 Queries per second
 
-{{https://cppcomet.github.io/comet-server/HL-tests/HL-test1/20170608-1534/images/graphes-Perfs-rate.png|queries per second}}
+![queries per second](https://cppcomet.github.io/comet-server/HL-tests/HL-test1/20170608-1534/images/graphes-Perfs-rate.png)
 
 The number of simultaneous connections
 
-{{https://cppcomet.github.io/comet-server/HL-tests/HL-test1/20170608-1534/images/graphes-Users-simultaneous.png|the number of simultaneous connections}}
+![the number of simultaneous connections](https://cppcomet.github.io/comet-server/HL-tests/HL-test1/20170608-1534/images/graphes-Users-simultaneous.png)
 

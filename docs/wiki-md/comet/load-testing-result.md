@@ -47,7 +47,7 @@ ___
 
 Gif анимация процесса тестирования. Видно что идёт прирост около 2500 соеденений в секунду и то что все ядра загружаются почти равномерно. Так же виден рост потребления памяти.
 
-{{https://comet-server.com/doc/CppComet/HL-test2-64000.gif}}
+![https://comet-server.com/doc/CppComet/HL-test2-64000.gif](https://comet-server.com/doc/CppComet/HL-test2-64000.gif)
 
 # Отчёт tsung
 
@@ -58,11 +58,11 @@ ___
 
 
 # Запросов в секунду # 
-{{https://cppcomet.github.io/comet-server/HL-tests/HL-test1/20170608-1534/images/graphes-Perfs-rate.png|Запросов в секунду}}
+![Запросов в секунду](https://cppcomet.github.io/comet-server/HL-tests/HL-test1/20170608-1534/images/graphes-Perfs-rate.png)
 
 # Количество одновременных подключений # 
 
-{{https://cppcomet.github.io/comet-server/HL-tests/HL-test1/20170608-1534/images/graphes-Users-simultaneous.png|Количество одновременных подключений}}
+![Количество одновременных подключений](https://cppcomet.github.io/comet-server/HL-tests/HL-test1/20170608-1534/images/graphes-Users-simultaneous.png)
 
 
 
