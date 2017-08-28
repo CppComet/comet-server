@@ -48,11 +48,11 @@ mysql -h app.comet-server.ru -u15 -plPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgL
 ```
 
 
-Else you can use [online command prompt](en/comet/cometql/cli.md). You can find it on the bottom of the right corner on all of the pages.  
+Else you can use [online command prompt](/docs/wiki-md/en/comet/cometql/cli.md). You can find it on the bottom of the right corner on all of the pages.  
 
 
 ___
-[Here you can test source code based on PHP with CometQL](en/comet/cometql/cli.md) using for online command prompt implementation.
+[Here you can test source code based on PHP with CometQL](/docs/wiki-md/en/comet/cometql/cli.md) using for online command prompt implementation.
 ___
 
  
@@ -99,12 +99,12 @@ ___
 
 Notes of current implementation of CometSQL:
   * CometSQL doesn’t implement all methods of SQL. A part of functions planned to realize in future. But some notes were applied in order to optimize inner structure of Comet server.
-  * To [optimize internal logics](en/comet/cometql/optimization_for_the_cluster.md), such operations like delete and insert doesn’t return amount of used lines (it belongs to CometQL v.1.0).
+  * To [optimize internal logics](/docs/wiki-md/en/comet/cometql/optimization_for_the_cluster.md), such operations like delete and insert doesn’t return amount of used lines (it belongs to CometQL v.1.0).
   * Supporting such operators like AND, OR and ORDER BY in queries will be realize soon.
 
 
 ___
-Some of hosting providers determine forbiddance (или ban) on external connections – you can face with this on some free or half-free hosting services. In order to check ability to use CometQL, you can take advantage of [hosting verification script](en/comet/testhosting.md). 
+Some of hosting providers determine forbiddance (или ban) on external connections – you can face with this on some free or half-free hosting services. In order to check ability to use CometQL, you can take advantage of [hosting verification script](/docs/wiki-md/en/comet/testhosting.md). 
 ___
 
 # Table pipes_messages
@@ -200,7 +200,7 @@ Input channel name “web_admins” and click “subscribe”.
 </html>
 Now perform query again and you will see that amount of subscribers are increase.
 # Table users_in_pipes
-The table “users_in_pipes” contains data about [authorized users](en/comet/authentication.md) which subscribe on channel. This table is available only for reading.  
+The table “users_in_pipes” contains data about [authorized users](/docs/wiki-md/en/comet/authentication.md) which subscribe on channel. This table is available only for reading.  
 
 ```
 
@@ -220,7 +220,7 @@ mysql> select * from users_in_pipes where name = "web_admins";
 
 
 ___
-Field user in table pipes contain aggregate amount of subscribers ([authorized and non-authorized](en/comet/authentication.md)), besides of table users_in_pipes includes only authorized subscribers list.
+Field user in table pipes contain aggregate amount of subscribers ([authorized and non-authorized](/docs/wiki-md/en/comet/authentication.md)), besides of table users_in_pipes includes only authorized subscribers list.
 ___
 
 
@@ -263,7 +263,7 @@ Query OK, 0 rows affected (0.00 sec)
 
 
 # Table users_messages
-The table “users_messages” intended sending messages to [authorized users](en/comet/authentication.md) by their identifiers.
+The table “users_messages” intended sending messages to [authorized users](/docs/wiki-md/en/comet/authentication.md) by their identifiers.
 
 ___
 Sending messages by identifiers gives more powerful protection tools while data is transferring. Also it increases probability to deliver message to right user.
@@ -337,7 +337,7 @@ Here user with id=2 at that moment online, user with id=3 – was online at July
  
 # Table users_auth
 
-The table users_auth contains data of user’s [authorizing](en/comet/authentication.md) on comet server. 
+The table users_auth contains data of user’s [authorizing](/docs/wiki-md/en/comet/authentication.md) on comet server. 
 
 ```
 
@@ -361,7 +361,7 @@ ___
 In field hash you can transmit only lines (strings) less than 32 symbols and it must match with regular term [0-9A-z=+/_].
 ___
 
-To deleting data of [user’s authorizing](comet/authentication.md), you can use “delete” query.
+To deleting data of [user’s authorizing](/docs/wiki-md/comet/authentication.md), you can use “delete” query.
 
 ```
 
@@ -378,15 +378,15 @@ ___
 
 # Other information
 
-  * [Example of sending messages from bash.](en/comet/cometql-bash-example.md)
-  * [Error code in CometQL](en/comet/cometql/error.md)
-  * [Reserved channel names](en/comet/javascript_api/pipe-types.md)
-  * [JavaScript API](en/comet/javascript_api.md)
-  * [What it is and why do we need "A public developer token" and "Secret developer key?"](en/comet/dev_id.md)
+  * [Example of sending messages from bash.](/docs/wiki-md/en/comet/cometql-bash-example.md)
+  * [Error code in CometQL](/docs/wiki-md/en/comet/cometql/error.md)
+  * [Reserved channel names](/docs/wiki-md/en/comet/javascript_api/pipe-types.md)
+  * [JavaScript API](/docs/wiki-md/en/comet/javascript_api.md)
+  * [What it is and why do we need "A public developer token" and "Secret developer key?"](/docs/wiki-md/en/comet/dev_id.md)
 
 # Reserved channels names
 
-Main article [Reserved channels names and channels with extra properties](en/comet/javascript_api/pipe-types.md).
+Main article [Reserved channels names and channels with extra properties](/docs/wiki-md/en/comet/javascript_api/pipe-types.md).
 
 ___
 We don’t recommend to use in our project such channels names as «bin_*», «big_*», «push_*», «comet_*» и «sys_*». These names could be used for new functions. And they can have some special properties besides of current channels names.

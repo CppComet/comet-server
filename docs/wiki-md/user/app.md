@@ -22,5 +22,5 @@ ___
 
 # Плагин чата для modx
 
-Messenger это система диалогов с использованием web-сокетов (comet-server) для мгновенных уведомлений. [Подробнее](user/app/modx-messenger.md) 
+Messenger это система диалогов с использованием web-сокетов (comet-server) для мгновенных уведомлений. [Подробнее](/docs/wiki-md/user/app/modx-messenger.md) 
 {{ :user:app:modx-messenger.png?direct&900 |Плагин чата для modx messenger}}
