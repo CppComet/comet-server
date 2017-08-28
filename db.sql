@@ -1,12 +1,12 @@
 
 --
--- База данных: `comet_db`
+-- Database: `comet_db`
 --
 
 -- --------------------------------------------------------
 
 --
--- Структура таблицы `log_event`
+-- Table structure `log_event`
 --
 
 CREATE TABLE IF NOT EXISTS `log_event` (
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS `log_event` (
 -- --------------------------------------------------------
 
 --
--- Структура таблицы `log_query`
+-- Table structure `log_query`
 --
 
 CREATE TABLE IF NOT EXISTS `log_query` (
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `log_query` (
 -- --------------------------------------------------------
 
 --
--- Структура таблицы `pipes_settings`
+-- Table structure `pipes_settings`
 --
 
 CREATE TABLE IF NOT EXISTS `pipes_settings` (
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `pipes_settings` (
 -- --------------------------------------------------------
 
 --
--- Структура таблицы `pipe_messages`
+-- Table structure `pipe_messages`
 --
 
 CREATE TABLE IF NOT EXISTS `pipe_messages` (
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS `pipe_messages` (
 -- --------------------------------------------------------
 
 --
--- Структура таблицы `users_auth`
+-- Table structure `users_auth`
 --
 
 CREATE TABLE IF NOT EXISTS `users_auth` (
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `users_auth` (
 -- --------------------------------------------------------
 
 --
--- Структура таблицы `users_messages`
+-- Table structure `users_messages`
 --
 
 CREATE TABLE IF NOT EXISTS `users_messages` (
@@ -88,11 +88,25 @@ CREATE TABLE IF NOT EXISTS `users_messages` (
 -- --------------------------------------------------------
 
 --
--- Структура таблицы `users_time`
+-- Table structure `users_time`
 --
 
 CREATE TABLE IF NOT EXISTS `users_time` (
   `user_id` int(11) NOT NULL,
   `time` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- --------------------------------------------------------
+
+--
+-- Table structure `options`
+--
+
+CREATE TABLE IF NOT EXISTS `options` (
+  `section` varbinary(250) NOT NULL,
+  `name` varbinary(250) NOT NULL,
+  `value` varbinary(250) NOT NULL,
+  PRIMARY KEY (`section`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

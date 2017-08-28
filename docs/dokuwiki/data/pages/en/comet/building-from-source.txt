@@ -1,5 +1,4 @@
-<rst>EN::004-Administration</rst>
-
+<rst>EN::004-Administration::004-Install</rst>
 ====== Install ======
 
 Recommended OS ubuntu, debian, centos

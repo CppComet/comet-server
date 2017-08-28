@@ -48,8 +48,7 @@ pthread_mutex_t MySql_connection::QLParsing_mutex;
  * @param msg сообщение (уже с экранированными данными)
  * @param quote Кавычки
  * @return
- *
- * @todo добавить обработку authType в логирование канала.
+ * 
  */
 int PipeLog::addToLog(thread_data* local_buf, const char* pipe_name, const char* event_name, unsigned int from_user_id, const char* msg,  unsigned int msg_length)
 {
@@ -94,7 +93,7 @@ int PipeLog::addToLog(thread_data* local_buf, const char* pipe_name, const char*
         // Вставка в бд
         local_buf->stm.pipe_messages_insert.execute(uid, (long int)time(NULL), pipe_name, event_name, msg, msg_length, from_user_id);
 
-        // @todo Заменить потом на stm выражение
+        // @todo simpleTask Заменить потом на stm выражение
         local_buf->db.query_format("delete from pipe_messages where pipe_messages.id in( \
                                         select p2.id from ( \
                                             select id FROM `pipe_messages` as p3 where p3.pipe_name = '%s' order by p3.time desc limit %d, 999\
@@ -929,7 +928,8 @@ int MySql_connection::sql_show_processlist(thread_data* local_buf, unsigned int 
 int MySql_connection::sql_show_variables(thread_data* local_buf, unsigned int PacketNomber)
 {
     // SHOW SESSION VARIABLES LIKE 'lower_case_table_names'
-    // @todo не доделан like и флаги SESSION и GLOBAL
+    // @todo simpleTask не доделан like и флаги SESSION и GLOBAL
+    // @todo simpleTask показывать параметры ini файла
 
     local_buf->answer_buf.lock();
     char* answer = local_buf->answer_buf.getData();

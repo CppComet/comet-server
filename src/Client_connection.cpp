@@ -953,7 +953,7 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
 
 int Client_connection::log_statistics(thread_data* local_buf, const char* event_data,int client, int len)
 {
-    // @todo Переделать на отправку данных в бд
+    // @todo simpleTask Переделать на отправку данных в бд
     //local_buf->answer_buf.lock();
     //mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), event_data, strlen(event_data));
     //local_buf->clusterRC.lpush_printf("log_statistics \"%s\"", local_buf->answer_buf.getData());
@@ -1004,7 +1004,7 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
             CP<Client_connection> r = tcpServer <Client_connection>::instance()->get(conection_id);
             if(r)
             {
-                // @todo отдавать всем не uuid а его солёный хеш.
+                // @todo simpleTask отдавать всем не uuid а его солёный хеш.
                 bzero(strtmp, 200);
                 snprintf(strtmp, 200, "{\"user_id\":%d,\"uuid\":\"%s\"}", r->web_user_id, r->web_user_uuid);
                 usersstr.append(strtmp);
@@ -1220,6 +1220,11 @@ char* Client_connection::checking_event_name(thread_data* local_buf, const char*
  */
 int Client_connection::web_pipe_msg_v1(thread_data* local_buf, char* event_data,int client, int len)
 {
+    if(!appConf::instance()->get_bool('ws', 'support_old_api'))
+    {
+        return;
+    }
+    
     bool send_user_id = true;
     char* name = event_data;
     if(memcmp(name, "@web_", 5) == 0)
@@ -1229,8 +1234,7 @@ int Client_connection::web_pipe_msg_v1(thread_data* local_buf, char* event_data,
         name++;
     }
     else if(memcmp(name, "web_", 4) != 0)
-    {
-        // @todo добавить ссылку на описание ошибки
+    { 
         message(local_buf, base64_encode((const char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}").data(), "_answer");
         return -1;
     }
@@ -1619,10 +1623,6 @@ int Client_connection::get_custom_request(int client, int len, thread_data* loca
         return -1;
     }*/
       
-    /**
-     * @todo add parameter  to .ini file for http headers control
-     * And make class for return correct headers for HTTP response 
-     */
     
     char resp[]="HTTP/1.1 200 OK\r\nContent-Type:%s; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
     \r\nAccess-Control-Allow-Methods: GET\r\nAllow: GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nCache-Control: max-age=3600\r\nConnection: close\r\n\r\n";
@@ -1638,10 +1638,7 @@ int Client_connection::get_custom_request(int client, int len, thread_data* loca
     
     char headers_resp[1024];
     snprintf(headers_resp, 1024, resp, headers.data());
-     
-    /** 
-     * @todo дополнить белым списком запрашиваемых файлов чтоб исключить нагрузку от левых запросов.
-     */ 
+      
     int fp = open(name.data(), O_RDONLY);
     if(fp < 0)
     {
@@ -1923,9 +1920,7 @@ int Client_connection::message(thread_data* local_buf, const char* msg)
 
 /**
  * Устанавливает соединению статус
- * Вызывается при создании соединения с аргументом true и при удалении соединения с аргументом false
- * @todo Было бы круто разделить на 2 функции set_online и set_offline
- *
+ * Вызывается при создании соединения с аргументом true и при удалении соединения с аргументом false  
  * @param local_buf
  * @param IsOnLine статус который надо постивить online или offline
  * @return

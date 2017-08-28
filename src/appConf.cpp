@@ -63,6 +63,11 @@ bool appConf::initFromFile(const char *fileName)
         sections["statistics"]["interval"] = "3600";  
     }
      
+    if(!is_property_exists("statistics", "allow"))
+    {
+        sections["statistics"]["allow"] = "true";  
+    }
+    
     /*
     ; Объём буфера для сообщения
     ; Много ставить не надо, комет сервер не расчитан на передачу больших сообщений
