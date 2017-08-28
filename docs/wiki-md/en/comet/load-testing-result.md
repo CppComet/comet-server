@@ -13,7 +13,7 @@ ___
 # Results # 
 
 On the screenshot you can see 3 consoles.  
-{{ :comet:снимок_экрана_от_2017-06-08_15-35-11.png|Пик тестирования}}
+![Пик тестирования](https://comet-server.com/wiki/lib/exe/fetch.php/comet:снимок_экрана_от_2017-06-08_15-35-11.png)
 
   - At the top was running the tsung
   - At the left is the comet server

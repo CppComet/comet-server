@@ -11,5 +11,5 @@ echo "INSERT INTO pipes_messages (name, event, message)VALUES('web_MainPageChat'
 
 Выполните эту команду в linux консоли и в окне чата появится сообщение содержащие данные о нагрузке на сервер.
 <html>
-<iframe src="//comet-server.ru/doc/CometQL/MainPageChat/index.php" style="width: 100%;  display: block;  height: 250px;"></iframe>
+
 </html>

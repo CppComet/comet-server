@@ -30,11 +30,11 @@ ___
   * Список жалоб на пользователей от других пользователей
   * Возможность просматривать только сообщения с вложениями
 
-{{ :star-comet-chat:screenshot_21_.png?600 |}}
+![](https://comet-server.com/wiki/lib/exe/fetch.php/star-comet-chat:screenshot_21_.png)
 
 # Скриншоты чата
 
-{{ :star-comet-chat:screenshot_4_.png?600  |Внешний вид чата}}
+![Внешний вид чата](https://comet-server.com/wiki/lib/exe/fetch.php/star-comet-chat:screenshot_4_.png)
 # Как встроить чат на сайт
 
 
@@ -330,4 +330,4 @@ Warning: move_uploaded_file(): Unable to move '/tmp/php27nQco' to '/home/www-dat
 == Как попасть в админку? ==
 
 Список пользователей с правами администратора задаётся в файле config.php в функции getAdminIds()
-{{ :star-comet-chat:снимок_экрана_от_2017-03-06_14-39-30.png |}}
+![](https://comet-server.com/wiki/lib/exe/fetch.php/star-comet-chat:снимок_экрана_от_2017-03-06_14-39-30.png )

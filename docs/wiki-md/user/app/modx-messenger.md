@@ -15,4 +15,4 @@ Messenger это система диалогов с использованием
 
 [Плагин чата для modx](https://modstore.pro/packages/users/messenger)
 
-{{ :user:app:modx-messenger.png?direct&900 |Плагин чата для modx messenger}}
+![Плагин чата для modx messenger](https://comet-server.com/wiki/lib/exe/fetch.php/user:app:modx-messenger.png)

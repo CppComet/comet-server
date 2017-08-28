@@ -95,6 +95,6 @@ cometApi.onAuthFalill(function()
 Откройте пример в двух или более браузерах, Скопируйте ваш `USER_ID` из одного окна и вставьте его в другое окно. В поле с подписью ` Identificator of user who must will receive the message` введите текст сообщения и нажмите отправить. Вы увидите что сообщение придёт только в то окно у которого задан то же USER_ID который вы и указали при отправке.
 
 <html>
-<iframe height='800' scrolling='no' title='CppComet auth chat example' src='//codepen.io/Levhav/embed/XaWLra/?height=265&theme-id=dark&default-tab=js,result&embed-version=2' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'>See the Pen <a href='https://codepen.io/Levhav/pen/XaWLra/'>CppComet auth chat example</a> by Trapenok Victor (<a href='https://codepen.io/Levhav'>@Levhav</a>) on <a href='https://codepen.io'>CodePen</a>.
-</iframe>
+See the Pen <a href='https://codepen.io/Levhav/pen/XaWLra/'>CppComet auth chat example</a> by Trapenok Victor (<a href='https://codepen.io/Levhav'>@Levhav</a>) on <a href='https://codepen.io'>CodePen</a>.
+
 </html>

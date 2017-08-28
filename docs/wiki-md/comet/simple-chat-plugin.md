@@ -56,7 +56,7 @@
 
 
 <html>
-<iframe src="https://comet-server.com/doc/CometQL/htmlChat/index.html" width="910px" height="1060px"></iframe>
+
 </html> 
 
 

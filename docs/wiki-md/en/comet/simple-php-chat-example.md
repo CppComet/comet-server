@@ -6,13 +6,13 @@ An example of using the [CppComet](https://github.com/CppComet/comet-server) ser
   * [jsfiddle.net online demo](https://jsfiddle.net/Levhav/o35kvmn2/17/)
   * [Github repo](https://github.com/CppComet/php-chat-example)
 
-{{ :en:comet:chat.gif |chat demo}}
+![chat demo](https://comet-server.com/wiki/lib/exe/fetch.php/en:comet:chat.gif )
 
 # Scheme of chat
 
 Typical scheme of chat:
 
-{{ :en:comet:scheme-of-chat.jpg |Typical scheme of chat}}
+![Typical scheme of chat](https://comet-server.com/wiki/lib/exe/fetch.php/en:comet:scheme-of-chat.jpg )
 
   * Connecting to the comet server by websockets
   * Send ajax message for add new massage to chat

@@ -55,5 +55,5 @@ INSERT INTO pipes_messages (name, event, message)VALUES("Pipe_name", "event_in_p
 ```
 
 <html>
-<iframe src="http://comet-server.com/doc/example/3" width="910px"></iframe>
+
 </html>

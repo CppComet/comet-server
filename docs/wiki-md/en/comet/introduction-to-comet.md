@@ -13,7 +13,7 @@ On this scheme you can see field of using Comet server in working process. We ca
   - Comet server uses open connection with browser. Than server delivers message to browser.
   - JavaScript API delivers this message to your callback.
 
-{{ ::scheme-of-comet-using.gif |}}
+![](https://comet-server.com/wiki/lib/exe/fetch.php/:scheme-of-comet-using.gif )
 # Advantages of using push service
 
 Comet server permanently maintain opened connections and this let to unlade (unload) structure of your site. Comet server realized on C++ for maintain a big amount of opened connections with browsers and server always correct solve (perform) the current tasks.

@@ -80,6 +80,6 @@ The function “isAuthorized” may return 3 different values:
 [code of online demo](https://github.com/CppComet/auth-example) [online demo on github](https://cppcomet.github.io/auth-example/index.html) [Look in codepen.io](https://codepen.io/Levhav/pen/XaWLra)
 
 <html>
-<iframe height='800' scrolling='no' title='CppComet auth chat example' src='//codepen.io/Levhav/embed/XaWLra/?height=265&theme-id=dark&default-tab=js,result&embed-version=2' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'>See the Pen <a href='https://codepen.io/Levhav/pen/XaWLra/'>CppComet auth chat example</a> by Trapenok Victor (<a href='https://codepen.io/Levhav'>@Levhav</a>) on <a href='https://codepen.io'>CodePen</a>.
-</iframe>
+See the Pen <a href='https://codepen.io/Levhav/pen/XaWLra/'>CppComet auth chat example</a> by Trapenok Victor (<a href='https://codepen.io/Levhav'>@Levhav</a>) on <a href='https://codepen.io'>CodePen</a>.
+
 </html>

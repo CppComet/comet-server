@@ -23,11 +23,11 @@ Source codes you can find on [GitHub](https://github.com/Levhav/Star.Comet-Chat)
   * Appeal list of users;
   * Possibility to read messages only with attachments.
 
-{{ :star-comet-chat:screenshot_21_.png?600 |}}
+![](https://comet-server.com/wiki/lib/exe/fetch.php/star-comet-chat:screenshot_21_.png)
 
 # Screenshots
 
-{{ :star-comet-chat:screenshot_4_.png?600  |Внешний вид чата}}
+![Внешний вид чата](https://comet-server.com/wiki/lib/exe/fetch.php/star-comet-chat:screenshot_4_.png)
 # How to embed this chat
 
 

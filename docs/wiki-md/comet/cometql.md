@@ -164,7 +164,7 @@ Query OK, 0 rows affected (0.13 sec)
 # Online пример
 Введите имя канала "pipe_name" и нажмите подписаться.
 <html>
-<iframe src="//comet-server.com/doc/example/7/subscriptionTest.php" width="910px"></iframe>
+
 </html>
 А теперь с помощью online командной строки расположенной в углу экрана выполните запрос вставки в pipes_messages  и увидите что сообщение дошло.
 
@@ -203,7 +203,7 @@ mysql> select * from pipes where name in( "web_admins", "web_php_chat");
 
 Теперь введите имя канала "web_admins" и нажмите подписаться.
 <html>
-<iframe src="//comet-server.com/doc/example/7/subscriptionTest.php" width="910px"></iframe>
+
 </html>
 А теперь выполните запрос ещё раз и увидите что подписчиков в канале стало больше.
 # Таблица users_in_pipes
