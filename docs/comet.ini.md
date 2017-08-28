@@ -179,7 +179,8 @@ statistics = 500
 
 Disabling overtime connections
 
-```removeOldConnections = 500
+```
+removeOldConnections = 500
 ```
 
 Working with mysql
