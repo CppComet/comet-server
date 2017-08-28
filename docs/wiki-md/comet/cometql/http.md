@@ -34,8 +34,8 @@ http://comet-server.ru/cometapi.php?query=show+tables&id=15&key=lPXBFPqNg3f661Jc
 
 
   * query это CometQL запрос
-  * id это [идентификатор разработчика](comet:dev_id)
-  * key это [секретный ключ разработчика](comet:dev_id)
+  * id это [идентификатор разработчика](comet/dev_id).md
+  * key это [секретный ключ разработчика](comet/dev_id).md
 
 Ответ придёт в json формате. В случаи успеха ответ будет таким
 
@@ -54,7 +54,9 @@ http://comet-server.ru/cometapi.php?query=show+tables&id=15&key=lPXBFPqNg3f661Jc
 
 Ниже приведён исходный код файла выполняющего роль промежуточного звена которое принимает запросы по HTTP и передаёт их дальше по протоколу mysql. Вы можете его скачать и поставить на свой хостинг чтобы обезопасить себя от изменений в интерфейсе работы HTTP api. 
 
-<file php cometapi.php>
+
+```
+
 <?php
 
 header('Content-Type: application/json; charset=utf-8');
@@ -112,4 +114,5 @@ while ($row = mysqli_fetch_assoc($result))
 
 header('HTTP/1.1 200 OK');
 die(json_encode(array("data" => $data)));
-</file>
+
+```

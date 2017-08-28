@@ -5,7 +5,9 @@ The program called “tsung” can be used for stress testing.
 
 # Tsung installation
 
-<code bash>
+
+```
+
 apt install tsung
 
 ```
@@ -15,7 +17,9 @@ apt install tsung
 
 The tsung program needs to transfer a file with description of the test script. Here is an example of a simple test scenario:
 
-<file XML tsung.xml>
+
+```
+
 <?xml version="1.0"?>
 <!DOCTYPE tsung SYSTEM "/usr/share/tsung/tsung-1.0.dtd">
 <tsung loglevel="debug" version="1.0">
@@ -54,7 +58,9 @@ The tsung program needs to transfer a file with description of the test script. 
     </session>
   </sessions>
 </tsung>
-</file>
+
+```
+
 
 There is specified that to localhost port 8087 it is necessary to be connected via web sockets and establish 2,500 connections every second until they total 64,000.
 
@@ -70,7 +76,9 @@ The load of 64,000 is the maximum that will allow the operational system to crea
 
 In order for the OS to remove as many connections as possible, it is necessary to increase the limit on the number of file descriptors with the next command
 
-<code bash>
+
+```
+
 ulimit -m 64000 
 
 ```
@@ -78,7 +86,9 @@ ulimit -m 64000
 
 In the section benchmark of file comet.ini it is necessary to establish the options of benchmark and ws sections:
 
-<code ini>
+
+```
+
 [benchmark]
 to_log = true   ; Output of measurements of load in the log  
 
@@ -97,7 +107,9 @@ maxUptime = 0 ; The maximum value of uptime after which the connection is disabl
 
 
 And then start the server in console mode to see the statistics output
-<code bash>
+
+```
+
 ./cpp_comet
 
 ```
@@ -106,7 +118,9 @@ And then start the server in console mode to see the statistics output
 # Test launching # 
 
 Stress testing will be run thus:
-<code bash>
+
+```
+
 ulimit -m 64000
 tsung -f ~/tsung.xml start
 
@@ -120,7 +134,9 @@ In the testing process, you can watch the OS load for example via the htop or io
 
 Check that the built-in comet server counter of the total number of connections online shows numbers close to the truth it is possible with the next command:
 
-<code bash>
+
+```
+
 ss -p | grep "cpp_comet" | wc -l
 
 ```
@@ -128,7 +144,9 @@ ss -p | grep "cpp_comet" | wc -l
 
 It calculates the number of incoming connections using the operating system. After testing tsung, gives a test report to the folder. But that it was possible to look it is necessary to process it by a script which goes together with tsung. You can find that script in the next folder /usr/lib/tsung/bin/tsung_stats.pl
 
-<code bash>
+
+```
+
 cd /home/victor/.tsung/log/20170524-1159
 /usr/lib/tsung/bin/tsung_stats.pl
 

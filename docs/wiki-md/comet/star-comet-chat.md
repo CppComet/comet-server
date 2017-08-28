@@ -3,7 +3,7 @@
 
 Готовый к встраиванию в ваш сайт чат плагин личной переписки между пользователями.
 
-Исходные коды размещены на [GitHub](https://github.com/Levhav/Star.Comet-Chat), [Демо версия чата](http://comet-server.ru/doc/CometQL/Star.Comet-Chat/backend-example/index.php)
+Исходные коды размещены на [GitHub](https///github.com/Levhav/Star.Comet-Chat).md, [Демо версия чата](http///comet-server.ru/doc/CometQL/Star.Comet-Chat/backend-example/index.php).md
 
 
 ___
@@ -49,7 +49,7 @@ ___
 Чат может быть размещён как на отдельном сервере так и на том же сервере где и основной сайт. Чат взаимодействует с вашим сайтом через простое api.
 У чата все данные хранятся в собственной бд и информацию о пользователях и данные для авторизации он получает путём отправки запросов к вашему сайту.
 
-Для установки чата на своём сервере вам понадобится скачать все исходники от [сюда](https://github.com/Levhav/Star.Comet-Chat)
+Для установки чата на своём сервере вам понадобится скачать все исходники от [сюда](https///github.com/Levhav/Star.Comet-Chat).md
 
 Среди исходников будет файл database.sql в нём содержится структура таблиц необходимая для работы чата. На основании этого файла создаём базу данных.
 
@@ -58,7 +58,9 @@ ___
   * ./backend-example/config.php
 
 В файле ./config.php надо указать настройки для чата для подключения к базе данных. Для хранения переписки. И надо задать настройки доступа к комет серверу для рассылки уведомлений.
-<code php> 
+
+```
+ 
 /**
  * Доступ к БД
  */
@@ -78,14 +80,18 @@ $conf['cometQL_key'] = 15;
 
 
 Так же в файле ./config.php есть опция admin_ids которая позволяет перечислить идентификаторы всех пользователей у которых есть права администраторов. Наделять такими правами очень много пользователей не рекомендуется, так как это может повлиять на скорость работы чата.
-<code php>
+
+```
+
 $conf['admin_ids'] = array(1, 2);    // Список id пользователей с правами администратора
 
 ```
 
 
 Параметр trusted_ip в файле ./config.php должен содержать ip сервера с которого разрешены вызовы api чата.
-<code php>
+
+```
+
 /**
  * ip адрес с которого разрешено вызывать api методы управления чатом
  * Или false если ограничение отключено (не безопасно)
@@ -101,7 +107,9 @@ ___
  
 
 Переменная $trusted_ip в файле ./backend-example/config.php должна содержать ip адрес сервера на котором расположен чат.
-<code php>
+
+```
+
 /**
  * ip адрес с которого разрешено вызывать api методы управления чатом
  * Или false если ограничение отключено (не безопасно)
@@ -123,7 +131,9 @@ ___
 
 Чат будет отправлять вашему проекту post запросы для получения информации о пользователях. Адрес на который будут отправляться эти запросы задаётся в файле ./config.php, имя параметра "URL_getUsersInfo"
 Вот фрагмент кода в котором определено это значение.
-<code php>
+
+```
+
 /**
  * URL для запроса информации о пользователях в json
  */
@@ -145,7 +155,9 @@ users=1,2
 ```
 
 В ответ он будет ожидать json строку со следующими объектами.
-<code JavaScript>
+
+```
+
 [{
     "user_id":1,
     "avatar_url":"http:\/\/comet-server.ru\/doc\/CometQL\/Star.Comet-Chat\/img\/avatar0.png",
@@ -173,7 +185,9 @@ users=1,2
 
 Для получения хеша авторизации пользователя чат будет отправлять post запрос на адрес который содержится в параметре URL_getUsersHash в файле ./config.php,
 Вот фрагмент кода в котором определено это значение.
-<code php>
+
+```
+
 /**
  * URL для запроса хеша авторизации
  */
@@ -195,7 +209,9 @@ id=1
 ```
 
 В ответ он будет ожидать строку хеша авторизации
-<code JavaScript>56ff3f23bfd1071e14749aad42e58d89
+
+```
+56ff3f23bfd1071e14749aad42e58d89
 ```
 
 Файл ./backend-example/chat_get_user_hash.php содержит в себе код который правильно обрабатывает запрос и отдаёт правильные данные.
@@ -206,7 +222,9 @@ id=1
 Файл ./backend-example/userPage.php представляет из себя пример страницы пользователя. В нём есть пример интеграции JavaScript вызовов чата в страницы сайта.
 
 Вот приведён код запуска чат плагина.
-<code JavaScript>
+
+```
+
 var user_id = <?php echo $_SESSION['userId']; ?>;  
 var user_key = "<?php echo getUserHash($_SESSION['userId']); ?>";  
         
@@ -252,19 +270,27 @@ $(document).ready(function()
 
 # После завершения инициализации доступны следующие вызовы:
 Возвращает кол-во непрочитанных сообщений
-<code JavaScript>StarCometChat.countNewMessagesSum()
+
+```
+StarCometChat.countNewMessagesSum()
 ```
 
 Возвращает кол-во непрочитанных сообщений от пользователя user_id
-<code JavaScript>StarCometChat.countNewMessages(user_id)
+
+```
+StarCometChat.countNewMessages(user_id)
 ```
 
 Открывает список диалогов
-<code JavaScript>StarCometChat.openDialog()
+
+```
+StarCometChat.openDialog()
 ```
 
 Открывает диалог с пользователем user_id
-<code JavaScript>StarCometChat.openDialog(user_id)
+
+```
+StarCometChat.openDialog(user_id)
 ```
 
 
@@ -272,7 +298,9 @@ $(document).ready(function()
 # Решение проблем
 
 Для включения вывода ошибок надо добавить в файл config.php код:
-<code php>
+
+```
+
 ini_set('display_errors','on');
 error_reporting (E_ALL & ~E_NOTICE);
 
@@ -280,7 +308,9 @@ error_reporting (E_ALL & ~E_NOTICE);
 
 
 Ошибка о том что указаны не верные пути к файлам чата выглядит как то так:
-<code php>Error in line 14 include_once $_SERVER['DOCUMENT_ROOT'].'/config.php';
+
+```
+Error in line 14 include_once $_SERVER['DOCUMENT_ROOT'].'/config.php';
 ```
 
 

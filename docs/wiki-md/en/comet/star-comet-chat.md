@@ -3,7 +3,7 @@
 
 It’s ready-made plugin chat which could embed on your site for private correspondence between users.
 
-Source codes you can find on [GitHub](https://github.com/Levhav/Star.Comet-Chat), [Demo version](http://comet-server.ru/doc/CometQL/Star.Comet-Chat/backend-example/index.php)
+Source codes you can find on [GitHub](https///github.com/Levhav/Star.Comet-Chat).md, [Demo version](http///comet-server.ru/doc/CometQL/Star.Comet-Chat/backend-example/index.php).md
 # Chat functionality
 
   * Possibility to transmit text messages with any attachments;
@@ -39,7 +39,7 @@ ___
 
 This chat can be located on separate server and on the same server, where you site has been existed. This chat can cooperate with your site via API. A lot of chat’s data can be held by its database. New information such as about users or some other data for authorization it receives from special queries.
 
-For installing this chat on your server you need to download all of the examples from [here](https://github.com/Levhav/Star.Comet-Chat)
+For installing this chat on your server you need to download all of the examples from [here](https///github.com/Levhav/Star.Comet-Chat).md
 
 One of the source files “Database.sql” includes tables’ structure, which this chat uses for correct work.  This file will be based for our database.
 
@@ -48,7 +48,9 @@ After this you must change file configuration:
   * ./backend-example/config.php
 
 In file ./config.php you must specify chat settings for correct connection to database and storing correspondence. Also it’s necessary to specify setting to access comet server for sending out notifications.
-<code php> 
+
+```
+ 
 /**
  * Database access
  */
@@ -68,14 +70,18 @@ $conf['cometQL_key'] = 15;
 
 
 Also in file ./config.php exists one option “admin_ids”, which lets itemize all users’ identifiers with administration roots. Grant a lot of users by these roots is not recommended, because it can seriously affects on chat’s working speed.
-<code php>
+
+```
+
 $conf['admin_ids'] = array(1, 2);    // List of users’ id with administration roots
 
 ```
 
 
 Parameter trusted_ip in file ./config.php must include server IP which could call chat’s API.
-<code php>
+
+```
+
 /**
  * IP address which can call API methods
  * Or false if limit disables (non-safety)
@@ -91,7 +97,9 @@ ___
  
 
 Variable $trusted_ip in file ./backend-example/config.php may include server’s IP address which holds chat. 
-<code php>
+
+```
+
 /**
  * IP address which can call API methods
  * Or false if limit disables (non-safety)
@@ -112,7 +120,9 @@ The directory backend-example includes files with example of integration this ch
 # URL_getUsersInfo
 
 The chat will be send to your project post-queries for getting data about users. Final address with these queries contains in file ./fonfig.php, name of parameter “URL_getUserInfo”. There is an example code, determines this value.
-<code php>
+
+```
+
 /**
  * URL getting data about users json
  */
@@ -134,7 +144,9 @@ users=1,2
 ```
 
 As answer it would be waiting for json line with next objects:
-<code JavaScript>
+
+```
+
 [{
     "user_id":1,
     "avatar_url":"http:\/\/comet-server.ru\/doc\/CometQL\/Star.Comet-Chat\/img\/avatar0.png",
@@ -162,7 +174,9 @@ The file ./backend-example/chat_get_users.php consists of code which correctly p
 
 For getting user’s authorization hash the chat will be sending post-query for address, which stores in parameter URL_getUsersHash in file ./config.php. There is a fragment of code, which determines this value.
 
-<code php>
+
+```
+
 /**
  * URL for an authorization hash query
  */
@@ -184,7 +198,9 @@ id=1
 ```
 
 As the answer it will be waiting for authorization hash line.
-<code JavaScript>56ff3f23bfd1071e14749aad42e58d89
+
+```
+56ff3f23bfd1071e14749aad42e58d89
 ```
 
 The file ./backend-example/chat_get_users.php consists of code which correctly performs query and back correct data.
@@ -195,7 +211,9 @@ The file ./backend-example/chat_get_users.php consists of code which correctly p
 The file ./backend-example/chat_get_users.php – it’s an example of user’s page. This file has an example of integration JavaScript chat calls.
 
 There is code of launching chat plugin:
-<code JavaScript>
+
+```
+
 var user_id = <?php echo $_SESSION['userId']; ?>;  
 var user_key = "<?php echo getUserHash($_SESSION['userId']); ?>";  
         
@@ -241,19 +259,27 @@ We hope that comments in the code are clear to you. Each user gets online status
 
 # After ending of initialization you can perform the next calls:
 This method returns the value of unread messages.
-<code JavaScript>StarCometChat.countNewMessagesSum()
+
+```
+StarCometChat.countNewMessagesSum()
 ```
 
 This method returns the value of unread messages from user with user_id.
-<code JavaScript>StarCometChat.countNewMessages(user_id)
+
+```
+StarCometChat.countNewMessages(user_id)
 ```
 
 This method opens the list of dialogs.
-<code JavaScript>StarCometChat.openDialog()
+
+```
+StarCometChat.openDialog()
 ```
 
 This method opens the dialog with user with user_id. 
-<code JavaScript>StarCometChat.openDialog(user_id)
+
+```
+StarCometChat.openDialog(user_id)
 ```
 
 

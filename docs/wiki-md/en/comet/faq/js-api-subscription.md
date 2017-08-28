@@ -2,7 +2,9 @@
 # How to take a message out of the channel in JavaScript?
 
 
-<file html index.html> 
+
+```
+ 
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -52,4 +54,5 @@
     </script>
 </body>
 </html>
-</file>
+
+```

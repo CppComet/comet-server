@@ -1,7 +1,9 @@
 
 # Из CometQL
-Для того что бы отправить сообщение в канал выполните следующий [CometQL запрос](comet:cometql). (Вы можете использовать онлайн командную строку. Она расположена в правом нижнем углу экрана на всех старицах.)
-<code sql>
+Для того что бы отправить сообщение в канал выполните следующий [CometQL запрос](comet/cometql).md. (Вы можете использовать онлайн командную строку. Она расположена в правом нижнем углу экрана на всех старицах.)
+
+```
+
 INSERT INTO pipes_messages (name, event, message)VALUES("Pipe_name", "event_in_pipe", '{"text":"message"}');
 
 ```
@@ -9,7 +11,9 @@ INSERT INTO pipes_messages (name, event, message)VALUES("Pipe_name", "event_in_p
 
 # С помощью PHP
 
-<file php sendToPipe.php>
+
+```
+
 <?php
 
 $link = mysqli_connect("app.comet-server.ru", "15", "lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8", "CometQL_v1");
@@ -30,5 +34,7 @@ if(mysqli_errno($link) != 0)
 }
 
 ?>
-</file>
+
+```
+
  

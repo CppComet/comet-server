@@ -1,23 +1,27 @@
 
 # JavaScript API
 
-  * [Скачать CometServerApi.js](http://comet-server.com/CometServerApi.js)
-  * [GitHab репозиторий с CometServerApi.js](https://github.com/Levhav/CometServerApi.js)
+  * [Скачать CometServerApi.js](http///comet-server.com/CometServerApi.js).md
+  * [GitHab репозиторий с CometServerApi.js](https///github.com/Levhav/CometServerApi.js).md
 
 # Соединение с сервером
 
 
 Функция start принимает настройки соединения и открывает соединение. Здесь opt это объект с опциями подключения.
-<code JavaScript>cometApi.start({dev_id:15, user_id:1, user_key:"userHash", node:"app.comet-server.ru"})
+
+```
+cometApi.start({dev_id:15, user_id:1, user_key:"userHash", node:"app.comet-server.ru"})
 ```
 
-  * dev_id обязательный параметр это [публичный ключ разработчика](comet:dev_id). 
-  * user_id не обязательный параметр, это идентификатор пользователя нужен для [авторизации пользователя](comet:authentication) на комет сервере
-  * user_key не обязательный параметр, это хеш авторизации пользователя нужен для [авторизации пользователя](comet:authentication) на комет сервере
-  * node - если вы разворачиваете [CppComet](https://github.com/CppComet/comet-server) на своём сервере, то надо указать адрес вашего сервера ( Если комет сервер работает не на 80 порту то обязательно надо указать порт например так node:"app.comet-server.ru:8087" )
+  * dev_id обязательный параметр это [публичный ключ разработчика](comet/dev_id).md. 
+  * user_id не обязательный параметр, это идентификатор пользователя нужен для [авторизации пользователя](comet/authentication).md на комет сервере
+  * user_key не обязательный параметр, это хеш авторизации пользователя нужен для [авторизации пользователя](comet/authentication).md на комет сервере
+  * node - если вы разворачиваете [CppComet](https///github.com/CppComet/comet-server).md на своём сервере, то надо указать адрес вашего сервера ( Если комет сервер работает не на 80 порту то обязательно надо указать порт например так node:"app.comet-server.ru:8087" )
 
 Для переподключения к серверу используйте функцию restart
-<code JavaScript>cometApi.restart({dev_id:15, user_id:1, user_key:"userHash"})
+
+```
+cometApi.restart({dev_id:15, user_id:1, user_key:"userHash"})
 ```
 
 При переподключении вы можете переопределить параметры подключения или оставить их прежними.
@@ -25,50 +29,66 @@
 
 Функция subscription добавляет подписки на каналы, события в каналах и отчёты о доставке сообщений в каналы.
 Для подписки на сообщения в канале:
-<code JavaScript>cometApi.subscription("имя_канала", function(data){ console.log(data) } )
+
+```
+cometApi.subscription("имя_канала", function(data){ console.log(data) } )
 ```
 
   * Первый аргумент - имя канала должно быть короче 32 символов и должно состоять из символов A-Za-z0-9 и символа минус и знака подчёркивания.
   * Второй аргумент - callback функция которая будет вызвана при получении сообщения из этого канала.
 
 Обратите внимание что телом сообщения может быть json строка. Если это так то она автоматически будет преобразована в объект.
-<code JavaScript>cometApi.subscription( "pipe_name.event_name", function(e){ console.log(["event", e])})
+
+```
+cometApi.subscription( "pipe_name.event_name", function(e){ console.log(["event", e])})
 ```
 
 Подписка на канал "Имя_канала"
-<code JavaScript>cometApi.subscription("Имя_канала", function(e){ console.log(e)})
+
+```
+cometApi.subscription("Имя_канала", function(e){ console.log(e)})
 ```
 
 Подписка на канал событие "имя_события" в канале "Имя_канала"
-<code JavaScript>cometApi.subscription("Имя_канала.имя_события", function(e){ console.log(e)})
+
+```
+cometApi.subscription("Имя_канала.имя_события", function(e){ console.log(e)})
 ```
 
 Подписка на отчёт о доставке в канал "Имя_канала"
-<code JavaScript>cometApi.subscription("#Имя_канала", function(e){ console.log(e)})
+
+```
+cometApi.subscription("#Имя_канала", function(e){ console.log(e)})
 ```
 
 Подписка на все входящие сообщения из всех каналов на которые подписан этот клиент
-<code JavaScript>cometApi.subscription(function(e){ console.log(e)})
+
+```
+cometApi.subscription(function(e){ console.log(e)})
 ```
 
 
-Пример с online demo [как принять сообщение из канала в JavaScript?](comet:faq:js-api-subscription)
+Пример с online demo [как принять сообщение из канала в JavaScript?](comet/faq/js-api-subscription).md
 
 # Отписка от получения сообщений из канала
 
 Функция subscription возвращает строку subscription_id которая нам может понадобится если мы захотим отписать функцию от получения сообщений.
-<code JavaScript>var subscriptionId = cometApi.subscription("Имя_канала.имя_события", function(e){ console.log(e)})
+
+```
+var subscriptionId = cometApi.subscription("Имя_канала.имя_события", function(e){ console.log(e)})
 ```
 
 
 Для отписки от получения сообщений вызовите 
-<code JavaScript>cometApi.unsubscription(subscriptionId)
+
+```
+cometApi.unsubscription(subscriptionId)
 ```
 
 
 # Зарезервированные имена каналов
 
-Основная статья [зарезервированные имена каналов](comet:javascript_api:pipe-types)
+Основная статья [зарезервированные имена каналов](comet/javascript_api/pipe-types).md
 
 ___
 Не рекомендуется использовать в своих проектах имена каналов вида "bin_*", "big_*", "push_*", "comet_*", "self_*", "trust_*" и "sys_*" эти имена возможно будут использованы для дальнейшего расширения функционала. И будут иметь какие ни будь не обычные свойства по сравнению с другими именами каналов.
@@ -83,17 +103,21 @@ ___
   * track_* - для автоматического уведомления JS api о том что кто то подписался или отписался от этого канала
 # Подписка на получение личных сообщений ( канал msg )======
 Подписка на сообщения от сервера доставленные в соответствии с данными авторизации (то есть по id пользователя)
-<code JavaScript>cometApi.subscription("msg", function(e){ console.log(e)})
+
+```
+cometApi.subscription("msg", function(e){ console.log(e)})
 ```
 
 Подписка на сообщения с именем события "имя_события" от сервера доставленные в соответствии с данными авторизации (то есть по id пользователя)
-<code JavaScript>cometApi.subscription("msg.имя_события", function(e){ console.log(e)})
+
+```
+cometApi.subscription("msg.имя_события", function(e){ console.log(e)})
 ```
 
 
 
 ___
-Более подробно про механизм авторизации на комет сервере и про личные сообщения смотрите в статье [Авторизация пользователей на комет сервере](comet:authentication)
+Более подробно про механизм авторизации на комет сервере и про личные сообщения смотрите в статье [Авторизация пользователей на комет сервере](comet/authentication).md
 ___
 
 
@@ -103,7 +127,9 @@ ___
 
 Когда пользователь на комет сервере авторизуется то комет сервер автоматически отправляет сигнал в канал user_status_{идентификатор пользователя} с именем события online. А когда авторизованный пользователь уходит в offline то комет сервер тоже генерирует событие.
 
-<code JavaScript>
+
+```
+
     // Подписываемся на уведомление о том что пользователь с id=12 online
     cometApi.subscription("user_status_12.online", function(event)
     {
@@ -124,7 +150,9 @@ ___
 
 Каналы с именем вида track_* автоматически генерируют события subscription и unsubscription внутри себя каждый раз как кто то подписывается или отписывается от этого канала
 
-<code JavaScript>
+
+```
+
 cometApi.subscription("track_online.subscription", function(msg)
 {
     // Обработка события что кто то зашёл на сайт и подписался на канал track_online
@@ -138,7 +166,7 @@ cometApi.subscription("track_online.unsubscription", function(msg)
 
 
 Этот вид каналов создан специально для облегчения создания динамически обновляемых списков пользователей онлайн.
-Основная статья [список пользователей онлайн](comet:faq:realtime-users-list)
+Основная статья [список пользователей онлайн](comet/faq/realtime-users-list).md
 
 # Отправка сообщений в канал из JS (каналы web_*)
 
@@ -152,17 +180,23 @@ ___
 ___
 
 
-<code JavaScript>cometApi.web_pipe_send("web_pipe_name", "event_name", "message")
+
+```
+cometApi.web_pipe_send("web_pipe_name", "event_name", "message")
 ```
 
 
 Для того чтобы получить отчёт о доставке сообщения в канал "Имя_канала" используйте subscription
-<code JavaScript>cometApi.subscription("#Имя_канала", function(e){ console.log(e)})
+
+```
+cometApi.subscription("#Имя_канала", function(e){ console.log(e)})
 ```
 
 
 Так как комет сервер поддерживает авторизацию пользователей, он сам добавляет id пользователя к сообщению таким образом что пользователь отправивший сообщение не может отправить чужой id. Для отключения этой возможности надо добавить символ "@" перед именем канала в который отправляется сообщение. В таком случаи доставленное сообщение будет выглядеть так как будто его отправил не авторизованный пользователь.
-<code JavaScript>cometApi.web_pipe_send("@web_pipe_name", "event_name", "message")
+
+```
+cometApi.web_pipe_send("@web_pipe_name", "event_name", "message")
 ```
 
 
@@ -193,12 +227,14 @@ ___
 В комет сервере есть возможность для некоторых каналов включить механизм запоминания последних N сообщений через них. 
 
 ___
-Логирование проходящих сообщений можно включить запросом CometQL к [таблице pipes_settings](comet:cometql#таблица_pipes_settings).
+Логирование проходящих сообщений можно включить запросом CometQL к [таблице pipes_settings](comet/cometql#таблица_pipes_settings).md.
 ___
  
 
 Если функция логирования включена то вызов метода get_pipe_log инициирует отправку всех сообщений из истории в канале на клиент.
-<code JavaScript>cometApi.get_pipe_log("web_pipe_name")
+
+```
+cometApi.get_pipe_log("web_pipe_name")
 ```
 
 Сообщения пришедшие из истории канала будут иметь свойство history=true
@@ -208,7 +244,9 @@ ___
 Функция count_users_in_pipe даёт возможность узнать количество подписчиков в канале.
 
 У функции count_users_in_pipe  первый аргумент это имя канала а вторым аргументом передаётся callback функция в которую будет передан ответ.
-<code Javascript>
+
+```
+
 cometApi.count_users_in_pipe("web_chat_pipe", function(res)
 {
     console.log("count_users_in_pipe", res, res.data.user_in_pipe)
@@ -217,16 +255,18 @@ cometApi.count_users_in_pipe("web_chat_pipe", function(res)
 ```
 
 
-Но в отличии от [CometQL](comet:cometql) запроса эта функция может показывать количество подписчиков только в тех каналах у которых имя начинается с web_ к примеру для канала web_chat_pipe она сработает а для канала chat_pipe не сработает. Это ограничение введено для того что бы была возможность создать такой канал в котором количество подписчиков не сможет узнать кто попало через js api
+Но в отличии от [CometQL](comet/cometql).md запроса эта функция может показывать количество подписчиков только в тех каналах у которых имя начинается с web_ к примеру для канала web_chat_pipe она сработает а для канала chat_pipe не сработает. Это ограничение введено для того что бы была возможность создать такой канал в котором количество подписчиков не сможет узнать кто попало через js api
 
 # Определение статуса авторизации на комет сервере
 
-Основная статья [авторизация на комет сервере](comet:authentication)
+Основная статья [авторизация на комет сервере](comet/authentication).md
 
-У комет сервера есть возможность [авторизации пользователей](comet:authentication). Авторизация может быть полезна для того что бы была возможность определить кто именно отправил сообщение в канал или для адресной отправки сообщений пользователям.
+У комет сервера есть возможность [авторизации пользователей](comet/authentication).md. Авторизация может быть полезна для того что бы была возможность определить кто именно отправил сообщение в канал или для адресной отправки сообщений пользователям.
 
 Из JavaScript api вы можете отслеживать изменение статуса авторизации на комет сервере.
-<code JavaScript>
+
+```
+
 // Добавление callBack функции на уведомление об успешной авторизации
 cometApi.onAuthSuccess(function(){
     console.log("Подключились и авторизовались успешно")
@@ -242,7 +282,9 @@ cometApi.onAuthFalill(function(){
 Эти функции будут вызваны в момент смены статуса авторизации. То есть как минимум один раз при подключении к комет серверу и при каждой смене статуса если в момент работы скрипта авторизация пропадёт или на оборот произойдёт.
 
 Так же в любой момент времени можно вызвать функцию isAuthorized для определения статуса авторизации.
-<code JavaScript>cometApi.isAuthorized()
+
+```
+cometApi.isAuthorized()
 ```
 
 Функция isAuthorized может вернуть 3 разных значения
@@ -254,20 +296,24 @@ cometApi.onAuthFalill(function(){
 
 В JavaScript API есть функция которая из нескольких открытых вкладок назначает одну вкладку "главной" она называется мастер вкладкой, а все остальные вкладки определяются как salve вкладки. Функция isMaster возвращает true если выполняется в контексте мастер вкладки и false если выполняется в контексте salave вкладки.
 
-<code JavaScript>cometApi.isMaster()
+
+```
+cometApi.isMaster()
 ```
 
 
 Определение какая вкладка является мастер вкладкой, а какая slave может быть полезно если вам надо сделать определённое действие только на одной вкладке а не во всех. 
 Например у вас чат открыт на 3 страницах и при каждом входящем сообщении воспроизводится звуковое уведомление. В таком примере будет правильно если только одна вкладка будет воспроизводить звук а не все 3.
 
-Больше подробностей про взаимодействие между вкладками смотрите в статье [обмен сообщениями между вкладками браузера](https://habrahabr.ru/company/comet-server/blog/250719/).
+Больше подробностей про взаимодействие между вкладками смотрите в статье [обмен сообщениями между вкладками браузера](https///habrahabr.ru/company/comet-server/blog/250719/).md.
 
 
 # Примечание
 
 В ряде примеров файл CometServerApi.js вставляется следующим образом:
-<code html>
+
+```
+
 <script src="//comet-server.ru/CometServerApi.js" type="text/javascript"></script>
 
 ```
@@ -278,10 +324,10 @@ cometApi.onAuthFalill(function(){
 
 # Дополнительная информация
  
-  * [Зарезервированные имена каналов](comet:javascript_api:pipe-types)
-  * [CometQL API](comet:cometql)
-  * [Почему скрипт работает на локальной машине и не работает на хостинге? ](comet:testhosting)
-  * [Что такое и зачем нужен "Публичный идентификатор разработчика" и "Секретный ключ разработчика"?](comet:faq:public_key)
-  * [Как отправить сообщение в произвольный канал и как его потом получить на другой странице?](comet:faq:send-message-to-pipe)
-  * [Как реализовать механизм отслеживания вхождения пользователей на сайт. То есть список посетителей обновляющийся на "лету"?](comet:faq:realtime-users-list)
-  * [Может ли кто то посторонний получать сообщение из каналов](comet:faq:access-to-channels-for-outsiders)
+  * [Зарезервированные имена каналов](comet/javascript_api/pipe-types).md
+  * [CometQL API](comet/cometql).md
+  * [Почему скрипт работает на локальной машине и не работает на хостинге? ](comet/testhosting).md
+  * [Что такое и зачем нужен "Публичный идентификатор разработчика" и "Секретный ключ разработчика"?](comet/faq/public_key).md
+  * [Как отправить сообщение в произвольный канал и как его потом получить на другой странице?](comet/faq/send-message-to-pipe).md
+  * [Как реализовать механизм отслеживания вхождения пользователей на сайт. То есть список посетителей обновляющийся на "лету"?](comet/faq/realtime-users-list).md
+  * [Может ли кто то посторонний получать сообщение из каналов](comet/faq/access-to-channels-for-outsiders).md

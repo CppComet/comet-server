@@ -1,7 +1,9 @@
 # Install
 
 Recommended OS ubuntu, debian, centos
-<code sh>
+
+```
+
 apt-get update
 apt-get install cmake make cpp gcc libssl-dev g++ nginx libmysqlclient-dev mysql-server mysql-client flex mailutils uuid-dev 
 
@@ -9,7 +11,9 @@ apt-get install cmake make cpp gcc libssl-dev g++ nginx libmysqlclient-dev mysql
 
 
 # Building it from source code
-<code sh>
+
+```
+
 git clone https://github.com/Levhav/comet-server
 cd comet-server
 cmake .
@@ -21,9 +25,11 @@ make
 # Settings
 CppComet use mysql database for storage users credentials for authorization on server. And to store the time when the user was on the online. And for storing temporary data, such as undelivered messages and other data.
  
-  * Create a database in mysql based on [db.sql](https://github.com/Levhav/comet-server/blob/master/db.sql) file
-  * In [comet.ini](https://github.com/CppComet/comet-server/blob/master/comet.ini) file, set the details to access the database
-<code ini>
+  * Create a database in mysql based on [db.sql](https///github.com/Levhav/comet-server/blob/master/db.sql).md file
+  * In [comet.ini](https///github.com/CppComet/comet-server/blob/master/comet.ini).md file, set the details to access the database
+
+```
+
 [db]
 host = localhost   # The server address database
 user = root        # User
@@ -34,7 +40,9 @@ port = 3305        # Port
 ```
 
 Enter the password to access the comet-server api
-<code ini>
+
+```
+
 [main]  
 password = 0000000000000000000000000000000000000000000000000000000000000000
 
@@ -43,13 +51,17 @@ password = 0000000000000000000000000000000000000000000000000000000000000000
  
 # Launch
 Run in console mode
-<code sh>
+
+```
+
 ./cpp_comet
 
 ```
 
 Running in daemon mode
-<code sh>
+
+```
+
 systemctl start comet.service
 
 ```
@@ -57,13 +69,15 @@ systemctl start comet.service
 
 # Add to Startup
  
-<code sh>cp ./comet.service /etc/systemd/system
+
+```
+cp ./comet.service /etc/systemd/system
 systemctl daemon-reload
 systemctl enable comet.service
 ```
 
 
-After successes run server we can begin create chat. If you get error create issue in [github repository](https://github.com/Levhav/comet-server/issues).
+After successes run server we can begin create chat. If you get error create issue in [github repository](https///github.com/Levhav/comet-server/issues).md.
 
 # Configuring nginx as a reverse proxy
 
@@ -71,7 +85,9 @@ In order to configure the operation of comets on one machine with a web server, 
 
 The following is an example of the nginx configuration for proxy traffic to comet servers with /comet-server to the comet server running on port 82 and all other traffic to the web server running on port 8080
 
-<file text default>
+
+```
+
 server {
 	listen 0.0.0.0:80;   
 	server_name comet-server.com;
@@ -157,7 +173,9 @@ server {
         proxy_read_timeout 900;
 	}
 }
-</file>
+
+```
+
 
 # Possible problems after installation
  
@@ -165,13 +183,17 @@ Pay attention to what values of the port parameter are specified in the sections
 
 In the comet.ini example in the repository, the port parameter for connections from JavaScrip api is set to 8087
 This means that you need to connect like this:
-<code JavaScript>cometApi.start({user_id:1, user_key:"userHash", node:"example.ru:8087"})
+
+```
+cometApi.start({user_id:1, user_key:"userHash", node:"example.ru:8087"})
 ```
 
 
 The port parameter for connections from CometQL is set to 3300
 This means that you need to connect like this:
-<code PHP>$link = mysqli_connect("example.ru", "root", "", "CometQL_v1", 3300);
+
+```
+$link = mysqli_connect("example.ru", "root", "", "CometQL_v1", 3300);
 ```
 
 

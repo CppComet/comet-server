@@ -11,11 +11,15 @@
 
 В данном представлении данные лежат в таблицах а команды на выборку или вставку совершают какие то действия.
 Например для получения информации о том когда пользователь был online достаточно выполнить следующий запрос:
-<code sql>select * from users_time where id = 2;
+
+```
+select * from users_time where id = 2;
 ```
 
 Вот что мы увидим
-<code sql>
+
+```
+
 mysql> select * from users_time where id in( 2, 3, 145);
 +-----+------------+
 | id  | time       |
@@ -31,7 +35,9 @@ mysql> select * from users_time where id in( 2, 3, 145);
 Здесь пользователь с id = 2  в данный момент на сайте, пользователь с id = 3 был online 30 июля, а для пользователя с id = 145 нет данных.
 # Как подключится и попробовать самостоятельно
 Вы можете сами подключится с демо данными и попробовать. Но подключатся рекомендуется через консоль, так как не все графические MySQL клиенты нормально работают с comet сервером. 
-<code bash>
+
+```
+
 # Сервер app.comet-server.ru
 # Логин 15
 # Пароль lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8
@@ -43,22 +49,24 @@ mysql -h app.comet-server.ru -u15 -plPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgL
 ```
 
 
-Или ещё можете использовать [онлайн командную строку](comet:cometql:cli). Она расположена в правом нижнем углу экрана на всех старицах.
+Или ещё можете использовать [онлайн командную строку](comet/cometql/cli).md. Она расположена в правом нижнем углу экрана на всех старицах.
 
 
 ___
-Есть [пример исходных кодов на PHP с использованием CometQL](comet:cometql:cli) для реализации онлайн командной строки
+Есть [пример исходных кодов на PHP с использованием CometQL](comet/cometql/cli).md для реализации онлайн командной строки
 ___
 
 
 
 ___
-Есть случаи когда нет возможности использовать протокол MySQL для соединения с комет сервером. Для таких случаев можно отправлять команды комет серверу по HTTP/HTTPS. Смотрите статью [отправка CometQL запросов по HTTP](comet:cometql:HTTP)
+Есть случаи когда нет возможности использовать протокол MySQL для соединения с комет сервером. Для таких случаев можно отправлять команды комет серверу по HTTP/HTTPS. Смотрите статью [отправка CometQL запросов по HTTP](comet/cometql/HTTP).md
 ___
 
 
 Пример подключения к комет серверу из php. 
-<code php>
+
+```
+
 $dev_id = "15"; // Используется как логин
 $dev_key = "lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8"; // Используется как пароль
 
@@ -98,18 +106,20 @@ ___
 
 Замечания по реализации текущей версии CometQL:
   * В CometQL реализовано не всё что доступно в sql. Часть функционала планируется реализовать позже. Но некоторые ограничения наложены специально в целях оптимизации внутренней структуры Comet сервера.
-  * В целях [оптимизации внутренней логики](comet:cometql:optimization_for_the_cluster) операции delete и insert не возвращают количество затронутых строк, по крайней мере так будет в CometQL версии 1.0
+  * В целях [оптимизации внутренней логики](comet/cometql/optimization_for_the_cluster).md операции delete и insert не возвращают количество затронутых строк, по крайней мере так будет в CometQL версии 1.0
   * Поддержка в запросах операторов OR, AND и ORDER BY будет реализована позже.
 
 
 ___
-У некоторых хостинг провайдеров установлен запрет на внешние соединения, это достаточно часто встречается на бесплатных или очень очень дешёвых хостингах. Для того что бы проверить возможность использования CometQL воспользуйтесь [скриптом проверки хостинга](comet:testhosting). 
+У некоторых хостинг провайдеров установлен запрет на внешние соединения, это достаточно часто встречается на бесплатных или очень очень дешёвых хостингах. Для того что бы проверить возможность использования CometQL воспользуйтесь [скриптом проверки хостинга](comet/testhosting).md. 
 ___
 
 # Таблица pipes_messages
 
 Таблица pipes_messages содержит сообщения передаваемые через каналы. Для отправки сообщения в канал надо выполнить запрос вставки ( insert ) в эту таблицу.
-<code sql>
+
+```
+
 mysql> insert into pipes_messages (name, event, message)values("pipe_name", "event_in_pipe", "text message");
 Query OK, 0 rows affected (0.13 sec)
 
@@ -125,7 +135,9 @@ ___
 
  
 Запрос выборки из pipes_messages вернёт историю сообщений в канале если функция сохранения истории включена для этого канала.
-<code sql>
+
+```
+
 mysql> select * from pipes_messages where name = "p10";
 +------+-------+-------+--------------+
 | name | index | event | message      |
@@ -140,7 +152,9 @@ mysql> select * from pipes_messages where name = "p10";
 
 
 Очищает историю сообщений в канале.
-<code sql>
+
+```
+
 mysql> delete from pipes_messages where name = 'p10';
 Query OK, 0 rows affected (0.13 sec)
 
@@ -153,14 +167,18 @@ Query OK, 0 rows affected (0.13 sec)
 <iframe src="//comet-server.com/doc/example/7/subscriptionTest.php" width="910px"></iframe>
 </html>
 А теперь с помощью online командной строки расположенной в углу экрана выполните запрос вставки в pipes_messages  и увидите что сообщение дошло.
-<code sql>
+
+```
+
 mysql> insert into pipes_messages (name, event, message)values("pipe_name", "event_in_pipe", "text message");
 
 ```
  
 # Таблица pipes 
 Таблица pipes содержит информацию о том сколько человек подписались на сообщения из каналов. Таблица доступна только для чтения.
-<code sql>
+
+```
+
 mysql> select * from pipes where name in( "web_admins", "web_php_chat");
 +--------------+-------+
 | name         | users |
@@ -176,7 +194,9 @@ mysql> select * from pipes where name in( "web_admins", "web_php_chat");
 # Online пример
 
 Выполните запрос
-<code sql>
+
+```
+
 mysql> select * from pipes where name in( "web_admins", "web_php_chat");
 
 ```
@@ -188,7 +208,9 @@ mysql> select * from pipes where name in( "web_admins", "web_php_chat");
 А теперь выполните запрос ещё раз и увидите что подписчиков в канале стало больше.
 # Таблица users_in_pipes
 Таблица users_in_pipes содержит данные о том кто из пользователей подписался на канал. Таблица доступна только для чтения.
-<code sql>
+
+```
+
 mysql> select * from users_in_pipes where name = "web_admins";
 +------------+---------+-----------+-----------------+-------------------------------------+
 | name       | user_id | ip        | origin          | language                            |
@@ -204,7 +226,9 @@ mysql> select * from users_in_pipes where name = "web_admins";
 # Таблица pipes_settings 
 Таблица pipes_settings содержит настройки логирования каналов. По умолчанию сообщения проходящие через канал не запоминаются. Но если включить механизм логирования для канала то в комет сервере будет хранится n последних сообщений прошедших через этот канал.
 Для включения механизма логирования в канале надо выполнить следующий запрос.
-<code sql>
+
+```
+
 mysql> insert into pipes_settings ("name", "length") values ('p10', 10);
 Query OK, 1 row affected (0.00 sec)
 
@@ -213,7 +237,9 @@ Query OK, 1 row affected (0.00 sec)
 Здесь параметр length это то сколько последних сообщений будет запомнено. Принимает значения от 0 до 99.
 
 Для того чтобы получить значения настроек канала нужно выполнить запрос выборки из pipes_settings.
-<code sql>
+
+```
+
 mysql> select * from pipes_settings where name = 'p10';
 +------+--------+
 | name | length |
@@ -226,7 +252,9 @@ mysql> select * from pipes_settings where name = 'p10';
 
 
 Для того чтобы отключить механизм логирования надо удалить из pipes_settings запись настроек.
-<code sql>
+
+```
+
 mysql> delete from  pipes_settings where name = 'p10';
 Query OK, 0 rows affected (0.00 sec)
 
@@ -234,14 +262,16 @@ Query OK, 0 rows affected (0.00 sec)
 
 
 # Таблица users_messages
-Таблица users_messages предназначена для отправки сообщений [авторизованным пользователям](comet:authentication) по их идентификатору.
+Таблица users_messages предназначена для отправки сообщений [авторизованным пользователям](comet/authentication).md по их идентификатору.
 
 ___
 Отправка личных сообщений пользователям по их идентификаторам, а не в канал предоставляет более надёжную защиту передаваемых данных. А также повышает вероятность доставки сообщения пользователю.
 ___
 
 Например для отправки сообщения пользователю с id = 2 и текстом сообщения 'message' надо выполнить следующий запрос
-<code sql>
+
+```
+
 mysql> insert into users_messages (id, event, message)values (2, 'event', 'message');
 Query OK, 0 row affected (0.00 sec)
 
@@ -250,7 +280,9 @@ Query OK, 0 row affected (0.00 sec)
 Сообщение либо отправлено пользователю сразу либо помещено в очередь для отправки пользователю позже. 
 
 Для того чтобы получить все те сообщения которые ещё не доставлены пользователю и находятся в очереди надо выполнить запрос select
-<code sql>
+
+```
+
 mysql> select * from users_messages where id = 2;
 +----+-------+-------+---------+
 | id | index | event | message |
@@ -270,7 +302,9 @@ mysql> select * from users_messages where id = 2;
   - message - Тело сообщения
 
 Для очистки очереди используйте запрос удаления.
-<code sql>
+
+```
+
 mysql> delete from users_messages where id = 2;
 Query OK, 0 rows affected (0.08 sec)
 
@@ -283,8 +317,10 @@ ___
 
 
 # Таблица users_time
-Таблица users_time содержит данные о том когда были пользователи online. Таблица доступна только для чтения. Данные о времени хранятся в [UNIX-time](https://ru.wikipedia.org/wiki/UNIX-%D0%B2%D1%80%D0%B5%D0%BC%D1%8F)
-<code sql>
+Таблица users_time содержит данные о том когда были пользователи online. Таблица доступна только для чтения. Данные о времени хранятся в [UNIX-time](https///ru.wikipedia.org/wiki/UNIX-%D0%B2%D1%80%D0%B5%D0%BC%D1%8F).md
+
+```
+
 mysql> select * from users_time where id in( 2, 3, 145);
 +-----+------------+
 | id  | time       |
@@ -301,14 +337,16 @@ mysql> select * from users_time where id in( 2, 3, 145);
 
 
 ___
-Есть пример использования данных из этой таблицы для того чтобы [определить, онлайн пользователь или нет](http://dimasudarkin.ru/%D0%BE%D0%BD%D0%BB%D0%B0%D0%B9%D0%BD-%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D1%8C-%D0%B8%D0%BB%D0%B8-%D0%BD%D0%B5%D1%82-php/)
+Есть пример использования данных из этой таблицы для того чтобы [определить, онлайн пользователь или нет](http///dimasudarkin.ru/%D0%BE%D0%BD%D0%BB%D0%B0%D0%B9%D0%BD-%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D1%8C-%D0%B8%D0%BB%D0%B8-%D0%BD%D0%B5%D1%82-php/).md
 ___
 
 # Таблица users_auth
 
-Таблица <abbr>Таблица содержит данные для авторизации пользователей на комет сервере(users_auth)</abbr>  содержит данные для [авторизации пользователей](comet:authentication) на комет сервере.
+Таблица <abbr>Таблица содержит данные для авторизации пользователей на комет сервере(users_auth)</abbr>  содержит данные для [авторизации пользователей](comet/authentication).md на комет сервере.
 
-<code sql>
+
+```
+
 mysql> insert into users_auth (id, hash )values (12, 'hash1');
 Query OK, 1 row affected (0.13 sec)
 
@@ -329,8 +367,10 @@ ___
 В поле hash можно передавать только строки  длиной не более 32 символов и соответствующие <abbr>Цифры от 0 до 9 буквы английского алфавита и знаки = + / _ (регулярному выражению [0-9A-z=+/_])</abbr>.
 ___
 
-Для удаления данных [авторизации пользователей](comet:authentication) используйте запрос delete
-<code sql>
+Для удаления данных [авторизации пользователей](comet/authentication).md используйте запрос delete
+
+```
+
 delete from users_auth where id = 12;
 Query OK, 0 rows affected (0.00 sec)
 
@@ -338,27 +378,27 @@ Query OK, 0 rows affected (0.00 sec)
 
 
 ___
-В целях [оптимизации внутренней логики операции](comet:cometql:optimization_for_the_cluster) delete и insert не возвращают количество затронутых строк, по крайней мере так будет в QometQL версии 1.0
+В целях [оптимизации внутренней логики операции](comet/cometql/optimization_for_the_cluster).md delete и insert не возвращают количество затронутых строк, по крайней мере так будет в QometQL версии 1.0
 ___
 
 
 # Дополнительная информация
 
-  * [Пример использования CometQL на php](comet:cometql:cli)
-  * [Пример отправки сообщения из bash](comet:cometql-bash-example)
-  * [Коды ошибок CometQL](comet:cometql:error)
-  * [Зарезервированные имена каналов](comet:javascript_api:pipe-types)
-  * [JavaScript API](comet:javascript_api)
-  * [Почему скрипт работает на локальной машине и не работает на хостинге? ](comet:testhosting)
-  * [Что такое и зачем нужен "Публичный идентификатор разработчика" и "Секретный ключ разработчика"?](comet:faq:public_key)
-  * [Как отправить сообщение в произвольный канал и как его потом получить на другой странице?](comet:faq:send-message-to-pipe)
-  * [Как реализовать механизм отслеживания вхождения пользователей на сайт. То есть список посетителей обновляющийся на "лету"?](comet:faq:realtime-users-list)
-  * [Могут ли влиять одни пользователи сервиса на других пользователей?](comet:faq:isolation-of-users)  * 
-  * [Может ли кто то посторонний получать сообщение из каналов](comet:faq:access-to-channels-for-outsiders)
+  * [Пример использования CometQL на php](comet/cometql/cli).md
+  * [Пример отправки сообщения из bash](comet/cometql-bash-example).md
+  * [Коды ошибок CometQL](comet/cometql/error).md
+  * [Зарезервированные имена каналов](comet/javascript_api/pipe-types).md
+  * [JavaScript API](comet/javascript_api).md
+  * [Почему скрипт работает на локальной машине и не работает на хостинге? ](comet/testhosting).md
+  * [Что такое и зачем нужен "Публичный идентификатор разработчика" и "Секретный ключ разработчика"?](comet/faq/public_key).md
+  * [Как отправить сообщение в произвольный канал и как его потом получить на другой странице?](comet/faq/send-message-to-pipe).md
+  * [Как реализовать механизм отслеживания вхождения пользователей на сайт. То есть список посетителей обновляющийся на "лету"?](comet/faq/realtime-users-list).md
+  * [Могут ли влиять одни пользователи сервиса на других пользователей?](comet/faq/isolation-of-users).md  * 
+  * [Может ли кто то посторонний получать сообщение из каналов](comet/faq/access-to-channels-for-outsiders).md
 
 # Зарезервированные имена каналов
 
-Основная статья [зарезервированные имена каналов](comet:javascript_api:pipe-types)
+Основная статья [зарезервированные имена каналов](comet/javascript_api/pipe-types).md
 
 ___
 Не рекомендуется использовать в своих проектах имена каналов вида "bin_*", "big_*", "push_*", "comet_*", "self_*", "trust_*" и "sys_*" эти имена возможно будут использованы для дальнейшего расширения функционала. И будут иметь какие ни будь не обычные свойства по сравнению с другими именами каналов.

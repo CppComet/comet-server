@@ -1,10 +1,10 @@
 
 # PHP chat example
 
-An example of using the [CppComet](https://github.com/CppComet/comet-server) server to create a chat.   
+An example of using the [CppComet](https///github.com/CppComet/comet-server).md server to create a chat.   
 
-  * [jsfiddle.net online demo](https://jsfiddle.net/Levhav/o35kvmn2/17/)
-  * [Github repo](https://github.com/CppComet/php-chat-example)
+  * [jsfiddle.net online demo](https///jsfiddle.net/Levhav/o35kvmn2/17/).md
+  * [Github repo](https///github.com/CppComet/php-chat-example).md
 
 {{ :en:comet:chat.gif |chat demo}}
 
@@ -22,7 +22,7 @@ Typical scheme of chat:
  
 # Step 1. Connecting to the comet server
 
-[CppComet](https://github.com/CppComet/comet-server) has cloud saas alternative that can be used for testing and demo access. In the following examples I will use demonstration access from https://comet-server.com for those who could not or were too lazy to [deploy the server on their VPS](https://github.com/CppComet/comet-server#building-from-source)
+[CppComet](https///github.com/CppComet/comet-server).md has cloud saas alternative that can be used for testing and demo access. In the following examples I will use demonstration access from https://comet-server.com for those who could not or were too lazy to [deploy the server on their VPS](https///github.com/CppComet/comet-server#building-from-source).md
 
 
 ```
@@ -34,7 +34,9 @@ Host: app.comet-server.ru
 
 To connect to the comet server from the JavaScript API, use the following command:
 
-<code JavaScript>
+
+```
+
 cometApi.start({node:"app.comet-server.ru", dev_id:15})
 
 ```
@@ -49,10 +51,12 @@ cometApi.start({node:"app.comet-server.ru", dev_id:15})
 * Send ajax query to php back-end
 * Send CometQL query for comet server
 
-[code of php back-end](https://github.com/CppComet/php-chat-example/blob/master/chat.php)
+[code of php back-end](https///github.com/CppComet/php-chat-example/blob/master/chat.php).md
 
 Connection code to CppComet using MySQL protocol:
-<code PHP>
+
+```
+
 $host = "app.comet-server.ru";
 $user = "15";
 $password = "lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8";
@@ -63,7 +67,9 @@ $comet = mysqli_connect($host, $user, $password, "CometQL_v1");
 
 
 The code for sending a message to the pipe "simplechat" and event 'newMessage':
-<code PHP>
+
+```
+
 $query = "INSERT INTO pipes_messages (name, event, message)VALUES('simplechat', 'newMessage', '".$msg."')"; 
 mysqli_query($comet, $query);
 
@@ -75,7 +81,9 @@ mysqli_query($comet, $query);
 
 subscription Code to the pipe on comet server. This callback will be called when somebody send message into channel `simplechat`
 
-<code JavaScript>
+
+```
+
     cometApi.subscription("simplechat.newMessage", function(event){
         $("#web_chat").append('<b>'+HtmlEncode(event.data.name)+'</b>')
         $("#web_chat").append('<pre>'+HtmlEncode(event.data.text)+'</pre>')
@@ -93,8 +101,8 @@ subscription Code to the pipe on comet server. This callback will be called when
 
 # Links
 
-  * [JavaScript API](en:comet:javascript_api)
-  * [CometQL API](en:comet:cometql)
-  * [Online demo](https://jsfiddle.net/o35kvmn2/5/)
-  * [CppComet](https://github.com/CppComet/comet-server)
-  * [Creating a simple chat using CppComet](https://www.codeproject.com/script/Articles/ArticleVersion.aspx?waid=235463&aid=1181698)
+  * [JavaScript API](en/comet/javascript_api).md
+  * [CometQL API](en/comet/cometql).md
+  * [Online demo](https///jsfiddle.net/o35kvmn2/5/).md
+  * [CppComet](https///github.com/CppComet/comet-server).md
+  * [Creating a simple chat using CppComet](https///www.codeproject.com/script/Articles/ArticleVersion.aspx?waid=235463&aid=1181698).md

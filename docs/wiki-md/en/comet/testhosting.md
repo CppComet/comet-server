@@ -7,7 +7,9 @@ To work with the CppComet service, your hoster needs support for working with so
 
  
 To check the hosting for prohibiting external connections, download this script and run it on your hosting.
-<file php testHosting.php>
+
+```
+
 <?php
     header('Content-Type: text/html; charset=utf-8');
         
@@ -117,4 +119,5 @@ To check the hosting for prohibiting external connections, download this script 
     
 </body>
 </html> 
-</file>
+
+```

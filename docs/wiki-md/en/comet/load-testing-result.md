@@ -2,7 +2,7 @@
 # Report about testing of 64,000 connections online
 
 
-At previous article we examined the [ how to conduct the stress testing.](comet:load-testing) And here I want to show you how I conducted it by myself, and give its results.
+At previous article we examined the [ how to conduct the stress testing.](comet/load-testing).md And here I want to show you how I conducted it by myself, and give its results.
 
 
 ___
@@ -52,7 +52,7 @@ Gif-animation of the testing process. It is seen that there is an increase of ab
 
 
 ___
-Below are only 2 graphs, [the full version of the report](https://cppcomet.github.io/comet-server/HL-tests/HL-test1/20170608-1534/report.html) posted on github.
+Below are only 2 graphs, [the full version of the report](https///cppcomet.github.io/comet-server/HL-tests/HL-test1/20170608-1534/report.html).md posted on github.
 ___
 
 

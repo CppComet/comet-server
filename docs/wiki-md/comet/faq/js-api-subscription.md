@@ -2,7 +2,9 @@
 # Как принять сообщение из канала в JavaScript?
 
 
-<file JavaScript subscription.html>
+
+```
+
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -39,11 +41,15 @@ $(document).ready(function(){
 </script>
 </body>
 </html>
-</file>
+
+```
+
 
 # Online demo получение сообщения из канала на JavaScript
 Для того что бы отправить сообщение в канал выполните следующий запрос
-<code sql>
+
+```
+
 INSERT INTO pipes_messages (name, event, message)VALUES("Pipe_name", "event_in_pipe", '{"text":"message"}');
 
 ```

@@ -2,7 +2,9 @@
 # Установка
 
 Рекомендуемые ОС ubuntu, debian, centos
-<code bash>
+
+```
+
 apt-get update
 apt-get install cmake make cpp gcc libssl-dev g++ nginx libmysqlclient-dev mysql-server mysql-client flex mailutils uuid-dev 
 
@@ -10,7 +12,9 @@ apt-get install cmake make cpp gcc libssl-dev g++ nginx libmysqlclient-dev mysql
 
 
 # Собираем из исходных кодов
-<code bash>
+
+```
+
 git clone https://github.com/Levhav/comet-server
 cd comet-server
 cmake .
@@ -23,9 +27,11 @@ make
 
 CppComet использует базу данных mysql для хранения данных пользователей для авторизации на сервере. И хранения времени, когда пользователь был в сети. И для хранения временных данных, таких как не доставленные сообщения и другие данные.
 
-  * Создайте базу в mysql на основе файла [db.sql](https://github.com/Levhav/comet-server/blob/master/db.sql)
-  * В файле [comet.ini](https://github.com/CppComet/comet-server/blob/master/comet.ini) укажите реквизиты для доступа к бд в секции [db]
-<code ini>
+  * Создайте базу в mysql на основе файла [db.sql](https///github.com/Levhav/comet-server/blob/master/db.sql).md
+  * В файле [comet.ini](https///github.com/CppComet/comet-server/blob/master/comet.ini).md укажите реквизиты для доступа к бд в секции [db]
+
+```
+
 [db]
 host = localhost
 user = root
@@ -36,30 +42,36 @@ port = 3305
 ```
 
 Укажите пароль для доступа к api комет сервера
-<code ini>
+
+```
+
 [main] 
 ; пароль для доступа к api комет сервера
 password = 0000000000000000000000000000000000000000000000000000000000000000
 
 ```
 
-Остальные настройки из файла [comet.ini](https://github.com/CppComet/comet-server/blob/master/comet.ini) можно не менять.
+Остальные настройки из файла [comet.ini](https///github.com/CppComet/comet-server/blob/master/comet.ini).md можно не менять.
 
 
 ___
-Весь перечень настроек в статье [Настройка файла comet.ini](comet:ini-file) 
+Весь перечень настроек в статье [Настройка файла comet.ini](comet/ini-file).md 
 ___
 
   
 # Запуск
 Запуск в консольном режиме
-<code sh>
+
+```
+
 ./cpp_comet
 
 ```
 
 Запуск в режиме демона
-<code sh>
+
+```
+
 systemctl start comet.service
 
 ```
@@ -68,7 +80,9 @@ systemctl start comet.service
 # Добавление в автозагрузку
 
 
-<code sh>cp ./comet.service /etc/systemd/system
+
+```
+cp ./comet.service /etc/systemd/system
 systemctl daemon-reload
 systemctl enable comet.service
 ```
@@ -78,7 +92,9 @@ systemctl enable comet.service
 Для того чтоб настроить работу комет сервера на одной машине с другим сервером. Или просто иметь возможность работы не только по http но и по https надо настроить реверс прокси.
 
 Ниже приведён пример конфигурации nginx для проксирования трафика до комет сервера с /comet-server на комет сервер запущенный на порту 82 и всего остального трафика на веб сервер запущенном на порту 8080
-<file text default>
+
+```
+
 server {
 	listen 0.0.0.0:80;   
 	server_name comet-server.com;
@@ -164,7 +180,9 @@ server {
         proxy_read_timeout 900;
 	}
 }
-</file>
+
+```
+
 
 # Возможные проблемы после установки
  
@@ -172,13 +190,17 @@ server {
 
 В шаблоне comet.ini поставляемом в репозитории параметр port  для подключений из JavaScrip api выставлен в 8087
 Это значит что подключатся надо так:
-<code JavaScript>cometApi.start({user_id:1, user_key:"userHash", node:"example.ru:8087"})
+
+```
+cometApi.start({user_id:1, user_key:"userHash", node:"example.ru:8087"})
 ```
 
 
 Параметр port  для подключений из CometQL выставлен в 3300
 Это значит что подключатся надо так:
-<code PHP>$link = mysqli_connect("example.ru", "root", "", "CometQL_v1", 3300);
+
+```
+$link = mysqli_connect("example.ru", "root", "", "CometQL_v1", 3300);
 ```
 
 
