@@ -149,7 +149,8 @@ public:
         }
         else if(val.compare(0, 2, "[]"))
         {
-            list.push_back(val.erase(0, 2));
+            std::string arrStr = val;
+            list.push_back(arrStr.erase(0, 2));
         }
     } 
     
@@ -406,7 +407,7 @@ class ini_parser
             std::string key = extract_key(line);
             std::string value = extract_value(line);
 
-            //printf("assignment:%s[%s]=%s\n", current_section.data(), key.data(), value.data());
+            printf("assignment:%s[%s]=%s\n", current_section.data(), key.data(), value.data());
             set_value(current_section, key, value); 
         }
 
@@ -459,8 +460,8 @@ class ini_parser
          * bracket and the last character is a closing bracket.
          */
         bool is_section_start_line(const std::string& line) const
-        {
-            return (line.length() > 0) && (line[0] == '[') && (line[line.length() - 1] == ']');
+        { 
+            return (line.length() > 0) && (line[0] == '[') && (line[line.find_last_not_of(" \r\t")] == ']');
         }
 
         /*

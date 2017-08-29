@@ -1220,9 +1220,9 @@ char* Client_connection::checking_event_name(thread_data* local_buf, const char*
  */
 int Client_connection::web_pipe_msg_v1(thread_data* local_buf, char* event_data,int client, int len)
 {
-    if(!appConf::instance()->get_bool('ws', 'support_old_api'))
+    if(!appConf::instance()->get_bool("ws", "support_old_api"))
     {
-        return;
+        return 0;
     }
     
     bool send_user_id = true;
@@ -1576,7 +1576,8 @@ int Client_connection::get_favicon_request(int client, int len, thread_data* loc
 }
 
 int Client_connection::get_custom_request(int client, int len, thread_data* local_buf)
-{
+{ 
+    TagLoger::log(Log_ClientServer, 0, ">Client GET get_custom_request\n"); 
     char *p = local_buf->buf.getData();
     int urlStart = strlen("GET ");
     p = p + urlStart;
@@ -1590,6 +1591,11 @@ int Client_connection::get_custom_request(int client, int len, thread_data* loca
 
     p[urlEnd - 1] = 0;
     char *uri = p; 
+    if(strncmp(uri, "/comet-server", strlen("/comet-server")) == 0)
+    {
+        uri += strlen("/comet-server");
+    }
+    
     std::string name(appConf::instance()->get_string("main", "base_dir"));
     if(name.empty())
     {

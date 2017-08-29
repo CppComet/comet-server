@@ -5,6 +5,16 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v3.24
+
+IMPROVEMENTS:
+
+* Allowed adding spaces after section name in .ini file
+ 
+BUG FIXES:
+
+ * Was rename parameter `benchmark` to `statistics`
+
 ## v3.23
 
 IMPROVEMENTS:

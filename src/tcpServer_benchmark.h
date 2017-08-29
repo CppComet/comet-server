@@ -111,49 +111,7 @@ public:
         }
         printf("---------------------------------------------\n");
     }
-    
-    void filePrint()
-    {
-        if(fp == NULL)
-        {
-            int len = strlen(name);
-            memcpy(file_name, name, len);
-            memcpy(file_name+len, ".csv", 4);
-            
-            fp = fopen(file_name, "w");
-            fprintf(fp, "work_time,conections,addClient,deleteClient,handle_message,ps_addClient,ps_deleteClient,ps_handle_message,loadavg_1,loadavg_2,loadavg_3,running_processes,total_processes" );
-            for(int i = 0; i< th_num; i++)
-            {
-                fprintf(fp, ",th_status_count%d,th_ps_status_count%d", i, i);
-            }
-            fprintf(fp, "\n");
-        }
-        
-        FILE* loadavgFp = fopen("/proc/loadavg", "r");
-        float loadavg_1, loadavg_2, loadavg_3;
-        int running_processes, total_processes;
-        
-        fscanf(loadavgFp, "%5f %5f %5f %5d/%5d", &loadavg_1, &loadavg_2, &loadavg_3, &running_processes, &total_processes);
-        fclose(loadavgFp);
-        
-        fprintf(fp, "%d,%d,%d,%d,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d",
-                cprint_count, conections, addClient, deleteClient, handle_message, ps_addClient, ps_deleteClient, ps_handle_message, loadavg_1, loadavg_2, loadavg_3, running_processes, total_processes);
-         
-        for(int i = 0; i< th_num; i++)
-        {
-            fprintf(fp, ",%d,%.2f",th_status_count[i], th_ps_status_count[i]);
-        }
-        fprintf(fp, "\n");
-        fileCountLines++;
-        
-        if(fileCountLines > appConf::instance()->get_int("benchmark", "file_save")) 
-        {
-            fileCountLines = 0;
-            fclose(fp);
-            fp = fopen(file_name, "a");
-        }
-    }
-    
+     
     int getAddClient(){ return addClient; }
     float getPsAddClient(){ return ps_addClient; }
     
@@ -335,8 +293,7 @@ public:
 
         cprint_count+=stat_interval;
 
-        if(appConf::instance()->get_bool("benchmark", "to_log")) cprint();  
-        if(appConf::instance()->get_bool("benchmark", "to_file")) filePrint();   
+        if(appConf::instance()->get_bool("statistics", "to_log")) cprint();   
     } 
 };
  
