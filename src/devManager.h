@@ -449,7 +449,7 @@ class devManager
         index = new devInfo(appConf::instance()->get_chars("main", "password") ); 
         intervalLoop::instance()->add([](int uptime, thread_data* local_buf)
         {
-            int benchmark = appConf::instance()->get_int("ws", "benchmark");
+            int benchmark = appConf::instance()->get_int("ws", "statistics");
             if( !benchmark || uptime% benchmark != 0)
             {
                 return;

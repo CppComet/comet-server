@@ -86,10 +86,10 @@ void th_startServer(int threadid, const char* server_name)
 
 
 
-    if(appConf::instance()->get_int(server_name, "benchmark") > 0)
+    if(appConf::instance()->get_int(server_name, "statistics") > 0)
     {
         tcpServer <connectionType>::instance()->benchmark = 1;
-        tcpServer <connectionType>::instance()->bm.stat_interval = appConf::instance()->get_int(server_name, "benchmark");
+        tcpServer <connectionType>::instance()->bm.stat_interval = appConf::instance()->get_int(server_name, "statistics");
     }
     else
     {
