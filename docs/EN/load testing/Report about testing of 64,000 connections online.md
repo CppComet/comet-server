@@ -2,7 +2,7 @@
 # Report about testing of 64,000 connections online
 
 
-At previous article we examined the [ how to conduct the stress testing.](/docs/RU/%D0%9D%D0%B0%D0%B3%D1%80%D1%83%D0%B7%D0%BE%D1%87%D0%BD%D0%BE%D0%B5%20%D1%82%D0%B5%D1%81%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5/%D0%9D%D0%B0%D0%B3%D1%80%D1%83%D0%B7%D0%BE%D1%87%D0%BD%D0%BE%D0%B5%20%D1%82%D0%B5%D1%81%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5%20%D1%81%20tsung.md) And here I want to show you how I conducted it by myself, and give its results.
+At previous article we examined the [ how to conduct the stress testing.](/docs/EN/load%20testing/Stress%20testing.md) And here I want to show you how I conducted it by myself, and give its results.
 
 
 ___
@@ -30,7 +30,7 @@ The first process in the list was processed most of all as it was engaged in rec
 Other processes for already received connections processed incoming messages;
 The PcS column indicates how many network events were processed in the last second (there are no zeros on the gif animation) Zero since the connections are accepted and hang in anticipation of incoming messages, but with this test scenario we do not send any additional events.
   
-![CppComet](:comet:out.png?direct )
+![CppComet](:comet:out.png)
 
 # The output of htop # 
 
@@ -40,7 +40,7 @@ Comet server processes (It can be seen that he spent 4891 MB of RAM);
 tsung processes (It can be seen that he spent 2262 MB of RAM);
 Total memory consumption (The rest was consumed by the operating system and other programs started at the time of testing). 
 
-![htop](:comet:htop.png?direct )
+![htop](:comet:htop.png)
 
 # The testing process # 
 
