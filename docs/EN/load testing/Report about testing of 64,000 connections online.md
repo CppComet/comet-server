@@ -30,7 +30,7 @@ The first process in the list was processed most of all as it was engaged in rec
 Other processes for already received connections processed incoming messages;
 The PcS column indicates how many network events were processed in the last second (there are no zeros on the gif animation) Zero since the connections are accepted and hang in anticipation of incoming messages, but with this test scenario we do not send any additional events.
   
-![CppComet](:comet:out.png)
+![CppComet](https://comet-server.com/wiki/lib/exe/fetch.php/comet:out.png)
 
 # The output of htop # 
 
@@ -40,7 +40,7 @@ Comet server processes (It can be seen that he spent 4891 MB of RAM);
 tsung processes (It can be seen that he spent 2262 MB of RAM);
 Total memory consumption (The rest was consumed by the operating system and other programs started at the time of testing). 
 
-![htop](:comet:htop.png)
+![htop](https://comet-server.com/wiki/lib/exe/fetch.php/comet:htop.png)
 
 # The testing process # 
 
