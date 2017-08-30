@@ -39,8 +39,8 @@ Push notifications can be implemented by PHP, but PHP need to use more memory co
 # Links
 We recommend you to read these articles:
 
-  * [PHP chat example](/docs/EN%2FExamples%2FPHP+chat+example.md)  
-  * [JavaScript API](/docs/EN%2FAPI%2FJavaScript+API%2FJavaScript+API.md)
-  * [CometQL API](/docs/EN%2FAPI%2FCometQL%2FCometQL.md) 
+  * [PHP chat example](/docs/EN/Examples/PHP+chat+example.md)  
+  * [JavaScript API](/docs/EN/API/JavaScript+API/JavaScript+API.md)
+  * [CometQL API](/docs/EN/API/CometQL/CometQL.md) 
   * [CppComet](https://github.com/CppComet/comet-server) 
-  * [An example of sending a message from a bash script](/docs/EN%2FAn+example+of+sending+a+message+from+a+bash+script.md)
+  * [An example of sending a message from a bash script](/docs/EN/An+example+of+sending+a+message+from+a+bash+script.md)
