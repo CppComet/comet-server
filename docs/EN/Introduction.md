@@ -41,6 +41,6 @@ We recommend you to read these articles:
 
   * [PHP chat example](/docs/EN/Examples/PHP%20chat%20example.md)  
   * [JavaScript API](/docs/EN/API/JavaScript%20API/JavaScript%20API.md)
-  * [CometQL API](/docs/EN/API/CometQL/CometQL.md) 
+  * [CometQL API](/docs/EN/API/CometQL/CometQL%20API.md) 
   * [CppComet](https://github.com/CppComet/comet-server) 
   * [An example of sending a message from a bash script](/docs/EN/An%20example%20of%20sending%20a%20message%20from%20a%20bash%20script.md)

@@ -48,11 +48,11 @@ mysql -h app.comet-server.ru -u15 -plPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgL
 ```
 
 
-Else you can use [online command prompt](/docs/EN/Online%20CometQL%20command%20line.md). You can find it on the bottom of the right corner on all of the pages.  
+Else you can use [online command prompt](/docs/EN/Online%20CometQL%20CLI.md). You can find it on the bottom of the right corner on all of the pages.  
 
 
 ___
-[Here you can test source code based on PHP with CometQL](/docs/EN/Online%20CometQL%20command%20line.md) using for online command prompt implementation.
+[Here you can test source code based on PHP with CometQL](/docs/EN/Online%20CometQL%20CLI.md) using for online command prompt implementation.
 ___
 
  
@@ -200,7 +200,7 @@ Input channel name “web_admins” and click “subscribe”.
 </html>
 Now perform query again and you will see that amount of subscribers are increase.
 # Table users_in_pipes
-The table “users_in_pipes” contains data about [authorized users](/docs/EN/API/Users%E2%80%99%20authorization%20on%20the%20comet-server.md) which subscribe on channel. This table is available only for reading.  
+The table “users_in_pipes” contains data about [authorized users](/docs/EN/API/Authorization%20on%20the%20CppComet.md) which subscribe on channel. This table is available only for reading.  
 
 ```
 
@@ -220,7 +220,7 @@ mysql> select * from users_in_pipes where name = "web_admins";
 
 
 ___
-Field user in table pipes contain aggregate amount of subscribers ([authorized and non-authorized](/docs/EN/API/Users%E2%80%99%20authorization%20on%20the%20comet-server.md)), besides of table users_in_pipes includes only authorized subscribers list.
+Field user in table pipes contain aggregate amount of subscribers ([authorized and non-authorized](/docs/EN/API/Authorization%20on%20the%20CppComet.md)), besides of table users_in_pipes includes only authorized subscribers list.
 ___
 
 
@@ -263,7 +263,7 @@ Query OK, 0 rows affected (0.00 sec)
 
 
 # Table users_messages
-The table “users_messages” intended sending messages to [authorized users](/docs/EN/API/Users%E2%80%99%20authorization%20on%20the%20comet-server.md) by their identifiers.
+The table “users_messages” intended sending messages to [authorized users](/docs/EN/API/Authorization%20on%20the%20CppComet.md) by their identifiers.
 
 ___
 Sending messages by identifiers gives more powerful protection tools while data is transferring. Also it increases probability to deliver message to right user.
@@ -337,7 +337,7 @@ Here user with id=2 at that moment online, user with id=3 – was online at July
  
 # Table users_auth
 
-The table users_auth contains data of user’s [authorizing](/docs/EN/API/Users%E2%80%99%20authorization%20on%20the%20comet-server.md) on comet server. 
+The table users_auth contains data of user’s [authorizing](/docs/EN/API/Authorization%20on%20the%20CppComet.md) on comet server. 
 
 ```
 
@@ -361,7 +361,7 @@ ___
 In field hash you can transmit only lines (strings) less than 32 symbols and it must match with regular term [0-9A-z=+/_].
 ___
 
-To deleting data of [user’s authorizing](/docs/RU/API/%D0%90%D0%B2%D1%82%D0%BE%D1%80%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F%20%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D0%B5%D0%B9.md), you can use “delete” query.
+To deleting data of [user’s authorizing](/docs/RU/API/%D0%90%D0%B2%D1%82%D0%BE%D1%80%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F%20%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D0%B5%D0%B9%20%D0%BD%D0%B0%20%D0%BA%D0%BE%D0%BC%D0%B5%D1%82%20%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%B5.md), you can use “delete” query.
 
 ```
 
@@ -382,7 +382,7 @@ ___
   * [Error code in CometQL](/docs/EN/API/Error%20codes%20in%20CometQL.md)
   * [Reserved channel names](/docs/EN/API/Reserved%20channel%20names.md)
   * [JavaScript API](/docs/EN/API/JavaScript%20API/JavaScript%20API.md)
-  * [What it is and why do we need "A public developer token" and "Secret developer key?"](/docs/EN/What%20is%20%E2%80%9Cthe%20public%20developer%E2%80%99s%20ID%E2%80%9D%20and%20%E2%80%9Cthe%20secret%20developer%E2%80%99s%20key%E2%80%9D%3F.md)
+  * [What it is and why do we need "A public developer token" and "Secret developer key?"](/docs/EN/Connection%20settings.md)
 
 # Reserved channels names
 

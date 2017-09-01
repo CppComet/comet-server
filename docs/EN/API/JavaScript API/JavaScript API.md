@@ -13,9 +13,9 @@ The function start accepts connection settings and opens new connection. Here op
 cometApi.start({dev_id:15, user_id:1, user_key:"userHash", node:"app.comet-server.ru"})
 ```
 
-  * dev_id it’s a binding parameter – [public developers’ key](/docs/EN/What%20is%20%E2%80%9Cthe%20public%20developer%E2%80%99s%20ID%E2%80%9D%20and%20%E2%80%9Cthe%20secret%20developer%E2%80%99s%20key%E2%80%9D%3F.md). 
-  * user_id it’s a non-binding parameter – user’s identifier is necessary to  [authorization on the comet server](/docs/EN/API/Users%E2%80%99%20authorization%20on%20the%20comet-server.md); 
-  * user_key it’s non-binding parameter – it is an authorization hash which necessary to [authorize user on the comet server](/docs/EN/API/Users%E2%80%99%20authorization%20on%20the%20comet-server.md).  
+  * dev_id it’s a binding parameter – [public developers’ key](/docs/EN/Connection%20settings.md). 
+  * user_id it’s a non-binding parameter – user’s identifier is necessary to  [authorization on the comet server](/docs/EN/API/Authorization%20on%20the%20CppComet.md); 
+  * user_key it’s non-binding parameter – it is an authorization hash which necessary to [authorize user on the comet server](/docs/EN/API/Authorization%20on%20the%20CppComet.md).  
   * node - If you deploy [CppComet](https://github.com/CppComet/comet-server) on your server, you must specify the address of your server
 
 To reconnecting to server use the restart function.
@@ -67,7 +67,7 @@ cometApi.subscription(function(e){ console.log(e)})
 ```
 
 
-An example with online demo [How to accept message from channel in JavaScript](/docs/EN/How%20to%20take%20a%20message%20out%20of%20the%20channel%20in%20JavaScript%3F.md)
+An example with online demo [How to accept message from channel in JavaScript](/docs/EN/How%20to%20take%20a%20message%20out%20of%20the%20channel%20in%20JavaScript.md)
 
 # Unsubscription of receiving messages from channel
 
@@ -115,7 +115,7 @@ cometApi.subscription("msg.event_name", function(e){ console.log(e)})
 
 
 ___
-More details about authorization mechanism on comet server you and about private messages look in article “[User’s authorization on comet server](/docs/EN/API/Users%E2%80%99%20authorization%20on%20the%20comet-server.md)”
+More details about authorization mechanism on comet server you and about private messages look in article “[User’s authorization on comet server](/docs/EN/API/Authorization%20on%20the%20CppComet.md)”
 ___
 
 
@@ -219,7 +219,7 @@ Field server_info.user_id in incoming message fills out by some information besi
 The comet server includes possibility to activate storing the last N messages mechanism for some channels.
 
 ___
-Logging of transferred messages may be activate by CometQL query to table “[pipes_settings](/docs/EN/API/CometQL/CometQL.md)”.
+Logging of transferred messages may be activate by CometQL query to table “[pipes_settings](/docs/EN/API/CometQL/CometQL%20API.md)”.
 ___
  
 
@@ -247,11 +247,11 @@ cometApi.count_users_in_pipe("web_chat_pipe", function(res)
 ```
 
 
-Besides of [CometQL query](/docs/EN/API/CometQL/CometQL.md), this function can show a number of subscribers only for those channels which name begins with “web_” (for example, for “web_chat_pipe” it will work but for “chat_pipe” – will not work). This limitation entered in order to be able to create such a channel which a number of subscribers can’t be accessible for anyone via JS API.
+Besides of [CometQL query](/docs/EN/API/CometQL/CometQL%20API.md), this function can show a number of subscribers only for those channels which name begins with “web_” (for example, for “web_chat_pipe” it will work but for “chat_pipe” – will not work). This limitation entered in order to be able to create such a channel which a number of subscribers can’t be accessible for anyone via JS API.
  
 # Determination of authorization status on comet server
 
-The main article [An authorization on comet server](/docs/EN/API/Users%E2%80%99%20authorization%20on%20the%20comet-server.md)
+The main article [An authorization on comet server](/docs/EN/API/Authorization%20on%20the%20CppComet.md)
 
 The comet server has an opportunity to authorize users. An authorizing can be useful for determination of sender, who create message.
 
@@ -314,5 +314,5 @@ To prevent this situation you can just only once download the file with CometSer
 # Additional Information
  
   * [Reserved channel names](/docs/EN/API/Reserved%20channel%20names.md)
-  * [CometQL API](/docs/EN/API/CometQL/CometQL.md)
-  * [What is and why do we need "A public developer token" and "Secret developer key"](/docs/EN/What%20is%20%E2%80%9Cthe%20public%20developer%E2%80%99s%20ID%E2%80%9D%20and%20%E2%80%9Cthe%20secret%20developer%E2%80%99s%20key%E2%80%9D%3F.md)
+  * [CometQL API](/docs/EN/API/CometQL/CometQL%20API.md)
+  * [What is and why do we need "A public developer token" and "Secret developer key"](/docs/EN/Connection%20settings.md)
