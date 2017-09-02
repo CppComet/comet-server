@@ -133,13 +133,13 @@ bool appConf::initFromFile(const char *fileName)
      
     if(!is_property_exists("ws", "port"))
     {
-        sections["ws"]["port"] = "8080"; 
+        sections["ws"]["port"] = "8087"; 
     } 
      
      
     if(!is_property_exists("comeql", "port"))
     {
-        sections["comeql"]["port"] = "8081"; 
+        sections["comeql"]["port"] = "3300"; 
     } 
       
     if(!is_property_exists("freeswitch", "port"))
@@ -147,6 +147,11 @@ bool appConf::initFromFile(const char *fileName)
         sections["freeswitch"]["port"] = "8082"; 
     } 
          
+    if(!is_property_exists("cometqlproxy", "port"))
+    {
+        sections["cometqlproxy"]["port"] = "3301"; 
+    } 
+    
     if(!is_property_exists("log", "level"))
     {
         sections["log"]["level"] = "200"; 

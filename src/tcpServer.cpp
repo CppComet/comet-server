@@ -825,10 +825,12 @@ template< class connectionType >
 #include "Client_connection.h" 
 #include "MySql_connection.h"
 #include "Freeswitch_connection.h"
+#include "CometQLProxy_connection.h"
 
 template class tcpServer<Client_connection>; 
 template class tcpServer<MySql_connection>;
 template class tcpServer<Freeswitch_connection>;
+template class tcpServer<CometQLProxy_connection>;
 
 
 #endif	/* TCPSERVER_CPP */ 

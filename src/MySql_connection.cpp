@@ -24,6 +24,8 @@
 #include "internalApi.h"
 #include "Client_connection.h"
 #include "MySql_connection.h"
+#include "CometQLProxy_connection.h"
+
 
 #include "CometQL.h"
 #include "y.tab.h"
@@ -914,6 +916,15 @@ int MySql_connection::sql_show_processlist(thread_data* local_buf, unsigned int 
         value[1] = i;
         value[2] = (char)tcpServer <Client_connection>::instance()->bm.get_th_status(i);
         value[3] = tcpServer <Client_connection>::instance()->bm.get_th_count(i);
+        answer += RowPackage(4, value, ++PacketNomber, answer);
+    }
+
+    value[0] = tcpServer <CometQLProxy_connection>::instance()->bm.getServiceName();
+    for(int i =0; i < tcpServer <CometQLProxy_connection>::instance()->bm.get_th_num(); i++)
+    {
+        value[1] = i;
+        value[2] = (char)tcpServer <CometQLProxy_connection>::instance()->bm.get_th_status(i);
+        value[3] = tcpServer <CometQLProxy_connection>::instance()->bm.get_th_count(i);
         answer += RowPackage(4, value, ++PacketNomber, answer);
     }
 

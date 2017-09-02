@@ -19,7 +19,8 @@
 
 #include "Client_connection.h"
 #include "MySql_connection.h"
-#include "Freeswitch_connection.h" 
+#include "Freeswitch_connection.h"  
+#include "CometQLProxy_connection.h" 
 
 #include "intervalLoop.h"
 
@@ -381,8 +382,9 @@ int main(int argc, char *argv[])
     th_startServer<MySql_connection>(2, "cometql");
     
     // Запуск потока обработки сообщений от серверов freeswitch
-    th_startServer<Freeswitch_connection>(3, "freeswitch"); 
- 
+    th_startServer<Freeswitch_connection>(3, "freeswitch");  
+    th_startServer<CometQLProxy_connection>(4, "cometqlproxy");
+    
     command_line_fork();
 
     TagTimer::end(Time_start);
