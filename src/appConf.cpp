@@ -156,55 +156,39 @@ bool appConf::initFromFile(const char *fileName)
     {
         sections["log"]["level"] = "200"; 
     } 
-          
-    /**
-     *  mysql hl кластер 
-    else if(memcmp(key, "hl_ip", strlen("hl_ip")) == 0)
-    {
-        bzero(hl_ip[hl_ip_NodeIndex],100);
-        sscanf(val,"%20s",hl_ip[hl_ip_NodeIndex]);
-        TagLoger::log(Log_appConf, 0, "set hl_ip[%d] %s\n", hl_ip_NodeIndex, hl_ip[hl_ip_NodeIndex]);
-        hl_ip_NodeIndex++;
-
-    }
-    else if(memcmp(key, "hl_pw", strlen("hl_pw")) == 0)
-    {
-        bzero(hl_pw[hl_pw_NodeIndex],DEV_KEY_LEN);
-        sscanf(val,"%64s",hl_pw[hl_pw_NodeIndex]);
-        TagLoger::log(Log_appConf, 0, "set hl_ip[%d] %s\n", hl_pw_NodeIndex, hl_pw[hl_pw_NodeIndex]);
-        hl_pw_NodeIndex++; 
-    }
-    else if(memcmp(key, "hl_port", strlen("hl_port")) == 0)
-    {
-        hl_port[hl_port_NodeIndex] = 0;
-        sscanf(val, "%7d", &hl_port[hl_port_NodeIndex]);
-        TagLoger::log(Log_appConf, 0, "set hl_port[%d] %d\n", hl_port_NodeIndex, hl_port[hl_port_NodeIndex]);
-        hl_port_NodeIndex++; 
-    }
-    */
-
+        
     /**
      *  mysql db 
      */
     if(!is_property_exists("db", "host"))
     {
         // Ошибочка, параметр обязателен
+        TagLoger::error(Log_appConf, 0, "\x1b[1;32mCppComet in file comet.ini in section [db] param `host` is required\x1b[0m");
+        return false;
     }
-    else if(!is_property_exists("db", "host"))
+    else if(!is_property_exists("db", "port"))
     {
         // Ошибочка, параметр обязателен
+        TagLoger::error(Log_appConf, 0, "\x1b[1;32mCppComet in file comet.ini in section [db] param `port` is required\x1b[0m");
+        return false;
     }
     else if(!is_property_exists("db", "db_pw"))
     {
         // Ошибочка, параметр обязателен
+        TagLoger::error(Log_appConf, 0, "\x1b[1;32mCppComet in file comet.ini in section [db] param `db_pw` is required\x1b[0m");
+        return false;
     }
     else if(!is_property_exists("db", "db_user"))
     {
         // Ошибочка, параметр обязателен
+        TagLoger::error(Log_appConf, 0, "\x1b[1;32mCppComet in file comet.ini in section [db] param `db_user` is required\x1b[0m");
+        return false;
     }
     else if(!is_property_exists("db", "db_name"))
     {
         // Ошибочка, параметр обязателен
+        TagLoger::error(Log_appConf, 0, "\x1b[1;32mCppComet in file comet.ini in section [db] param `db_name` is required\x1b[0m");
+        return false;
     }  
     return true;
 }

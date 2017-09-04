@@ -205,6 +205,37 @@ public:
 
     bool init(const char* host, const char* user, const char* pw, const char* name, int port)
     {
+        if(host == NULL)
+        { 
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;32mCppComet MySQL connection `host` is NULL\x1b[0m");
+            return false;
+        }
+        
+        if(pw == NULL)
+        { 
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;32mCppComet MySQL connection `password` is NULL\x1b[0m");
+            return false;
+        }
+        
+        if(user == NULL)
+        { 
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;32mCppComet MySQL connection `user` is NULL\x1b[0m");
+            return false;
+        }
+        
+        if(db_name == NULL)
+        { 
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;32mCppComet MySQL connection `db_name` is NULL\x1b[0m");
+            return false;
+        }
+        
+        if(port <= 0)
+        {
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;32mCppComet MySQL connection `port` is %d\x1b[0m", port);
+            return false;
+        }
+        
+        TagLoger::log(Log_dbLink, 0, "init dbLink host=%s, user=%s, name=%s, port=%d\n", host, user, name, port);  
         isInit = true;
         bzero(db_host,200);
         strncpy(db_host, host, 200);

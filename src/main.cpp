@@ -346,9 +346,10 @@ int main(int argc, char *argv[])
   
     // Чтение конфига и ключей запуска 
     if(!appConf::instance()->init(argc, argv))
-    {
+    { 
+        TagLoger::error(Log_appConf, 0, "\x1b[1;32mCppComet error in parsing comet.ini file\x1b[0m");
         return 0;
-    } 
+    }
     
     TagLoger::log(Log_Any, 0, "Server starting pid:%d, getrusage:%d\n", getpid());
     TagLoger::initTagLevels();
