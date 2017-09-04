@@ -407,7 +407,7 @@ class ini_parser
             std::string key = extract_key(line);
             std::string value = extract_value(line);
 
-            printf("set:%s[%s] =\t%s\n", current_section.data(), key.data(), value.data());
+            //printf("set:%s[%s] =\t%s\n", current_section.data(), key.data(), value.data());
             set_value(current_section, key, value); 
         }
 

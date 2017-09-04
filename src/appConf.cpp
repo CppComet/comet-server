@@ -163,31 +163,31 @@ bool appConf::initFromFile(const char *fileName)
     if(!is_property_exists("db", "host"))
     {
         // Ошибочка, параметр обязателен
-        TagLoger::error(Log_appConf, 0, "\x1b[1;32mCppComet in file comet.ini in section [db] param `host` is required\x1b[0m");
+        TagLoger::error(Log_appConf, 0, "\x1b[1;31mCppComet in file comet.ini in section [db] param `host` is required\x1b[0m");
         return false;
     }
     else if(!is_property_exists("db", "port"))
     {
         // Ошибочка, параметр обязателен
-        TagLoger::error(Log_appConf, 0, "\x1b[1;32mCppComet in file comet.ini in section [db] param `port` is required\x1b[0m");
+        TagLoger::error(Log_appConf, 0, "\x1b[1;31mCppComet in file comet.ini in section [db] param `port` is required\x1b[0m");
         return false;
     }
-    else if(!is_property_exists("db", "db_pw"))
+    else if(!is_property_exists("db", "password"))
     {
         // Ошибочка, параметр обязателен
-        TagLoger::error(Log_appConf, 0, "\x1b[1;32mCppComet in file comet.ini in section [db] param `db_pw` is required\x1b[0m");
+        TagLoger::error(Log_appConf, 0, "\x1b[1;31mCppComet in file comet.ini in section [db] param `password` is required\x1b[0m");
         return false;
     }
-    else if(!is_property_exists("db", "db_user"))
+    else if(!is_property_exists("db", "user"))
     {
         // Ошибочка, параметр обязателен
-        TagLoger::error(Log_appConf, 0, "\x1b[1;32mCppComet in file comet.ini in section [db] param `db_user` is required\x1b[0m");
+        TagLoger::error(Log_appConf, 0, "\x1b[1;31mCppComet in file comet.ini in section [db] param `user` is required\x1b[0m");
         return false;
     }
-    else if(!is_property_exists("db", "db_name"))
+    else if(!is_property_exists("db", "name"))
     {
         // Ошибочка, параметр обязателен
-        TagLoger::error(Log_appConf, 0, "\x1b[1;32mCppComet in file comet.ini in section [db] param `db_name` is required\x1b[0m");
+        TagLoger::error(Log_appConf, 0, "\x1b[1;31mCppComet in file comet.ini in section [db] param `name` is required\x1b[0m");
         return false;
     }  
     return true;
