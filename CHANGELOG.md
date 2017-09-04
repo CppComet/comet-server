@@ -5,6 +5,12 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v3.25
+
+IMPROVEMENTS:
+
+* Added error messages for comet.ini parser
+
 ## v3.24
 
 IMPROVEMENTS:
