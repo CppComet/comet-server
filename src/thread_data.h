@@ -272,6 +272,7 @@ public:
         auto cluster = app->get_list("cluster", "cometql");
         if(!cluster.empty())
         {
+            TagLoger::log(Log_Any, LogColorGreen, "Starting CometQL cluster on %d nodes", cluster.size());
             auto it = cluster.begin();
             while(it != cluster.end())
             {
@@ -286,6 +287,10 @@ public:
                 }
                 it++;
             }
+        }
+        else
+        { 
+            TagLoger::log(Log_Any, LogColorBase, "section [cluster] value [cometql] is empty");
         }
     }
 

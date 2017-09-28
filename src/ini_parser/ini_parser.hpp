@@ -152,10 +152,11 @@ public:
         {
             list.erase(list.begin(), list.end());
         }
-        else if(val.compare(0, 2, "[]"))
+        else if(val.compare(0, 2, "[]") == 0)
         {
             std::string arrStr = val;
-            list.push_back(arrStr.erase(0, 2));
+            arrStr = arrStr.erase(0, 2); 
+            list.push_back(arrStr);
         }
     }
 

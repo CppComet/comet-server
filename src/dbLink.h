@@ -227,26 +227,30 @@ public:
         std::string Pwd;
         int Port = 3301;
         
-        while(pos < connectionString.length())
+        int i = 0;
+        while(pos <= connectionString.length() && i < 10)
         {
-            nextPos = connectionString.find("=", pos);
+            i++;
+            nextPos = connectionString.find('=', pos);
             if(!nextPos)
             {
                 break;
             }
             
             auto paramName = connectionString.substr(pos, nextPos - pos); 
-            pos = nextPos;
+            TagLoger::debug(Log_dbLink, 0, "\x1b[1;31mparamName=%s, pos=%d, nextPos=%d\x1b[0m", paramName.data(), pos, nextPos);
+            pos = nextPos + 1;
 
-            nextPos = connectionString.find(",", pos);
-            if(nextPos)
+            nextPos = connectionString.find(',', pos);
+            if(!nextPos)
             {
                 nextPos = connectionString.length();
             }
             
             auto paramValue = connectionString.substr(pos, nextPos - pos); 
-
-            TagLoger::debug(Log_dbLink, 0, "\x1b[1;31mparam: %s=%s\x1b[0m", paramName.data(), paramValue.data());
+            TagLoger::debug(Log_dbLink, 0, "\x1b[1;31mparamValue=%s, pos=%d, nextPos=%d\x1b[0m", paramValue.data(), pos, nextPos);
+            pos = nextPos + 1;
+            
             if(paramName.compare("Server"))
             {
                 Server = paramValue;
