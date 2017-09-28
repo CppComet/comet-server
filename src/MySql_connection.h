@@ -24,12 +24,12 @@
 #include <vector>
 #include <map>
 
+#ifndef MYSQL_CONNECTION_H
+#define	MYSQL_CONNECTION_H
+ 
 #include "MySqlProtocol.h"
 #include "CometQL.h"
 #include "mystring.h" 
-
-#ifndef MYSQL_CONNECTION_H
-#define	MYSQL_CONNECTION_H
  
 /**
  * Коды ошибок
@@ -380,6 +380,7 @@ protected:
 
 protected:
 
+    int query_router(thread_data* local_buf, int PacketNomber);
     /**
      *  Если версия api не выбрана то вернёт false и отправит информацию об ошибке клиенту.
      */

@@ -22,7 +22,7 @@
 #include "hashlib2plus/src/hashlibpp.h"
 #include <map>
 
-#include "backtrace.h" 
+#include "backtrace.h"
 #include "thread_data.h"
 #include "internalApi.h"
 #include "base64.h"
@@ -177,7 +177,7 @@ public:
     {
         if(last_online_time == -1)
         {
-            local_buf->stm.users_time_select.execute(user_id); 
+            local_buf->stm.users_time_select.execute(user_id);
             if(local_buf->stm.users_time_select.fetch())
             {
                 local_buf->stm.users_time_select.free();
@@ -185,7 +185,7 @@ public:
             }
 
             last_online_time = local_buf->stm.users_time_select.result_time;
-            local_buf->stm.users_time_select.free(); 
+            local_buf->stm.users_time_select.free();
         }
 
         return last_online_time;
@@ -211,7 +211,7 @@ public:
         {
             return -1;
         }
-        
+
         if(local_buf->stm.users_time_select.fetch())
         {
             local_buf->stm.users_time_select.free();
@@ -219,8 +219,8 @@ public:
         }
 
         long last_online_time = local_buf->stm.users_time_select.result_time;
-        local_buf->stm.users_time_select.free(); 
-         
+        local_buf->stm.users_time_select.free();
+
         return last_online_time;
     }
 
@@ -277,9 +277,9 @@ public:
     static bool getHash(thread_data* local_buf, unsigned int user_id, char* out_hash)
     {
         local_buf->stm.users_auth_select.execute(user_id);
-        
+
         if(local_buf->stm.users_auth_select.fetch())
-        { 
+        {
             TagLoger::log(Log_UserItem, 0, "[4]Hash, user_id=%d not found\n", user_id);
             local_buf->stm.users_auth_select.free();
             return false;
@@ -306,15 +306,15 @@ public:
      *
      * Данные берёт из редиса или если есть из памяти переменной hash
      * @param local_buf
-     * @return 
+     * @return
      */
     bool getHash(thread_data* local_buf, char* out_hash)
     {
         if(hash == 0)
         {
-            local_buf->stm.users_auth_select.execute(user_id); 
+            local_buf->stm.users_auth_select.execute(user_id);
             if(local_buf->stm.users_auth_select.fetch())
-            { 
+            {
                 local_buf->stm.users_auth_select.free();
                 TagLoger::log(Log_UserItem, 0, "[3]Hash user_id=%d not found\n", user_id);
                 return false;
@@ -368,7 +368,7 @@ public:
         {
             // Если токен верен но хеша авторизации нет то установим значение токена в качестве хеша авторизации
             if(!getHash(local_buf, NULL))
-            { 
+            {
                 setHash(local_buf, Hash);
             }
             return true;
@@ -430,10 +430,10 @@ public:
             }
             return true;
         }
- 
+
         local_buf->stm.users_auth_select.execute(user_id);
         if(local_buf->stm.users_auth_select.fetch())
-        { 
+        {
             local_buf->stm.users_auth_select.free();
             return false;
         }
@@ -461,32 +461,73 @@ protected:
     /**
      * Запоминает время ухода пользователя и сохраняет эту информацию в редис
      * Отправляет сообщение в канал user_status_{user_id} о том что человек offline
+     * @todo учесть работу в кластере
      */
     void setOffline_time(thread_data* local_buf)
     {
-        last_online_time = time(0); 
+        last_online_time = time(0);
         if(user_id > 0)
         {
-            local_buf->db.query_format("replace into `users_time` (`user_id`, `time`) VALUES ('%d', '%d')", user_id, last_online_time); 
-            char pipe_name[100];
-            snprintf(pipe_name, 100,"user_status_%d", user_id);
-            internalApi::send_event_to_pipe(local_buf, pipe_name, "{\\\"data\\\":\\\"offline\\\",\\\"event_name\\\":\\\"offline\\\"}", NULL);
+            if(appConf::instance()->get_bool("main", "save_users_last_online_time"))
+            {
+                local_buf->db.query_format("replace into `users_time` (`user_id`, `time`) VALUES ('%d', '%d')", user_id, last_online_time);
+            }
+            if(appConf::instance()->get_bool("main", "send_user_offline_events"))
+            {
+                char pipe_name[100];
+                snprintf(pipe_name, 100,"user_status_%d", user_id);
+                internalApi::send_event_to_pipe(local_buf, pipe_name, "{\\\"data\\\":\\\"offline\\\",\\\"event_name\\\":\\\"offline\\\"}", NULL);
+
+                if(local_buf->isClusterActive())
+                {
+                    auto it = local_buf->cometCluster.begin();
+                    while(it != local_buf->cometCluster.end())
+                    {
+                        auto link = *it;
+
+                        // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
+                        link->query_format("INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'offline', 'offline');", pipe_name);
+                    }
+                }
+            }
         }
     }
 
     /**
-     * Устанавливает пользователю статус online и сохраняет эту информацию в редис
+     * Устанавливает пользователю статус online и сохраняет эту информацию
      * Отправляет сообщение в канал user_status_{user_id} о том что человек online
+     * @todo учесть работу в кластере
      */
     void setOnline_time(thread_data* local_buf)
     {
         last_online_time = 0;
         if(user_id > 0)
         {
-            local_buf->db.query_format("replace into `users_time` (`user_id`, `time`) VALUES ('%d', 0)", user_id);  // Подусать может этот запрос не нужен 
-            char pipe_name[100];
-            snprintf(pipe_name, 100, "user_status_%d", user_id);
-            internalApi::send_event_to_pipe(local_buf, pipe_name, "{\\\"data\\\":\\\"online\\\",\\\"event_name\\\":\\\"online\\\"}", NULL);
+            if(appConf::instance()->get_bool("main", "save_users_last_online_time") && !local_buf->isClusterActive())
+            {
+                // В не кластерной работы точно нет необходимости в этом запросе
+                local_buf->db.query_format("replace into `users_time` (`user_id`, `time`) VALUES ('%d', 0)", user_id);
+            }
+
+            if(appConf::instance()->get_bool("main", "send_user_online_events"))
+            {
+                char pipe_name[100];
+                snprintf(pipe_name, 100, "user_status_%d", user_id);
+                internalApi::send_event_to_pipe(local_buf, pipe_name, "{\\\"data\\\":\\\"online\\\",\\\"event_name\\\":\\\"online\\\"}", NULL);
+
+
+                if(local_buf->isClusterActive())
+                {
+                    auto it = local_buf->cometCluster.begin();
+                    while(it != local_buf->cometCluster.end())
+                    {
+                        auto link = *it;
+
+                        // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
+                        link->query_format("INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'online', 'online');", pipe_name);
+                    }
+                }
+            }
         }
     }
 

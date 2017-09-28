@@ -5,6 +5,24 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v3.26
+
+IMPROVEMENTS:
+
+* Added parameter `send_user_online_events` to `main`
+* Added parameter `send_user_offline_events` to `main`
+* Added parameter `save_users_last_online_time` to `main`
+
+* Added section `cluster`
+* Added section `cometqlproxy`
+* Added clustering mechanism #15
+
+## v3.25
+
+IMPROVEMENTS:
+
+* Added error messages for comet.ini parser
+
 ## v3.24
 
 IMPROVEMENTS:

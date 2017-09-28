@@ -14,15 +14,15 @@ class tcpServer_benchmark;
 #include <string.h>
 #include <exception>
 
-#include "main.h" 
+#include "main.h"
 #include "appConf.h"
 
 #include "dbLink.h"
- 
+
 #include "CometQL.h"
 
 #include "CometQLcluster.h"
- 
+
 
 #include "tcpServer_benchmark.h"
 
@@ -32,7 +32,7 @@ class tcpServer_benchmark;
 
 /**
  * Класс для работы с памятью предназначеной для буферизации принимаемых и отправляемых данных.
- * 
+ *
  * @todo Заменить поддержку работы так чтоб можно было не задавать начальный размер [opt1 -600*ws_online]
  */
 class bufferController
@@ -70,7 +70,7 @@ public:
      * @param size
      */
     void setSize(int size)
-    { 
+    {
         data_size = size;
         if(buf == NULL)
         {
@@ -158,7 +158,7 @@ public:
     {
         return inUse_buf;
     }
-    
+
     /**
      * Функция для контроля доступа.
      * Делает заметку о том что память занята.
@@ -199,7 +199,7 @@ public:
         return buf;
     }
 };
-  
+
 /**
  * Класс хранящий соединение с редисом и память для записи туда данных на короткий период.
  * Не является потокобезопасным и поэтому подразумевается что в каждом потке иметтся своя копия класса.
@@ -209,17 +209,19 @@ public:
 class thread_data
 {
 public:
- 
+
     /**
      * Соединение с mysql сервером для хранения данных
      */
     dbLink db;
-    
+
+    std::vector<dbLink*> cometCluster;
+
     stmMapper stm;
-    
+
     tcpServer_benchmark* bm;
     int thread_id = 0;
-      
+
     /**
      * Буфер для сообщения от пользователя.
      * Сюда записываются данные прочитаные из сокета.
@@ -241,7 +243,7 @@ public:
      * Для формирования заголовков описания таблицы ответа в mysql
      */
     mysqlAnswer sql;
-    
+
     /**
      * Для хранания распарсеной информации о запросе
      */
@@ -252,7 +254,7 @@ public:
     int tmp_bufdataPrt[ARRAY_BUFFER_SIZE];*/
 
     thread_data( appConf* app):buf(app->get_int("main", "buf_size")), messge_buf(app->get_int("main", "buf_size")), answer_buf(app->get_int("main", "answer_buf_size")),sql(),bm(NULL)
-    { 
+    {
         /*bzero(tmp_bufdata, ARRAY_BUFFER_SIZE);
         bzero(tmp_bufdataSize, ARRAY_BUFFER_SIZE);
         bzero(tmp_bufdataPrt, ARRAY_BUFFER_SIZE);
@@ -261,13 +263,32 @@ public:
         bzero(tmp_bufdata[0], app->buf_size*2);
 
         tmp_bufdataSize[0] = app->buf_size*2;*/
-  
+
         db.init(app->get_chars("db", "host"), app->get_chars("db", "user"), app->get_chars("db", "password"), app->get_chars("db", "name"), app->get_int("db", "port"));
         db.connect();
-        
-        stm.init(db); 
+
+        stm.init(db);
+
+        auto cluster = app->get_list("cluster", "cometql");
+        if(!cluster.empty())
+        {
+            auto it = cluster.begin();
+            while(it != cluster.end())
+            {
+                dbLink* link = new dbLink();
+                if(link->init(it->data()) && link->connect())
+                {
+                    cometCluster.push_back(link);
+                }
+                else
+                {
+                    TagLoger::error(Log_Any, LogColorRed, "Error, CometQL connection %s does not establish", it->data());
+                }
+                it++;
+            }
+        }
     }
-    
+
     void setThreadStatus(char c);
 
 private:
@@ -284,6 +305,16 @@ private:
 
 public:
 
+    bool isClusterActive()
+    {
+        return !cometCluster.empty();
+    }
+    
+    bool clusterSize()
+    {
+        return cometCluster.size();
+    }
+    
     void unlockAll()
     {
         buf.unlock();
@@ -310,10 +341,10 @@ private:
                 break;
             }
         }
- 
+
         bzero(tmp_bufdataPrt, ARRAY_BUFFER_SIZE);
     }*/
- 
+
     /**
      * Распределитель памяти.
      * Выделяет блок памяти запрошенного размера.
@@ -343,7 +374,7 @@ private:
 
         throw "getMem not enough memory!";
     }*/
-    
+
 public:
 
     ~thread_data()

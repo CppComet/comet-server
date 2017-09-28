@@ -3,6 +3,7 @@
 #include "Client_connection.h"
 #include "MySql_connection.h"
 #include "Freeswitch_connection.h" 
+#include "CometQLProxy_connection.h"
 #include "devManager.h"
 #include "mystring.h"
 
@@ -222,6 +223,9 @@ void usage_statistics::start()
         snprintf(value, 255, "Freeswitch_connection_th_num=%d&", tcpServer <Freeswitch_connection>::instance()->bm.get_th_num());
         exportdata.append(value);
  
+        snprintf(value, 255, "CometQLProxy_connection_th_num=%d&", tcpServer <CometQLProxy_connection>::instance()->bm.get_th_num());
+        exportdata.append(value);
+        
         for(int i =0; i < tcpServer <MySql_connection>::instance()->bm.get_th_num(); i++)
         {
             snprintf(value, 255, "MySql_connection_th=%d,%c,%d&", i, (char)tcpServer <MySql_connection>::instance()->bm.get_th_status(i), tcpServer <MySql_connection>::instance()->bm.get_th_count(i));
@@ -240,6 +244,11 @@ void usage_statistics::start()
             exportdata.append(value);
         }
  
+        for(int i =0; i < tcpServer <CometQLProxy_connection>::instance()->bm.get_th_num(); i++)
+        {
+            snprintf(value, 255, "CometQLProxy_connection=%d,%c,%d&", i, (char)tcpServer <CometQLProxy_connection>::instance()->bm.get_th_status(i), tcpServer <CometQLProxy_connection>::instance()->bm.get_th_count(i));
+            exportdata.append(value);
+        }
         exportdata.append("end=true");
         send(exportdata);
     });

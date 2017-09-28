@@ -184,6 +184,19 @@ class dbLink {
     char db_name[200];
     int db_port = 3306;
     my_bool reconnect = 1;
+    
+private:
+
+    /**
+     * Запрещаем копирование для объектов данного класса
+     */
+    dbLink(const dbLink& cpy) = delete;
+
+    /**
+     * Запрещаем копирование для объектов данного класса
+     */
+    void operator=( const dbLink& cpy) = delete;
+
 public:
 
     dbLink(){
@@ -194,7 +207,7 @@ public:
         mysql_init(&mysqlLink);
 
     }
-
+ 
     ~dbLink(){
 
         if(isInit)
@@ -203,8 +216,101 @@ public:
         }
     }
 
+    bool init(std::string connectionString)
+    { 
+        int pos = 0;
+        int nextPos = 0;
+        
+        std::string Server = "localhost";
+        std::string Database;
+        std::string Uid = "root";
+        std::string Pwd;
+        int Port = 3301;
+        
+        while(pos < connectionString.length())
+        {
+            nextPos = connectionString.find("=", pos);
+            if(!nextPos)
+            {
+                break;
+            }
+            
+            auto paramName = connectionString.substr(pos, nextPos - pos); 
+            pos = nextPos;
+
+            nextPos = connectionString.find(",", pos);
+            if(nextPos)
+            {
+                nextPos = connectionString.length();
+            }
+            
+            auto paramValue = connectionString.substr(pos, nextPos - pos); 
+
+            TagLoger::debug(Log_dbLink, 0, "\x1b[1;31mparam: %s=%s\x1b[0m", paramName.data(), paramValue.data());
+            if(paramName.compare("Server"))
+            {
+                Server = paramValue;
+            } 
+            else if(paramName.compare("Database"))
+            {
+                Database = paramValue;
+            } 
+            else if(paramName.compare("Uid"))
+            {
+                Uid = paramValue;
+            } 
+            else if(paramName.compare("Pwd"))
+            {
+                Pwd = paramValue; 
+            } 
+            else if(paramName.compare("Port"))
+            {
+                try{
+                    //printf("get_long [%s] %s=%s\n", section.data(), name.data(), sections.at(section).at(name).data());
+                    Port = std::stoi(paramValue);
+                }catch(...)
+                {
+                    printf("\x1b[1;31mexeption in parsing Port value Port=%s\x1b[0m\n", paramValue.data());
+                    return false;
+                } 
+            }
+        }
+        
+        return init(Server.data(), Database.data(), Uid.data(), Pwd.data(), Port);
+    }
     bool init(const char* host, const char* user, const char* pw, const char* name, int port)
     {
+        if(host == NULL)
+        { 
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mCppComet MySQL connection `host` is NULL\x1b[0m");
+            return false;
+        }
+        
+        if(pw == NULL)
+        { 
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mCppComet MySQL connection `password` is NULL\x1b[0m");
+            return false;
+        }
+        
+        if(user == NULL)
+        { 
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mCppComet MySQL connection `user` is NULL\x1b[0m");
+            return false;
+        }
+        
+        if(db_name == NULL)
+        { 
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mCppComet MySQL connection `db_name` is NULL\x1b[0m");
+            return false;
+        }
+        
+        if(port <= 0)
+        {
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mCppComet MySQL connection `port` is %d\x1b[0m", port);
+            return false;
+        }
+        
+        TagLoger::log(Log_dbLink, 0, "init dbLink host=%s, user=%s, name=%s, port=%d\n", host, user, name, port);  
         isInit = true;
         bzero(db_host,200);
         strncpy(db_host, host, 200);

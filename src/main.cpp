@@ -19,7 +19,8 @@
 
 #include "Client_connection.h"
 #include "MySql_connection.h"
-#include "Freeswitch_connection.h" 
+#include "Freeswitch_connection.h"  
+#include "CometQLProxy_connection.h" 
 
 #include "intervalLoop.h"
 
@@ -345,9 +346,10 @@ int main(int argc, char *argv[])
   
     // Чтение конфига и ключей запуска 
     if(!appConf::instance()->init(argc, argv))
-    {
+    { 
+        TagLoger::error(Log_appConf, 0, "\x1b[1;32mCppComet error in parsing comet.ini file\x1b[0m");
         return 0;
-    } 
+    }
     
     TagLoger::log(Log_Any, 0, "Server starting pid:%d, getrusage:%d\n", getpid());
     TagLoger::initTagLevels();
@@ -381,8 +383,9 @@ int main(int argc, char *argv[])
     th_startServer<MySql_connection>(2, "cometql");
     
     // Запуск потока обработки сообщений от серверов freeswitch
-    th_startServer<Freeswitch_connection>(3, "freeswitch"); 
- 
+    th_startServer<Freeswitch_connection>(3, "freeswitch");  
+    th_startServer<CometQLProxy_connection>(4, "cometqlproxy");
+    
     command_line_fork();
 
     TagTimer::end(Time_start);

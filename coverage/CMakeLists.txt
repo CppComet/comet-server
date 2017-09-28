@@ -114,6 +114,7 @@ set(SOURCE_EXE
         ../src/connection.cpp 
         ../src/mystring.cpp 
         ../src/MySql_connection.cpp 
+        ../src/CometQLProxy_connection.cpp
         ../src/tcpServer.cpp 
         ../src/user_index.cpp 
         ../src/backtrace.cpp 
