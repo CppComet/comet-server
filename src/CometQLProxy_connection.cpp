@@ -28,7 +28,7 @@
 #include "CometQL.h"
 #include "y.tab.h"
 #include "sha1.h"
-#include "CometQLcluster.h"
+ 
 #include "devManager.h"
 #include <ctime>
 

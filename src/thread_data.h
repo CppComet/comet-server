@@ -20,10 +20,7 @@ class tcpServer_benchmark;
 #include "dbLink.h"
 
 #include "CometQL.h"
-
-#include "CometQLcluster.h"
-
-
+  
 #include "tcpServer_benchmark.h"
 
 #ifndef ARRAY_BUFFER_SIZE

@@ -178,10 +178,10 @@ class dbLink {
     MYSQL mysqlLink;
     bool isInit = false;
 
-    char db_host[200];
-    char db_pw[200];
-    char db_user[200];
-    char db_name[200];
+    std::string db_host;
+    std::string db_pw;
+    std::string db_user;
+    std::string db_name;
     int db_port = 3306;
     my_bool reconnect = 1;
     
@@ -200,12 +200,7 @@ private:
 public:
 
     dbLink(){
-        bzero(db_host,200);
-        bzero(db_pw,200);
-        bzero(db_user,200);
-        bzero(db_name,200);
         mysql_init(&mysqlLink);
-
     }
  
     ~dbLink(){
@@ -232,42 +227,42 @@ public:
         {
             i++;
             nextPos = connectionString.find('=', pos);
-            if(!nextPos)
+            if(nextPos == std::string::npos)
             {
                 break;
             }
             
             auto paramName = connectionString.substr(pos, nextPos - pos); 
-            TagLoger::debug(Log_dbLink, 0, "\x1b[1;31mparamName=%s, pos=%d, nextPos=%d\x1b[0m", paramName.data(), pos, nextPos);
+            //TagLoger::debug(Log_dbLink, 0, "\x1b[1;32mparamName=%s, pos=%d, nextPos=%d\x1b[0m", paramName.data(), pos, nextPos);
             pos = nextPos + 1;
 
             nextPos = connectionString.find(',', pos);
-            if(!nextPos)
+            if(nextPos == std::string::npos)
             {
                 nextPos = connectionString.length();
             }
             
             auto paramValue = connectionString.substr(pos, nextPos - pos); 
-            TagLoger::debug(Log_dbLink, 0, "\x1b[1;31mparamValue=%s, pos=%d, nextPos=%d\x1b[0m", paramValue.data(), pos, nextPos);
+            //TagLoger::debug(Log_dbLink, 0, "\x1b[1;32mparamValue=%s, pos=%d, nextPos=%d\x1b[0m", paramValue.data(), pos, nextPos);
             pos = nextPos + 1;
             
-            if(paramName.compare("Server"))
+            if(paramName.compare("Server") == 0)
             {
                 Server = paramValue;
             } 
-            else if(paramName.compare("Database"))
+            else if(paramName.compare("Database") == 0)
             {
                 Database = paramValue;
             } 
-            else if(paramName.compare("Uid"))
+            else if(paramName.compare("Uid") == 0)
             {
                 Uid = paramValue;
             } 
-            else if(paramName.compare("Pwd"))
+            else if(paramName.compare("Pwd") == 0)
             {
                 Pwd = paramValue; 
             } 
-            else if(paramName.compare("Port"))
+            else if(paramName.compare("Port") == 0)
             {
                 try{
                     //printf("get_long [%s] %s=%s\n", section.data(), name.data(), sections.at(section).at(name).data());
@@ -302,7 +297,7 @@ public:
             return false;
         }
         
-        if(db_name == NULL)
+        if(name == NULL)
         { 
             TagLoger::error(Log_dbLink, 0, "\x1b[1;31mCppComet MySQL connection `db_name` is NULL\x1b[0m");
             return false;
@@ -315,18 +310,11 @@ public:
         }
         
         TagLoger::log(Log_dbLink, 0, "init dbLink host=%s, user=%s, name=%s, port=%d\n", host, user, name, port);  
-        isInit = true;
-        bzero(db_host,200);
-        strncpy(db_host, host, 200);
-
-        bzero(db_pw,200);
-        strncpy(db_pw, pw, 200);
-
-        bzero(db_user,200);
-        strncpy(db_user, user, 200);
-
-        bzero(db_name,200);
-        strncpy(db_name, name, 200);
+        isInit = true; 
+        db_host = host;
+        db_pw = pw;
+        db_user = user;
+        db_name = name;
 
         db_port = port;
 
@@ -389,17 +377,17 @@ public:
 
     bool connect()
     {
-        mysql_real_connect(&mysqlLink, db_host, db_user, db_pw, db_name, db_port, NULL, 0);
+        mysql_real_connect(&mysqlLink, db_host.data(), db_user.data(), db_pw.data(), db_name.data(), db_port, NULL, 0);
 
         if(mysql_errno(&mysqlLink))
         {
             TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL connection not established\n%s\nip=%s:%d user=%s [errno=%d]\x1b[0m", mysql_error(&mysqlLink),
-                    db_host, db_port, db_user, mysql_errno(&mysqlLink));
+                    db_host.data(), db_port, db_user.data(), mysql_errno(&mysqlLink));
             return false;
         }
 
 
-        TagLoger::log(Log_dbLink, 0, "\x1b[1;32mMySQL connection established\nip=%s:%d user=%s\x1b[0m", db_host, db_port, db_user);
+        TagLoger::log(Log_dbLink, 0, "\x1b[1;32mMySQL connection established\nip=%s:%d user=%s\x1b[0m", db_host.data(), db_port, db_user.data());
         return true;
 
         //return query("SET CHARACTER SET 'utf8' ");
