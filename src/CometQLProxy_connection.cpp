@@ -74,15 +74,17 @@ int CometQLProxy_connection::proxy_select(int node, const char* query, thread_da
     {
         if(node < 0)
         {
-            node = local_buf->cometCluster.size() % random();
+            node = random() % local_buf->cometCluster.size();
         }
         
+        TagLoger::log(Log_CometQLCluster, 0, "CometQLProxy query:%s send to node=%d\n", query, node);
         // Если задана node то выполнить запрос на конкретной ноде а не на всех нодах.
         auto link = local_buf->cometCluster[node];
         if(!link->query(query))
         {
             // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
             local_buf->qInfo.setError(mysql_error(link->getLink()), mysql_errno(link->getLink()));
+            local_buf->answer_buf.unlock();
             Send_Err_Package(local_buf->qInfo.errorCode, local_buf->qInfo.errorText, ++PacketNomber, local_buf, this);
             return 0;
         }
@@ -124,6 +126,7 @@ int CometQLProxy_connection::proxy_select(int node, const char* query, thread_da
             if(!link->query(query))
             {
                 local_buf->qInfo.setError(mysql_error(link->getLink()), mysql_errno(link->getLink()));
+                local_buf->answer_buf.unlock();
                 Send_Err_Package(local_buf->qInfo.errorCode, local_buf->qInfo.errorText, ++PacketNomber, local_buf, this);
                 return 0;
             }
@@ -206,7 +209,7 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
 {
     if(local_buf->qInfo.command == TOK_SHOW)
     {
-        TagLoger::log(Log_MySqlServer, 0, "cmd show:%d\n", local_buf->qInfo.arg_show.command);
+        TagLoger::log(Log_CometQLCluster, 0, "CometQLProxy cmd show:%d\n", local_buf->qInfo.arg_show.command);
         if(local_buf->qInfo.arg_show.command == TOK_DATABASES)
         {
             return proxy_query(-2, local_buf,PacketNomber); // return sql_show_databases(local_buf,PacketNomber);
@@ -245,7 +248,7 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
     }
     else if(local_buf->qInfo.command == TOK_SELECT)
     {
-        TagLoger::log(Log_MySqlServer, 0, "cmd select:%d\n", local_buf->qInfo.arg_select.command);
+        TagLoger::log(Log_CometQLCluster, 0, "cmd select:%d\n", local_buf->qInfo.arg_select.command);
 
         if(local_buf->qInfo.arg_select.command == TOK_DATABASE)
         {
@@ -393,7 +396,7 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
     }
     else
     {
-        TagLoger::log(Log_MySqlServer, 0, "cmd undefined:%d %s\n", local_buf->qInfo.arg_select.command, local_buf->qInfo.StartQury);
+        TagLoger::log(Log_CometQLCluster, 0, "cmd undefined:%d %s\n", local_buf->qInfo.arg_select.command, local_buf->qInfo.StartQury);
         return Send_OK_Package(PacketNomber+1, local_buf, this);
     }
     

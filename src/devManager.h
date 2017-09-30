@@ -223,11 +223,18 @@ public:
 class Pipe: public CpClass
 {
 public:
-    fastList<int> subscribers;
+    fastList<int>* subscribers;
 
     Pipe():CpClass()
     {
-
+        subscribers = new fastList<int>();
+    }
+    
+    ~Pipe(){
+        if(subscribers != NULL)
+        {
+            delete subscribers;
+        }
     }
 
     /**
@@ -235,17 +242,17 @@ public:
      */
     void insert(int id)
     {
-        subscribers.append(id);
+        subscribers->append(id);
     }
 
     int size() const
     {
-        return subscribers.size();
+        return subscribers->size();
     }
 
     bool empty() const
     {
-        return subscribers.empty();
+        return subscribers->empty();
     }
 
     /**
@@ -253,8 +260,9 @@ public:
      */
     void erase(int id)
     {
-        subscribers.remove(id);
+        subscribers->remove(id);
     }
+    
 };
 
 /**

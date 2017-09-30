@@ -1039,7 +1039,7 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
     CP<Pipe> pipe = devManager::instance()->getDevInfo()->findPipe(std::string(pipe_name));
     if(!pipe.isNULL())
     {
-        auto it = pipe->subscribers.begin();
+        auto it = pipe->subscribers->begin();
         while(it)
         {
             int conection_id = it->data;
@@ -1346,7 +1346,7 @@ int Client_connection::web_pipe_msg_v1(thread_data* local_buf, char* event_data,
     if(!pipe.isNULL())
     {
         int num_fail = 0;
-        auto it = pipe->subscribers.begin();
+        auto it = pipe->subscribers->begin();
         while(it)
         {
             int conection_id = it->data;
@@ -1486,7 +1486,7 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
     {
         int num_fail = 0;
 
-        auto it = pipe->subscribers.begin();
+        auto it = pipe->subscribers->begin();
         while(it)
         {
             int conection_id = it->data;

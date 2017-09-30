@@ -7,6 +7,10 @@ BUG FIXES:
 
 ## v3.26
 
+BUG FIXES:
+
+ * bug fix to query `select * from pipes where name in ("web_test");`
+
 IMPROVEMENTS:
 
 * Added parameter `send_user_online_events` to `main`
@@ -16,6 +20,9 @@ IMPROVEMENTS:
 * Added section `cluster`
 * Added section `cometqlproxy`
 * Added clustering mechanism #15
+
+* Added queryes like `set paramName paramValue`
+* Added queryes like `set sectionName paramName paramValue`
 
 ## v3.25
 

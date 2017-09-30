@@ -273,17 +273,16 @@ public:
             auto it = cluster.begin();
             while(it != cluster.end())
             {
-                dbLink* link = new dbLink();
-                if(link->init(it->data()) && link->connect())
-                {
-                    cometCluster.push_back(link);
-                }
-                else
+                dbLink *link = new dbLink();
+                cometCluster.push_back(link);
+                if(!link->init(it->data()) || !link->connect())
                 {
                     TagLoger::error(Log_Any, LogColorRed, "Error, CometQL connection %s does not establish", it->data());
                 }
+                
                 it++;
             }
+            TagLoger::log(Log_Any, LogColorGreen, "Starting CometQL cluster on %d nodes complte", cluster.size());
         }
         else
         { 

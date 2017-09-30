@@ -665,6 +665,10 @@ int MySql_connection::query_router(thread_data* local_buf, int PacketNomber)
             }
         }
     }
+    else if(local_buf->qInfo.command == TOK_SET)
+    {
+        sql_set_value(local_buf,PacketNomber);
+    }
     else
     {
         TagLoger::log(Log_MySqlServer, 0, "cmd undefined:%d %s\n", local_buf->qInfo.arg_select.command, local_buf->qInfo.StartQury);
@@ -704,6 +708,13 @@ bool MySql_connection::sql_use_db(char* db_name)
     api_version = 0;
     return false;
 }
+ 
+int MySql_connection::sql_set_value(thread_data* local_buf, unsigned int PacketNomber)
+{
+    Send_OK_Package(0, 0, PacketNomber+1, local_buf, this); 
+    return 0;
+}
+
 
 /**
  * show databases
@@ -2127,7 +2138,7 @@ int MySql_connection::sql_select_from_users_in_pipes(thread_data* local_buf, uns
             continue;
         }
 
-        auto it = pipe->subscribers.begin();
+        auto it = pipe->subscribers->begin();
         while(it)
         {
             int val =  it->data;
@@ -2208,10 +2219,15 @@ int MySql_connection::sql_select_from_pipes(thread_data* local_buf, unsigned int
         }
  
         CP<Pipe> pipe = devManager::instance()->getDevInfo()->findPipe(std::string(pipe_name));
+        int pipe_size = 0;
+        if(!pipe.isNULL())
+        {
+            pipe_size = pipe->size();
+        }
 
         TagLoger::log(Log_MySqlServer, 0, "text>%s\n",pipe_name); 
         if(local_buf->sql.useColumn(0)) local_buf->sql.getValue(countRows, 0) = pipe_name;
-        if(local_buf->sql.useColumn(1)) local_buf->sql.getValue(countRows, 1) = pipe->size();
+        if(local_buf->sql.useColumn(1)) local_buf->sql.getValue(countRows, 1) = pipe_size;
  
         countRows++;
     }

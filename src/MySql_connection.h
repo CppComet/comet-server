@@ -380,7 +380,7 @@ protected:
 
 protected:
 
-    int query_router(thread_data* local_buf, int PacketNomber);
+    virtual int query_router(thread_data* local_buf, int PacketNomber);
     /**
      *  Если версия api не выбрана то вернёт false и отправит информацию об ошибке клиенту.
      */
@@ -409,6 +409,9 @@ protected:
      * SHOW SLAVE STATUS https://dev.mysql.com/doc/refman/5.0/en/show-slave-status.html
      */
 
+    int sql_set_value(thread_data* local_buf, unsigned int PacketNomber);
+    
+    
     int sql_select_database_name(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_systemvarible(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_from_users_auth(thread_data* local_buf, unsigned int PacketNomber);

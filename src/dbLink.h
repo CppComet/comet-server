@@ -275,7 +275,7 @@ public:
             }
         }
         
-        return init(Server.data(), Database.data(), Uid.data(), Pwd.data(), Port);
+        return init(Server.data(), Uid.data(), Pwd.data(), Database.data(), Port);
     }
     bool init(const char* host, const char* user, const char* pw, const char* name, int port)
     {

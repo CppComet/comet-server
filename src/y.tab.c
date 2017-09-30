@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.2.  */
+/* A Bison parser, made by GNU Bison 3.0.4.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "3.0.2"
+#define YYBISON_VERSION "3.0.4"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -62,7 +62,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "CometQL.y" /* yacc.c:339  */
+#line 1 "src/CometQL.y" /* yacc.c:339  */
 
 #include <stdio.h>
 #include <string.h>
@@ -209,104 +209,106 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    TOK_SHOW = 258,
-    TOK_DATABASES = 259,
-    TOK_TABLES = 260,
-    TOK_COLUMNS = 261,
-    TOK_STATUS = 262,
-    TOK_PROCESSLIST = 263,
-    FLAG_GLOBAL = 264,
-    FLAG_SESSION = 265,
-    FLAG_FULL = 266,
-    FLAG_FILESYSTEM = 267,
-    FLAG_RAM = 268,
-    FLAG_AVG = 269,
-    FLAG_UPTIME = 270,
-    TOK_FROM = 271,
-    TOK_USE = 272,
-    VAL_INT = 273,
-    VAL_NAME = 274,
-    TOK_SELECT = 275,
-    TOK_LIMIT = 276,
-    VAL_SYSTEM_VARIBLE = 277,
-    TOK_INSERT = 278,
-    TOK_INTO = 279,
-    TOK_VALUES = 280,
-    VAL_QUOTED_STRING = 281,
-    BRACKETS_RIGHT = 282,
-    COMMA = 283,
-    BRACKETS_LEFT = 284,
-    EQUALLY = 285,
-    ASTERISK = 286,
-    TOK_LIKE = 287,
-    TOK_VARIABLES = 288,
-    TOK_TABLE_STATUS = 289,
-    TOK_DESCRIBE = 290,
-    TOK_WHERE = 291,
-    TOK_ASC = 292,
-    TOK_DESC = 293,
-    TOK_ORDER_BY = 294,
-    TOK_DELETE = 295,
-    TOK_IN = 296,
-    TOK_OR = 297,
-    TOK_AND = 298,
-    MORE = 299,
-    LESS = 300,
-    TOK_DATABASE = 301
+    TOK_SET = 258,
+    TOK_SHOW = 259,
+    TOK_DATABASES = 260,
+    TOK_TABLES = 261,
+    TOK_COLUMNS = 262,
+    TOK_STATUS = 263,
+    TOK_PROCESSLIST = 264,
+    FLAG_GLOBAL = 265,
+    FLAG_SESSION = 266,
+    FLAG_FULL = 267,
+    FLAG_FILESYSTEM = 268,
+    FLAG_RAM = 269,
+    FLAG_AVG = 270,
+    FLAG_UPTIME = 271,
+    TOK_FROM = 272,
+    TOK_USE = 273,
+    VAL_INT = 274,
+    VAL_NAME = 275,
+    TOK_SELECT = 276,
+    TOK_LIMIT = 277,
+    VAL_SYSTEM_VARIBLE = 278,
+    TOK_INSERT = 279,
+    TOK_INTO = 280,
+    TOK_VALUES = 281,
+    VAL_QUOTED_STRING = 282,
+    BRACKETS_RIGHT = 283,
+    COMMA = 284,
+    BRACKETS_LEFT = 285,
+    EQUALLY = 286,
+    ASTERISK = 287,
+    TOK_LIKE = 288,
+    TOK_VARIABLES = 289,
+    TOK_TABLE_STATUS = 290,
+    TOK_DESCRIBE = 291,
+    TOK_WHERE = 292,
+    TOK_ASC = 293,
+    TOK_DESC = 294,
+    TOK_ORDER_BY = 295,
+    TOK_DELETE = 296,
+    TOK_IN = 297,
+    TOK_OR = 298,
+    TOK_AND = 299,
+    MORE = 300,
+    LESS = 301,
+    TOK_DATABASE = 302
   };
 #endif
 /* Tokens.  */
-#define TOK_SHOW 258
-#define TOK_DATABASES 259
-#define TOK_TABLES 260
-#define TOK_COLUMNS 261
-#define TOK_STATUS 262
-#define TOK_PROCESSLIST 263
-#define FLAG_GLOBAL 264
-#define FLAG_SESSION 265
-#define FLAG_FULL 266
-#define FLAG_FILESYSTEM 267
-#define FLAG_RAM 268
-#define FLAG_AVG 269
-#define FLAG_UPTIME 270
-#define TOK_FROM 271
-#define TOK_USE 272
-#define VAL_INT 273
-#define VAL_NAME 274
-#define TOK_SELECT 275
-#define TOK_LIMIT 276
-#define VAL_SYSTEM_VARIBLE 277
-#define TOK_INSERT 278
-#define TOK_INTO 279
-#define TOK_VALUES 280
-#define VAL_QUOTED_STRING 281
-#define BRACKETS_RIGHT 282
-#define COMMA 283
-#define BRACKETS_LEFT 284
-#define EQUALLY 285
-#define ASTERISK 286
-#define TOK_LIKE 287
-#define TOK_VARIABLES 288
-#define TOK_TABLE_STATUS 289
-#define TOK_DESCRIBE 290
-#define TOK_WHERE 291
-#define TOK_ASC 292
-#define TOK_DESC 293
-#define TOK_ORDER_BY 294
-#define TOK_DELETE 295
-#define TOK_IN 296
-#define TOK_OR 297
-#define TOK_AND 298
-#define MORE 299
-#define LESS 300
-#define TOK_DATABASE 301
+#define TOK_SET 258
+#define TOK_SHOW 259
+#define TOK_DATABASES 260
+#define TOK_TABLES 261
+#define TOK_COLUMNS 262
+#define TOK_STATUS 263
+#define TOK_PROCESSLIST 264
+#define FLAG_GLOBAL 265
+#define FLAG_SESSION 266
+#define FLAG_FULL 267
+#define FLAG_FILESYSTEM 268
+#define FLAG_RAM 269
+#define FLAG_AVG 270
+#define FLAG_UPTIME 271
+#define TOK_FROM 272
+#define TOK_USE 273
+#define VAL_INT 274
+#define VAL_NAME 275
+#define TOK_SELECT 276
+#define TOK_LIMIT 277
+#define VAL_SYSTEM_VARIBLE 278
+#define TOK_INSERT 279
+#define TOK_INTO 280
+#define TOK_VALUES 281
+#define VAL_QUOTED_STRING 282
+#define BRACKETS_RIGHT 283
+#define COMMA 284
+#define BRACKETS_LEFT 285
+#define EQUALLY 286
+#define ASTERISK 287
+#define TOK_LIKE 288
+#define TOK_VARIABLES 289
+#define TOK_TABLE_STATUS 290
+#define TOK_DESCRIBE 291
+#define TOK_WHERE 292
+#define TOK_ASC 293
+#define TOK_DESC 294
+#define TOK_ORDER_BY 295
+#define TOK_DELETE 296
+#define TOK_IN 297
+#define TOK_OR 298
+#define TOK_AND 299
+#define MORE 300
+#define LESS 301
+#define TOK_DATABASE 302
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE YYSTYPE;
+
 union YYSTYPE
 {
-#line 115 "CometQL.y" /* yacc.c:355  */
+#line 115 "src/CometQL.y" /* yacc.c:355  */
 
    struct TokStruct {
       char* text;
@@ -314,8 +316,10 @@ union YYSTYPE
       char quote;
    } tokStruct;
 
-#line 318 "y.tab.c" /* yacc.c:355  */
+#line 320 "y.tab.c" /* yacc.c:355  */
 };
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
@@ -329,7 +333,7 @@ int yyparse (void* qInfo);
 
 /* Copy the second part of user declarations.  */
 
-#line 333 "y.tab.c" /* yacc.c:358  */
+#line 337 "y.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -571,21 +575,21 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  2
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   93
+#define YYLAST   99
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  47
+#define YYNTOKENS  48
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  27
+#define YYNNTS  28
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  68
+#define YYNRULES  72
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  116
+#define YYNSTATES  123
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   301
+#define YYMAXUTOK   302
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -624,20 +628,21 @@ static const yytype_uint8 yytranslate[] =
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
       35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
-      45,    46
+      45,    46,    47
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   180,   180,   181,   185,   187,   189,   191,   198,   206,
-     214,   222,   231,   239,   248,   257,   269,   271,   274,   277,
-     283,   289,   295,   301,   307,   314,   317,   328,   338,   346,
-     354,   357,   361,   373,   389,   408,   414,   420,   426,   432,
-     440,   442,   446,   455,   472,   475,   482,   489,   497,   500,
-     508,   519,   525,   529,   531,   535,   556,   563,   572,   574,
-     578,   580,   584,   602,   620,   637,   648,   650,   652
+       0,   181,   181,   182,   186,   188,   190,   192,   194,   201,
+     210,   218,   231,   239,   247,   255,   264,   272,   281,   290,
+     302,   304,   307,   310,   316,   322,   328,   334,   340,   347,
+     350,   361,   371,   379,   387,   390,   394,   406,   422,   441,
+     447,   453,   459,   465,   473,   475,   479,   488,   505,   508,
+     515,   522,   530,   533,   541,   552,   558,   562,   564,   568,
+     589,   596,   605,   607,   611,   613,   617,   635,   653,   670,
+     681,   683,   685
 };
 #endif
 
@@ -646,7 +651,7 @@ static const yytype_uint16 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "TOK_SHOW", "TOK_DATABASES",
+  "$end", "error", "$undefined", "TOK_SET", "TOK_SHOW", "TOK_DATABASES",
   "TOK_TABLES", "TOK_COLUMNS", "TOK_STATUS", "TOK_PROCESSLIST",
   "FLAG_GLOBAL", "FLAG_SESSION", "FLAG_FULL", "FLAG_FILESYSTEM",
   "FLAG_RAM", "FLAG_AVG", "FLAG_UPTIME", "TOK_FROM", "TOK_USE", "VAL_INT",
@@ -656,7 +661,7 @@ static const char *const yytname[] =
   "TOK_LIKE", "TOK_VARIABLES", "TOK_TABLE_STATUS", "TOK_DESCRIBE",
   "TOK_WHERE", "TOK_ASC", "TOK_DESC", "TOK_ORDER_BY", "TOK_DELETE",
   "TOK_IN", "TOK_OR", "TOK_AND", "MORE", "LESS", "TOK_DATABASE", "$accept",
-  "commands", "command", "show_query", "tok_from_or_in",
+  "commands", "command", "set_query", "show_query", "tok_from_or_in",
   "opt_for_show_status", "opt_for_show_columns", "select_query",
   "opt_for_where", "opt_for_where_expression_list",
   "opt_for_where_expression", "opt_for_select_value_list",
@@ -678,16 +683,16 @@ static const yytype_uint16 yytoknum[] =
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
      275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
      285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
-     295,   296,   297,   298,   299,   300,   301
+     295,   296,   297,   298,   299,   300,   301,   302
 };
 # endif
 
-#define YYPACT_NINF -84
+#define YYPACT_NINF -71
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-84)))
+  (!!((Yystate) == (-71)))
 
-#define YYTABLE_NINF -26
+#define YYTABLE_NINF -30
 
 #define yytable_value_is_error(Yytable_value) \
   0
@@ -696,18 +701,19 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-     -84,     1,   -84,     3,     4,   -14,    23,    41,   -84,   -84,
-     -84,   -84,   -84,   -84,   -84,   -84,   -84,   -84,   -84,   -84,
-     -84,   -84,   -84,   -84,    -5,    14,   -84,    27,   -84,    40,
-      54,    43,   -84,    23,   -84,   -84,    23,   -84,    42,     6,
-      55,   -84,    45,    23,    56,    29,    44,    50,   -84,   -84,
-      23,    49,   -84,    44,   -84,    52,    59,    60,    46,   -84,
-     -84,    64,    46,    25,   -84,    28,   -84,   -84,    -9,   -84,
-       8,    65,    27,   -84,    27,   -84,   -84,   -84,    32,   -84,
-     -84,    58,    59,    60,    60,    25,    25,    57,    25,    25,
-      24,   -84,   -84,   -84,    25,    61,   -84,   -84,   -84,   -84,
-     -84,   -84,    25,   -84,   -84,   -84,   -84,   -84,    25,    36,
-     -84,    38,   -84,    25,   -84,   -84
+     -71,     1,   -71,    34,     3,     0,   -19,    -9,    18,   -71,
+     -71,   -71,   -71,   -71,   -71,    29,    52,   -71,   -71,   -71,
+     -71,   -71,   -71,   -71,   -71,   -71,   -71,   -71,    -6,    53,
+     -71,    51,   -71,    44,    58,    47,   -71,    -9,   -71,   -71,
+      -9,    57,   -71,   -71,    45,     4,    60,   -71,    54,    -9,
+      61,   -23,    43,   -71,    56,   -71,   -71,    -9,    55,   -71,
+      43,   -71,    59,    65,    66,    48,   -71,   -71,    68,    48,
+      14,   -71,    15,   -71,   -71,   -14,   -71,    19,    70,    51,
+     -71,    51,   -71,   -71,   -71,    30,   -71,   -71,    67,    65,
+      66,    66,    14,    14,    62,    14,    14,    24,   -71,   -71,
+     -71,    14,    64,   -71,   -71,   -71,   -71,   -71,   -71,    14,
+     -71,   -71,   -71,   -71,   -71,    14,    38,   -71,    40,   -71,
+      14,   -71,   -71
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -715,34 +721,35 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       2,     0,     1,    18,     0,     0,     0,     0,     3,     4,
-       5,     6,     7,     8,    10,     9,    19,    20,    26,    21,
-      22,    23,    24,    11,     0,     0,    55,    48,    51,     0,
-       0,    52,    53,     0,    65,    14,     0,    12,     0,     0,
-       0,    27,     0,     0,     0,     0,    30,     0,    17,    16,
-       0,    49,    28,    30,    54,     0,     0,     0,    44,    15,
-      13,     0,    44,     0,    62,     0,    58,    42,    31,    32,
-       0,     0,    48,    50,    48,    68,    67,    66,     0,    60,
-      63,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-      45,    64,    29,    56,     0,     0,    59,    33,    34,    38,
-      43,    35,     0,    36,    37,    46,    47,    61,     0,     0,
-      40,     0,    39,     0,    57,    41
+       2,     0,     1,     0,    22,     0,     0,     0,     0,     3,
+       8,     4,     5,     6,     7,     0,     0,    12,    14,    13,
+      23,    24,    30,    25,    26,    27,    28,    15,     0,     0,
+      59,    52,    55,     0,     0,    56,    57,     0,    69,    18,
+       0,    10,     9,    16,     0,     0,     0,    31,     0,     0,
+       0,     0,    34,    11,     0,    21,    20,     0,    53,    32,
+      34,    58,     0,     0,     0,    48,    19,    17,     0,    48,
+       0,    66,     0,    62,    46,    35,    36,     0,     0,    52,
+      54,    52,    72,    71,    70,     0,    64,    67,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,    49,    68,    33,
+      60,     0,     0,    63,    37,    38,    42,    47,    39,     0,
+      40,    41,    50,    51,    65,     0,     0,    44,     0,    43,
+       0,    61,    45
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -84,   -84,   -84,   -84,   -84,   -84,   -84,   -84,    34,   -84,
-     -16,   -84,   -84,   -83,    26,   -47,   -84,   -84,    47,   -84,
-     -84,   -19,    10,    -1,   -84,    -4,   -63
+     -71,   -71,   -71,   -71,   -71,   -71,   -71,   -71,   -71,    31,
+     -71,   -20,   -71,   -71,   -69,    26,   -26,   -71,   -71,    46,
+     -71,   -71,   -18,     9,    -2,   -71,    -1,   -70
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     1,     8,     9,    50,    24,    25,    10,    58,    68,
-      69,   109,    70,    99,    72,    41,    30,    31,    32,    11,
-      65,    78,    66,    79,    12,    35,   100
+      -1,     1,     9,    10,    11,    57,    28,    29,    12,    65,
+      75,    76,   116,    77,   106,    79,    47,    34,    35,    36,
+      13,    72,    85,    73,    86,    14,    39,   107
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -750,72 +757,75 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      80,     2,    37,   101,     3,   103,   104,    13,    14,   -25,
-      33,    15,    16,    17,    18,    19,    20,    21,    22,   110,
-      39,     4,    48,    26,     5,    91,    27,    92,    38,    45,
-     115,    80,    46,    83,    84,    28,     6,    23,    85,    53,
-      86,     7,    34,    75,    76,    80,    60,    49,    40,    87,
-      29,    77,    88,    89,    55,    81,    82,    36,    56,    93,
-      94,   105,   106,   112,   113,   114,    94,    97,    98,    42,
-      43,    44,    52,    51,    47,    26,    59,    61,    64,    67,
-      57,    63,    73,    95,    90,    71,   102,    62,    74,   111,
-     108,    54,    96,   107
+      87,     2,    43,    62,     3,     4,    37,    63,    17,    18,
+     -29,    38,    19,    20,    21,    22,    23,    24,    25,    26,
+      30,    55,     5,    31,   108,     6,   110,   111,    44,    90,
+      91,    87,    32,    82,    83,    40,    51,     7,    27,    52,
+     117,    84,     8,    88,    89,    87,    56,    33,    60,    41,
+      92,   122,    93,    98,    15,    99,    67,    16,   100,   101,
+      45,    94,   112,   113,    95,    96,   119,   120,   121,   101,
+     104,   105,    42,    46,    48,    49,    50,    53,    54,    58,
+      64,    30,    59,    66,    68,    71,    74,    80,    78,    70,
+      97,    69,   109,   102,   115,    81,    61,   118,   103,   114
 };
 
 static const yytype_uint8 yycheck[] =
 {
-      63,     0,     7,    86,     3,    88,    89,     4,     5,     6,
-      24,     8,     9,    10,    11,    12,    13,    14,    15,   102,
-       6,    20,    16,    19,    23,    72,    22,    74,    33,    33,
-     113,    94,    36,    42,    43,    31,    35,    34,    30,    43,
-      32,    40,    19,    18,    19,   108,    50,    41,    21,    41,
-      46,    26,    44,    45,    25,    27,    28,    16,    29,    27,
-      28,    37,    38,    27,    28,    27,    28,    83,    84,    29,
-      16,    28,    27,    18,    32,    19,    26,    28,    19,    19,
-      36,    29,    18,    25,    19,    39,    29,    53,    62,   108,
-      29,    44,    82,    94
+      70,     0,     8,    26,     3,     4,    25,    30,     5,     6,
+       7,    20,     9,    10,    11,    12,    13,    14,    15,    16,
+      20,    17,    21,    23,    93,    24,    95,    96,    34,    43,
+      44,   101,    32,    19,    20,    17,    37,    36,    35,    40,
+     109,    27,    41,    28,    29,   115,    42,    47,    49,    20,
+      31,   120,    33,    79,    20,    81,    57,    23,    28,    29,
+       7,    42,    38,    39,    45,    46,    28,    29,    28,    29,
+      90,    91,    20,    22,    30,    17,    29,    20,    33,    19,
+      37,    20,    28,    27,    29,    20,    20,    19,    40,    30,
+      20,    60,    30,    26,    30,    69,    50,   115,    89,   101
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,    48,     0,     3,    20,    23,    35,    40,    49,    50,
-      54,    66,    71,     4,     5,     8,     9,    10,    11,    12,
-      13,    14,    15,    34,    52,    53,    19,    22,    31,    46,
-      63,    64,    65,    24,    19,    72,    16,     7,    33,     6,
-      21,    62,    29,    16,    28,    72,    72,    32,    16,    41,
-      51,    18,    27,    72,    65,    25,    29,    36,    55,    26,
-      72,    28,    55,    29,    19,    67,    69,    19,    56,    57,
-      59,    39,    61,    18,    61,    18,    19,    26,    68,    70,
-      73,    27,    28,    42,    43,    30,    32,    41,    44,    45,
-      19,    62,    62,    27,    28,    25,    69,    57,    57,    60,
-      73,    60,    29,    60,    60,    37,    38,    70,    29,    58,
-      60,    68,    27,    28,    27,    60
+       0,    49,     0,     3,     4,    21,    24,    36,    41,    50,
+      51,    52,    56,    68,    73,    20,    23,     5,     6,     9,
+      10,    11,    12,    13,    14,    15,    16,    35,    54,    55,
+      20,    23,    32,    47,    65,    66,    67,    25,    20,    74,
+      17,    20,    20,     8,    34,     7,    22,    64,    30,    17,
+      29,    74,    74,    20,    33,    17,    42,    53,    19,    28,
+      74,    67,    26,    30,    37,    57,    27,    74,    29,    57,
+      30,    20,    69,    71,    20,    58,    59,    61,    40,    63,
+      19,    63,    19,    20,    27,    70,    72,    75,    28,    29,
+      43,    44,    31,    33,    42,    45,    46,    20,    64,    64,
+      28,    29,    26,    71,    59,    59,    62,    75,    62,    30,
+      62,    62,    38,    39,    72,    30,    60,    62,    70,    28,
+      29,    28,    62
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    47,    48,    48,    49,    49,    49,    49,    50,    50,
-      50,    50,    50,    50,    50,    50,    51,    51,    52,    52,
-      52,    52,    52,    52,    52,    53,    53,    54,    54,    54,
-      55,    55,    56,    56,    56,    57,    57,    57,    57,    57,
-      58,    58,    59,    60,    61,    61,    61,    61,    62,    62,
-      62,    63,    63,    64,    64,    65,    66,    66,    67,    67,
-      68,    68,    69,    70,    71,    72,    73,    73,    73
+       0,    48,    49,    49,    50,    50,    50,    50,    50,    51,
+      51,    51,    52,    52,    52,    52,    52,    52,    52,    52,
+      53,    53,    54,    54,    54,    54,    54,    54,    54,    55,
+      55,    56,    56,    56,    57,    57,    58,    58,    58,    59,
+      59,    59,    59,    59,    60,    60,    61,    62,    63,    63,
+      63,    63,    64,    64,    64,    65,    65,    66,    66,    67,
+      68,    68,    69,    69,    70,    70,    71,    72,    73,    74,
+      75,    75,    75
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     0,     2,     1,     1,     1,     1,     2,     2,
-       2,     2,     3,     5,     2,     5,     1,     1,     0,     1,
-       1,     1,     1,     1,     1,     0,     1,     3,     4,     7,
-       0,     2,     1,     3,     3,     3,     3,     3,     3,     5,
-       1,     3,     1,     1,     0,     2,     3,     3,     0,     2,
-       4,     1,     1,     1,     3,     1,     7,    10,     1,     3,
-       1,     3,     1,     1,     6,     1,     1,     1,     1
+       0,     2,     0,     2,     1,     1,     1,     1,     1,     3,
+       3,     4,     2,     2,     2,     2,     3,     5,     2,     5,
+       1,     1,     0,     1,     1,     1,     1,     1,     1,     0,
+       1,     3,     4,     7,     0,     2,     1,     3,     3,     3,
+       3,     3,     3,     5,     1,     3,     1,     1,     0,     2,
+       3,     3,     0,     2,     4,     1,     1,     1,     3,     1,
+       7,    10,     1,     3,     1,     3,     1,     1,     6,     1,
+       1,     1,     1
 };
 
 
@@ -1493,41 +1503,76 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 8:
-#line 199 "CometQL.y" /* yacc.c:1646  */
+        case 9:
+#line 202 "src/CometQL.y" /* yacc.c:1646  */
+    {
+                setQData;
+                qData->command = TOK_SET;
+                setTokValue(qData, qData->arg_set.varible, (yyvsp[-1].tokStruct));  
+                setTokValue(qData, qData->arg_set.value, (yyvsp[0].tokStruct));  
+                //printf("\tСписок баз данных\n");
+        }
+#line 1516 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 10:
+#line 211 "src/CometQL.y" /* yacc.c:1646  */
+    {
+                setQData;
+                qData->command = TOK_SET; 
+                setTokValue(qData, qData->arg_set.varible, (yyvsp[-1].tokStruct));  
+                setTokValue(qData, qData->arg_set.value, (yyvsp[0].tokStruct));   
+        }
+#line 1527 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 11:
+#line 219 "src/CometQL.y" /* yacc.c:1646  */
+    {
+                setQData;
+                qData->command = TOK_SET; 
+                setTokValue(qData, qData->arg_set.varible, (yyvsp[-2].tokStruct));  
+                setTokValue(qData, qData->arg_set.value, (yyvsp[-1].tokStruct));   
+                setTokValue(qData, qData->arg_set.section, (yyvsp[0].tokStruct));  
+        }
+#line 1539 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 12:
+#line 232 "src/CometQL.y" /* yacc.c:1646  */
     { 
                 setQData;
                 qData->command = TOK_SHOW;
                 qData->arg_show.command = TOK_DATABASES; 
                 //printf("\tСписок баз данных\n");
         }
-#line 1505 "y.tab.c" /* yacc.c:1646  */
+#line 1550 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 9:
-#line 207 "CometQL.y" /* yacc.c:1646  */
+  case 13:
+#line 240 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_SHOW;
                 qData->arg_show.command = TOK_PROCESSLIST; 
                 //printf("\tСписок потоков\n");
         }
-#line 1516 "y.tab.c" /* yacc.c:1646  */
+#line 1561 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 10:
-#line 215 "CometQL.y" /* yacc.c:1646  */
+  case 14:
+#line 248 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_SHOW;
                 qData->arg_show.command = TOK_TABLES; 
                 //printf("\tСписок таблиц\n");
         }
-#line 1527 "y.tab.c" /* yacc.c:1646  */
+#line 1572 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 11:
-#line 223 "CometQL.y" /* yacc.c:1646  */
+  case 15:
+#line 256 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_SHOW;
@@ -1535,22 +1580,22 @@ yyreduce:
                 
                 //printf("\tСписок таблиц\n");
         }
-#line 1539 "y.tab.c" /* yacc.c:1646  */
+#line 1584 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 12:
-#line 232 "CometQL.y" /* yacc.c:1646  */
+  case 16:
+#line 265 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_SHOW;
                 qData->arg_show.command = TOK_STATUS; 
                 //printf("\tСтатус системы\n");
         }
-#line 1550 "y.tab.c" /* yacc.c:1646  */
+#line 1595 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 13:
-#line 240 "CometQL.y" /* yacc.c:1646  */
+  case 17:
+#line 273 "src/CometQL.y" /* yacc.c:1646  */
     {
                 // Тоже самое что и TOK_DESCRIBE VAL_NAME 
                 setQData;
@@ -1558,11 +1603,11 @@ yyreduce:
                 qData->arg_show.command = TOK_COLUMNS;  
                 //printf("\tСписок колонок\n");
         }
-#line 1562 "y.tab.c" /* yacc.c:1646  */
+#line 1607 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 14:
-#line 249 "CometQL.y" /* yacc.c:1646  */
+  case 18:
+#line 282 "src/CometQL.y" /* yacc.c:1646  */
     {
                 // Тоже самое что и TOK_SHOW opt_for_show_columns TOK_COLUMNS TOK_FROM VAL_NAME 
                 setQData;
@@ -1570,11 +1615,11 @@ yyreduce:
                 qData->arg_show.command = TOK_COLUMNS;  
                 //printf("\tСписок колонок\n");
         }
-#line 1574 "y.tab.c" /* yacc.c:1646  */
+#line 1619 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 15:
-#line 258 "CometQL.y" /* yacc.c:1646  */
+  case 19:
+#line 291 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_SHOW;
@@ -1583,74 +1628,74 @@ yyreduce:
                 setTokValue(qData, qData->arg_show.like, (yyvsp[0].tokStruct)); 
                 //printf("\tПоказать переменные\n");
         }
-#line 1587 "y.tab.c" /* yacc.c:1646  */
+#line 1632 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 19:
-#line 278 "CometQL.y" /* yacc.c:1646  */
+  case 23:
+#line 311 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->arg_show.flag = FLAG_GLOBAL;
         }
-#line 1596 "y.tab.c" /* yacc.c:1646  */
+#line 1641 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 20:
-#line 284 "CometQL.y" /* yacc.c:1646  */
+  case 24:
+#line 317 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->arg_show.flag = FLAG_SESSION;
         }
-#line 1605 "y.tab.c" /* yacc.c:1646  */
+#line 1650 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 21:
-#line 290 "CometQL.y" /* yacc.c:1646  */
+  case 25:
+#line 323 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->arg_show.flag = FLAG_FILESYSTEM;
         }
-#line 1614 "y.tab.c" /* yacc.c:1646  */
+#line 1659 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 22:
-#line 296 "CometQL.y" /* yacc.c:1646  */
+  case 26:
+#line 329 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->arg_show.flag = FLAG_RAM;
         }
-#line 1623 "y.tab.c" /* yacc.c:1646  */
+#line 1668 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 23:
-#line 302 "CometQL.y" /* yacc.c:1646  */
+  case 27:
+#line 335 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->arg_show.flag = FLAG_AVG;
         }
-#line 1632 "y.tab.c" /* yacc.c:1646  */
+#line 1677 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 24:
-#line 308 "CometQL.y" /* yacc.c:1646  */
+  case 28:
+#line 341 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->arg_show.flag = FLAG_UPTIME;
         }
-#line 1641 "y.tab.c" /* yacc.c:1646  */
+#line 1686 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 26:
-#line 318 "CometQL.y" /* yacc.c:1646  */
+  case 30:
+#line 351 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->arg_show.flag = FLAG_FULL;
         }
-#line 1650 "y.tab.c" /* yacc.c:1646  */
+#line 1695 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 27:
-#line 329 "CometQL.y" /* yacc.c:1646  */
+  case 31:
+#line 362 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_SELECT;
@@ -1659,32 +1704,32 @@ yyreduce:
                 
                 //printf("\tВыборка %s\n", $2.text);
         }
-#line 1663 "y.tab.c" /* yacc.c:1646  */
+#line 1708 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 28:
-#line 339 "CometQL.y" /* yacc.c:1646  */
+  case 32:
+#line 372 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_SELECT;
                 qData->arg_select.command = TOK_DATABASE;  
                 //printf("\tВыборка DATABASE\n");
         }
-#line 1674 "y.tab.c" /* yacc.c:1646  */
+#line 1719 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 29:
-#line 347 "CometQL.y" /* yacc.c:1646  */
+  case 33:
+#line 380 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 qData->command = TOK_SELECT;
                 qData->arg_select.command = TOK_FROM;  
         }
-#line 1684 "y.tab.c" /* yacc.c:1646  */
+#line 1729 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 32:
-#line 362 "CometQL.y" /* yacc.c:1646  */
+  case 36:
+#line 395 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 if(qData->where.whereExprCount >= MAX_EXPRESSIONS_COUNT)
@@ -1695,11 +1740,11 @@ yyreduce:
                 qData->where.whereExprValueCount = 0;
                 qData->where.whereExprCount++;
         }
-#line 1699 "y.tab.c" /* yacc.c:1646  */
+#line 1744 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 33:
-#line 374 "CometQL.y" /* yacc.c:1646  */
+  case 37:
+#line 407 "src/CometQL.y" /* yacc.c:1646  */
     {
             /** 
              * нет скобочек для порядка выполнения
@@ -1714,11 +1759,11 @@ yyreduce:
                 qData->where.whereExprCount++;
                 qData->where.whereExprValueCount = 0;
         }
-#line 1718 "y.tab.c" /* yacc.c:1646  */
+#line 1763 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 34:
-#line 390 "CometQL.y" /* yacc.c:1646  */
+  case 38:
+#line 423 "src/CometQL.y" /* yacc.c:1646  */
     {
             /** 
              * нет скобочек для порядка выполнения
@@ -1733,66 +1778,66 @@ yyreduce:
                 qData->where.whereExprCount++;
                 qData->where.whereExprValueCount = 0;
         }
-#line 1737 "y.tab.c" /* yacc.c:1646  */
+#line 1782 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 35:
-#line 409 "CometQL.y" /* yacc.c:1646  */
+  case 39:
+#line 442 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = TOK_LIKE;
         }
-#line 1746 "y.tab.c" /* yacc.c:1646  */
+#line 1791 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 36:
-#line 415 "CometQL.y" /* yacc.c:1646  */
+  case 40:
+#line 448 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = MORE;
         }
-#line 1755 "y.tab.c" /* yacc.c:1646  */
+#line 1800 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 37:
-#line 421 "CometQL.y" /* yacc.c:1646  */
+  case 41:
+#line 454 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = LESS;
         }
-#line 1764 "y.tab.c" /* yacc.c:1646  */
+#line 1809 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 38:
-#line 427 "CometQL.y" /* yacc.c:1646  */
+  case 42:
+#line 460 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = EQUALLY;
         }
-#line 1773 "y.tab.c" /* yacc.c:1646  */
+#line 1818 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 39:
-#line 433 "CometQL.y" /* yacc.c:1646  */
+  case 43:
+#line 466 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = TOK_IN;
         }
-#line 1782 "y.tab.c" /* yacc.c:1646  */
+#line 1827 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 42:
-#line 447 "CometQL.y" /* yacc.c:1646  */
+  case 46:
+#line 480 "src/CometQL.y" /* yacc.c:1646  */
     { 
                 setQData;  
                 setTokValue(qData, qData->where.whereExprColum[qData->where.whereExprCount], (yyvsp[0].tokStruct));   
                 //printf("\texpr_Name %d[%.3s...]\n", qData->where.whereExprCount, $1.text);
         }
-#line 1792 "y.tab.c" /* yacc.c:1646  */
+#line 1837 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 43:
-#line 456 "CometQL.y" /* yacc.c:1646  */
+  case 47:
+#line 489 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 if(qData->where.whereExprValueCount >= MAX_EXPRESSIONS_VALUES)
@@ -1807,52 +1852,52 @@ yyreduce:
                     //printf("\texpr_Value %d[%.3s...]\n", qData->where.whereExprValueCount, $1.text);
                 }
         }
-#line 1811 "y.tab.c" /* yacc.c:1646  */
+#line 1856 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 45:
-#line 476 "CometQL.y" /* yacc.c:1646  */
+  case 49:
+#line 509 "src/CometQL.y" /* yacc.c:1646  */
     { 
                 setQData; 
                 setTokValue(qData, qData->orderBy.name, (yyvsp[-1].tokStruct));   
                 qData->orderBy.type = TOK_ASC;
         }
-#line 1821 "y.tab.c" /* yacc.c:1646  */
+#line 1866 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 46:
-#line 483 "CometQL.y" /* yacc.c:1646  */
+  case 50:
+#line 516 "src/CometQL.y" /* yacc.c:1646  */
     { 
                 setQData; 
                 setTokValue(qData, qData->orderBy.name, (yyvsp[-1].tokStruct));  
                 qData->orderBy.type = TOK_ASC;
         }
-#line 1831 "y.tab.c" /* yacc.c:1646  */
+#line 1876 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 47:
-#line 490 "CometQL.y" /* yacc.c:1646  */
+  case 51:
+#line 523 "src/CometQL.y" /* yacc.c:1646  */
     { 
                 setQData; 
                 setTokValue(qData, qData->orderBy.name, (yyvsp[-1].tokStruct));   
                 qData->orderBy.type = TOK_DESC;
         }
-#line 1841 "y.tab.c" /* yacc.c:1646  */
+#line 1886 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 49:
-#line 501 "CometQL.y" /* yacc.c:1646  */
+  case 53:
+#line 534 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->limit.rows = strToInt((yyvsp[0].tokStruct).text, (yyvsp[0].tokStruct).len);
                 
                 //printf("\tВыборка limit %d\n", qData->limit.rows);
         }
-#line 1852 "y.tab.c" /* yacc.c:1646  */
+#line 1897 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 50:
-#line 509 "CometQL.y" /* yacc.c:1646  */
+  case 54:
+#line 542 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->limit.setStart(strToInt((yyvsp[0].tokStruct).text, (yyvsp[0].tokStruct).len));
@@ -1860,20 +1905,20 @@ yyreduce:
                 
                 //printf("\tВыборка limit_start %d, limit %d\n", qData->limit.start, qData->limit.rows);
         }
-#line 1864 "y.tab.c" /* yacc.c:1646  */
+#line 1909 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 51:
-#line 520 "CometQL.y" /* yacc.c:1646  */
+  case 55:
+#line 553 "src/CometQL.y" /* yacc.c:1646  */
     { 
                 setQData; 
                 qData->arg_select.selectedColumnsCount=0;
         }
-#line 1873 "y.tab.c" /* yacc.c:1646  */
+#line 1918 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 55:
-#line 536 "CometQL.y" /* yacc.c:1646  */
+  case 59:
+#line 569 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 if(qData->arg_select.selectedColumnsCount >= MAX_COLUMNS_COUNT)
@@ -1888,31 +1933,31 @@ yyreduce:
                     //printf("\tQUOTED_Name %d[%.3s...]\n", qData->arg_select.selectedColumnsCount, $1.text);
                 }
         }
-#line 1892 "y.tab.c" /* yacc.c:1646  */
+#line 1937 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 56:
-#line 557 "CometQL.y" /* yacc.c:1646  */
+  case 60:
+#line 590 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_INSERT;  
                 //printf("\tВставка\n");
         }
-#line 1902 "y.tab.c" /* yacc.c:1646  */
+#line 1947 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 57:
-#line 564 "CometQL.y" /* yacc.c:1646  */
+  case 61:
+#line 597 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_INSERT;         
                 //printf("\tВставка\n"); 
         }
-#line 1912 "y.tab.c" /* yacc.c:1646  */
+#line 1957 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 62:
-#line 585 "CometQL.y" /* yacc.c:1646  */
+  case 66:
+#line 618 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 if(qData->arg_insert.namesCount >= MAX_COLUMNS_COUNT)
@@ -1927,11 +1972,11 @@ yyreduce:
                     //printf("\tQUOTED_Name %d[%.3s...]\n", qData->arg_insert.namesCount, $1.text);
                 }
         }
-#line 1931 "y.tab.c" /* yacc.c:1646  */
+#line 1976 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 63:
-#line 603 "CometQL.y" /* yacc.c:1646  */
+  case 67:
+#line 636 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 if(qData->arg_insert.valuesCount >= MAX_EXPRESSIONS_VALUES)
@@ -1946,31 +1991,31 @@ yyreduce:
                     //printf("\tQUOTED_Value %d[%.3s...%d]\n", qData->arg_insert.valuesCount, $1.text, $1.len);
                 }
         }
-#line 1950 "y.tab.c" /* yacc.c:1646  */
+#line 1995 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 64:
-#line 621 "CometQL.y" /* yacc.c:1646  */
+  case 68:
+#line 654 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_DELETE;  
                 //printf("\tУдаление\n");
         }
-#line 1960 "y.tab.c" /* yacc.c:1646  */
+#line 2005 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 65:
-#line 638 "CometQL.y" /* yacc.c:1646  */
+  case 69:
+#line 671 "src/CometQL.y" /* yacc.c:1646  */
     { 
                 setQData;
                 setTokValue(qData, qData->tableName, (yyvsp[0].tokStruct));   
                 //printf("\tTable_Name [%.3s...%d]\n", $1.text, $1.len);
         }
-#line 1970 "y.tab.c" /* yacc.c:1646  */
+#line 2015 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1974 "y.tab.c" /* yacc.c:1646  */
+#line 2019 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2198,7 +2243,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 655 "CometQL.y" /* yacc.c:1906  */
+#line 688 "src/CometQL.y" /* yacc.c:1906  */
 
         
         

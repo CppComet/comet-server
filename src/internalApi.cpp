@@ -91,7 +91,7 @@ int internalApi::send_event_to_pipe(thread_data* local_buf, const char* pipe_nam
 
     int num_fail = 0;
     int num_msg = 0;
-    auto it = pipe->subscribers.begin();
+    auto it = pipe->subscribers->begin();
     while(it)
     {
         CP<Client_connection> r = tcpServer <Client_connection>::instance()->get(it->data);

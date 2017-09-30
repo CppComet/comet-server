@@ -120,6 +120,7 @@ int strToInt(const char* buffer, int len)
    } tokStruct;
 }
 
+%token <tokStruct> TOK_SET
 %token <tokStruct> TOK_SHOW
 %token <tokStruct> TOK_DATABASES
 %token <tokStruct> TOK_TABLES
@@ -189,8 +190,40 @@ command:
         insert_query
         |
         delete_query 
+        |
+        set_query 
         ;
 
+/**
+ * SET
+ */
+set_query:
+        TOK_SET VAL_SYSTEM_VARIBLE VAL_NAME 
+        {
+                setQData;
+                qData->command = TOK_SET;
+                setTokValue(qData, qData->arg_set.varible, $2);  
+                setTokValue(qData, qData->arg_set.value, $3);  
+                //printf("\tСписок баз данных\n");
+        }
+        |
+        TOK_SET VAL_NAME VAL_NAME 
+        {
+                setQData;
+                qData->command = TOK_SET; 
+                setTokValue(qData, qData->arg_set.varible, $2);  
+                setTokValue(qData, qData->arg_set.value, $3);   
+        }
+        |
+        TOK_SET VAL_NAME VAL_NAME VAL_NAME
+        {
+                setQData;
+                qData->command = TOK_SET; 
+                setTokValue(qData, qData->arg_set.varible, $2);  
+                setTokValue(qData, qData->arg_set.value, $3);   
+                setTokValue(qData, qData->arg_set.section, $4);  
+        }
+        ;
 /**
  * SHOW
  */

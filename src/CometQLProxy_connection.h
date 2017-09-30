@@ -109,19 +109,14 @@ public:
     virtual ~CometQLProxy_connection();
  
 protected:
-  
-    /**
-     * отображает список потоков
-     */
-    int sql_show_processlist(thread_data* local_buf, unsigned int PacketNomber);
-
+   
     int proxy_select(int node, const char* query, thread_data* local_buf, unsigned int PacketNomber);
     int proxy_insert(int node, const char* query, thread_data* local_buf, unsigned int PacketNomber);
     //int proxy_delete(const char* query, thread_data* local_buf, unsigned int PacketNomber); 
     
     int proxy_query(int node, thread_data* local_buf, unsigned int PacketNomber);
     
-    int query_router(thread_data* local_buf, int PacketNomber);
+    virtual int query_router(thread_data* local_buf, int PacketNomber);
 };
 
 #endif	/* COMETQLPROXY_CONNECTION_H */
