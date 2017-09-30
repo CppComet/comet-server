@@ -77,7 +77,7 @@ int CometQLProxy_connection::proxy_select(int node, const char* query, thread_da
             node = random() % local_buf->cometCluster.size();
         }
         
-        TagLoger::log(Log_CometQLCluster, 0, "CometQLProxy query:%s send to node=%d\n", query, node);
+        TagLoger::log(Log_CometQLCluster, 0, "CometQLProxy query:`%s` send to node=%d\n", query, node);
         // Если задана node то выполнить запрос на конкретной ноде а не на всех нодах.
         auto link = local_buf->cometCluster[node];
         if(!link->query(query))
@@ -103,7 +103,7 @@ int CometQLProxy_connection::proxy_select(int node, const char* query, thread_da
             }
         }
 
-        answer += HeadAnswer(num_fields, local_buf->sql.columns, ++PacketNomber, answer);
+        answer += HeadAnswer(num_fields, local_buf->sql.columns, PacketNomber, answer);
         isSendHeader = true;
  
         while((row = mysql_fetch_row(result)))
@@ -147,7 +147,7 @@ int CometQLProxy_connection::proxy_select(int node, const char* query, thread_da
                     }
                 }
 
-                answer += HeadAnswer(num_fields, local_buf->sql.columns, ++PacketNomber, answer);
+                answer += HeadAnswer(num_fields, local_buf->sql.columns, PacketNomber, answer);
                 isSendHeader = true;
             }
 
@@ -161,6 +161,7 @@ int CometQLProxy_connection::proxy_select(int node, const char* query, thread_da
                 printf("\n");
                 answer += RowPackage(num_fields, value, ++PacketNomber, answer);
             }
+            it++;
         }
     }
     
@@ -183,7 +184,7 @@ int CometQLProxy_connection::proxy_insert(int node, const char* query, thread_da
     {
         if(node < 0)
         {
-            node = local_buf->cometCluster.size() % random();
+            node = random() % local_buf->cometCluster.size();
         }
         
         // Если задана node то выполнить запрос на конкретной ноде а не на всех нодах.
@@ -201,6 +202,7 @@ int CometQLProxy_connection::proxy_insert(int node, const char* query, thread_da
         
         // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
         link->query(query);
+        it++;
     } 
     return 0;
 }

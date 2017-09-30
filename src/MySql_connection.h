@@ -133,7 +133,7 @@ public:
  
         // Сохраняем настройки канала в бд
         local_buf->db.query_format("REPLACE INTO `pipes_settings`(`name`, `type`, `length`) VALUES ('%s', '0', %d);", pipe_name, log_length);
-        local_buf->db.query_format("DELETE FROM `pipes_log` WHERE `name` = '%s' ORDER BY `time` DESC limit %d, 99999", pipe_name, log_length);
+        local_buf->db.query_format("DELETE FROM `pipe_messages` WHERE `name` = '%s' ORDER BY `time` DESC limit %d, 99999", pipe_name, log_length);
         return 0;
     }
 
@@ -165,7 +165,7 @@ public:
             return false;
         }
    
-        local_buf->db.query_format("DELETE FROM `pipes_log` WHERE `name` = '%s' ;", pipe_name);
+        local_buf->db.query_format("DELETE FROM `pipe_messages` WHERE `name` = '%s' ;", pipe_name);
         local_buf->db.query_format("DELETE FROM `pipes_settings` WHERE `name` = '%s' ;", pipe_name); 
         
         return true;

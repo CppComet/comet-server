@@ -218,10 +218,10 @@ set_query:
         TOK_SET VAL_NAME VAL_NAME VAL_NAME
         {
                 setQData;
-                qData->command = TOK_SET; 
-                setTokValue(qData, qData->arg_set.varible, $2);  
-                setTokValue(qData, qData->arg_set.value, $3);   
-                setTokValue(qData, qData->arg_set.section, $4);  
+                qData->command = TOK_SET;   
+                setTokValue(qData, qData->arg_set.section, $2); 
+                setTokValue(qData, qData->arg_set.varible, $3);  
+                setTokValue(qData, qData->arg_set.value, $4);  
         }
         ;
 /**

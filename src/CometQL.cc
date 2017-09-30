@@ -1530,10 +1530,10 @@ yyreduce:
 #line 219 "src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
-                qData->command = TOK_SET; 
-                setTokValue(qData, qData->arg_set.varible, (yyvsp[-2].tokStruct));  
-                setTokValue(qData, qData->arg_set.value, (yyvsp[-1].tokStruct));   
-                setTokValue(qData, qData->arg_set.section, (yyvsp[0].tokStruct));  
+                qData->command = TOK_SET;   
+                setTokValue(qData, qData->arg_set.section, (yyvsp[-2].tokStruct)); 
+                setTokValue(qData, qData->arg_set.varible, (yyvsp[-1].tokStruct));  
+                setTokValue(qData, qData->arg_set.value, (yyvsp[0].tokStruct));  
         }
 #line 1539 "src/CometQL.cc" /* yacc.c:1646  */
     break;
