@@ -487,6 +487,7 @@ protected:
 
                         // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
                         link->query_format("INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'offline', 'offline');", pipe_name);
+                        it++;
                     }
                 }
             }
@@ -525,6 +526,7 @@ protected:
 
                         // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
                         link->query_format("INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'online', 'online');", pipe_name);
+                        it++;
                     }
                 }
             }

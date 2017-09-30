@@ -184,6 +184,7 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
 
                         // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
                         link->query_format("INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'subscription', '{\"user_id\":\"%d\",\"uuid\":\"%s\"');", subscriptions[i], web_user_id, web_user_uuid);
+                        it++;   
                     }
                 }
             }
@@ -616,6 +617,7 @@ int Client_connection::send_pipe_count(thread_data* local_buf, char* pipe_name, 
                     return false;
                 }
             }
+            it++;
         }
     }
     char addData[EVENT_NAME_LEN + 60] = "\"marker\":\"MarkerName\",\"event_name\":\"user_in_pipe\"";
@@ -1090,6 +1092,7 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
                 usersstr.append(strtmp); 
                 hasData = true;
             }
+            it++;
         }
     }
     
@@ -1533,6 +1536,7 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
 
             // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
             link->query_format("INSERT INTO pipes_messages (name, event, message)VALUES('%s', '%s', '%s');", name, event_name,  local_buf->answer_buf.getData());
+            it++;
         }
         
         local_buf->answer_buf.unlock();
