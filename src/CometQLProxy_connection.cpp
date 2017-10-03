@@ -62,13 +62,7 @@ int CometQLProxy_connection::proxy_query(int node, thread_data* local_buf, unsig
         return proxy_insert(node, local_buf->qInfo.StartQury, local_buf, PacketNomber);
     }
 }
-
-
-int CometQLProxy_connection::proxy_megre_select(int node, const char* query, thread_data* local_buf, unsigned int PacketNomber)
-{
-    
-}
-
+ 
 /**
  * Выполняет union select на нодах кластера
  * @param node
@@ -322,10 +316,15 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
                 }
                 else if(local_buf->qInfo.tokCompare("users_time",  local_buf->qInfo.tableName))
                 {
-                    // @todo выбор от user_id
-                    // Сейчас будет работать корректно если [main][save_users_last_online_time] = true
+                    if(appConf::instance()->get_bool("main", "save_users_last_online_time"))
+                    {
+                        // Будет работать корректно если [main][save_users_last_online_time] = true
+                        return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); 
+                    }
+                    
                     // Если не равно то работать не будет так как данные об онлайне могут не оказаться на нужной ноде.
-                    return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); // return sql_select_from_users_time(local_buf,PacketNomber);
+                    // (Минимум с нод)
+                    return sql_select_from_users_time(local_buf,PacketNomber); 
                 }
                 else if(local_buf->qInfo.tokCompare("users_messages",  local_buf->qInfo.tableName))
                 { 
@@ -341,8 +340,8 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
                 }
                 else if(local_buf->qInfo.tokCompare("pipes",  local_buf->qInfo.tableName))
                 {
-                    // @todo выбор от proxy_megre_select
-                    return proxy_query(PROXY_TO_ALL, local_buf,PacketNomber); // return sql_select_from_pipes(local_buf,PacketNomber);
+                    // (Сумма с нод)
+                    return sql_select_from_pipes(local_buf,PacketNomber);
                 }
                 else if(local_buf->qInfo.tokCompare("pipes_settings",  local_buf->qInfo.tableName))
                 {
@@ -455,5 +454,177 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
         return Send_OK_Package(PacketNomber+1, local_buf, this);
     }
 
+    return 0;
+}
+
+// pipes
+int CometQLProxy_connection::sql_select_from_pipes(thread_data* local_buf, unsigned int PacketNomber)
+{
+    const static char* columDef[MAX_COLUMNS_COUNT] = {
+        "name",
+        "users"
+    };
+
+    if(!local_buf->sql.prepare_columns_for_select(columDef, local_buf->qInfo))
+    {
+        Send_Err_Package(local_buf->qInfo.errorCode, local_buf->qInfo.errorText, PacketNomber+1, local_buf, this);
+        return 0;
+    }
+
+    int idExprPos = local_buf->sql.expressionsPositions[0];
+
+    if(idExprPos == -1)
+    {
+        Send_Err_Package(SQL_ERR_WHERE_EXPRESSIONS, "Selection without transferring the requested values of the primary key is not supported", PacketNomber+1, local_buf, this);
+        return 0;
+    }
+      
+    MYSQL_ROW row;
+    int countRows = 0;
+    for(int i=0; i< MAX_EXPRESSIONS_VALUES; i++)
+    {
+        if(local_buf->qInfo.where.whereExprValue[idExprPos][i].isNull())
+        {
+            // Значения закончились
+            break;
+        }
+
+        char* pipe_name = local_buf->qInfo.where.whereExprValue[idExprPos][i].Start(local_buf->qInfo);
+        int nameLen = local_buf->qInfo.where.whereExprValue[idExprPos][i].tokLen;
+        pipe_name[nameLen] = 0;
+        if(nameLen < 3 || nameLen > PIPE_NAME_LEN || !AZ09test(pipe_name, nameLen))
+        {
+            continue;
+        }
+        
+        int pipe_size = 0;
+        auto it = local_buf->proxyCluster.begin();
+        while(it != local_buf->proxyCluster.end())
+        {
+            auto link = *it; 
+            if(!link->query_format("SELECT users FROM pipes WHERE name = \"%s\" ", pipe_name))
+            {
+                if(!link->query_format("SELECT users FROM pipes WHERE name = \"%s\" ", pipe_name))
+                {
+                    continue;
+                }
+            }
+
+            auto result = mysql_store_result(link->getLink()); 
+            while((row = mysql_fetch_row(result)))
+            {  
+                long int_size = 0;
+                if(row[0] == NULL)
+                {
+                    continue; 
+                }
+                
+                try{
+                    //printf("get_long [%s] %s=%s\n", section.data(), name.data(), sections.at(section).at(name).data());
+                    int_size = std::stoi(row[0]);
+                }catch(...)
+                {
+                    continue;
+                }
+                 
+                pipe_size += int_size; 
+            }
+            it++;
+        }
+         
+        TagLoger::log(Log_MySqlServer, 0, "text>%s\n",pipe_name); 
+        if(local_buf->sql.useColumn(0)) local_buf->sql.getValue(countRows, 0) = pipe_name;
+        if(local_buf->sql.useColumn(1)) local_buf->sql.getValue(countRows, 1) = pipe_size;
+ 
+        countRows++;
+    }
+
+    local_buf->sql.sendAllRowsAndHeaders(local_buf, PacketNomber, countRows, this);
+    return 0;
+}
+
+// users_time
+int CometQLProxy_connection::sql_select_from_users_time(thread_data* local_buf, unsigned int PacketNomber)
+{
+    const static char* columDef[MAX_COLUMNS_COUNT] = {
+        "id",
+        "time"
+    };
+
+    if(!local_buf->sql.prepare_columns_for_select(columDef, local_buf->qInfo))
+    {
+        Send_Err_Package(local_buf->qInfo.errorCode, local_buf->qInfo.errorText, PacketNomber+1, local_buf, this);
+        return 0;
+    }
+
+    int idExprPos = local_buf->sql.expressionsPositions[0];
+
+    if(idExprPos == -1)
+    {
+        Send_Err_Package(SQL_ERR_WHERE_EXPRESSIONS, "Selection without transferring the requested values of the primary key is not supported", PacketNomber+1, local_buf, this);
+        return 0;
+    }
+
+    MYSQL_ROW row;
+    int countRows = 0;
+    for(int i=0; i< MAX_EXPRESSIONS_VALUES; i++)
+    {
+        if(local_buf->qInfo.where.whereExprValue[idExprPos][i].isNull())
+        {
+            // Значения закончились
+            break;
+        }
+
+        int userId = local_buf->qInfo.where.whereExprValue[idExprPos][i].ToInt(local_buf->qInfo);
+        if(userId < 0 )
+        {
+            continue;
+        }
+ 
+        long min_time = -1;
+        auto it = local_buf->proxyCluster.begin();
+        while(it != local_buf->proxyCluster.end())
+        {
+            auto link = *it; 
+            if(!link->query_format("SELECT time FROM users_time WHERE name = %d ", userId))
+            {
+                if(!link->query_format("SELECT time FROM users_time WHERE name = %d ", userId))
+                {
+                    continue;
+                }
+            }
+
+            auto result = mysql_store_result(link->getLink()); 
+            while((row = mysql_fetch_row(result)))
+            { 
+                long time = 0;
+                if(row[0] == NULL)
+                {
+                    continue; 
+                }
+                
+                try{
+                    //printf("get_long [%s] %s=%s\n", section.data(), name.data(), sections.at(section).at(name).data());
+                    time = std::stol(row[0]);
+                }catch(...)
+                {
+                    continue;
+                }
+                
+                if(min_time > time)
+                {
+                    min_time = time; 
+                }
+            }
+            it++;
+        }
+
+        if(local_buf->sql.useColumn(0)) local_buf->sql.getValue(countRows, 0) = userId;
+        if(local_buf->sql.useColumn(1)) local_buf->sql.getValue(countRows, 1) = min_time;
+
+        countRows++;
+    }
+
+    local_buf->sql.sendAllRowsAndHeaders(local_buf, PacketNomber, countRows, this);
     return 0;
 }

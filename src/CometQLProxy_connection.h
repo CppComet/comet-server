@@ -115,8 +115,7 @@ public:
  
 protected:
    
-    int proxy_union_select(int node, const char* query, thread_data* local_buf, unsigned int PacketNomber);
-    int proxy_megre_select(int node, const char* query, thread_data* local_buf, unsigned int PacketNomber);
+    int proxy_union_select(int node, const char* query, thread_data* local_buf, unsigned int PacketNomber); 
     
     int proxy_insert(int node, const char* query, thread_data* local_buf, unsigned int PacketNomber);
     //int proxy_delete(const char* query, thread_data* local_buf, unsigned int PacketNomber); 
@@ -124,6 +123,9 @@ protected:
     int proxy_query(int node, thread_data* local_buf, unsigned int PacketNomber);
     
     virtual int query_router(thread_data* local_buf, int PacketNomber);
+    
+    int sql_select_from_pipes(thread_data* local_buf, unsigned int PacketNomber);
+    int sql_select_from_users_time(thread_data* local_buf, unsigned int PacketNomber);
 };
 
 #endif	/* COMETQLPROXY_CONNECTION_H */

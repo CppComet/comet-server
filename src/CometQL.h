@@ -280,6 +280,11 @@ public:
         bzero(this, sizeof(QueryData));
     }
     
+    const char* getQuery() const
+    {
+        return (const char*)StartQury;
+    }
+    
     /**
      * 
      * @param place
