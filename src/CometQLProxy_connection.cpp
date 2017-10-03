@@ -28,13 +28,18 @@
 #include "CometQL.h"
 #include "y.tab.h"
 #include "sha1.h"
- 
+
 #include "devManager.h"
 #include <ctime>
 
 #include <openssl/sha.h>
 
 #include "sha1.h"
+
+// ; @todo Сделать агрегацию данных под каждый sql select запрос
+// ; @todo Написать тесты на работу в кластере
+// ; @todo Не транслировать ошибку если хоть одна из нод запрос обработатала
+
 
 CometQLProxy_connection::CometQLProxy_connection():MySql_connection()
 {
@@ -50,7 +55,7 @@ int CometQLProxy_connection::proxy_query(int node, thread_data* local_buf, unsig
 {
     if(local_buf->qInfo.command == TOK_SELECT || local_buf->qInfo.command == TOK_SHOW)
     {
-        return proxy_select(node, local_buf->qInfo.StartQury, local_buf, PacketNomber);
+        return proxy_union_select(node, local_buf->qInfo.StartQury, local_buf, PacketNomber);
     }
     else if(local_buf->qInfo.command == TOK_INSERT || local_buf->qInfo.command == TOK_DELETE)
     {
@@ -58,28 +63,42 @@ int CometQLProxy_connection::proxy_query(int node, thread_data* local_buf, unsig
     }
 }
 
-int CometQLProxy_connection::proxy_select(int node, const char* query, thread_data* local_buf, unsigned int PacketNomber)
+
+int CometQLProxy_connection::proxy_megre_select(int node, const char* query, thread_data* local_buf, unsigned int PacketNomber)
+{
+    
+}
+
+/**
+ * Выполняет union select на нодах кластера
+ * @param node
+ * @param query
+ * @param local_buf
+ * @param PacketNomber
+ * @return 
+ */
+int CometQLProxy_connection::proxy_union_select(int node, const char* query, thread_data* local_buf, unsigned int PacketNomber)
 {
     local_buf->answer_buf.lock();
     char* answer = local_buf->answer_buf.getData();
 
-    auto it = local_buf->cometCluster.begin();
-    
+    auto it = local_buf->proxyCluster.begin();
+
     bool isSendHeader = false;
     int num_fields = 0;
     MySqlResulValue value[MAX_COLUMNS_COUNT];
-    MYSQL_ROW row; 
-    
-    if(node != -1)
+    MYSQL_ROW row;
+
+    if(node != PROXY_TO_ALL)
     {
-        if(node < 0)
+        if(node == PROXY_TO_RANDOM)
         {
-            node = random() % local_buf->cometCluster.size();
+            node = random() % local_buf->proxyCluster.size();
         }
-        
+
         TagLoger::log(Log_CometQLCluster, 0, "CometQLProxy query:`%s` send to node=%d\n", query, node);
         // Если задана node то выполнить запрос на конкретной ноде а не на всех нодах.
-        auto link = local_buf->cometCluster[node];
+        auto link = local_buf->proxyCluster[node];
         if(!link->query(query))
         {
             // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
@@ -90,7 +109,7 @@ int CometQLProxy_connection::proxy_select(int node, const char* query, thread_da
         }
 
         auto result = mysql_store_result(link->getLink());
- 
+
         MYSQL_FIELD *field;
         while((field = mysql_fetch_field(result)))
         {
@@ -105,7 +124,7 @@ int CometQLProxy_connection::proxy_select(int node, const char* query, thread_da
 
         answer += HeadAnswer(num_fields, local_buf->sql.columns, PacketNomber, answer);
         isSendHeader = true;
- 
+
         while((row = mysql_fetch_row(result)))
         {
             for(int i = 0; i < num_fields; i++)
@@ -119,7 +138,7 @@ int CometQLProxy_connection::proxy_select(int node, const char* query, thread_da
     }
     else
     {
-        while(it != local_buf->cometCluster.end())
+        while(it != local_buf->proxyCluster.end())
         {
             auto link = *it;
 
@@ -164,8 +183,8 @@ int CometQLProxy_connection::proxy_select(int node, const char* query, thread_da
             it++;
         }
     }
-    
-    
+
+
     web_write(local_buf->answer_buf.getData(), answer - local_buf->answer_buf.getData());
     local_buf->answer_buf.unlock();
 
@@ -173,40 +192,73 @@ int CometQLProxy_connection::proxy_select(int node, const char* query, thread_da
     return 0;
 }
 
+/**
+ * @todo Надо добавлять к запросу uuid чтоб потом на клиенте не приходило дубликоатов если кластер будет работать на более чем одном коннекте от клиента
+ * @param node
+ * @param query
+ * @param local_buf
+ * @param PacketNomber
+ * @return 0
+ */
 int CometQLProxy_connection::proxy_insert(int node, const char* query, thread_data* local_buf, unsigned int PacketNomber)
-{
+{ 
     /**
      * Для операций удаления affectedRows возвращатся не будет в целях оптимизации.
      */
-    Send_OK_Package(0, 0, PacketNomber+1, local_buf, this); 
-    
-    if(node != -1)
+    Send_OK_Package(0, 0, PacketNomber+1, local_buf, this);
+
+    if(node != PROXY_TO_ALL)
     {
-        if(node < 0)
+        if(node == PROXY_TO_RANDOM)
         {
-            node = random() % local_buf->cometCluster.size();
+            // Не задана node выполнить запрос на случайной.
+            node = random() % local_buf->proxyCluster.size(); 
+            auto link = local_buf->proxyCluster[node]; 
+            if(!link->query(query))
+            {
+                // Если ошибка то ещё раз отправим запрос но на другую ноду
+                auto it = local_buf->proxyCluster.begin();
+                while(it != local_buf->proxyCluster.end())
+                {
+                    if((*it)->query(query))
+                    {
+                        break;
+                    }
+                    it++;
+                }
+            }
         }
-        
-        // Если задана node то выполнить запрос на конкретной ноде а не на всех нодах.
-        auto link = local_buf->cometCluster[node];
-        
-        // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
-        link->query(query);
+        else
+        {
+            // задана node то выполнить запрос на конкретной ноде
+            auto link = local_buf->proxyCluster[node];
+
+            if(!link->query(query))
+            {
+                // Если ошибка то ещё раз отправим запрос
+                link->query(query);
+            }
+        }
+       
         return 0;
     }
-    
-    auto it = local_buf->cometCluster.begin(); 
-    while(it != local_buf->cometCluster.end())
+
+    auto it = local_buf->proxyCluster.begin();
+    while(it != local_buf->proxyCluster.end())
     {
         auto link = *it;
-        
-        // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
-        link->query(query);
+ 
+        if(!link->query(query))
+        {
+            // Если ошибка то ещё раз отправим запрос
+            // @todo Лучше если ошибка то отправлять запрос не сразу а после того как пройдёмся по другим нодам
+            link->query(query);
+        }
         it++;
-    } 
+    }
     return 0;
 }
- 
+
 int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomber)
 {
     if(local_buf->qInfo.command == TOK_SHOW)
@@ -214,33 +266,33 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
         TagLoger::log(Log_CometQLCluster, 0, "CometQLProxy cmd show:%d\n", local_buf->qInfo.arg_show.command);
         if(local_buf->qInfo.arg_show.command == TOK_DATABASES)
         {
-            return proxy_query(-2, local_buf,PacketNomber); // return sql_show_databases(local_buf,PacketNomber);
+            return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); // return sql_show_databases(local_buf,PacketNomber);
         }
         else if(test_api_version(local_buf,PacketNomber))
         {
             if(local_buf->qInfo.arg_show.command == TOK_TABLES)
             {
-                return proxy_query(-2, local_buf,PacketNomber); //return sql_show_tables(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); //return sql_show_tables(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.arg_show.command == TOK_COLUMNS)
             {
-                return proxy_query(-2, local_buf,PacketNomber); //return sql_show_columns(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); //return sql_show_columns(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.arg_show.command == TOK_STATUS)
             {
-                return proxy_query(-1, local_buf,PacketNomber); //return sql_show_status(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_ALL, local_buf,PacketNomber); //return sql_show_status(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.arg_show.command == TOK_PROCESSLIST)
             {
-                return proxy_query(-1, local_buf,PacketNomber); //return sql_show_processlist(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_ALL, local_buf,PacketNomber); //return sql_show_processlist(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.arg_show.command == TOK_VARIABLES)
             {
-                return proxy_query(-1, local_buf,PacketNomber); //return sql_show_variables(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_ALL, local_buf,PacketNomber); //return sql_show_variables(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.arg_show.command == TOK_TABLE_STATUS)
             {
-                return proxy_query(-1, local_buf,PacketNomber); //return sql_show_table_status(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); //return sql_show_table_status(local_buf,PacketNomber);
             }
         }
 
@@ -254,46 +306,47 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
 
         if(local_buf->qInfo.arg_select.command == TOK_DATABASE)
         {
-            return proxy_query(-1, local_buf,PacketNomber); //return sql_select_database_name(local_buf,PacketNomber);
+            return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); //return sql_select_database_name(local_buf,PacketNomber);
         }
         else if(local_buf->qInfo.arg_select.command == VAL_SYSTEM_VARIBLE)
         {
-            return proxy_query(-1, local_buf,PacketNomber); //return sql_select_systemvarible(local_buf,PacketNomber);
+            return proxy_query(PROXY_TO_ALL, local_buf,PacketNomber); //return sql_select_systemvarible(local_buf,PacketNomber);
         }
         else if(test_api_version(local_buf,PacketNomber))
         {
             if(local_buf->qInfo.arg_select.command == TOK_FROM)
             {
                 if(local_buf->qInfo.tokCompare("users_auth",  local_buf->qInfo.tableName))
-                {
-                    // @todo выбор от user_id
-                    return proxy_query(-2, local_buf,PacketNomber); //return sql_select_from_users_auth(local_buf,PacketNomber);
+                { 
+                    return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); //return sql_select_from_users_auth(local_buf,PacketNomber);
                 }
                 else if(local_buf->qInfo.tokCompare("users_time",  local_buf->qInfo.tableName))
                 {
                     // @todo выбор от user_id
-                    return proxy_query(-2, local_buf,PacketNomber); // return sql_select_from_users_time(local_buf,PacketNomber);
+                    // Сейчас будет работать корректно если [main][save_users_last_online_time] = true
+                    // Если не равно то работать не будет так как данные об онлайне могут не оказаться на нужной ноде.
+                    return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); // return sql_select_from_users_time(local_buf,PacketNomber);
                 }
                 else if(local_buf->qInfo.tokCompare("users_messages",  local_buf->qInfo.tableName))
-                {
-                    // @todo выбор от user_id
-                    return proxy_query(-2, local_buf,PacketNomber); // return sql_select_from_users_messages(local_buf,PacketNomber);
+                { 
+                    return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); // return sql_select_from_users_messages(local_buf,PacketNomber);
                 }
                 else if(local_buf->qInfo.tokCompare("pipes_messages",  local_buf->qInfo.tableName))
                 {
-                    return proxy_query(-1, local_buf,PacketNomber); // return sql_select_from_pipes_messages(local_buf,PacketNomber);
+                    return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); // return sql_select_from_pipes_messages(local_buf,PacketNomber);
                 }
                 else if(local_buf->qInfo.tokCompare("users_in_pipes",  local_buf->qInfo.tableName))
                 {
-                    return proxy_query(-1, local_buf,PacketNomber); // return sql_select_from_users_in_pipes(local_buf,PacketNomber);
+                    return proxy_query(PROXY_TO_ALL, local_buf,PacketNomber); // return sql_select_from_users_in_pipes(local_buf,PacketNomber);
                 }
                 else if(local_buf->qInfo.tokCompare("pipes",  local_buf->qInfo.tableName))
                 {
-                    return proxy_query(-1, local_buf,PacketNomber); // return sql_select_from_pipes(local_buf,PacketNomber);
+                    // @todo выбор от proxy_megre_select
+                    return proxy_query(PROXY_TO_ALL, local_buf,PacketNomber); // return sql_select_from_pipes(local_buf,PacketNomber);
                 }
                 else if(local_buf->qInfo.tokCompare("pipes_settings",  local_buf->qInfo.tableName))
                 {
-                    return proxy_query(-1, local_buf,PacketNomber); // return sql_select_from_pipes_settings(local_buf,PacketNomber);
+                    return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); // return sql_select_from_pipes_settings(local_buf,PacketNomber);
                 }
                 else
                 {
@@ -313,41 +366,41 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
             if(local_buf->qInfo.tokCompare("users_auth",  local_buf->qInfo.tableName))
             {
                 // @todo выбор от user_id
-                return proxy_query(-2, local_buf,PacketNomber); // return sql_insert_into_users_auth(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); // return sql_insert_into_users_auth(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.tokCompare("users_time",  local_buf->qInfo.tableName))
             {
                 // @todo выбор от user_id
-                return proxy_query(-2, local_buf,PacketNomber); // return sql_insert_into_users_time(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); // return sql_insert_into_users_time(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.tokCompare("users_messages",  local_buf->qInfo.tableName))
             {
                 // @todo выбор от user_id
-                return proxy_query(-2, local_buf,PacketNomber); // return sql_insert_into_users_messages(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); // return sql_insert_into_users_messages(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.tokCompare("pipes_messages",  local_buf->qInfo.tableName))
             {
-                return proxy_query(-1, local_buf,PacketNomber); // return sql_insert_into_pipes_messages(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_ALL, local_buf,PacketNomber); // return sql_insert_into_pipes_messages(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.tokCompare("users_in_pipes",  local_buf->qInfo.tableName))
             {
-                return proxy_query(-1, local_buf,PacketNomber); // return sql_insert_into_users_in_pipes(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_ALL, local_buf,PacketNomber); // return sql_insert_into_users_in_pipes(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.tokCompare("pipes",  local_buf->qInfo.tableName))
             {
-                return proxy_query(-1, local_buf,PacketNomber); // return sql_insert_into_pipes(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_ALL, local_buf,PacketNomber); // return sql_insert_into_pipes(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.tokCompare("pipes_settings",  local_buf->qInfo.tableName))
             {
-                return proxy_query(-1, local_buf,PacketNomber); // return sql_insert_into_pipes_settings(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_ALL, local_buf,PacketNomber); // return sql_insert_into_pipes_settings(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.tokCompare("conference",  local_buf->qInfo.tableName))
             {
-                return proxy_query(-1, local_buf,PacketNomber); // return sql_insert_into_conference(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_ALL, local_buf,PacketNomber); // return sql_insert_into_conference(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.tokCompare("dialogs",  local_buf->qInfo.tableName))
             {
-                return proxy_query(-1, local_buf,PacketNomber); // return sql_insert_into_dialogs(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_ALL, local_buf,PacketNomber); // return sql_insert_into_dialogs(local_buf,PacketNomber);
             }
             else
             {
@@ -362,33 +415,33 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
             if(local_buf->qInfo.tokCompare("users_auth",  local_buf->qInfo.tableName))
             {
                 // @todo выбор от user_id
-                return proxy_query(-1, local_buf,PacketNomber); // return sql_delete_from_users_auth(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_ALL, local_buf,PacketNomber); // return sql_delete_from_users_auth(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.tokCompare("users_time",  local_buf->qInfo.tableName))
             {
                 // @todo выбор от user_id
-                return proxy_query(-2, local_buf,PacketNomber); // return sql_delete_from_users_time(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); // return sql_delete_from_users_time(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.tokCompare("users_messages",  local_buf->qInfo.tableName))
             {
                 // @todo выбор от user_id
-                return proxy_query(-2, local_buf,PacketNomber); // return sql_delete_from_users_messages(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); // return sql_delete_from_users_messages(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.tokCompare("pipes_messages",  local_buf->qInfo.tableName))
             {
-                return proxy_query(-2, local_buf,PacketNomber); // return sql_delete_from_pipes_messages(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); // return sql_delete_from_pipes_messages(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.tokCompare("users_in_pipes",  local_buf->qInfo.tableName))
             {
-                return proxy_query(-2, local_buf,PacketNomber); // return sql_delete_from_users_in_pipes(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); // return sql_delete_from_users_in_pipes(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.tokCompare("pipes",  local_buf->qInfo.tableName))
             {
-                return proxy_query(-2, local_buf,PacketNomber); // return sql_delete_from_pipes(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); // return sql_delete_from_pipes(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.tokCompare("pipes_settings",  local_buf->qInfo.tableName))
             {
-                return proxy_query(-2, local_buf,PacketNomber); // return sql_delete_from_pipes_settings(local_buf,PacketNomber);
+                return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); // return sql_delete_from_pipes_settings(local_buf,PacketNomber);
             }
             else
             {
@@ -401,6 +454,6 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
         TagLoger::log(Log_CometQLCluster, 0, "cmd undefined:%d %s\n", local_buf->qInfo.arg_select.command, local_buf->qInfo.StartQury);
         return Send_OK_Package(PacketNomber+1, local_buf, this);
     }
-    
+
     return 0;
 }

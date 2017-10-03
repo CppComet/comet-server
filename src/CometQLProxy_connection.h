@@ -38,6 +38,11 @@ class MySql_connection;
    
 using namespace std;
  
+
+#define	PROXY_TO_ALL -1
+#define	PROXY_TO_RANDOM -2
+
+
 /**
  * Класс одного соединения с сервером
  * Содержит функции обработки запросов от бекенда
@@ -110,7 +115,9 @@ public:
  
 protected:
    
-    int proxy_select(int node, const char* query, thread_data* local_buf, unsigned int PacketNomber);
+    int proxy_union_select(int node, const char* query, thread_data* local_buf, unsigned int PacketNomber);
+    int proxy_megre_select(int node, const char* query, thread_data* local_buf, unsigned int PacketNomber);
+    
     int proxy_insert(int node, const char* query, thread_data* local_buf, unsigned int PacketNomber);
     //int proxy_delete(const char* query, thread_data* local_buf, unsigned int PacketNomber); 
     

@@ -914,6 +914,10 @@ public:
 public:
     stm_pipe_messages_select()
     {
+        bzero(is_null, 5);
+        bzero(error, 5);
+        bzero(length, 5);
+        
         bzero(result_id, PIPE_NAME_LEN);
         bzero(result_event, EVENT_NAME_LEN);
     }
@@ -1139,10 +1143,10 @@ public:
     char          result_hash[USER_HASH_LEN];
     unsigned long result_hash_length = USER_HASH_LEN;
 
-    my_bool       is_null[3];
-    my_bool       error[3];
-    unsigned long length[3];
-
+    my_bool       is_null[1];
+    my_bool       error[1];
+    unsigned long length[1];
+ 
     bool prepare(MYSQL *mysql)
     {
         setParamsCount(1);
@@ -1171,6 +1175,9 @@ public:
     stm_users_auth_select()
     {
         bzero(result_hash, USER_HASH_LEN);
+        bzero(is_null, 1);
+        bzero(error, 1);
+        bzero(length, 1); 
     }
 
     bool execute(unsigned long user_id)
@@ -1249,10 +1256,10 @@ public:
 
         i = 0; 
         result[i].buffer_type    = MYSQL_TYPE_LONG;
-        result[i].buffer         = (void *)&result_length;
-        result[i].is_unsigned    = 0;
-        result[i].is_null        = 0;
-        result[i].length         = 0;
+        result[i].buffer         = (void *)&result_length; 
+        result[i].is_null        = &is_null[i];
+        result[i].error          = &error[i];
+        result[i].length         = &length[i];
           
         return init(mysql, "SELECT `length` FROM `pipes_settings` WHERE `name` = ? limit 1");
     }
@@ -1260,6 +1267,9 @@ public:
 public:
     stm_pipes_settings_select()
     { 
+        bzero(is_null, 1);
+        bzero(error, 1);
+        bzero(length, 1); 
         bzero(param_pipe_name, PIPE_NAME_LEN);
     }
 
@@ -1344,9 +1354,9 @@ public:
         i = 0; 
         result[i].buffer_type    = MYSQL_TYPE_LONG;
         result[i].buffer         = (void *)&result_time;
-        result[i].is_unsigned    = 0;
-        result[i].is_null        = 0;
-        result[i].length         = 0;
+        result[i].is_null        = &is_null[i];
+        result[i].error          = &error[i];
+        result[i].length         = &length[i];
           
         return init(mysql, "SELECT `time` FROM `users_time` WHERE `user_id` = ? ");
     }
@@ -1354,6 +1364,9 @@ public:
 public:
     stm_users_time_select()
     { 
+        bzero(is_null, 1);
+        bzero(error, 1);
+        bzero(length, 1); 
     }
 
     bool execute(unsigned long user_id)

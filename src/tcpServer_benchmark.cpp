@@ -97,7 +97,7 @@ void usage_statistics::start()
         char tmpNull[200];
         int len;
         int i = 0;
-        while(fscanf(meminfoFp, "%s %s %s", name, value, tmpNull) != EOF && i < 34)
+        while(fscanf(meminfoFp, "%64s %64s %64s", name, value, tmpNull) != EOF && i < 34)
         {
             i++;
             len = strlen(name);

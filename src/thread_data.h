@@ -212,8 +212,9 @@ public:
      */
     dbLink db;
 
-    std::vector<dbLink*> cometCluster;
-
+    std::vector<dbLink*> wsCluster; 
+    std::vector<dbLink*> proxyCluster;
+    
     stmMapper stm;
 
     tcpServer_benchmark* bm;
@@ -266,27 +267,52 @@ public:
 
         stm.init(db);
 
-        auto cluster = app->get_list("cluster", "cometql");
-        if(!cluster.empty())
+        // cometqlproxy кластер для рассылки сообщений приходившех с cometqlproxy
+        auto proxycluster = app->get_list("cometqlproxy", "cluster");
+        if(!proxycluster.empty())
         {
-            TagLoger::log(Log_Any, LogColorGreen, "Starting CometQL cluster on %d nodes", cluster.size());
-            auto it = cluster.begin();
-            while(it != cluster.end())
+            TagLoger::log(Log_Any, LogColorGreen, "Starting Proxy-CometQL cluster on %d nodes", proxycluster.size());
+            auto it = proxycluster.begin();
+            while(it != proxycluster.end())
             {
                 dbLink *link = new dbLink();
-                cometCluster.push_back(link);
+                proxyCluster.push_back(link);
                 if(!link->init(it->data()) || !link->connect())
                 {
-                    TagLoger::error(Log_Any, LogColorRed, "Error, CometQL connection %s does not establish", it->data());
+                    TagLoger::error(Log_Any, LogColorRed, "Error, Proxy-CometQL connection %s does not establish", it->data());
                 }
                 
                 it++;
             }
-            TagLoger::log(Log_Any, LogColorGreen, "Starting CometQL cluster on %d nodes complte", cluster.size());
+            TagLoger::log(Log_Any, LogColorGreen, "Starting Proxy-CometQL cluster on %d nodes complte", proxycluster.size());
         }
         else
         { 
-            TagLoger::log(Log_Any, LogColorBase, "section [cluster] value [cometql] is empty");
+            TagLoger::log(Log_Any, LogColorBase, "section [cometqlproxy] value [cluster] is empty");
+        }
+         
+        // WS кластер для рассылки сообщений приходившех с вебсокетов
+        auto wscluster = app->get_list("ws", "cluster");
+        if(!wscluster.empty())
+        {
+            TagLoger::log(Log_Any, LogColorGreen, "Starting WS-CometQL cluster on %d nodes", wscluster.size());
+            auto it = wscluster.begin();
+            while(it != wscluster.end())
+            {
+                dbLink *link = new dbLink();
+                wsCluster.push_back(link);
+                if(!link->init(it->data()) || !link->connect())
+                {
+                    TagLoger::error(Log_Any, LogColorRed, "Error, WS-CometQL connection %s does not establish", it->data());
+                }
+                
+                it++;
+            }
+            TagLoger::log(Log_Any, LogColorGreen, "Starting WS-CometQL cluster on %d nodes complte", wscluster.size());
+        }
+        else
+        { 
+            TagLoger::log(Log_Any, LogColorBase, "section [ws] value [cluster] is empty");
         }
     }
 
@@ -306,14 +332,24 @@ private:
 
 public:
 
-    bool isClusterActive()
+    bool isWSClusterActive()
     {
-        return !cometCluster.empty();
+        return !wsCluster.empty();
     }
     
-    bool clusterSize()
+    bool wsClusterSize()
     {
-        return cometCluster.size();
+        return wsCluster.size();
+    }
+    
+    bool isProxyClusterActive()
+    {
+        return !proxyCluster.empty();
+    }
+    
+    bool proxyClusterSize()
+    {
+        return proxyCluster.size();
     }
     
     void unlockAll()

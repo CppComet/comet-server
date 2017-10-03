@@ -175,16 +175,16 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
 
                 // @todo учесть работу в кластере
                 // @todo Вставить правку в js апи для совместимости (перенести данные из data в addData)
-                if(local_buf->isClusterActive())
+                if(local_buf->isWSClusterActive())
                 {
-                    auto it = local_buf->cometCluster.begin();
-                    while(it != local_buf->cometCluster.end())
+                    auto it = local_buf->wsCluster.begin();
+                    while(it != local_buf->wsCluster.end())
                     {
                         auto link = *it;
 
                         // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
                         link->query_format("INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'subscription', '{\"user_id\":\"%d\",\"uuid\":\"%s\"');", subscriptions[i], web_user_id, web_user_uuid);
-                        it++;   
+                        it++;
                     }
                 }
             }
@@ -592,11 +592,11 @@ int Client_connection::send_pipe_count(thread_data* local_buf, char* pipe_name, 
         num_user = pipe->size();
     }
 
-    if(local_buf->isClusterActive())
+    if(local_buf->isWSClusterActive())
     {
         MYSQL_ROW row;
-        auto it = local_buf->cometCluster.begin();
-        while(it != local_buf->cometCluster.end())
+        auto it = local_buf->wsCluster.begin();
+        while(it != local_buf->wsCluster.end())
         {
             auto link = *it;
 
@@ -1064,12 +1064,12 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
             }
         }
     }
- 
-    if(local_buf->isClusterActive())
+
+    if(local_buf->isWSClusterActive())
     {
         MYSQL_ROW row;
-        auto it = local_buf->cometCluster.begin();
-        while(it != local_buf->cometCluster.end())
+        auto it = local_buf->wsCluster.begin();
+        while(it != local_buf->wsCluster.end())
         {
             auto link = *it;
 
@@ -1081,21 +1081,21 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
             auto result = mysql_store_result(link->getLink());
 
             while((row = mysql_fetch_row(result)))
-            { 
+            {
                 if(hasData)
                 {
                     usersstr.append(",");
                 }
-                
+
                 bzero(strtmp, 200);
                 snprintf(strtmp, 200, "{\"user_id\":%s,\"uuid\":\"%s\"}", row[0], row[1]);
-                usersstr.append(strtmp); 
+                usersstr.append(strtmp);
                 hasData = true;
             }
             it++;
         }
     }
-    
+
     usersstr.append("]}}");
 
     std::string rdname("_answer_to_");
@@ -1527,10 +1527,10 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
     // @todo Отметить в документации что number_messages относится только к инфе
     // этого сервера и сколько было сообщений доставлено по нодам кластера не известно.
     // @todo добавить как баг тот фапкт что будет терятся user_id отправителя при работе в кластере.
-    if(local_buf->isClusterActive())
-    { 
-        auto it = local_buf->cometCluster.begin();
-        while(it != local_buf->cometCluster.end())
+    if(local_buf->isWSClusterActive())
+    {
+        auto it = local_buf->wsCluster.begin();
+        while(it != local_buf->wsCluster.end())
         {
             auto link = *it;
 
@@ -1538,7 +1538,7 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
             link->query_format("INSERT INTO pipes_messages (name, event, message)VALUES('%s', '%s', '%s');", name, event_name,  local_buf->answer_buf.getData());
             it++;
         }
-        
+
         local_buf->answer_buf.unlock();
     }
 

@@ -478,10 +478,10 @@ protected:
                 snprintf(pipe_name, 100,"user_status_%d", user_id);
                 internalApi::send_event_to_pipe(local_buf, pipe_name, "{\\\"data\\\":\\\"offline\\\",\\\"event_name\\\":\\\"offline\\\"}", NULL);
 
-                if(local_buf->isClusterActive())
+                if(local_buf->isWSClusterActive())
                 {
-                    auto it = local_buf->cometCluster.begin();
-                    while(it != local_buf->cometCluster.end())
+                    auto it = local_buf->wsCluster.begin();
+                    while(it != local_buf->wsCluster.end())
                     {
                         auto link = *it;
 
@@ -504,7 +504,7 @@ protected:
         last_online_time = 0;
         if(user_id > 0)
         {
-            if(appConf::instance()->get_bool("main", "save_users_last_online_time") && !local_buf->isClusterActive())
+            if(appConf::instance()->get_bool("main", "save_users_last_online_time") && !local_buf->isWSClusterActive())
             {
                 // В не кластерной работы точно нет необходимости в этом запросе
                 local_buf->db.query_format("replace into `users_time` (`user_id`, `time`) VALUES ('%d', 0)", user_id);
@@ -517,10 +517,10 @@ protected:
                 internalApi::send_event_to_pipe(local_buf, pipe_name, "{\\\"data\\\":\\\"online\\\",\\\"event_name\\\":\\\"online\\\"}", NULL);
 
 
-                if(local_buf->isClusterActive())
+                if(local_buf->isWSClusterActive())
                 {
-                    auto it = local_buf->cometCluster.begin();
-                    while(it != local_buf->cometCluster.end())
+                    auto it = local_buf->wsCluster.begin();
+                    while(it != local_buf->wsCluster.end())
                     {
                         auto link = *it;
 

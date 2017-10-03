@@ -1077,7 +1077,7 @@ int MySql_connection::sql_show_status(thread_data* local_buf, unsigned int Packe
         char tmpNull[200];
         int len;
         int i = 0;
-        while(fscanf(loadavgFp, "%s %s %s", name, val, tmpNull) != EOF && i < 34)
+        while(fscanf(loadavgFp, "%32s %32s %32s", name, val, tmpNull) != EOF && i < 34)
         {
             i++;
             len = strlen(name);
@@ -1362,9 +1362,9 @@ int MySql_connection::sql_select_database_name(thread_data* local_buf, unsigned 
 
     if(api_version != 0)
     {
-        values = "CometQL_v0";
-        char* name = values;
-        name[9] = '0' + api_version;
+        values = "CometQL_v1";
+        //char* name = values;
+        //name[9] = '0' + api_version;
     }
     else
     {
@@ -1748,7 +1748,7 @@ int MySql_connection::sql_insert_into_users_messages(thread_data* local_buf, uns
 
     char* message = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]]);
     message[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen] = 0;
-    char messageQuote = local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].quote;
+    //char messageQuote = local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].quote;
 
     local_buf->answer_buf.lock();
     //json_escape_string(message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen, local_buf->answer_buf.getData());
@@ -2484,11 +2484,9 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
     std::string sipNumber("000000");
 
     // Определение типа видеорежима
-    bool isAudio = false;
-    bool isVideo = false;
-
-    isAudio = strcmp(mode, "audio") == 0;
-    isVideo = strcmp(mode, "video") == 0;
+    bool isAudio = strcmp(mode, "audio") == 0;
+    bool isVideo = strcmp(mode, "video") == 0;
+ 
     // isVideo = strcmp(mode, "videoMux") == 0;
     // isVideo = strcmp(mode, "videoMux2") == 0;
 
