@@ -183,7 +183,7 @@ class dbLink {
     std::string db_user;
     std::string db_name;
     int db_port = 3306;
-    my_bool reconnect = 1;
+    my_bool is_reconnect = 1;
     
 private:
 
@@ -277,6 +277,7 @@ public:
         
         return init(Server.data(), Uid.data(), Pwd.data(), Database.data(), Port);
     }
+    
     bool init(const char* host, const char* user, const char* pw, const char* name, int port)
     {
         if(host == NULL)
@@ -318,7 +319,7 @@ public:
 
         db_port = port;
 
-        mysql_options(&mysqlLink, MYSQL_OPT_RECONNECT, &reconnect);
+        mysql_options(&mysqlLink, MYSQL_OPT_RECONNECT, &is_reconnect);
         mysql_options(&mysqlLink, MYSQL_SET_CHARSET_NAME, "utf8");
         mysql_options(&mysqlLink, MYSQL_INIT_COMMAND, "SET NAMES utf8");
         return true;
@@ -341,10 +342,23 @@ public:
         {
             return true;
         }
+         
 
         if(mysql_errno(&mysqlLink))
         {
-            TagLoger::log(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), q);
+            TagLoger::warn(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), q);
+            if(reconnect())
+            {
+                if(mysql_real_query(&mysqlLink, q, strlen(q)) == 0)
+                {
+                    return true;
+                }
+                
+                if(mysql_errno(&mysqlLink))
+                {
+                    TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), q);
+                }
+            } 
         }
 
         return false;
@@ -368,13 +382,42 @@ public:
 
         if(mysql_errno(&mysqlLink))
         {
-            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m\n", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), buf);
+            // @todo Проверять код ошибки и не паниковать если по коду ясно что проблема в самом запросе а не соединении. 
+            TagLoger::warn(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), buf);
+            if(reconnect())
+            {
+                if(mysql_real_query(&mysqlLink, buf, strlen(buf)) == 0)
+                {
+                    va_end(ap);
+                    return true;
+                }
+                
+                if(mysql_errno(&mysqlLink))
+                {
+                    TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), buf);
+                }
+            } 
         }
-
+         
         va_end(ap);
         return false;
     }
 
+    bool reconnect()
+    {
+        close();
+        return connect();
+    }
+    
+    void close()
+    {
+        if(isInit)
+        {
+            mysql_close(&mysqlLink);
+        }
+        
+    }
+    
     bool connect()
     {
         mysql_real_connect(&mysqlLink, db_host.data(), db_user.data(), db_pw.data(), db_name.data(), db_port, NULL, 0);

@@ -95,7 +95,9 @@ int CometQLProxy_connection::proxy_union_select(int node, const char* query, thr
         auto link = local_buf->proxyCluster[node];
         if(!link->query(query))
         {
+            // @todo Проверять код ошибки и не паниковать если по коду ясно что проблема в самом запросе а не соединении.
             // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
+            TagLoger::error(Log_CometQLCluster, 0, "CometQLProxy error[6] on node=%d in query=%s\n", node, query); 
             local_buf->qInfo.setError(mysql_error(link->getLink()), mysql_errno(link->getLink()));
             local_buf->answer_buf.unlock();
             Send_Err_Package(local_buf->qInfo.errorCode, local_buf->qInfo.errorText, ++PacketNomber, local_buf, this);
@@ -138,6 +140,9 @@ int CometQLProxy_connection::proxy_union_select(int node, const char* query, thr
 
             if(!link->query(query))
             {
+                // @todo Не паниковать если ошибка на одной ноде из нескольких, и не рубить из за этого весь запрос.
+                // @todo Проверять код ошибки и не паниковать если по коду ясно что проблема в самом запросе а не соединении.
+                TagLoger::error(Log_CometQLCluster, 0, "CometQLProxy error[5] on node=%d in query=%s\n", node, query); 
                 local_buf->qInfo.setError(mysql_error(link->getLink()), mysql_errno(link->getLink()));
                 local_buf->answer_buf.unlock();
                 Send_Err_Package(local_buf->qInfo.errorCode, local_buf->qInfo.errorText, ++PacketNomber, local_buf, this);
@@ -210,6 +215,8 @@ int CometQLProxy_connection::proxy_insert(int node, const char* query, thread_da
             auto link = local_buf->proxyCluster[node]; 
             if(!link->query(query))
             {
+                // @todo Проверять код ошибки и не паниковать если по коду ясно что проблема в самом запросе а не соединении.
+                TagLoger::warn(Log_CometQLCluster, 0, "CometQLProxy error[1] on node=%d in query=%s\n", node, query); 
                 // Если ошибка то ещё раз отправим запрос но на другую ноду
                 auto it = local_buf->proxyCluster.begin();
                 while(it != local_buf->proxyCluster.end())
@@ -218,6 +225,8 @@ int CometQLProxy_connection::proxy_insert(int node, const char* query, thread_da
                     {
                         break;
                     }
+                    // @todo Проверять код ошибки и не паниковать если по коду ясно что проблема в самом запросе а не соединении.
+                    TagLoger::warn(Log_CometQLCluster, 0, "CometQLProxy error[2] on node=%d in query=%s\n", node, query); 
                     it++;
                 }
             }
@@ -229,8 +238,9 @@ int CometQLProxy_connection::proxy_insert(int node, const char* query, thread_da
 
             if(!link->query(query))
             {
-                // Если ошибка то ещё раз отправим запрос
-                link->query(query);
+                // Если ошибка то не повезло
+                // @todo Проверять код ошибки и не паниковать если по коду ясно что проблема в самом запросе а не соединении.
+                TagLoger::error(Log_CometQLCluster, 0, "CometQLProxy error[3] on node=%d in query=%s\n", node, query); 
             }
         }
        
@@ -245,8 +255,8 @@ int CometQLProxy_connection::proxy_insert(int node, const char* query, thread_da
         if(!link->query(query))
         {
             // Если ошибка то ещё раз отправим запрос
-            // @todo Лучше если ошибка то отправлять запрос не сразу а после того как пройдёмся по другим нодам
-            link->query(query);
+            // @todo Проверять код ошибки и не паниковать если по коду ясно что проблема в самом запросе а не соединении.
+            TagLoger::error(Log_CometQLCluster, 0, "CometQLProxy error[4] on node=%d in query=%s\n", node, query); 
         }
         it++;
     }
