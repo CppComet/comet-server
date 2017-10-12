@@ -617,6 +617,7 @@ int Client_connection::send_pipe_count(thread_data* local_buf, char* pipe_name, 
                     return false;
                 }
             }
+            mysql_free_result(result);
             it++;
         }
     }
@@ -1092,6 +1093,7 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
                 usersstr.append(strtmp);
                 hasData = true;
             }
+            mysql_free_result(result);
             it++;
         }
     }

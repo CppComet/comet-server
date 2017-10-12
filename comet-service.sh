@@ -10,64 +10,35 @@
 ### END INIT INFO
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-RUNDIR=/root/comet/
-CONFIG=/root/comet/comet.conf  
+RUNDIR=/etc/comet-server/
 EXTRAOPTS=
-PIDFILE=
-
+PIDFILE=/var/run/cppcomet.pid
 
 echo "CppComet"
- 
+
 cd ${RUNDIR}
- 
+
 case "$1" in
-    start)    
-        startCount=`ps auxH | grep "comet-start.sh" | wc -l`
-        if [ $startCount -ne 2 ]
+    start) 
+        if [test -f "$PIDFILE"]
         then
-            count=`ps auxH | grep "cpp_comet" | wc -l`
-            if [ $count -le 40  ]
-            then
-                echo "Starting CppComet"
-                nohup ./comet-start.sh > cpp_comet.log &
-            else
-                echo "CppComet already run"
-            fi
-        else
             echo "CppComet already run"
+        else
+            echo "Starting CppComet"
+            nohup ./comet-start.sh > /var/log/cpp_comet.log &
         fi
         ;;
     stop)
         echo "Stopping CppComet"
-        ps aux | grep -E "comet-start.sh" | grep -o -E "root +([0-9]+)" | grep -o -E "[0-9]+" | xargs kill 
-        ps auxH | grep "comet-start.sh" | grep -o -E "root +([0-9]+)" | grep -o -E "[0-9]+" | xargs kill 
-        
-        
-        ps aux | grep -E "cpp_comet" | grep -o -E "root +([0-9]+)" | grep -o -E "[0-9]+" | xargs kill 
-        ps auxH | grep "cpp_comet" | grep -o -E "root +([0-9]+)" | grep -o -E "[0-9]+" | xargs kill 
-         
+        kill `cat $PIDFILE`
+        `rm -rf $PIDFILE`
         ;;
     *)
         echo "Stopping CppComet"
-        ps aux | grep -E "comet-start.sh" | grep -o -E "root +([0-9]+)" | grep -o -E "[0-9]+" | xargs kill 
-        ps auxH | grep "comet-start.sh" | grep -o -E "root +([0-9]+)" | grep -o -E "[0-9]+" | xargs kill 
-        
-        ps aux | grep -E "cpp_comet" | grep -o -E "root +([0-9]+)" | grep -o -E "[0-9]+" | xargs kill 
-        ps auxH | grep "cpp_comet" | grep -o -E "root +([0-9]+)" | grep -o -E "[0-9]+" | xargs kill 
-         
-        startCount=`ps auxH | grep "comet-start.sh" | wc -l`
-        if [ $startCount -ne 2 ]
-        then
-            count=`ps auxH | grep "cpp_comet" | wc -l`
-            if [ $count -le 40  ]
-            then
-                echo "Starting CppComet"
-                nohup ./comet-start.sh > cpp_comet.log &
-            else
-                echo "CppComet already run"
-            fi
-        else
-            echo "CppComet already run"
-        fi
-        ;; 
+        kill `cat $PIDFILE`
+        `rm -rf $PIDFILE`
+
+        echo "Starting CppComet"
+        nohup ./cpp_comet > /var/log/cpp_comet.log &
+        ;;
 esac

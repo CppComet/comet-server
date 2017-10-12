@@ -83,6 +83,12 @@ bool appConf::initFromFile(const char *fileName)
     {
         sections["main"]["save_users_last_online_time"] = "true";  
     }
+    
+    if(!is_property_exists("main", "pidfile"))
+    {
+        sections["main"]["pidfile"] = "/var/run/cppcomet.pid";  
+    }
+    
     /*
     ; Объём буфера для сообщения
     ; Много ставить не надо, комет сервер не расчитан на передачу больших сообщений

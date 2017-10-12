@@ -125,6 +125,7 @@ void posix_death_signal(int signum)
     int fp = open("posix_signal.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
     write(fp, error_string, strlen(error_string));
     close(fp);
+    TagLoger::log(Log_Any, 0, "\x1b[1;33m%s\x1b[0m\n", error_string);
 
 
     signal(signum, SIG_DFL); // перепосылка сигнала
@@ -140,7 +141,7 @@ void posix_death_signal(int signum)
  */
 void posix_log_signal(int signum)
 {
-    TagLoger::log(Log_Any, 0, "\n\n\x1b[1;posix_log_signal\x1b[0m\n");
+    TagLoger::log(Log_Any, 0, "\n\n\x1b[1;mmposix_log_signal\x1b[0m\n");
     print_backtrace();
     TagLoger::log(Log_Any, 0, "\x1b[1;32mok\x1b[0m\n");
 
@@ -157,13 +158,14 @@ void posix_log_signal(int signum)
     int fp = open("posix_signal.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
     write(fp, error_string, strlen(error_string));
     close(fp);
+    TagLoger::log(Log_Any, 0, "\x1b[1;33m%s\x1b[0m\n", error_string);
 
     signal(signum, SIG_DFL); // перепосылка сигнала
 }
 
 void posix_ignor_signal(int signum)
 {
-    TagLoger::log(Log_Any, 0, "\n\n\x1b[1;posix_ignor_signal\x1b[0m\n");
+    TagLoger::log(Log_Any, 0, "\n\n\x1b[1;mposix_ignor_signal\x1b[0m\n");
     print_backtrace();
     TagLoger::log(Log_Any, 0, "\x1b[1;32mok\x1b[0m\n");
 
@@ -180,6 +182,7 @@ void posix_ignor_signal(int signum)
     int fp = open("posix_signal.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
     write(fp, error_string, strlen(error_string));
     close(fp);
+    TagLoger::log(Log_Any, 0, "\x1b[1;33m%s\x1b[0m\n", error_string);
 
     signal(signum, SIG_IGN); // перепосылка сигнала
 }
@@ -244,7 +247,7 @@ void command_line_fork()
         if( strncmp(buf,"exit", strlen("exit") ) == 0 )
         {
             printf("\x1b[31mExit command received\x1b[0m\n");
-            //kill(pid, SIGTERM);
+            //kill(getppid(), SIGTERM);
             close(fd);
             remove(NAMEDPIPE_NAME);
             exit(0);
@@ -256,12 +259,12 @@ void command_line_fork()
             //kill(pid, SIGTERM);
             close(fd);
             remove(NAMEDPIPE_NAME);
-            exit(-1);
+            exit(9);
             return;
         }
         else if( strncmp(buf,"version", strlen("version") ) == 0 )
         {
-            printf("\x1b[31mCPPcomet v.1.38\x1b[0m\n");
+            printf("\x1b[31m%s\x1b[0m\n", MYSQL_SYSTEMVARIBLE);
         }
         else if(memcmp(buf, "TagLog", strlen("TagLog")) == 0)
         {
@@ -312,17 +315,16 @@ int main(int argc, char *argv[])
     signal(SIGSEGV, posix_death_signal);
 
     signal(SIGFPE,  posix_log_signal); //  сигнал, посылаемый процессу, при попытке выполнения ошибочной арифметической операции. ( может быть перехвачен или проигнорирован программой.)
-    signal(SIGHUP,  posix_log_signal); //  сигнал, посылаемый процессу для уведомления о потере соединения с управляющим терминалом пользователя. ( может быть перехвачен или проигнорирован программой. )
     signal(SIGILL,  posix_log_signal); //  сигнал, посылаемый процессу при попытке выполнить неправильно сформированную, несуществующую или привилегированную инструкцию. (или попытке выполнения инструкции, требующей специальных привилегий. ) ( может быть перехвачен или проигнорирован)
     signal(SIGINT,  posix_log_signal); //  сигнал для остановки процесса пользователем с терминала.
     signal(SIGQUIT, posix_log_signal); //  сигнал, для остановки процесса пользователем, комбинацией «quit» на терминале.
-    signal(SIGTERM, posix_log_signal); // сигнал, для запроса завершения процесса. (В отличие от SIGKILL этот сигнал может быть обработан или проигнорирован программой.)
+    signal(SIGTERM, posix_log_signal); //  сигнал, для запроса завершения процесса. (В отличие от SIGKILL этот сигнал может быть обработан или проигнорирован программой.)
 
     signal(SIGUSR1, posix_log_signal); // пользовательские сигналы По умолчанию, сигналы SIGUSR1 и SIGUSR2 завершают выполнение процесса.
     signal(SIGUSR2, posix_log_signal); // пользовательские сигналы По умолчанию, сигналы SIGUSR1 и SIGUSR2 завершают выполнение процесса.
 
     signal(SIGBUS,  posix_log_signal); //  сигнал, сигнализирующий об ошибке шины, при обращении к физической памяти. ( может быть перехвачен или проигнорирован)
-    signal(SIGSYS,  posix_log_signal); // сигнал, предназначенный для посылки программе, при попытке передать неправильный аргумент в системный вызов.
+    signal(SIGSYS,  posix_log_signal); //  сигнал, предназначенный для посылки программе, при попытке передать неправильный аргумент в системный вызов.
     signal(SIGXCPU, posix_log_signal); //  сигнал, посылаемый компьютерной программе, превышающей лимит процессорного времени.
     signal(SIGXFSZ, posix_log_signal); //  сигнал, посылаемый процессу при превышении открытым файлом максимально допустимого размера.
 
@@ -369,7 +371,53 @@ int main(int argc, char *argv[])
     {
         return 0;
     }
- 
+
+    // Запись pid в var run 
+    auto fp = fopen(appConf::instance()->get_chars("main", "pidfile"), "w");
+    fprintf(fp, "%d", getpid());
+    fclose(fp);
+
+    while(true)
+    {
+        pid_t pid = fork(); 
+        if(pid == -1)
+        {
+            TagLoger::error(Log_appConf, 0, "\x1b[1;32mError in fork result of function\x1b[0m");
+            perror("fork"); /* произошла ошибка */
+            remove(appConf::instance()->get_chars("main", "pidfile"));
+            remove(NAMEDPIPE_NAME);
+            exit(1); /*выход из родительского процесса*/
+        }
+        else if(pid == 0)
+        {
+            // Это процесс-потомок
+            TagLoger::debug(Log_appConf, 0, "PID=%d, PPID=%d", getpid(), getppid());
+            signal(SIGHUP,  posix_death_signal); //  сигнал, посылаемый процессу для уведомления о потере соединения с управляющим терминалом пользователя. ( может быть перехвачен или проигнорирован программой. )
+     
+            break;
+        }
+        else
+        {
+            // Это процесс-родитель 
+            TagLoger::debug(Log_appConf, 0, "PID=%d, Child PID=%d", getpid(), pid); 
+            signal(SIGHUP,  posix_log_signal); //  сигнал, посылаемый процессу для уведомления о потере соединения с управляющим терминалом пользователя. ( может быть перехвачен или проигнорирован программой. )
+   
+            int status;
+            waitpid(pid, &status, 0); 
+            if(status == 0)
+            {
+                TagLoger::log(Log_appConf, 0, "Completion of work");  
+                remove(appConf::instance()->get_chars("main", "pidfile"));
+                remove(NAMEDPIPE_NAME);
+                exit(0);
+            }
+            else
+            {
+                TagLoger::error(Log_appConf, 0, "Child return status is %d", status);  
+            }
+        }
+    }
+    
     if(!appConf::instance()->get_string("main", "host").empty())
     {
         devManager::instance()->getDevInfo()->setDevUrl(appConf::instance()->get_chars("main", "host"));

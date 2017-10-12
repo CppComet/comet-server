@@ -8,6 +8,10 @@
 #ifndef DBLINK_H
 #define	DBLINK_H
 
+/**
+ * https://dev.mysql.com/doc/refman/5.7/en/error-messages-client.html#error_cr_commands_out_of_sync
+ */
+#define	CR_COMMANDS_OUT_OF_SYNC 2014
 
 class stmMapper;
 
@@ -177,13 +181,17 @@ protected:
 class dbLink {
     MYSQL mysqlLink;
     bool isInit = false;
+    bool isConnected = false;
 
+    std::string connectionName;
     std::string db_host;
     std::string db_pw;
     std::string db_user;
     std::string db_name;
     int db_port = 3306;
     my_bool is_reconnect = 1;
+    int connect_timeout  = 1; // MYSQL_OPT_CONNECT_TIMEOUT
+    int read_timeout  = 1; // MYSQL_OPT_READ_TIMEOUT
     
 private:
 
@@ -200,6 +208,13 @@ private:
 public:
 
     dbLink(){
+        connectionName = "noname";
+        connectionName.append(std::to_string(random()));
+        mysql_init(&mysqlLink);
+    }
+    
+    dbLink(std::string ConnectionName){
+        connectionName = ConnectionName;
         mysql_init(&mysqlLink);
     }
  
@@ -209,6 +224,10 @@ public:
         {
             mysql_close(&mysqlLink);
         }
+    }
+    
+    const char* name(){
+        return connectionName.data();
     }
 
     bool init(std::string connectionString)
@@ -322,6 +341,8 @@ public:
         mysql_options(&mysqlLink, MYSQL_OPT_RECONNECT, &is_reconnect);
         mysql_options(&mysqlLink, MYSQL_SET_CHARSET_NAME, "utf8");
         mysql_options(&mysqlLink, MYSQL_INIT_COMMAND, "SET NAMES utf8");
+        //mysql_options(&mysqlLink, MYSQL_OPT_CONNECT_TIMEOUT, &connect_timeout);
+        //mysql_options(&mysqlLink, MYSQL_OPT_READ_TIMEOUT, &read_timeout);
         return true;
     }
 
@@ -337,6 +358,17 @@ public:
 
     bool query(const char *q)
     {
+        if(!isInit)
+        {
+            TagLoger::trace(Log_dbLink, 0, "\x1b[1;32mMySQL connection was not initialized\x1b[0m", db_host.data(), db_port, db_user.data());
+            return false;
+        }
+        
+        if(!isConnected)
+        {
+            connect();
+        }
+        
         TagLoger::log(Log_dbLink, 0, "\x1b[1;32mMySQL query[%d]=%s\x1b[0m", strlen(q), q);
         if(mysql_real_query(&mysqlLink, q, strlen(q)) == 0)
         {
@@ -346,7 +378,20 @@ public:
 
         if(mysql_errno(&mysqlLink))
         {
-            TagLoger::warn(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), q);
+            TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn)error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), q);
+            if(mysql_errno(&mysqlLink) == CR_COMMANDS_OUT_OF_SYNC)
+            {
+                MYSQL_RES* res = mysql_store_result(&mysqlLink);
+                mysql_free_result(res);
+                
+                if(mysql_real_query(&mysqlLink, q, strlen(q)) == 0)
+                {
+                    return true;
+                }
+                
+                TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn[2])error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), q);
+            }
+            
             if(reconnect())
             {
                 if(mysql_real_query(&mysqlLink, q, strlen(q)) == 0)
@@ -366,6 +411,17 @@ public:
 
     bool query_format(const char *format, ...)
     {
+        if(!isInit)
+        {
+            TagLoger::trace(Log_dbLink, 0, "\x1b[1;32mMySQL connection was not initialized\x1b[0m", db_host.data(), db_port, db_user.data());
+            return false;
+        }
+        
+        if(!isConnected)
+        {
+            connect();
+        }
+        
         int buffer_size = 2000;
         char buf[2000];
         bzero(buf, buffer_size);
@@ -383,7 +439,20 @@ public:
         if(mysql_errno(&mysqlLink))
         {
             // @todo Проверять код ошибки и не паниковать если по коду ясно что проблема в самом запросе а не соединении. 
-            TagLoger::warn(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), buf);
+            TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn)error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), buf); 
+            if(mysql_errno(&mysqlLink) == CR_COMMANDS_OUT_OF_SYNC)
+            {
+                MYSQL_RES* res = mysql_store_result(&mysqlLink);
+                mysql_free_result(res);
+                
+                if(mysql_real_query(&mysqlLink, buf, strlen(buf)) == 0)
+                {
+                    return true;
+                }
+                
+                TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn[2])error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), buf);
+            }
+            
             if(reconnect())
             {
                 if(mysql_real_query(&mysqlLink, buf, strlen(buf)) == 0)
@@ -414,12 +483,20 @@ public:
         if(isInit)
         {
             mysql_close(&mysqlLink);
-        }
-        
+            isConnected = false;
+        } 
     }
     
     bool connect()
     {
+        if(!isInit)
+        {
+            TagLoger::trace(Log_dbLink, 0, "\x1b[1;32mMySQL connection was not initialized\x1b[0m", db_host.data(), db_port, db_user.data());
+            return false;
+        }
+        
+        isConnected = true;
+        
         mysql_real_connect(&mysqlLink, db_host.data(), db_user.data(), db_pw.data(), db_name.data(), db_port, NULL, 0);
 
         if(mysql_errno(&mysqlLink))

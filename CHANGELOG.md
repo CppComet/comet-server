@@ -10,6 +10,7 @@ BUG FIXES:
 BUG FIXES:
 
  * bug fix to query `select * from pipes where name in ("web_test");`
+ * Command systemctl stop comet.service does not work on Ubuntu 16 ( #17 )
 
 IMPROVEMENTS:
 
@@ -20,6 +21,7 @@ IMPROVEMENTS:
 * Added section `cluster`
 * Added section `cometqlproxy`
 * Added clustering mechanism #15
+* Added pidfile option in section `main`.`pidfile`
 
 * Added queryes like `set paramName paramValue`
 * Added queryes like `set sectionName paramName paramValue`

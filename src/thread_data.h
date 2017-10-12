@@ -271,13 +271,18 @@ public:
         auto proxycluster = app->get_list("cometqlproxy", "cluster");
         if(!proxycluster.empty())
         {
+            int id = 0;
             TagLoger::log(Log_Any, LogColorGreen, "Starting Proxy-CometQL cluster on %d nodes", proxycluster.size());
             auto it = proxycluster.begin();
             while(it != proxycluster.end())
             {
-                dbLink *link = new dbLink();
+                id++;
+                std::string name;
+                name.append("cometqlcluster-").append(std::to_string(id));
+                
+                dbLink *link = new dbLink(name);
                 proxyCluster.push_back(link);
-                if(!link->init(it->data()) || !link->connect())
+                if(!link->init(it->data()))
                 {
                     TagLoger::error(Log_Any, LogColorRed, "Error, Proxy-CometQL connection %s does not establish", it->data());
                 }
@@ -292,16 +297,20 @@ public:
         }
          
         // WS кластер для рассылки сообщений приходившех с вебсокетов
-        auto wscluster = app->get_list("ws", "cluster");
+        auto wscluster = app->get_list("ws", "cluster"); 
         if(!wscluster.empty())
         {
+            int id = 0;
             TagLoger::log(Log_Any, LogColorGreen, "Starting WS-CometQL cluster on %d nodes", wscluster.size());
             auto it = wscluster.begin();
             while(it != wscluster.end())
             {
-                dbLink *link = new dbLink();
+                id++;
+                std::string name;
+                name.append("wscluster-").append(std::to_string(id));
+                dbLink *link = new dbLink(name);
                 wsCluster.push_back(link);
-                if(!link->init(it->data()) || !link->connect())
+                if(!link->init(it->data()))
                 {
                     TagLoger::error(Log_Any, LogColorRed, "Error, WS-CometQL connection %s does not establish", it->data());
                 }
