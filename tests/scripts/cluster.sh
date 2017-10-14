@@ -1,19 +1,18 @@
 #!/bin/bash
 
+ # Запуск с coverage
 cd ../../coverage
 cmake .
 make
 
-cd ../tests/scripts
+rm -rf ./cpp_cometN1.log # удалить старый лог
 
+# Запуск под valgrind
 print "start N1"
-nohup ./cpp_comet --conf ./cometN1.ini > ./cpp_cometN1.log &
+valgrind --tool=memcheck --track-origins=yes --leak-check=yes ./cpp_comet_coverage --conf ../tests/scripts/cometN1.ini #> ./cpp_cometN1.log
 
-print "start N2"
-nohup ./cpp_comet --conf ./cometN2.ini > ./cpp_cometN2.log &
-
-print "start N3"
-nohup ./cpp_comet --conf ./cometN3.ini > ./cpp_cometN3.log &
-
-
-echo "INSERT INTO pipes_messages (name, event, message)VALUES('web_MainPageChat', '', '{ \"text\":\"`cat /proc/loadavg`\",\"name\":\"AVG `uname -n`\"}' );" | mysql -h test.comet.su -uroot -p0000000000000000000000000000000000000000000000000000000000000000 -DCometQL_v1 --skip-ssl
+# grep лога на предмет вывода ошибок от valgrind
+echo `cat ./cpp_cometN1.log | grep -E "^==="`
+  
+# Определение coverage
+sh ./coverage.sh

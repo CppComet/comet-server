@@ -35,18 +35,13 @@ if(!file_exists("./tests/".$test.".php"))
 }
 
 include "./tests/".$test.".php";
-  
-// We connect to the comet server with login and password for the access demo (you can get your data for connection after registration at comet-server.com)
-// Login 15
-// Password lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8
-// CometQL_v1 database 
-$cppTest->init([
-    "host" => "app.comet-server.ru",
-    "user" => "15",
-    "password" => "lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8",
-    "api_version" => "CometQL_v1"
-]);
 
+if(file_exists("./conf.php"))
+{
+    include "./conf.php";
+}
+   
+$cppTest->init($serverConf);
 
 $cppTest->start();
 timeTest::test('cpp', 'test'); 
