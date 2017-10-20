@@ -14,6 +14,9 @@ class test_mysqli_connect extends testClass{
         {
             throw new Exception("Error[".mysqli_errno($link)."]:".  mysqli_error($link));
         }
+        
+        @mysqli_connect($this->opt['host'], $this->opt['user'], "noPass", $this->opt['api_version'], $this->opt['port']);
+        @mysqli_connect($this->opt['host'], $this->opt['user'], null, null, $this->opt['port']);
     }
 }
   

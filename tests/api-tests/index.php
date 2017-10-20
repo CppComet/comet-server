@@ -68,6 +68,7 @@ hr{
     <li><a href="#" onclick="runTest('pipes');">pipes</a></li>
     <li><a href="#" onclick="runTest('users_messages');">users_messages</a></li>
     <li><a href="#" onclick="runTest('users_messages');">status</a></li>
+    <li><a href="#" onclick="runTest('pipes_settings');">pipes_settings</a></li>
 </ul>
     
 <div class="root"> 
@@ -241,6 +242,11 @@ cometApi.count_users_in_pipe("track_online", function(res)
 })
 
 cometApi.count_users_in_pipe("web_log_pipe", function(res)
+{
+    console.log("web_log_pipe", res, res.data.user_in_pipe)
+})
+
+cometApi.count_users_in_pipe("trust_log_pipe", function(res)
 {
     console.log("web_log_pipe", res, res.data.user_in_pipe)
 })

@@ -949,13 +949,7 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
         TagLoger::log(Log_ClientServer, 0, "comand-web_pipe:web_pipe_msg_v2\n" );
         res = web_pipe_msg_v2(local_buf, (char*)(str_data + strlen("web_pipe2") + 1), client, msg_data_len);
         if(res == -1) return -1;
-    }
-    else if(memcmp( str_data, "web_pipe", strlen("web_pipe")) == 0)
-    {
-        TagLoger::log(Log_ClientServer, 0, "comand-web_pipe:web_pipe_msg_v1\n" );
-        res = web_pipe_msg_v1(local_buf, (char*)(str_data + strlen("web_pipe") + 1), client, msg_data_len);
-        if(res == -1) return -1;
-    }
+    } 
     else if(memcmp( str_data, "pipe_log", strlen("pipe_log")) == 0)
     {
         TagLoger::log(Log_ClientServer, 0, "comand-pipe_log:\n" );
@@ -1288,127 +1282,7 @@ char* Client_connection::checking_event_name(thread_data* local_buf, const char*
 
     return p;
 }
-
-/**
- * Обрабатывает событие пришедшие от js для отправки в web_pipe
- * @param event_data
- * @param client
- * @param len
- * @return
- * @note Старая версия, будет удалена когда выйдут из оборота все версии js api моложе 2.53
- * @depricate
- */
-int Client_connection::web_pipe_msg_v1(thread_data* local_buf, char* event_data,int client, int len)
-{
-    if(!appConf::instance()->get_bool("ws", "support_old_api"))
-    {
-        return 0;
-    }
-
-    bool send_user_id = true;
-    char* name = event_data;
-    if(memcmp(name, "@web_", 5) == 0)
-    {
-        // Не добавлять к сообщению id отправителя
-        send_user_id = false;
-        name++;
-    }
-    else if(memcmp(name, "web_", 4) != 0)
-    {
-        message(local_buf, base64_encode((const char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}").data(), "_answer");
-        return -1;
-    }
-
-    char* p = checking_channel_name( local_buf, name);
-    if( p == 0)
-    {
-        message(local_buf, base64_encode((const char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_msg] Invalid channel name.\"},\"event_name\":\"answer\"}").data(), "_answer");
-        return -1;
-    }
-
-    *p = 0;
-    p++;
-
-    TagLoger::log(Log_ClientServer, 0, "e:%s\n", name);
-    TagLoger::log(Log_ClientServer, 0, "p:%s\n", p);
-    char *msg = NULL;
-    if( !send_user_id)
-    {
-        msg = p;
-    }
-    else
-    {
-        msg = new char[strlen(p)+40]; // !!!
-        snprintf(msg, strlen(p)+40, "A::%d;%s", web_user_id, p);
-    }
-
-    TagLoger::log(Log_ClientServer, 0, "msg:%s\n", msg);
-    PipeLog::addToLog(local_buf, name, "undefined", web_user_id , p, strlen(p));
-
-    CP<Pipe> pipe = devManager::instance()->getDevInfo()->findPipe(std::string(name));
-
-    int num_msg = 0;
-    if(!pipe.isNULL())
-    {
-        int num_fail = 0;
-        auto it = pipe->subscribers->begin();
-        while(it)
-        {
-            int conection_id = it->data;
-            TagLoger::log(Log_ClientServer, 0, "Answer[]->%d\n", conection_id );
-
-            CP<Client_connection> r = tcpServer <Client_connection>::instance()->get(conection_id);
-            if(r)
-            {
-                if( r->getfd() != fd ) // Не отправлять самому себе события.
-                {
-                    int send_result = r->message(local_buf,  msg, name);
-                    TagLoger::log(Log_ClientServer, 0, "R->message = %d\n" , send_result);
-                    if(send_result == 0)
-                    {
-                        num_msg++;
-                    }
-                    else
-                    {
-                        TagLoger::log(Log_ClientServer, 0, "send_result[%d]->%d\n", conection_id, send_result );
-                        pipe->erase(conection_id);
-                        num_fail++;
-                    }
-                }
-            }
-            else
-            {
-                pipe->erase(conection_id);
-                num_fail++;
-            }
-            it = it->Next();
-        }
-    }
-
-    if( send_user_id)
-    {
-        delete[] msg;
-    }
-
-    char rdname[PIPE_NAME_LEN+64];
-    bzero(rdname, PIPE_NAME_LEN+64);
-    snprintf(rdname, PIPE_NAME_LEN+64, "_answer_to_%s", name);
-    TagLoger::log(Log_ClientServer, 0, "answer:%s\n", rdname);
-
-    local_buf->answer_buf.lock();
-    snprintf(local_buf->answer_buf, local_buf->answer_buf.getSize(), "{\"data\":{\"number_messages\":%d,\"error\":\"\"},\"event_name\":\"answer\"}",  num_msg);
-
-    int answer_len = strlen(local_buf->answer_buf);
-    TagLoger::log(Log_ClientServer, 0, "rdname:%s\n", rdname);
-    TagLoger::log(Log_ClientServer, 0, "answer:%s\n", (char*)local_buf->answer_buf);
-
-    if(message(local_buf, base64_encode( (const unsigned char*)local_buf->answer_buf.getAndUnlock(), answer_len ).data() , rdname) < 0)
-    {
-        return -1;
-    }
-    return 0;
-}
-
+ 
 /**
  * Обрабатывает событие пришедшие от js для отправки в web_pipe
  * @param event_data

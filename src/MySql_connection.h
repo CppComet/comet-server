@@ -172,135 +172,7 @@ public:
     }
 };
 
-
-/**
- * Класс для описания структуры таблицы
- */
-class SqlTable
-{
-    char* name = NULL;
-
-    char** columDefName = NULL;
-    char** columDefType = NULL;
-    int colums_count = 0;
-
-public:
-
-    SqlTable()
-    {
-    }
-
-
-    SqlTable(int colums_count)
-    {
-        setColumsCount(colums_count);
-    }
-
-    int getColumsCount() const
-    {
-        return colums_count;
-    }
-
-    void setName(const char* TableName)
-    {
-        if(name != NULL)
-        {
-            delete[] name;
-        }
-
-        name = new char[200]; // strlen(TableName)
-        bzero(name, 200);
-        memcpy(name, TableName, strlen(TableName));
-    }
-
-    const char* getName() const
-    {
-        return (const char*) name;
-    }
-
-    void setColumsCount(int colums_count)
-    {
-        if(columDefName != NULL)
-        {
-            for(int i=0; i< colums_count; i++)
-            {
-                delete columDefName[i];
-                delete columDefType[i];
-            }
-
-            delete[] columDefName;
-            delete[] columDefType;
-        }
-
-        columDefName = new char*[colums_count];
-        columDefType = new char*[colums_count];
-
-        bzero(columDefName, sizeof(char*) * colums_count);
-        bzero(columDefType, sizeof(char*) * colums_count);
-    }
-
-    ~SqlTable()
-    {
-        if(columDefName != NULL)
-        {
-            for(int i=0; i< colums_count; i++)
-            {
-                delete columDefName[i];
-                delete columDefType[i];
-            }
-
-            delete[] columDefName;
-            delete[] columDefType;
-        }
-
-        if(name != NULL)
-        {
-            delete[] name;
-        }
-
-    }
-
-    void setColumDef(int index, const char* name, const char* type)
-    {
-        if(index < 0 || index >= colums_count)
-        {
-            return;
-        }
-
-        int nameLen = strlen(name);
-        int typeLen = strlen(type);
-
-
-        columDefName[index] = new char[300];
-        columDefType[index] = new char[300];
-
-        bzero(columDefName[index], 300);
-        bzero(columDefType[index], 300);
-
-        memcpy(columDefName[index], name, nameLen);
-        memcpy(columDefType[index], type, typeLen);
-
-        printf("columDefName %s\n", columDefName[index]);
-        printf("columDefType %s\n", columDefType[index]);
-    }
-
-    const char** getColumDef() const
-    {
-        return (const char**)columDefName;
-    }
-
-    const char* getColumDef(int i) const
-    {
-        if(i < 0 || i >= colums_count)
-        {
-            return NULL;
-        }
-
-        return (const char*)columDefName[i];
-    }
-
-};
-
+ 
 #define STATE_0 0
 #define STATE_SEND_HANDSHAKE 1
 #define STATE_RECEIVED_HANDSHAKE 2
@@ -319,11 +191,7 @@ class MySql_connection:public connection
     friend class tcpServer<MySql_connection>;
 
 protected:
-    /**
-     * Массив с описанием структуры всех таблиц
-     */
-    static SqlTable* tables;
-     
+    
     bool isRootUser = true;  
     int api_version = 0;
 
@@ -359,11 +227,6 @@ protected:
      * @todo Надо бы и наш парсер переиначить в повторно входимый.
      */
     static pthread_mutex_t QLParsing_mutex;
-
-    /**
-     * Инициализация структуры таблиц
-     */
-    static void initTables();
  
     MySql_connection();
     virtual ~MySql_connection();

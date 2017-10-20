@@ -150,8 +150,7 @@ class Client_connection:public connection
      */
     int un_subscription(thread_data* local_buf);
      
-    int log_statistics(thread_data* local_buf, const char* event_data,int client, int len);
-    int web_pipe_msg_v1(thread_data* local_buf, char* event_data,int client, int len);
+    int log_statistics(thread_data* local_buf, const char* event_data,int client, int len); 
     int web_pipe_msg_v2(thread_data* local_buf, char* event_data,int client, int len);
     int get_pipe_log(thread_data* local_buf, char* event_data,int client, int len);
     int get_user_last_online_time(thread_data* local_buf, char* event_data,int client, int len);

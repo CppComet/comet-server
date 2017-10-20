@@ -37,8 +37,7 @@
 
 #include "sha1.h"
 
-
-SqlTable* MySql_connection::tables;
+ 
 int _countUerys = 0;
 pthread_mutex_t MySql_connection::QLParsing_mutex;
 
@@ -115,76 +114,7 @@ MySql_connection::~MySql_connection()
 {
     //printf("delete MySql_connection\n");
 }
-
-#define table_users_auth tables[0]
-#define table_users_time tables[1]
-#define table_users_messages tables[2]
-#define table_pipes_messages tables[3]
-#define table_users_in_pipes tables[4]
-#define table_pipes tables[5]
-#define table_pipes_settings tables[6]
-
-/**
- * Инициализация структуры таблиц
- */
-void MySql_connection::initTables()
-{
-    if(tables != NULL)
-    {
-        return;
-    }
-
-    tables = new SqlTable[MYSQL_TABLES_COUNT];
-    bzero(tables, sizeof(SqlTable)*MYSQL_TABLES_COUNT);
-
-    table_users_auth.setName("users_auth");
-    table_users_auth.setColumsCount(MAX_COLUMNS_COUNT);
-    table_users_auth.setColumDef(0, "id", "int");
-    table_users_auth.setColumDef(1, "hash", "char(32)");
-
-
-    table_users_time.setName("users_time");
-    table_users_time.setColumsCount(MAX_COLUMNS_COUNT);
-    table_users_time.setColumDef(0, "id", "int(10)");
-    table_users_time.setColumDef(1, "time", "int(10)");
-
-
-    table_users_messages.setName("users_messages");
-    table_users_messages.setColumsCount(MAX_COLUMNS_COUNT);
-    table_users_messages.setColumDef(0, "id", "int(10)");
-    table_users_messages.setColumDef(1, "index", "int(2)");
-    table_users_messages.setColumDef(1, "event", "varchar(32)");
-    table_users_messages.setColumDef(1, "message", "text");
-
-
-    table_pipes_messages.setName("pipes_messages");
-    table_pipes_messages.setColumsCount(MAX_COLUMNS_COUNT);
-    table_pipes_messages.setColumDef(0, "name", "int(10)");
-    table_pipes_messages.setColumDef(1, "index", "int(2)");
-    table_pipes_messages.setColumDef(1, "event", "varchar(32)");
-    table_pipes_messages.setColumDef(1, "message", "text");
-    table_pipes_messages.setColumDef(1, "auth_type", "char(1)");
-    table_pipes_messages.setColumDef(1, "user_id", "int(10)");
-
-
-    table_users_in_pipes.setName("users_in_pipes");
-    table_users_in_pipes.setColumsCount(MAX_COLUMNS_COUNT);
-    table_users_in_pipes.setColumDef(0, "name", "varchar(32)");
-    table_users_in_pipes.setColumDef(1, "user_id", "int(10)");
-
-
-    table_pipes.setName("pipes");
-    table_pipes.setColumsCount(MAX_COLUMNS_COUNT);
-    table_pipes.setColumDef(0, "name", "varchar(32)");
-    table_pipes.setColumDef(1, "users", "text");
-
-
-    table_pipes_settings.setName("pipes_settings");
-    table_pipes_settings.setColumsCount(MAX_COLUMNS_COUNT);
-    table_pipes_settings.setColumDef(0, "name", "varchar(32)");
-    table_pipes_settings.setColumDef(1, "length", "int(2)");
-}
-
+  
 /**
  * Обрабатывает сообщения от клиентов
  * @param client идентификатор клиента
@@ -746,9 +676,15 @@ int MySql_connection::sql_show_databases(thread_data* local_buf, unsigned int Pa
 
 int MySql_connection::sql_show_tables(thread_data* local_buf, unsigned int PacketNomber)
 {
-    /*// Отправляем пакет описания 1 колонки
-    const static MySqlResultset_ColumDef column("Tables");
+    // Отправляем пакет описания 1 колонки
+    MySqlResultset_ColumDef column[1]; 
+    column[0] = "Tables"; 
 
+    char* answer = local_buf->answer_buf.getData();
+    int delta = HeadAnswer(1, column, PacketNomber, answer);
+    answer += delta;
+    
+    MySqlResulValue values[18];
     int countRows = 0;
     local_buf->sql.getValue(countRows++, 0) = "users_auth";
     local_buf->sql.getValue(countRows++, 0) = "users_time";
@@ -757,23 +693,15 @@ int MySql_connection::sql_show_tables(thread_data* local_buf, unsigned int Packe
     local_buf->sql.getValue(countRows++, 0) = "users_in_pipes";
     local_buf->sql.getValue(countRows++, 0) = "pipes";
     local_buf->sql.getValue(countRows++, 0) = "pipes_settings";
-    local_buf->sql.sendAllRowsAndHeaders(local_buf, 1, &column, PacketNomber, countRows, this);
-    */
+    
+    delta = RowPackage(countRows, values, ++PacketNomber, answer);
+    answer += delta;
+ 
+    web_write(local_buf->answer_buf.getData(), answer - local_buf->answer_buf.getData());
 
-    initTables();
-
-    // Отправляем пакет описания 1 колонки
-    const static MySqlResultset_ColumDef column("Tables");
-
-    int countRows = 0;
-    while(countRows < MYSQL_TABLES_COUNT && tables[countRows].getName() != NULL )
-    {
-        local_buf->sql.getValue(countRows, 0) = tables[countRows].getName();
-        countRows++;
-    }
-
-    sendAllRowsAndHeaders(local_buf, 1, &column, PacketNomber, countRows);
-    return 0;
+    local_buf->answer_buf.unlock();
+    Send_EOF_Package(++PacketNomber, local_buf, this); // Send_EOF_Package
+    return 0; 
 }
 
 /**
