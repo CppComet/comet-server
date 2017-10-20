@@ -92,6 +92,7 @@ execute_process( COMMAND bison -d --verbose --debug ../src/CometQL.y -o ../src/C
 execute_process( COMMAND yacc -d --verbose --debug ../src/CometQL.y -o ../src/CometQL.cc)
 execute_process( COMMAND cc -c ../src/lex.yy.c -o ../src/lex.yy.o)
  
+add_definitions(-DUSE_COVERAGE=1) 
 
 # Установка переменной со списком исходников для исполняемого файла
 set(SOURCE_EXE 
@@ -132,5 +133,4 @@ target_link_libraries (cpp_comet_coverage ${CMAKE_THREAD_LIBS_INIT}  ${MYSQL_LIB
 
 
 #cmake ./ && make
-
 

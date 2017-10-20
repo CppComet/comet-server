@@ -163,6 +163,36 @@ void posix_log_signal(int signum)
     signal(signum, SIG_DFL); // перепосылка сигнала
 }
 
+/**
+ * Обрабатывает сигнал смерти.
+ * @link http://habrahabr.ru/post/131412/
+ * @param signum
+ */
+void posix_exit_signal(int signum)
+{
+    TagLoger::log(Log_Any, 0, "\n\n\x1b[1;mposix_exit_signal\x1b[0m\n");
+    print_backtrace();
+    TagLoger::log(Log_Any, 0, "\x1b[1;32mok\x1b[0m\n");
+
+    time_t seconds = time(NULL);
+    tm* timeinfo = localtime(&seconds);
+
+    /**
+     * @todo перевести на использование strftime
+     */
+    char *bufTime = asctime(timeinfo);
+    char error_string[900];
+    snprintf(error_string, 900, "signum=%d\tTime=%ld\t[%s]\n", signum, seconds, bufTime);
+
+    int fp = open("posix_signal.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+    write(fp, error_string, strlen(error_string));
+    close(fp);
+    TagLoger::log(Log_Any, 0, "\x1b[1;33m%s\x1b[0m\n", error_string);
+
+    signal(signum, SIG_DFL); // перепосылка сигнала 
+    exit(0);
+}
+
 void posix_ignor_signal(int signum)
 {
     TagLoger::log(Log_Any, 0, "\n\n\x1b[1;mposix_ignor_signal\x1b[0m\n");
@@ -316,13 +346,23 @@ int main(int argc, char *argv[])
 
     signal(SIGFPE,  posix_log_signal); //  сигнал, посылаемый процессу, при попытке выполнения ошибочной арифметической операции. ( может быть перехвачен или проигнорирован программой.)
     signal(SIGILL,  posix_log_signal); //  сигнал, посылаемый процессу при попытке выполнить неправильно сформированную, несуществующую или привилегированную инструкцию. (или попытке выполнения инструкции, требующей специальных привилегий. ) ( может быть перехвачен или проигнорирован)
+   
+
+//#define	USE_COVERAGE
+#ifndef USE_COVERAGE
     signal(SIGINT,  posix_log_signal); //  сигнал для остановки процесса пользователем с терминала.
     signal(SIGQUIT, posix_log_signal); //  сигнал, для остановки процесса пользователем, комбинацией «quit» на терминале.
     signal(SIGTERM, posix_log_signal); //  сигнал, для запроса завершения процесса. (В отличие от SIGKILL этот сигнал может быть обработан или проигнорирован программой.)
-
     signal(SIGUSR1, posix_log_signal); // пользовательские сигналы По умолчанию, сигналы SIGUSR1 и SIGUSR2 завершают выполнение процесса.
     signal(SIGUSR2, posix_log_signal); // пользовательские сигналы По умолчанию, сигналы SIGUSR1 и SIGUSR2 завершают выполнение процесса.
-
+#else
+    signal(SIGINT,  posix_exit_signal); //  сигнал для остановки процесса пользователем с терминала.
+    signal(SIGQUIT, posix_exit_signal); //  сигнал, для остановки процесса пользователем, комбинацией «quit» на терминале.
+    signal(SIGTERM, posix_exit_signal); //  сигнал, для запроса завершения процесса. (В отличие от SIGKILL этот сигнал может быть обработан или проигнорирован программой.)
+    signal(SIGUSR1, posix_exit_signal); // пользовательские сигналы По умолчанию, сигналы SIGUSR1 и SIGUSR2 завершают выполнение процесса.
+    signal(SIGUSR2, posix_exit_signal); // пользовательские сигналы По умолчанию, сигналы SIGUSR1 и SIGUSR2 завершают выполнение процесса.
+#endif	/* DEVMANAGER_H */
+    
     signal(SIGBUS,  posix_log_signal); //  сигнал, сигнализирующий об ошибке шины, при обращении к физической памяти. ( может быть перехвачен или проигнорирован)
     signal(SIGSYS,  posix_log_signal); //  сигнал, предназначенный для посылки программе, при попытке передать неправильный аргумент в системный вызов.
     signal(SIGXCPU, posix_log_signal); //  сигнал, посылаемый компьютерной программе, превышающей лимит процессорного времени.
