@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.2.  */
+/* A Bison parser, made by GNU Bison 3.0.4.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -45,59 +45,60 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    TOK_SHOW = 258,
-    TOK_DATABASES = 259,
-    TOK_TABLES = 260,
-    TOK_COLUMNS = 261,
-    TOK_STATUS = 262,
-    TOK_PROCESSLIST = 263,
-    FLAG_GLOBAL = 264,
-    FLAG_SESSION = 265,
-    FLAG_FULL = 266,
-    FLAG_FILESYSTEM = 267,
-    FLAG_RAM = 268,
-    FLAG_AVG = 269,
-    FLAG_UPTIME = 270,
-    TOK_FROM = 271,
-    TOK_USE = 272,
-    VAL_INT = 273,
-    VAL_NAME = 274,
-    TOK_SELECT = 275,
-    TOK_LIMIT = 276,
-    VAL_SYSTEM_VARIBLE = 277,
-    TOK_INSERT = 278,
-    TOK_INTO = 279,
-    TOK_VALUES = 280,
-    VAL_QUOTED_STRING = 281,
-    BRACKETS_RIGHT = 282,
-    COMMA = 283,
-    BRACKETS_LEFT = 284,
-    EQUALLY = 285,
-    ASTERISK = 286,
-    TOK_LIKE = 287,
-    TOK_VARIABLES = 288,
-    TOK_TABLE_STATUS = 289,
-    TOK_DESCRIBE = 290,
-    TOK_WHERE = 291,
-    TOK_ASC = 292,
-    TOK_DESC = 293,
-    TOK_ORDER_BY = 294,
-    TOK_DELETE = 295,
-    TOK_IN = 296,
-    TOK_OR = 297,
-    TOK_AND = 298,
-    MORE = 299,
-    LESS = 300,
-    TOK_DATABASE = 301
+    TOK_SET = 258,
+    TOK_SHOW = 259,
+    TOK_DATABASES = 260,
+    TOK_TABLES = 261,
+    TOK_COLUMNS = 262,
+    TOK_STATUS = 263,
+    TOK_PROCESSLIST = 264,
+    FLAG_GLOBAL = 265,
+    FLAG_SESSION = 266,
+    FLAG_FULL = 267,
+    FLAG_FILESYSTEM = 268,
+    FLAG_RAM = 269,
+    FLAG_AVG = 270,
+    FLAG_UPTIME = 271,
+    TOK_FROM = 272,
+    TOK_USE = 273,
+    VAL_INT = 274,
+    VAL_NAME = 275,
+    TOK_SELECT = 276,
+    TOK_LIMIT = 277,
+    VAL_SYSTEM_VARIBLE = 278,
+    TOK_INSERT = 279,
+    TOK_INTO = 280,
+    TOK_VALUES = 281,
+    VAL_QUOTED_STRING = 282,
+    BRACKETS_RIGHT = 283,
+    COMMA = 284,
+    BRACKETS_LEFT = 285,
+    EQUALLY = 286,
+    ASTERISK = 287,
+    TOK_LIKE = 288,
+    TOK_VARIABLES = 289,
+    TOK_TABLE_STATUS = 290,
+    TOK_DESCRIBE = 291,
+    TOK_WHERE = 292,
+    TOK_ASC = 293,
+    TOK_DESC = 294,
+    TOK_ORDER_BY = 295,
+    TOK_DELETE = 296,
+    TOK_IN = 297,
+    TOK_OR = 298,
+    TOK_AND = 299,
+    MORE = 300,
+    LESS = 301,
+    TOK_DATABASE = 302
   };
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE YYSTYPE;
+
 union YYSTYPE
 {
-#line 115 "CometQL.y" /* yacc.c:1909  */
+#line 115 "src/CometQL.y" /* yacc.c:1909  */
 
    struct TokStruct {
       char* text;
@@ -105,8 +106,10 @@ union YYSTYPE
       char quote;
    } tokStruct;
 
-#line 109 "CometQL.tab.h" /* yacc.c:1909  */
+#line 110 "CometQL.tab.h" /* yacc.c:1909  */
 };
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

@@ -27,6 +27,7 @@ class appConf: public ini_parser
 {
     
     static appConf* inst;
+    bool initFromFile(const char *fileName);
 public:
     bool isHelp = false;
     
@@ -50,7 +51,6 @@ public:
     appConf();
     void print(void);
     bool init(int argc, char *argv[]);
-    bool initFromFile(const char *fileName);
  
     static appConf* instance()
     {

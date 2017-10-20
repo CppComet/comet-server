@@ -102,8 +102,8 @@
     </body>\
     </html>" 
  
-#define MYSQL_SERVERNAME "CppComet 3.25"
-#define MYSQL_SYSTEMVARIBLE "CppComet 3.25 (comet-server.com, support@comet-server.com)"
+#define MYSQL_SERVERNAME "CppComet 3.26"
+#define MYSQL_SYSTEMVARIBLE "CppComet 3.26 (comet-server.com, support@comet-server.com)"
 
 #define maxValue( a, b ) ( (a) > (b) ? (a) : (b) )
 #define minValue( a, b ) ( (a) < (b) ? (a) : (b) )

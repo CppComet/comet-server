@@ -22,6 +22,7 @@
 ")"                     {  setTokData return BRACKETS_RIGHT;}
 IN                      {  setTokData return TOK_IN;}
 OR                      {  setTokData return TOK_OR;}
+SET                     {  setTokData return TOK_SET;}
 AND                     {  setTokData return TOK_AND;}
 USE                     {  setTokData return TOK_USE;}
 ASC                     {  setTokData return TOK_ASC;} 

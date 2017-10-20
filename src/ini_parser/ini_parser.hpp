@@ -3,7 +3,7 @@
 
 /*
  * From https://github.com/jhpy1024/ini_parser
- * 
+ *
  * Copyright (c) 2014 Jake Horsfield
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -38,20 +38,20 @@
 #include <stdexcept>
 
 
-#include <algorithm> 
-#include <functional> 
+#include <algorithm>
+#include <functional>
 #include <cctype>
 #include <locale>
 
 
-class confVar{ 
+class confVar{
     /**
-     * @todo simpleTask оптимизировать функции get_* и set_* так чтоб не преобразовывать каждый раз из строки в нужный тип 
-     */ 
+     * @todo simpleTask оптимизировать функции get_* и set_* так чтоб не преобразовывать каждый раз из строки в нужный тип
+     */
     std::string value;
     std::list<std::string> list;
 public:
-    
+
     int get_int() const
     {
         try{
@@ -100,9 +100,9 @@ public:
             return std::stol(value);
         }catch(...)
         {
-            printf("\x1b[1;31mget_long exeption data=%s\x1b[0m\n", value.data()); 
+            printf("\x1b[1;31mget_long exeption data=%s\x1b[0m\n", value.data());
             return 0;
-        } 
+        }
     }
 
     float get_float() const
@@ -112,58 +112,64 @@ public:
             return std::stof(value);
         }catch(...)
         {
-            printf("\x1b[1;31mget_float exeption data=%s\x1b[0m\n", value.data());  
+            printf("\x1b[1;31mget_float exeption data=%s\x1b[0m\n", value.data());
             return 0;
-        }  
+        }
     }
 
     double get_double() const
-    { 
-        try{ 
+    {
+        try{
             return std::stod(value);
         }catch(...)
         {
-            printf("\x1b[1;31mget_double exeption data=%s\x1b[0m\n", value.data());   
+            printf("\x1b[1;31mget_double exeption data=%s\x1b[0m\n", value.data());
             return 0;
-        }   
+        }
     }
 
     std::string get_string() const
-    { 
+    {
         //printf("get_string [%s] %s=%s\n", section.data(), name.data(), sections.at(section).at(name).data());
         return value;
     }
 
     const char* get_chars() const
-    {  
+    {
         return value.data();
-    } 
-     
+    }
+
+    const std::list<std::string> get_list() const
+    {
+        return list;
+    }
+    
     void set_value(const std::string& val)
     {
-        value = val; 
-        
+        value = val;
+
         if(val.empty() && !list.empty())
         {
             list.erase(list.begin(), list.end());
         }
-        else if(val.compare(0, 2, "[]"))
+        else if(val.compare(0, 2, "[]") == 0)
         {
             std::string arrStr = val;
-            list.push_back(arrStr.erase(0, 2));
+            arrStr = arrStr.erase(0, 2); 
+            list.push_back(arrStr);
         }
-    } 
-    
+    }
+
     void add_value(const std::string& val)
     {
         list.push_back(val);
-    } 
-    
-    const std::string& operator=(const std::string& val){ 
+    }
+
+    const std::string& operator=(const std::string& val){
         value = val;
         return value;
     }
-     
+
 };
 
 
@@ -202,19 +208,19 @@ class ini_parser
 
         ini_parser()
             : BOOL_TRUE("BOOL_TRUE")
-            , BOOL_FALSE("BOOL_FALSE") 
+            , BOOL_FALSE("BOOL_FALSE")
             , current_section("")
         {
         }
-         
+
         int get_int(const std::string& section, const std::string& name= "") const
         {
             if(!is_property_exists(section, name))
             {
                 return 0;
             }
-             
-            return sections.at(section).at(name).get_int(); 
+
+            return sections.at(section).at(name).get_int();
         }
 
         /*
@@ -227,8 +233,8 @@ class ini_parser
             {
                 return false;
             }
-             
-            return sections.at(section).at(name).get_bool(); 
+
+            return sections.at(section).at(name).get_bool();
         }
 
         long get_long(const std::string& section, const std::string& name= "") const
@@ -237,8 +243,8 @@ class ini_parser
             {
                 return 0;
             }
-            
-            return sections.at(section).at(name).get_long();  
+
+            return sections.at(section).at(name).get_long();
         }
 
         float get_float(const std::string& section, const std::string& name= "") const
@@ -247,8 +253,8 @@ class ini_parser
             {
                 return 0;
             }
-            
-            return sections.at(section).at(name).get_float();   
+
+            return sections.at(section).at(name).get_float();
         }
 
         double get_double(const std::string& section, const std::string& name= "") const
@@ -257,8 +263,8 @@ class ini_parser
             {
                 return 0;
             }
-            
-            return sections.at(section).at(name).get_double();     
+
+            return sections.at(section).at(name).get_double();
         }
 
         std::string get_string(const std::string& section, const std::string& name= "") const
@@ -267,18 +273,28 @@ class ini_parser
             {
                 return std::string("");
             }
-            
-            return sections.at(section).at(name).get_string(); 
+
+            return sections.at(section).at(name).get_string();
         }
-        
+
         const char* get_chars(const std::string& section, const std::string& name= "") const
         {
             if(!is_property_exists(section, name))
             {
                 return NULL;
             }
-            
-            return sections.at(section).at(name).get_chars();  
+
+            return sections.at(section).at(name).get_chars();
+        }
+        
+        const std::list<std::string> get_list(const std::string& section, const std::string& name= "") const
+        {
+            if(!is_property_exists(section, name))
+            {
+                return std::list<std::string>();
+            }
+
+            return sections.at(section).at(name).get_list();
         }
 
         void set_value(const std::string& section, const std::string& name, int value)
@@ -307,7 +323,7 @@ class ini_parser
         }
 
         void set_value(const std::string& section, const std::string& name, const std::string& value)
-        {  
+        {
             sections[section][name].set_value(value);
         }
 
@@ -318,7 +334,7 @@ class ini_parser
                 //printf("false section.empty [%s] %s\n", section.data(), name.data());
                 return false;
             }
-            
+
             if (sections.find(section) == sections.end())
             {
                 //printf("false sections.end [%s] %s\n", section.data(), name.data());
@@ -330,11 +346,11 @@ class ini_parser
                 //printf("false sections.at(section).end [%s] %s\n", section.data(), name.data());
                 return false;
             }
-            
+
             //printf("true is_property_exists [%s] %s\n", section.data(), name.data());
             return true;
         }
-        
+
         bool is_section_exists(const std::string& section) const
         {
             if (section != "" && sections.find(section) == sections.end())
@@ -344,11 +360,11 @@ class ini_parser
 
             return true;
         }
-         
+
         bool parse(const std::string& FileName)
         {
             filename = FileName;
-            
+
             std::fstream file;
             file.open(filename);
             if (!file.is_open())
@@ -360,7 +376,7 @@ class ini_parser
 
             std::string line;
             while (std::getline(file, line))
-            { 
+            {
                 input.push_back(line);
 
                 if (is_comment_line(line))
@@ -379,12 +395,12 @@ class ini_parser
                     handle_assignment(line);
                 }
             }
-            
+
             return true;
         }
 
     protected:
-         
+
         void start_section(const std::string& line)
         {
             current_section = extract_section_name(line);
@@ -408,7 +424,7 @@ class ini_parser
             std::string value = extract_value(line);
 
             //printf("set:%s[%s] =\t%s\n", current_section.data(), key.data(), value.data());
-            set_value(current_section, key, value); 
+            set_value(current_section, key, value);
         }
 
         std::string extract_key(const std::string& line) const
@@ -440,10 +456,10 @@ class ini_parser
                 {
                     break;
                 }
-                
+
                 value += line[i];
             }
-            
+
             return trim(value);
         }
 
@@ -460,7 +476,7 @@ class ini_parser
          * bracket and the last character is a closing bracket.
          */
         bool is_section_start_line(const std::string& line) const
-        { 
+        {
             return (line.length() > 0) && (line[0] == '[') && (line[line.find_last_not_of(" \r\t")] == ']');
         }
 
@@ -473,7 +489,7 @@ class ini_parser
             std::size_t equals_pos = line.find("=");
             return (equals_pos != std::string::npos) && (equals_pos != 0) && (equals_pos != line.length() - 1);
         }
-  
+
         std::string filename;
         std::vector<std::string> input;
 

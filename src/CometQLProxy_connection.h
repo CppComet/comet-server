@@ -38,6 +38,11 @@ class MySql_connection;
    
 using namespace std;
  
+
+#define	PROXY_TO_ALL -1
+#define	PROXY_TO_RANDOM -2
+
+
 /**
  * Класс одного соединения с сервером
  * Содержит функции обработки запросов от бекенда
@@ -50,8 +55,6 @@ using namespace std;
  * 
  * Для повышения скорости инсертов можно иметь более одного соединения между каждой из нод кластера
  * Тогда два подряд запроса будут выполнятся параллельно
- * 
- * Свой механизм проксирования запросов позволил бы переотправлять запросы в слачии ошибки
  * 
  * Два варианта кластерезации:
  *   - Высокая доступность 
@@ -76,28 +79,18 @@ using namespace std;
  * Или быть у каждого своей но с каким то дополнительным скриптом для синхронизации после падений
  * 
  * Js подключается к одному из серверов группы.
- *  Режим 1: Пользователи распределяются случайно между доступными серверами в группе
+ *  Режим 1: Пользователи распределяются случайно между доступными серверами в группе (Сейчас работвет так)
  *  Режим 2: Анонимные пользователи распределяются случайно. Авторизованные равномерно по серверам.
  * 
  * 
- * Режим 1: (Можно реализовать в бесплатной версии)
+ * Режим 1: (Сейчас работвет так)
  * Плюсы: Нагрузка распределяется равномерно по кластеру, Падение одного сервера отключит часть пользователей максимум на несколько секунд
  * Минусы: Масштабирование НЕ линейное так как cometQL запросы отправляются на все сервера группы
  * 
- * Режим 2: (Можно реализовать в платной версии)
+ * Режим 2:
  * Плюсы: Нагрузка распределяется равномерно по кластеру, масштабирование линейное так как cometQL запросы не отправляются на те сервера группы на которых точно нет адресата
- * Минусы: Падение одного сервера отключит часть пользователей
- * 
- * Режим 3: (Можно реализовать в платной версии но попозже)
- * Комбинация из режима 2 и режима 1 доступная на кластере в четыре ноды и больше
- * 
- * 
- * Оптимизации:
- * Мы можем для инсертов не отдавать результат а говорить принято.
- * Тогда задержки для сторонних сайтов будут минимальные
- * 
- * Для селектов же всё таки придётся обращатся ко всем серверам группы.
- * 
+ * Минусы: Падение одного сервера отключит часть пользователей (решаемо на уровне js api)
+ *   
  */
 class CometQLProxy_connection:public MySql_connection
 {
@@ -109,10 +102,17 @@ public:
     virtual ~CometQLProxy_connection();
  
 protected:
-  
-    int proxy_select(thread_data* local_buf, unsigned int PacketNomber);
-    int proxy_insert(thread_data* local_buf, unsigned int PacketNomber);
-    int proxy_delete(thread_data* local_buf, unsigned int PacketNomber); 
+   
+    int proxy_union_select(int node, const char* query, thread_data* local_buf, unsigned int PacketNomber); 
+    
+    int proxy_insert(int node, const char* query, thread_data* local_buf, unsigned int PacketNomber);
+    
+    int proxy_query(int node, thread_data* local_buf, unsigned int PacketNomber);
+    
+    virtual int query_router(thread_data* local_buf, int PacketNomber);
+    
+    int sql_select_from_pipes(thread_data* local_buf, unsigned int PacketNomber);
+    int sql_select_from_users_time(thread_data* local_buf, unsigned int PacketNomber);
 };
 
 #endif	/* COMETQLPROXY_CONNECTION_H */

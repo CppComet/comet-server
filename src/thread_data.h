@@ -14,16 +14,13 @@ class tcpServer_benchmark;
 #include <string.h>
 #include <exception>
 
-#include "main.h" 
+#include "main.h"
 #include "appConf.h"
 
 #include "dbLink.h"
- 
+
 #include "CometQL.h"
-
-#include "CometQLcluster.h"
- 
-
+  
 #include "tcpServer_benchmark.h"
 
 #ifndef ARRAY_BUFFER_SIZE
@@ -32,7 +29,7 @@ class tcpServer_benchmark;
 
 /**
  * Класс для работы с памятью предназначеной для буферизации принимаемых и отправляемых данных.
- * 
+ *
  * @todo Заменить поддержку работы так чтоб можно было не задавать начальный размер [opt1 -600*ws_online]
  */
 class bufferController
@@ -70,7 +67,7 @@ public:
      * @param size
      */
     void setSize(int size)
-    { 
+    {
         data_size = size;
         if(buf == NULL)
         {
@@ -158,7 +155,7 @@ public:
     {
         return inUse_buf;
     }
-    
+
     /**
      * Функция для контроля доступа.
      * Делает заметку о том что память занята.
@@ -199,7 +196,7 @@ public:
         return buf;
     }
 };
-  
+
 /**
  * Класс хранящий соединение с редисом и память для записи туда данных на короткий период.
  * Не является потокобезопасным и поэтому подразумевается что в каждом потке иметтся своя копия класса.
@@ -209,17 +206,20 @@ public:
 class thread_data
 {
 public:
- 
+
     /**
      * Соединение с mysql сервером для хранения данных
      */
     dbLink db;
+
+    std::vector<dbLink*> wsCluster; 
+    std::vector<dbLink*> proxyCluster;
     
     stmMapper stm;
-    
+
     tcpServer_benchmark* bm;
     int thread_id = 0;
-      
+
     /**
      * Буфер для сообщения от пользователя.
      * Сюда записываются данные прочитаные из сокета.
@@ -241,7 +241,7 @@ public:
      * Для формирования заголовков описания таблицы ответа в mysql
      */
     mysqlAnswer sql;
-    
+
     /**
      * Для хранания распарсеной информации о запросе
      */
@@ -252,7 +252,7 @@ public:
     int tmp_bufdataPrt[ARRAY_BUFFER_SIZE];*/
 
     thread_data( appConf* app):buf(app->get_int("main", "buf_size")), messge_buf(app->get_int("main", "buf_size")), answer_buf(app->get_int("main", "answer_buf_size")),sql(),bm(NULL)
-    { 
+    {
         /*bzero(tmp_bufdata, ARRAY_BUFFER_SIZE);
         bzero(tmp_bufdataSize, ARRAY_BUFFER_SIZE);
         bzero(tmp_bufdataPrt, ARRAY_BUFFER_SIZE);
@@ -261,13 +261,70 @@ public:
         bzero(tmp_bufdata[0], app->buf_size*2);
 
         tmp_bufdataSize[0] = app->buf_size*2;*/
-  
+
         db.init(app->get_chars("db", "host"), app->get_chars("db", "user"), app->get_chars("db", "password"), app->get_chars("db", "name"), app->get_int("db", "port"));
         db.connect();
-        
-        stm.init(db); 
+
+        stm.init(db);
+
+        // cometqlproxy кластер для рассылки сообщений приходившех с cometqlproxy
+        auto proxycluster = app->get_list("cometqlproxy", "cluster");
+        if(!proxycluster.empty())
+        {
+            int id = 0;
+            TagLoger::log(Log_Any, LogColorGreen, "Starting Proxy-CometQL cluster on %d nodes", proxycluster.size());
+            auto it = proxycluster.begin();
+            while(it != proxycluster.end())
+            {
+                id++;
+                std::string name;
+                name.append("cometqlcluster-").append(std::to_string(id));
+                
+                dbLink *link = new dbLink(name);
+                proxyCluster.push_back(link);
+                if(!link->init(it->data()))
+                {
+                    TagLoger::error(Log_Any, LogColorRed, "Error, Proxy-CometQL connection %s does not establish", it->data());
+                }
+                
+                it++;
+            }
+            TagLoger::log(Log_Any, LogColorGreen, "Starting Proxy-CometQL cluster on %d nodes complte", proxycluster.size());
+        }
+        else
+        { 
+            TagLoger::log(Log_Any, LogColorBase, "section [cometqlproxy] value [cluster] is empty");
+        }
+         
+        // WS кластер для рассылки сообщений приходившех с вебсокетов
+        auto wscluster = app->get_list("ws", "cluster"); 
+        if(!wscluster.empty())
+        {
+            int id = 0;
+            TagLoger::log(Log_Any, LogColorGreen, "Starting WS-CometQL cluster on %d nodes", wscluster.size());
+            auto it = wscluster.begin();
+            while(it != wscluster.end())
+            {
+                id++;
+                std::string name;
+                name.append("wscluster-").append(std::to_string(id));
+                dbLink *link = new dbLink(name);
+                wsCluster.push_back(link);
+                if(!link->init(it->data()))
+                {
+                    TagLoger::error(Log_Any, LogColorRed, "Error, WS-CometQL connection %s does not establish", it->data());
+                }
+                
+                it++;
+            }
+            TagLoger::log(Log_Any, LogColorGreen, "Starting WS-CometQL cluster on %d nodes complte", wscluster.size());
+        }
+        else
+        { 
+            TagLoger::log(Log_Any, LogColorBase, "section [ws] value [cluster] is empty");
+        }
     }
-    
+
     void setThreadStatus(char c);
 
 private:
@@ -284,6 +341,26 @@ private:
 
 public:
 
+    bool isWSClusterActive()
+    {
+        return !wsCluster.empty();
+    }
+    
+    bool wsClusterSize()
+    {
+        return wsCluster.size();
+    }
+    
+    bool isProxyClusterActive()
+    {
+        return !proxyCluster.empty();
+    }
+    
+    bool proxyClusterSize()
+    {
+        return proxyCluster.size();
+    }
+    
     void unlockAll()
     {
         buf.unlock();
@@ -310,10 +387,10 @@ private:
                 break;
             }
         }
- 
+
         bzero(tmp_bufdataPrt, ARRAY_BUFFER_SIZE);
     }*/
- 
+
     /**
      * Распределитель памяти.
      * Выделяет блок памяти запрошенного размера.
@@ -343,7 +420,7 @@ private:
 
         throw "getMem not enough memory!";
     }*/
-    
+
 public:
 
     ~thread_data()

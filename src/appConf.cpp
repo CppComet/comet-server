@@ -68,6 +68,27 @@ bool appConf::initFromFile(const char *fileName)
         sections["statistics"]["allow"] = "true";  
     }
     
+    
+    if(!is_property_exists("main", "send_user_online_events"))
+    {
+        sections["main"]["send_user_online_events"] = "true";  
+    }
+    
+    if(!is_property_exists("main", "send_user_offline_events"))
+    {
+        sections["main"]["send_user_offline_events"] = "true";  
+    }
+    
+    if(!is_property_exists("main", "save_users_last_online_time"))
+    {
+        sections["main"]["save_users_last_online_time"] = "true";  
+    }
+    
+    if(!is_property_exists("main", "pidfile"))
+    {
+        sections["main"]["pidfile"] = "/var/run/cppcomet.pid";  
+    }
+    
     /*
     ; Объём буфера для сообщения
     ; Много ставить не надо, комет сервер не расчитан на передачу больших сообщений

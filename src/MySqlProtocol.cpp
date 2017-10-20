@@ -466,6 +466,7 @@ char* MySqlResulValue::setValue(const char* text, int data_len)
     { 
         longDataLen = data_len;
         longData = new char[data_len+1];
+        bzero(data, data_len+1);
         memcpy(longData, text, data_len); 
         return longData;
     }

@@ -33,15 +33,12 @@ int internalApi::send_to_user(thread_data* local_buf, int user_id, const char* p
             CP<Client_connection> r = tcpServer <Client_connection>::instance()->get(conection_id[i]);
             if(r)
             {
-                isSend = r->message(local_buf, msg_data, NULL, MESSAGE_TEXT, server_data);
-            }
-            else if(r)
-            {
+                isSend = r->message(local_buf, msg_data, NULL, MESSAGE_TEXT, server_data); 
                 TagLoger::log(Log_MySqlServer, 0, "Connection object is found i=%d, conection_id=%d\n", i, conection_id[i]);
             }
             else
             {
-                TagLoger::log(Log_MySqlServer, 0, "Connection object is found i=%d, conection_id=%d\n", i, conection_id[i]);
+                TagLoger::log(Log_MySqlServer, 0, "Connection object is not found i=%d, conection_id=%d\n", i, conection_id[i]);
             }
         }
     }
@@ -91,7 +88,7 @@ int internalApi::send_event_to_pipe(thread_data* local_buf, const char* pipe_nam
 
     int num_fail = 0;
     int num_msg = 0;
-    auto it = pipe->subscribers.begin();
+    auto it = pipe->subscribers->begin();
     while(it)
     {
         CP<Client_connection> r = tcpServer <Client_connection>::instance()->get(it->data);

@@ -16,7 +16,7 @@ error_reporting (E_ALL);
 session_start();
  
 include './utils/timetest.php';
-include './utils/testClass.php';
+include './utils/testClass.php'; 
 
 $count = 100;
 if(isset($_GET['count']))
@@ -30,23 +30,22 @@ if(isset($_GET['count']))
 
 $test = preg_replace("#[^A-z0-9\_\-]#usi", "", $_GET['test']);
 if(!file_exists("./tests/".$test.".php"))
-{
-    return "-1";
+{ 
+    die("Error 404");
 }
 
 include "./tests/".$test.".php";
-  
-// We connect to the comet server with login and password for the access demo (you can get your data for connection after registration at comet-server.com)
-// Login 15
-// Password lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8
-// CometQL_v1 database 
-$cppTest->init([
-    "host" => "app.comet-server.ru",
-    "user" => "15",
-    "password" => "lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8",
-    "api_version" => "CometQL_v1"
-]);
 
+if(file_exists("./conf.php"))
+{
+    include "./conf.php";
+}
+
+$className = "test_".$test;
+$cppTest = new $className();
+   
+echo "RUN:".$test."\n";
+$cppTest->init($serverConf);
 
 $cppTest->start();
 timeTest::test('cpp', 'test'); 
@@ -60,7 +59,6 @@ $t = $t[count($t) - 1];
 $cppTest->stop();
 
 echo json_encode([
-    'count' => $count,
-    'test' => $test,
+    'count' => $count, 
     'time' => $t['time']
 ]);

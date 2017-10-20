@@ -37,8 +37,7 @@
 
 #include "sha1.h"
 
-
-SqlTable* MySql_connection::tables;
+ 
 int _countUerys = 0;
 pthread_mutex_t MySql_connection::QLParsing_mutex;
 
@@ -115,76 +114,7 @@ MySql_connection::~MySql_connection()
 {
     //printf("delete MySql_connection\n");
 }
-
-#define table_users_auth tables[0]
-#define table_users_time tables[1]
-#define table_users_messages tables[2]
-#define table_pipes_messages tables[3]
-#define table_users_in_pipes tables[4]
-#define table_pipes tables[5]
-#define table_pipes_settings tables[6]
-
-/**
- * Инициализация структуры таблиц
- */
-void MySql_connection::initTables()
-{
-    if(tables != NULL)
-    {
-        return;
-    }
-
-    tables = new SqlTable[MYSQL_TABLES_COUNT];
-    bzero(tables, sizeof(SqlTable)*MYSQL_TABLES_COUNT);
-
-    table_users_auth.setName("users_auth");
-    table_users_auth.setColumsCount(MAX_COLUMNS_COUNT);
-    table_users_auth.setColumDef(0, "id", "int");
-    table_users_auth.setColumDef(1, "hash", "char(32)");
-
-
-    table_users_time.setName("users_time");
-    table_users_time.setColumsCount(MAX_COLUMNS_COUNT);
-    table_users_time.setColumDef(0, "id", "int(10)");
-    table_users_time.setColumDef(1, "time", "int(10)");
-
-
-    table_users_messages.setName("users_messages");
-    table_users_messages.setColumsCount(MAX_COLUMNS_COUNT);
-    table_users_messages.setColumDef(0, "id", "int(10)");
-    table_users_messages.setColumDef(1, "index", "int(2)");
-    table_users_messages.setColumDef(1, "event", "varchar(32)");
-    table_users_messages.setColumDef(1, "message", "text");
-
-
-    table_pipes_messages.setName("pipes_messages");
-    table_pipes_messages.setColumsCount(MAX_COLUMNS_COUNT);
-    table_pipes_messages.setColumDef(0, "name", "int(10)");
-    table_pipes_messages.setColumDef(1, "index", "int(2)");
-    table_pipes_messages.setColumDef(1, "event", "varchar(32)");
-    table_pipes_messages.setColumDef(1, "message", "text");
-    table_pipes_messages.setColumDef(1, "auth_type", "char(1)");
-    table_pipes_messages.setColumDef(1, "user_id", "int(10)");
-
-
-    table_users_in_pipes.setName("users_in_pipes");
-    table_users_in_pipes.setColumsCount(MAX_COLUMNS_COUNT);
-    table_users_in_pipes.setColumDef(0, "name", "varchar(32)");
-    table_users_in_pipes.setColumDef(1, "user_id", "int(10)");
-
-
-    table_pipes.setName("pipes");
-    table_pipes.setColumsCount(MAX_COLUMNS_COUNT);
-    table_pipes.setColumDef(0, "name", "varchar(32)");
-    table_pipes.setColumDef(1, "users", "text");
-
-
-    table_pipes_settings.setName("pipes_settings");
-    table_pipes_settings.setColumsCount(MAX_COLUMNS_COUNT);
-    table_pipes_settings.setColumDef(0, "name", "varchar(32)");
-    table_pipes_settings.setColumDef(1, "length", "int(2)");
-}
-
+  
 /**
  * Обрабатывает сообщения от клиентов
  * @param client идентификатор клиента
@@ -441,191 +371,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
             pthread_mutex_unlock(&QLParsing_mutex);
             memcpy(startQuery, tmp, MAX_MESSAGE_SIZE);
 
-            if(local_buf->qInfo.command == TOK_SHOW)
-            {
-                TagLoger::log(Log_MySqlServer, 0, "cmd show:%d\n", local_buf->qInfo.arg_show.command);
-                if(local_buf->qInfo.arg_show.command == TOK_DATABASES)
-                {
-                    sql_show_databases(local_buf,PacketNomber);
-                }
-                else if(test_api_version(local_buf,PacketNomber))
-                {
-                    if(local_buf->qInfo.arg_show.command == TOK_TABLES)
-                    {
-                        sql_show_tables(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.arg_show.command == TOK_COLUMNS)
-                    {
-                        sql_show_columns(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.arg_show.command == TOK_STATUS)
-                    {
-                        sql_show_status(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.arg_show.command == TOK_PROCESSLIST)
-                    {
-                        sql_show_processlist(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.arg_show.command == TOK_VARIABLES)
-                    {
-                        sql_show_variables(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.arg_show.command == TOK_TABLE_STATUS)
-                    {
-                        sql_show_table_status(local_buf,PacketNomber);
-                    }
-                }
-
-                // [Почти готов] SHOW SESSION VARIABLES LIKE 'lower_case_table_names'
-                // SELECT current_user()
-                // show create table `users`
-            }
-            else if(local_buf->qInfo.command == TOK_SELECT)
-            {
-                TagLoger::log(Log_MySqlServer, 0, "cmd select:%d\n", local_buf->qInfo.arg_select.command);
-
-                if(local_buf->qInfo.arg_select.command == TOK_DATABASE)
-                {
-                    sql_select_database_name(local_buf,PacketNomber);
-                }
-                else if(local_buf->qInfo.arg_select.command == VAL_SYSTEM_VARIBLE)
-                {
-                    sql_select_systemvarible(local_buf,PacketNomber);
-                }
-                else if(test_api_version(local_buf,PacketNomber))
-                {
-                    if(local_buf->qInfo.arg_select.command == TOK_FROM)
-                    {
-                        if(local_buf->qInfo.tokCompare("users_auth",  local_buf->qInfo.tableName))
-                        {
-                            sql_select_from_users_auth(local_buf,PacketNomber);
-                        }
-                        else if(local_buf->qInfo.tokCompare("users_time",  local_buf->qInfo.tableName))
-                        {
-                            sql_select_from_users_time(local_buf,PacketNomber);
-                        }
-                        else if(local_buf->qInfo.tokCompare("users_messages",  local_buf->qInfo.tableName))
-                        {
-                            sql_select_from_users_messages(local_buf,PacketNomber);
-                        }
-                        else if(local_buf->qInfo.tokCompare("pipes_messages",  local_buf->qInfo.tableName))
-                        {
-                            sql_select_from_pipes_messages(local_buf,PacketNomber);
-                        }
-                        else if(local_buf->qInfo.tokCompare("users_in_pipes",  local_buf->qInfo.tableName))
-                        {
-                            sql_select_from_users_in_pipes(local_buf,PacketNomber);
-                        }
-                        else if(local_buf->qInfo.tokCompare("pipes",  local_buf->qInfo.tableName))
-                        {
-                            sql_select_from_pipes(local_buf,PacketNomber);
-                        }
-                        else if(local_buf->qInfo.tokCompare("pipes_settings",  local_buf->qInfo.tableName))
-                        {
-                            sql_select_from_pipes_settings(local_buf,PacketNomber);
-                        }
-                        else
-                        {
-                            Send_Err_Package(SQL_ERR_NOT_EXIST, "Table doesn't exist", PacketNomber+1, local_buf, this);
-                        }
-                    }
-                    else
-                    {
-                        Send_Err_Package(SQL_ERR_SYNTAX_ERROR, "Select query has error", PacketNomber+1, local_buf, this);
-                    }
-                }
-            }
-            else if(local_buf->qInfo.command == TOK_INSERT)
-            {
-                if(test_api_version(local_buf,PacketNomber))
-                {
-                    if(local_buf->qInfo.tokCompare("users_auth",  local_buf->qInfo.tableName))
-                    {
-                        sql_insert_into_users_auth(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.tokCompare("users_time",  local_buf->qInfo.tableName))
-                    {
-                        sql_insert_into_users_time(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.tokCompare("users_messages",  local_buf->qInfo.tableName))
-                    {
-                        sql_insert_into_users_messages(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.tokCompare("pipes_messages",  local_buf->qInfo.tableName))
-                    {
-                        sql_insert_into_pipes_messages(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.tokCompare("users_in_pipes",  local_buf->qInfo.tableName))
-                    {
-                        sql_insert_into_users_in_pipes(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.tokCompare("pipes",  local_buf->qInfo.tableName))
-                    {
-                        sql_insert_into_pipes(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.tokCompare("pipes_settings",  local_buf->qInfo.tableName))
-                    {
-                        sql_insert_into_pipes_settings(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.tokCompare("conference",  local_buf->qInfo.tableName))
-                    {
-                        sql_insert_into_conference(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.tokCompare("dialogs",  local_buf->qInfo.tableName))
-                    {
-                        sql_insert_into_dialogs(local_buf,PacketNomber);
-                    }
-                    else
-                    {
-                        Send_Err_Package(SQL_ERR_NOT_EXIST, "Table doesn't exist", PacketNomber+1, local_buf, this);
-                    }
-                }
-            }
-            else if(local_buf->qInfo.command == TOK_DELETE)
-            {
-                if(test_api_version(local_buf,PacketNomber))
-                {
-                    if(local_buf->qInfo.tokCompare("users_auth",  local_buf->qInfo.tableName))
-                    {
-                        sql_delete_from_users_auth(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.tokCompare("users_time",  local_buf->qInfo.tableName))
-                    {
-                        sql_delete_from_users_time(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.tokCompare("users_messages",  local_buf->qInfo.tableName))
-                    {
-                        sql_delete_from_users_messages(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.tokCompare("pipes_messages",  local_buf->qInfo.tableName))
-                    {
-                        sql_delete_from_pipes_messages(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.tokCompare("users_in_pipes",  local_buf->qInfo.tableName))
-                    {
-                        sql_delete_from_users_in_pipes(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.tokCompare("pipes",  local_buf->qInfo.tableName))
-                    {
-                        sql_delete_from_pipes(local_buf,PacketNomber);
-                    }
-                    else if(local_buf->qInfo.tokCompare("pipes_settings",  local_buf->qInfo.tableName))
-                    {
-                        sql_delete_from_pipes_settings(local_buf,PacketNomber);
-                    }
-                    else
-                    {
-                        Send_Err_Package(SQL_ERR_NOT_EXIST, "Table doesn't exist", PacketNomber+1, local_buf, this);
-                    }
-                }
-            }
-            else
-            {
-                TagLoger::log(Log_MySqlServer, 0, "cmd undefined:%d %s\n", local_buf->qInfo.arg_select.command, startQuery);
-                Send_OK_Package(PacketNomber+1, local_buf, this);
-            }
-
-
+            query_router(local_buf, PacketNomber);
             QLdeleteBuffer(buff, &local_buf->qInfo);
             return 0;
         }
@@ -669,6 +415,199 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
     return -1;
 }
 
+int MySql_connection::query_router(thread_data* local_buf, int PacketNomber)
+{ 
+    if(local_buf->qInfo.command == TOK_SHOW)
+    {
+        TagLoger::log(Log_MySqlServer, 0, "cmd show:%d\n", local_buf->qInfo.arg_show.command);
+        if(local_buf->qInfo.arg_show.command == TOK_DATABASES)
+        {
+            return sql_show_databases(local_buf,PacketNomber);
+        }
+        else if(test_api_version(local_buf,PacketNomber))
+        {
+            if(local_buf->qInfo.arg_show.command == TOK_TABLES)
+            {
+                return sql_show_tables(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.arg_show.command == TOK_COLUMNS)
+            {
+                return sql_show_columns(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.arg_show.command == TOK_STATUS)
+            {
+                return sql_show_status(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.arg_show.command == TOK_PROCESSLIST)
+            {
+                return sql_show_processlist(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.arg_show.command == TOK_VARIABLES)
+            {
+                return sql_show_variables(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.arg_show.command == TOK_TABLE_STATUS)
+            {
+                return sql_show_table_status(local_buf,PacketNomber);
+            }
+        }
+
+        // [Почти готов] SHOW SESSION VARIABLES LIKE 'lower_case_table_names'
+        // SELECT current_user()
+        // show create table `users`
+    }
+    else if(local_buf->qInfo.command == TOK_SELECT)
+    {
+        TagLoger::log(Log_MySqlServer, 0, "cmd select:%d\n", local_buf->qInfo.arg_select.command);
+
+        if(local_buf->qInfo.arg_select.command == TOK_DATABASE)
+        {
+            return sql_select_database_name(local_buf,PacketNomber);
+        }
+        else if(local_buf->qInfo.arg_select.command == VAL_SYSTEM_VARIBLE)
+        {
+            return sql_select_systemvarible(local_buf,PacketNomber);
+        }
+        else if(test_api_version(local_buf,PacketNomber))
+        {
+            if(local_buf->qInfo.arg_select.command == TOK_FROM)
+            {
+                if(local_buf->qInfo.tokCompare("users_auth",  local_buf->qInfo.tableName))
+                {
+                    return sql_select_from_users_auth(local_buf,PacketNomber);
+                }
+                else if(local_buf->qInfo.tokCompare("users_time",  local_buf->qInfo.tableName))
+                {
+                    return sql_select_from_users_time(local_buf,PacketNomber);
+                }
+                else if(local_buf->qInfo.tokCompare("users_messages",  local_buf->qInfo.tableName))
+                {
+                    return sql_select_from_users_messages(local_buf,PacketNomber);
+                }
+                else if(local_buf->qInfo.tokCompare("pipes_messages",  local_buf->qInfo.tableName))
+                {
+                    return sql_select_from_pipes_messages(local_buf,PacketNomber);
+                }
+                else if(local_buf->qInfo.tokCompare("users_in_pipes",  local_buf->qInfo.tableName))
+                {
+                    return sql_select_from_users_in_pipes(local_buf,PacketNomber);
+                }
+                else if(local_buf->qInfo.tokCompare("pipes",  local_buf->qInfo.tableName))
+                {
+                    return sql_select_from_pipes(local_buf,PacketNomber);
+                }
+                else if(local_buf->qInfo.tokCompare("pipes_settings",  local_buf->qInfo.tableName))
+                {
+                    return sql_select_from_pipes_settings(local_buf,PacketNomber);
+                }
+                else
+                {
+                    return Send_Err_Package(SQL_ERR_NOT_EXIST, "Table doesn't exist", PacketNomber+1, local_buf, this);
+                }
+            }
+            else
+            {
+                return Send_Err_Package(SQL_ERR_SYNTAX_ERROR, "Select query has error", PacketNomber+1, local_buf, this);
+            }
+        }
+    }
+    else if(local_buf->qInfo.command == TOK_INSERT)
+    {
+        if(test_api_version(local_buf,PacketNomber))
+        {
+            if(local_buf->qInfo.tokCompare("users_auth",  local_buf->qInfo.tableName))
+            {
+                return sql_insert_into_users_auth(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.tokCompare("users_time",  local_buf->qInfo.tableName))
+            {
+                return sql_insert_into_users_time(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.tokCompare("users_messages",  local_buf->qInfo.tableName))
+            {
+                return sql_insert_into_users_messages(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.tokCompare("pipes_messages",  local_buf->qInfo.tableName))
+            {
+                return sql_insert_into_pipes_messages(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.tokCompare("users_in_pipes",  local_buf->qInfo.tableName))
+            {
+                return sql_insert_into_users_in_pipes(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.tokCompare("pipes",  local_buf->qInfo.tableName))
+            {
+                return sql_insert_into_pipes(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.tokCompare("pipes_settings",  local_buf->qInfo.tableName))
+            {
+                return sql_insert_into_pipes_settings(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.tokCompare("conference",  local_buf->qInfo.tableName))
+            {
+                return sql_insert_into_conference(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.tokCompare("dialogs",  local_buf->qInfo.tableName))
+            {
+                return sql_insert_into_dialogs(local_buf,PacketNomber);
+            }
+            else
+            {
+                return Send_Err_Package(SQL_ERR_NOT_EXIST, "Table doesn't exist", PacketNomber+1, local_buf, this);
+            }
+        }
+    }
+    else if(local_buf->qInfo.command == TOK_DELETE)
+    {
+        if(test_api_version(local_buf,PacketNomber))
+        {
+            if(local_buf->qInfo.tokCompare("users_auth",  local_buf->qInfo.tableName))
+            {
+                return sql_delete_from_users_auth(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.tokCompare("users_time",  local_buf->qInfo.tableName))
+            {
+                return sql_delete_from_users_time(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.tokCompare("users_messages",  local_buf->qInfo.tableName))
+            {
+                return sql_delete_from_users_messages(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.tokCompare("pipes_messages",  local_buf->qInfo.tableName))
+            {
+                return sql_delete_from_pipes_messages(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.tokCompare("users_in_pipes",  local_buf->qInfo.tableName))
+            {
+                return sql_delete_from_users_in_pipes(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.tokCompare("pipes",  local_buf->qInfo.tableName))
+            {
+                return sql_delete_from_pipes(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.tokCompare("pipes_settings",  local_buf->qInfo.tableName))
+            {
+                return sql_delete_from_pipes_settings(local_buf,PacketNomber);
+            }
+            else
+            {
+                return Send_Err_Package(SQL_ERR_NOT_EXIST, "Table doesn't exist", PacketNomber+1, local_buf, this);
+            }
+        }
+    }
+    else if(local_buf->qInfo.command == TOK_SET)
+    {
+        sql_set_value(local_buf,PacketNomber);
+    }
+    else
+    {
+        TagLoger::log(Log_MySqlServer, 0, "cmd undefined:%d %s\n", local_buf->qInfo.arg_select.command, local_buf->qInfo.StartQury);
+        return Send_OK_Package(PacketNomber+1, local_buf, this);
+    }
+    
+    return 0;
+}
+
 /**
  *  Если версия api не выбрана то вернёт false и отправит информацию об ошибке клиенту.
  */
@@ -699,6 +638,13 @@ bool MySql_connection::sql_use_db(char* db_name)
     api_version = 0;
     return false;
 }
+ 
+int MySql_connection::sql_set_value(thread_data* local_buf, unsigned int PacketNomber)
+{
+    Send_OK_Package(0, 0, PacketNomber+1, local_buf, this); 
+    return 0;
+}
+
 
 /**
  * show databases
@@ -730,9 +676,15 @@ int MySql_connection::sql_show_databases(thread_data* local_buf, unsigned int Pa
 
 int MySql_connection::sql_show_tables(thread_data* local_buf, unsigned int PacketNomber)
 {
-    /*// Отправляем пакет описания 1 колонки
-    const static MySqlResultset_ColumDef column("Tables");
+    // Отправляем пакет описания 1 колонки
+    MySqlResultset_ColumDef column[1]; 
+    column[0] = "Tables"; 
 
+    char* answer = local_buf->answer_buf.getData();
+    int delta = HeadAnswer(1, column, PacketNomber, answer);
+    answer += delta;
+    
+    MySqlResulValue values[18];
     int countRows = 0;
     local_buf->sql.getValue(countRows++, 0) = "users_auth";
     local_buf->sql.getValue(countRows++, 0) = "users_time";
@@ -741,23 +693,15 @@ int MySql_connection::sql_show_tables(thread_data* local_buf, unsigned int Packe
     local_buf->sql.getValue(countRows++, 0) = "users_in_pipes";
     local_buf->sql.getValue(countRows++, 0) = "pipes";
     local_buf->sql.getValue(countRows++, 0) = "pipes_settings";
-    local_buf->sql.sendAllRowsAndHeaders(local_buf, 1, &column, PacketNomber, countRows, this);
-    */
+    
+    delta = RowPackage(countRows, values, ++PacketNomber, answer);
+    answer += delta;
+ 
+    web_write(local_buf->answer_buf.getData(), answer - local_buf->answer_buf.getData());
 
-    initTables();
-
-    // Отправляем пакет описания 1 колонки
-    const static MySqlResultset_ColumDef column("Tables");
-
-    int countRows = 0;
-    while(countRows < MYSQL_TABLES_COUNT && tables[countRows].getName() != NULL )
-    {
-        local_buf->sql.getValue(countRows, 0) = tables[countRows].getName();
-        countRows++;
-    }
-
-    sendAllRowsAndHeaders(local_buf, 1, &column, PacketNomber, countRows);
-    return 0;
+    local_buf->answer_buf.unlock();
+    Send_EOF_Package(++PacketNomber, local_buf, this); // Send_EOF_Package
+    return 0; 
 }
 
 /**
@@ -1061,7 +1005,7 @@ int MySql_connection::sql_show_status(thread_data* local_buf, unsigned int Packe
         char tmpNull[200];
         int len;
         int i = 0;
-        while(fscanf(loadavgFp, "%s %s %s", name, val, tmpNull) != EOF && i < 34)
+        while(fscanf(loadavgFp, "%32s %32s %32s", name, val, tmpNull) != EOF && i < 34)
         {
             i++;
             len = strlen(name);
@@ -1346,9 +1290,9 @@ int MySql_connection::sql_select_database_name(thread_data* local_buf, unsigned 
 
     if(api_version != 0)
     {
-        values = "CometQL_v0";
-        char* name = values;
-        name[9] = '0' + api_version;
+        values = "CometQL_v1";
+        //char* name = values;
+        //name[9] = '0' + api_version;
     }
     else
     {
@@ -1732,7 +1676,7 @@ int MySql_connection::sql_insert_into_users_messages(thread_data* local_buf, uns
 
     char* message = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]]);
     message[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen] = 0;
-    char messageQuote = local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].quote;
+    //char messageQuote = local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].quote;
 
     local_buf->answer_buf.lock();
     //json_escape_string(message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen, local_buf->answer_buf.getData());
@@ -2122,7 +2066,7 @@ int MySql_connection::sql_select_from_users_in_pipes(thread_data* local_buf, uns
             continue;
         }
 
-        auto it = pipe->subscribers.begin();
+        auto it = pipe->subscribers->begin();
         while(it)
         {
             int val =  it->data;
@@ -2203,10 +2147,15 @@ int MySql_connection::sql_select_from_pipes(thread_data* local_buf, unsigned int
         }
  
         CP<Pipe> pipe = devManager::instance()->getDevInfo()->findPipe(std::string(pipe_name));
+        int pipe_size = 0;
+        if(!pipe.isNULL())
+        {
+            pipe_size = pipe->size();
+        }
 
         TagLoger::log(Log_MySqlServer, 0, "text>%s\n",pipe_name); 
         if(local_buf->sql.useColumn(0)) local_buf->sql.getValue(countRows, 0) = pipe_name;
-        if(local_buf->sql.useColumn(1)) local_buf->sql.getValue(countRows, 1) = pipe->size();
+        if(local_buf->sql.useColumn(1)) local_buf->sql.getValue(countRows, 1) = pipe_size;
  
         countRows++;
     }
@@ -2463,11 +2412,9 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
     std::string sipNumber("000000");
 
     // Определение типа видеорежима
-    bool isAudio = false;
-    bool isVideo = false;
-
-    isAudio = strcmp(mode, "audio") == 0;
-    isVideo = strcmp(mode, "video") == 0;
+    bool isAudio = strcmp(mode, "audio") == 0;
+    bool isVideo = strcmp(mode, "video") == 0;
+ 
     // isVideo = strcmp(mode, "videoMux") == 0;
     // isVideo = strcmp(mode, "videoMux2") == 0;
 

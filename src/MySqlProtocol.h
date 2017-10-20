@@ -183,7 +183,7 @@ class MySqlResulValue
     char data[255]; 
     
     /**
-     * Для хранения строк длинее 250 символов
+     * Для хранения строк длинее 250 символов 
      */
     char* longData = 0;
     int longDataLen = 0;

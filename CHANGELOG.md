@@ -5,6 +5,27 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v3.26
+
+BUG FIXES:
+
+ * bug fix to query `select * from pipes where name in ("web_test");`
+ * Command systemctl stop comet.service does not work on Ubuntu 16 ( #17 )
+
+IMPROVEMENTS:
+
+* Added parameter `send_user_online_events` to `main`
+* Added parameter `send_user_offline_events` to `main`
+* Added parameter `save_users_last_online_time` to `main`
+
+* Added section `cluster`
+* Added section `cometqlproxy`
+* Added clustering mechanism #15
+* Added pidfile option in section `main`.`pidfile`
+
+* Added queryes like `set paramName paramValue`
+* Added queryes like `set sectionName paramName paramValue`
+
 ## v3.25
 
 IMPROVEMENTS:

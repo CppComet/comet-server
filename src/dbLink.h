@@ -8,6 +8,10 @@
 #ifndef DBLINK_H
 #define	DBLINK_H
 
+/**
+ * https://dev.mysql.com/doc/refman/5.7/en/error-messages-client.html#error_cr_commands_out_of_sync
+ */
+#define	CR_COMMANDS_OUT_OF_SYNC 2014
 
 class stmMapper;
 
@@ -177,24 +181,43 @@ protected:
 class dbLink {
     MYSQL mysqlLink;
     bool isInit = false;
+    bool isConnected = false;
 
-    char db_host[200];
-    char db_pw[200];
-    char db_user[200];
-    char db_name[200];
+    std::string connectionName;
+    std::string db_host;
+    std::string db_pw;
+    std::string db_user;
+    std::string db_name;
     int db_port = 3306;
-    my_bool reconnect = 1;
+    my_bool is_reconnect = 1;
+    int connect_timeout  = 1; // MYSQL_OPT_CONNECT_TIMEOUT
+    int read_timeout  = 1; // MYSQL_OPT_READ_TIMEOUT
+    
+private:
+
+    /**
+     * Запрещаем копирование для объектов данного класса
+     */
+    dbLink(const dbLink& cpy) = delete;
+
+    /**
+     * Запрещаем копирование для объектов данного класса
+     */
+    void operator=( const dbLink& cpy) = delete;
+
 public:
 
     dbLink(){
-        bzero(db_host,200);
-        bzero(db_pw,200);
-        bzero(db_user,200);
-        bzero(db_name,200);
+        connectionName = "noname";
+        connectionName.append(std::to_string(random()));
         mysql_init(&mysqlLink);
-
     }
-
+    
+    dbLink(std::string ConnectionName){
+        connectionName = ConnectionName;
+        mysql_init(&mysqlLink);
+    }
+ 
     ~dbLink(){
 
         if(isInit)
@@ -202,7 +225,78 @@ public:
             mysql_close(&mysqlLink);
         }
     }
+    
+    const char* name(){
+        return connectionName.data();
+    }
 
+    bool init(std::string connectionString)
+    { 
+        int pos = 0;
+        int nextPos = 0;
+        
+        std::string Server = "localhost";
+        std::string Database;
+        std::string Uid = "root";
+        std::string Pwd;
+        int Port = 3301;
+        
+        int i = 0;
+        while(pos <= connectionString.length() && i < 10)
+        {
+            i++;
+            nextPos = connectionString.find('=', pos);
+            if(nextPos == std::string::npos)
+            {
+                break;
+            }
+            
+            auto paramName = connectionString.substr(pos, nextPos - pos); 
+            //TagLoger::debug(Log_dbLink, 0, "\x1b[1;32mparamName=%s, pos=%d, nextPos=%d\x1b[0m", paramName.data(), pos, nextPos);
+            pos = nextPos + 1;
+
+            nextPos = connectionString.find(',', pos);
+            if(nextPos == std::string::npos)
+            {
+                nextPos = connectionString.length();
+            }
+            
+            auto paramValue = connectionString.substr(pos, nextPos - pos); 
+            //TagLoger::debug(Log_dbLink, 0, "\x1b[1;32mparamValue=%s, pos=%d, nextPos=%d\x1b[0m", paramValue.data(), pos, nextPos);
+            pos = nextPos + 1;
+            
+            if(paramName.compare("Server") == 0)
+            {
+                Server = paramValue;
+            } 
+            else if(paramName.compare("Database") == 0)
+            {
+                Database = paramValue;
+            } 
+            else if(paramName.compare("Uid") == 0)
+            {
+                Uid = paramValue;
+            } 
+            else if(paramName.compare("Pwd") == 0)
+            {
+                Pwd = paramValue; 
+            } 
+            else if(paramName.compare("Port") == 0)
+            {
+                try{
+                    //printf("get_long [%s] %s=%s\n", section.data(), name.data(), sections.at(section).at(name).data());
+                    Port = std::stoi(paramValue);
+                }catch(...)
+                {
+                    printf("\x1b[1;31mexeption in parsing Port value Port=%s\x1b[0m\n", paramValue.data());
+                    return false;
+                } 
+            }
+        }
+        
+        return init(Server.data(), Uid.data(), Pwd.data(), Database.data(), Port);
+    }
+    
     bool init(const char* host, const char* user, const char* pw, const char* name, int port)
     {
         if(host == NULL)
@@ -223,7 +317,7 @@ public:
             return false;
         }
         
-        if(db_name == NULL)
+        if(name == NULL)
         { 
             TagLoger::error(Log_dbLink, 0, "\x1b[1;31mCppComet MySQL connection `db_name` is NULL\x1b[0m");
             return false;
@@ -236,24 +330,19 @@ public:
         }
         
         TagLoger::log(Log_dbLink, 0, "init dbLink host=%s, user=%s, name=%s, port=%d\n", host, user, name, port);  
-        isInit = true;
-        bzero(db_host,200);
-        strncpy(db_host, host, 200);
-
-        bzero(db_pw,200);
-        strncpy(db_pw, pw, 200);
-
-        bzero(db_user,200);
-        strncpy(db_user, user, 200);
-
-        bzero(db_name,200);
-        strncpy(db_name, name, 200);
+        isInit = true; 
+        db_host = host;
+        db_pw = pw;
+        db_user = user;
+        db_name = name;
 
         db_port = port;
 
-        mysql_options(&mysqlLink, MYSQL_OPT_RECONNECT, &reconnect);
+        mysql_options(&mysqlLink, MYSQL_OPT_RECONNECT, &is_reconnect);
         mysql_options(&mysqlLink, MYSQL_SET_CHARSET_NAME, "utf8");
         mysql_options(&mysqlLink, MYSQL_INIT_COMMAND, "SET NAMES utf8");
+        //mysql_options(&mysqlLink, MYSQL_OPT_CONNECT_TIMEOUT, &connect_timeout);
+        //mysql_options(&mysqlLink, MYSQL_OPT_READ_TIMEOUT, &read_timeout);
         return true;
     }
 
@@ -269,15 +358,52 @@ public:
 
     bool query(const char *q)
     {
+        if(!isInit)
+        {
+            TagLoger::trace(Log_dbLink, 0, "\x1b[1;32mMySQL connection was not initialized\x1b[0m", db_host.data(), db_port, db_user.data());
+            return false;
+        }
+        
+        if(!isConnected)
+        {
+            connect();
+        }
+        
         TagLoger::log(Log_dbLink, 0, "\x1b[1;32mMySQL query[%d]=%s\x1b[0m", strlen(q), q);
         if(mysql_real_query(&mysqlLink, q, strlen(q)) == 0)
         {
             return true;
         }
+         
 
         if(mysql_errno(&mysqlLink))
         {
-            TagLoger::log(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), q);
+            TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn)error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), q);
+            if(mysql_errno(&mysqlLink) == CR_COMMANDS_OUT_OF_SYNC)
+            {
+                MYSQL_RES* res = mysql_store_result(&mysqlLink);
+                mysql_free_result(res);
+                
+                if(mysql_real_query(&mysqlLink, q, strlen(q)) == 0)
+                {
+                    return true;
+                }
+                
+                TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn[2])error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), q);
+            }
+            
+            if(reconnect())
+            {
+                if(mysql_real_query(&mysqlLink, q, strlen(q)) == 0)
+                {
+                    return true;
+                }
+                
+                if(mysql_errno(&mysqlLink))
+                {
+                    TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), q);
+                }
+            } 
         }
 
         return false;
@@ -285,6 +411,17 @@ public:
 
     bool query_format(const char *format, ...)
     {
+        if(!isInit)
+        {
+            TagLoger::trace(Log_dbLink, 0, "\x1b[1;32mMySQL connection was not initialized\x1b[0m", db_host.data(), db_port, db_user.data());
+            return false;
+        }
+        
+        if(!isConnected)
+        {
+            connect();
+        }
+        
         int buffer_size = 2000;
         char buf[2000];
         bzero(buf, buffer_size);
@@ -301,26 +438,76 @@ public:
 
         if(mysql_errno(&mysqlLink))
         {
-            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m\n", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), buf);
+            // @todo Проверять код ошибки и не паниковать если по коду ясно что проблема в самом запросе а не соединении. 
+            TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn)error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), buf); 
+            if(mysql_errno(&mysqlLink) == CR_COMMANDS_OUT_OF_SYNC)
+            {
+                MYSQL_RES* res = mysql_store_result(&mysqlLink);
+                mysql_free_result(res);
+                
+                if(mysql_real_query(&mysqlLink, buf, strlen(buf)) == 0)
+                {
+                    return true;
+                }
+                
+                TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn[2])error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), buf);
+            }
+            
+            if(reconnect())
+            {
+                if(mysql_real_query(&mysqlLink, buf, strlen(buf)) == 0)
+                {
+                    va_end(ap);
+                    return true;
+                }
+                
+                if(mysql_errno(&mysqlLink))
+                {
+                    TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), buf);
+                }
+            } 
         }
-
+         
         va_end(ap);
         return false;
     }
 
+    bool reconnect()
+    {
+        close();
+        return connect();
+    }
+    
+    void close()
+    {
+        if(isInit)
+        {
+            mysql_close(&mysqlLink);
+            isConnected = false;
+        } 
+    }
+    
     bool connect()
     {
-        mysql_real_connect(&mysqlLink, db_host, db_user, db_pw, db_name, db_port, NULL, 0);
+        if(!isInit)
+        {
+            TagLoger::trace(Log_dbLink, 0, "\x1b[1;32mMySQL connection was not initialized\x1b[0m", db_host.data(), db_port, db_user.data());
+            return false;
+        }
+        
+        isConnected = true;
+        
+        mysql_real_connect(&mysqlLink, db_host.data(), db_user.data(), db_pw.data(), db_name.data(), db_port, NULL, 0);
 
         if(mysql_errno(&mysqlLink))
         {
             TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL connection not established\n%s\nip=%s:%d user=%s [errno=%d]\x1b[0m", mysql_error(&mysqlLink),
-                    db_host, db_port, db_user, mysql_errno(&mysqlLink));
+                    db_host.data(), db_port, db_user.data(), mysql_errno(&mysqlLink));
             return false;
         }
 
 
-        TagLoger::log(Log_dbLink, 0, "\x1b[1;32mMySQL connection established\nip=%s:%d user=%s\x1b[0m", db_host, db_port, db_user);
+        TagLoger::log(Log_dbLink, 0, "\x1b[1;32mMySQL connection established\nip=%s:%d user=%s\x1b[0m", db_host.data(), db_port, db_user.data());
         return true;
 
         //return query("SET CHARACTER SET 'utf8' ");
@@ -847,6 +1034,10 @@ public:
 public:
     stm_pipe_messages_select()
     {
+        bzero(is_null, 5);
+        bzero(error, 5);
+        bzero(length, 5);
+        
         bzero(result_id, PIPE_NAME_LEN);
         bzero(result_event, EVENT_NAME_LEN);
     }
@@ -1072,10 +1263,10 @@ public:
     char          result_hash[USER_HASH_LEN];
     unsigned long result_hash_length = USER_HASH_LEN;
 
-    my_bool       is_null[3];
-    my_bool       error[3];
-    unsigned long length[3];
-
+    my_bool       is_null[1];
+    my_bool       error[1];
+    unsigned long length[1];
+ 
     bool prepare(MYSQL *mysql)
     {
         setParamsCount(1);
@@ -1104,6 +1295,9 @@ public:
     stm_users_auth_select()
     {
         bzero(result_hash, USER_HASH_LEN);
+        bzero(is_null, 1);
+        bzero(error, 1);
+        bzero(length, 1); 
     }
 
     bool execute(unsigned long user_id)
@@ -1182,10 +1376,10 @@ public:
 
         i = 0; 
         result[i].buffer_type    = MYSQL_TYPE_LONG;
-        result[i].buffer         = (void *)&result_length;
-        result[i].is_unsigned    = 0;
-        result[i].is_null        = 0;
-        result[i].length         = 0;
+        result[i].buffer         = (void *)&result_length; 
+        result[i].is_null        = &is_null[i];
+        result[i].error          = &error[i];
+        result[i].length         = &length[i];
           
         return init(mysql, "SELECT `length` FROM `pipes_settings` WHERE `name` = ? limit 1");
     }
@@ -1193,6 +1387,9 @@ public:
 public:
     stm_pipes_settings_select()
     { 
+        bzero(is_null, 1);
+        bzero(error, 1);
+        bzero(length, 1); 
         bzero(param_pipe_name, PIPE_NAME_LEN);
     }
 
@@ -1277,9 +1474,9 @@ public:
         i = 0; 
         result[i].buffer_type    = MYSQL_TYPE_LONG;
         result[i].buffer         = (void *)&result_time;
-        result[i].is_unsigned    = 0;
-        result[i].is_null        = 0;
-        result[i].length         = 0;
+        result[i].is_null        = &is_null[i];
+        result[i].error          = &error[i];
+        result[i].length         = &length[i];
           
         return init(mysql, "SELECT `time` FROM `users_time` WHERE `user_id` = ? ");
     }
@@ -1287,6 +1484,9 @@ public:
 public:
     stm_users_time_select()
     { 
+        bzero(is_null, 1);
+        bzero(error, 1);
+        bzero(length, 1); 
     }
 
     bool execute(unsigned long user_id)

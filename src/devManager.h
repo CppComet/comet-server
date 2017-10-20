@@ -223,11 +223,18 @@ public:
 class Pipe: public CpClass
 {
 public:
-    fastList<int> subscribers;
+    fastList<int>* subscribers;
 
     Pipe():CpClass()
     {
-
+        subscribers = new fastList<int>();
+    }
+    
+    ~Pipe(){
+        if(subscribers != NULL)
+        {
+            delete subscribers;
+        }
     }
 
     /**
@@ -235,17 +242,17 @@ public:
      */
     void insert(int id)
     {
-        subscribers.append(id);
+        subscribers->append(id);
     }
 
     int size() const
     {
-        return subscribers.size();
+        return subscribers->size();
     }
 
     bool empty() const
     {
-        return subscribers.empty();
+        return subscribers->empty();
     }
 
     /**
@@ -253,8 +260,9 @@ public:
      */
     void erase(int id)
     {
-        subscribers.remove(id);
+        subscribers->remove(id);
     }
+    
 };
 
 /**
@@ -316,7 +324,7 @@ class devInfo
          */
         static bool testDevKey(const char* random20bytes, const char* DevKeyHashStart, thread_data* local_buf);
 
-        CP<Pipe> getPipe(const std::string pipe_name)
+        CP<Pipe> getPipe(const std::string &pipe_name)
         {
             CP<Pipe> pipe = NULL;
             pipe_index_lock();
@@ -336,7 +344,7 @@ class devInfo
             return pipe;
         }
 
-        CP<Pipe> findPipe(const std::string pipe_name)
+        CP<Pipe> findPipe(const std::string &pipe_name)
         {
             pipe_index_lock();
             auto it = pipe_index.find(pipe_name);
@@ -356,7 +364,7 @@ class devInfo
          * Надо бы вызывать кода в канале не остаётся подписчиков
          * @param pipe_name
          */
-        void deletePipe(const std::string pipe_name)
+        void deletePipe(const std::string &pipe_name)
         {
             pipe_index_lock();
             auto it = pipe_index.find(pipe_name);

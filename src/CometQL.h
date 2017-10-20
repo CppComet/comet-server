@@ -188,6 +188,15 @@ public:
     tokPlace like; 
 };
 
+class Query_set
+{
+public:
+    int command = 0; 
+    tokPlace section;
+    tokPlace varible;
+    tokPlace value;
+};
+
 class Query_select
 { 
 public:
@@ -249,6 +258,7 @@ public:
     Query_show arg_show;
     Query_select arg_select;
     Query_insert arg_insert;
+    Query_set arg_set;
     
     tokPlace tableName;
     sqlWhere where;
@@ -268,6 +278,11 @@ public:
     void clear()
     {
         bzero(this, sizeof(QueryData));
+    }
+    
+    const char* getQuery() const
+    {
+        return (const char*)StartQury;
     }
     
     /**
