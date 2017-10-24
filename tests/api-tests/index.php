@@ -69,6 +69,7 @@ hr{
     <li><a href="#" onclick="runTest('users_messages');">users_messages</a></li>
     <li><a href="#" onclick="runTest('users_messages');">status</a></li>
     <li><a href="#" onclick="runTest('pipes_settings');">pipes_settings</a></li>
+    <li><a href="#" onclick="runTest('common');">common</a></li>
 </ul>
     
 <div class="root"> 
@@ -157,7 +158,7 @@ function auth()
         // The function start accepts connection settings and opens new connection. 
         // https://comet-server.com/wiki/doku.php/en:comet:javascript_api#connection_with_server
         cometApi.start({
-            node: ["test.comet.su:8087"/*, "test.comet.su:3301"*/],
+            nodes: ["test.comet.su:8087", "test.comet.su:8087"],
             dev_id: 0,
             user_id:user_id,
             user_key:user_key,
@@ -251,6 +252,9 @@ cometApi.count_users_in_pipe("trust_log_pipe", function(res)
     console.log("web_log_pipe", res, res.data.user_in_pipe)
 })
 
+/**
+ *  @todo Добавить ajax запросы к http части для повышения покрытия тестами
+ */
 
 </script>
 </body>

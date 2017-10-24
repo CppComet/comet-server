@@ -2655,25 +2655,13 @@ int MySql_connection::set_offline(thread_data* local_buf)
     return web_close();
 }
 
-int MySql_connection::sendAllRowsAndHeaders(thread_data* local_buf, int columCount, const MySqlResultset_ColumDef* columDef, unsigned int PacketNomber, int countRows)
-{
-    local_buf->answer_buf.lock();
-    char* answer = local_buf->answer_buf.getData();
-    answer += HeadAnswer(columCount, columDef, PacketNomber, answer);
-
-    int realSendPackage = 0;
-    int maxSize = local_buf->answer_buf.getSize() - (answer - local_buf->answer_buf.getData()); // Объём свободной памяти в буфере.
-    answer += local_buf->sql.rowsToBuff(PacketNomber, answer, countRows, local_buf->qInfo, maxSize, realSendPackage);
-    PacketNomber += realSendPackage;
-
-    int dataSize = answer - local_buf->answer_buf.getData();
-    web_write(local_buf->answer_buf.getData(), dataSize);
-
-    TagLoger::log(Log_MySqlServer, 0, "dataSize=%d, realSendRows=%d, countRows=%d", dataSize, realSendPackage, countRows);
-    local_buf->answer_buf.unlock();
-    return Send_EOF_Package(++PacketNomber, local_buf, this);
-}
-
+/**
+  * Хочу научится летать на самолёте
+  * Играть в пентбол
+  * Квадрокоптер с камерой
+  * 3D Принтер
+  * "We can fly"
+  */ 
 void MySql_connection::addIntervalRoutine()
 {
     intervalLoop::instance()->add([](int uptime, thread_data* local_buf)

@@ -27,6 +27,29 @@ class test_pipes_messages extends testClass{
         
         testQuery($this->link, 'SELECT * FROM pipes_messages WHERE name IN( "web_admins", "web_php_chat");'); 
         
+        
+        testQuery($this->link, "INSERT INTO pipes_settings (name, length )VALUES ('name".$rand."', 0);");
+        testQuery($this->link, "INSERT INTO pipes_settings (name, length )VALUES ('name".$rand."', 10);");
+        
+        testQuery($this->link, "INSERT INTO pipes_messages (event, message)VALUES('event_in_pipe', 'text message".$rand."');");
+        testQuery($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('e', 'event_in_pipe', 'text message".$rand."');");
+        testQuery($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('event_in_pipe', '0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789', 'text message".$rand."');");
+        testQuery($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789', '', 'text message".$rand."');");
+        
+        testQuery($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('name".$rand."', 'event_in_pipe', 'text message".$rand."');");
+        
+        $result = testQuery($this->link, "SELECT * FROM pipes_messages WHERE name IN( 'name".$rand."');"); 
+        while($row = mysqli_fetch_assoc($result))
+        {
+            if($row['message'] != 'text message'.$rand)
+            {
+                throw new Exception("Error message != 'text message". $rand."'");
+            }
+            echo json_encode($row)."\n";
+        }
+        
+        
+        // @todo sql_delete_from_pipes_messages
     }
 }
 
