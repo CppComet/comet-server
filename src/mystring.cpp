@@ -369,7 +369,7 @@ bool validation_string(const char* s, int len )
  * @param data Данные
  * @param len Количество данных
  * @return
- */
+ * /
 bool join_string(const char delimetr, char* answer, const int* data, int len )
 {
     sprintf(answer,"%d",data[0] );
@@ -394,7 +394,7 @@ bool join_string(const char delimetr, char* answer, const int* data, int len )
  * @param buff буфер для результирующей строки
  * @return длина результирующей строки
  * @link https://ru.wikipedia.org/wiki/UTF-8
- */
+ * /
 int json_escape_string(const char* string, int len, char* buffer)
 {
     int buffPos = 0;
@@ -531,7 +531,7 @@ int json_escape_string(const char* string, int len, char* buffer)
     //printf("buffer: %d[%s]\n", buffPos, buffer);
     //printHex(buffer, buffPos);
     return buffPos;
-}
+} //*/
 
 
 bool exec(const char* cmd, char* buff, int buff_size)

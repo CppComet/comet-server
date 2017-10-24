@@ -11,7 +11,9 @@ class test_users_time extends testClass{
 
         $query = "INSERT INTO users_time (id, hash )VALUES (".$rand.", 'hash".$rand."');";
         mysqli_query($this->link, $query);
-          
+           
+        mysqli_query($this->link, "delete from users_time where id = 3;");
+        
         $result = testQuery($this->link, "select * from users_time where id in(".$rand.")");
          
         while($row = mysqli_fetch_assoc($result))

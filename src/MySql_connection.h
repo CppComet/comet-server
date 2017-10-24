@@ -316,25 +316,7 @@ protected:
     int sql_delete_from_users_in_pipes(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_pipes(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_pipes_settings(thread_data* local_buf, unsigned int PacketNomber);
-    /**
-     * Хочу научится летать на самолёте
-     * Играть в пентбол
-     * Квадрокоптер с камерой
-     * 3D Принтер
-     * "We can fly"
-     */
-
-    /**
-     * @deprecate
-     * Отправляет ответ для sql select операции.
-     * Отправляет пакеты с описанием колонок, пакеты со строками. И пакет EOF
-     * @param local_buf
-     * @param PacketNomber
-     * @param countRows количество строк которое надо отправить
-     * @return
-     */
-    int sendAllRowsAndHeaders(thread_data* local_buf, int columCount, const MySqlResultset_ColumDef* columDef, unsigned int PacketNomber, int countRows);
-
+ 
 };
 
 #endif	/* MYSQL_CONNECTION_H */

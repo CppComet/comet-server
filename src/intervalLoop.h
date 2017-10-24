@@ -56,6 +56,6 @@ protected:
     /** 
      * @param time количество итераций примерно по одной секунде прошедшее с момента запуска сервера 
      */
-    void virtual step(int time, thread_data* local_buf){}
+    void virtual step(int time, thread_data* local_buf);
 };
 #endif	/* INTERVALLOOP_H */

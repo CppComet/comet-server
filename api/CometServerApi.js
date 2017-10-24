@@ -292,7 +292,7 @@ var _cometServerApi = function(opt)
 /**
  * @private
  */
-_cometServerApi.prototype.version = "3.28";
+_cometServerApi.prototype.version = "3.29";
 
 /**
  * @private
@@ -1122,6 +1122,12 @@ _cometServerApi.prototype.start = function(opt, callBack)
     {
         // Замена имени node на nodeArray чтоб не писать nodeArray когда одна нода
         _cometServerApi.prototype.options.nodeArray = [_cometServerApi.prototype.options.node]
+    }
+    
+    if(_cometServerApi.prototype.options.nodes)
+    {
+        // Замена имени nodes на nodeArray 
+        _cometServerApi.prototype.options.nodeArray = _cometServerApi.prototype.options.nodes
     }
 
     if(_cometServerApi.prototype.LogLevel) console.log("start", [_cometServerApi.prototype.custom_id , opt])
