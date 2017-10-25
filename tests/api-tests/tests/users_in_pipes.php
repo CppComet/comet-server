@@ -25,8 +25,7 @@ class test_users_in_pipes extends testClass{
         testQuery($this->link, "INSERT INTO users_in_pipes (name, event, message)VALUES('pipe_name', 'event_in_pipe', 'text message');");
         testQuery($this->link, "INSERT INTO users_in_pipes (name, event, message)VALUES('pi! pe_name', '#even t_in_pipe', 'text message');");
         
-        testQuery($this->link, 'SELECT * FROM users_in_pipes WHERE name IN( "web_admins", "web_php_chat");'); 
-        
+        testQuery($this->link, 'SELECT * FROM users_in_pipes WHERE name IN( "web_admins", "web_php_chat");');  
     }
 }
 

@@ -17,6 +17,7 @@ class test_mysqli_connect extends testClass{
         
         @mysqli_connect($this->opt['host'], $this->opt['user'], "noPass", $this->opt['api_version'], $this->opt['port']);
         @mysqli_connect($this->opt['host'], $this->opt['user'], null, null, $this->opt['port']);
+        @mysqli_connect($this->opt['host'], "haproxy_check", null, null, $this->opt['port']);
     }
 }
   

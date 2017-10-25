@@ -76,3 +76,8 @@ void* intervalLoop::loop(void *iLoop)
     }
     return NULL;
 }
+
+void intervalLoopObject::step(int time, thread_data* local_buf)
+{
+    
+}

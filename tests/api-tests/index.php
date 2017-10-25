@@ -67,9 +67,10 @@ hr{
     <li><a href="#" onclick="runTest('pipes_messages');">pipes_messages</a></li>
     <li><a href="#" onclick="runTest('pipes');">pipes</a></li>
     <li><a href="#" onclick="runTest('users_messages');">users_messages</a></li>
-    <li><a href="#" onclick="runTest('users_messages');">status</a></li>
+    <li><a href="#" onclick="runTest('status');">status</a></li>
     <li><a href="#" onclick="runTest('pipes_settings');">pipes_settings</a></li>
     <li><a href="#" onclick="runTest('common');">common</a></li>
+    <li><a href="#" onclick="runTest('users_in_pipes');">users_in_pipes</a></li>
 </ul>
     
 <div class="root"> 

@@ -173,7 +173,6 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
                 snprintf(data, 500, "{\\\"data\\\":{\\\"user_id\\\":\\\"%d\\\",\\\"uuid\\\":\\\"%s\\\"}}", web_user_id, web_user_uuid);
                 internalApi::send_event_to_pipe(local_buf, subscriptions[i], data, "\"event_name\":\"subscription\"");
 
-                // @todo учесть работу в кластере
                 // @todo Вставить правку в js апи для совместимости (перенести данные из data в addData)
                 if(local_buf->isWSClusterActive())
                 {
@@ -181,8 +180,6 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
                     while(it != local_buf->wsCluster.end())
                     {
                         auto link = *it;
-
-                        // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
                         link->query_format("INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'subscription', '{\"user_id\":\"%d\",\"uuid\":\"%s\"');", subscriptions[i], web_user_id, web_user_uuid);
                         it++;
                     }
@@ -573,7 +570,6 @@ int Client_connection::send_pipe_log(thread_data* local_buf, char* pipe_name, co
  * @param pipe_name
  * @param MarkerName
  * @return
- * @todo учесть работу в кластере
  */
 int Client_connection::send_pipe_count(thread_data* local_buf, char* pipe_name, const char* MarkerName)
 {

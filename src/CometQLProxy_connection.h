@@ -112,7 +112,7 @@ protected:
     virtual int query_router(thread_data* local_buf, int PacketNomber);
     
     int sql_select_from_pipes(thread_data* local_buf, unsigned int PacketNomber);
-    int sql_select_from_users_time(thread_data* local_buf, unsigned int PacketNomber);
+    int sql_union_select_from_users_time(thread_data* local_buf, unsigned int PacketNomber);
 };
 
 #endif	/* COMETQLPROXY_CONNECTION_H */
