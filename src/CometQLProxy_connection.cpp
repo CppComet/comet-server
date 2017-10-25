@@ -410,7 +410,7 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
 
                     // Если не равно то работать не будет так как данные об онлайне могут не оказаться на нужной ноде.
                     // (Минимум с нод)
-                    return sql_select_from_users_time(local_buf,PacketNomber);
+                    return sql_union_select_from_users_time(local_buf,PacketNomber);
                 }
                 else if(local_buf->qInfo.tokCompare("users_messages",  local_buf->qInfo.tableName))
                 {
@@ -629,7 +629,7 @@ int CometQLProxy_connection::sql_select_from_pipes(thread_data* local_buf, unsig
 }
 
 // users_time
-int CometQLProxy_connection::sql_select_from_users_time(thread_data* local_buf, unsigned int PacketNomber)
+int CometQLProxy_connection::sql_union_select_from_users_time(thread_data* local_buf, unsigned int PacketNomber)
 {
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "id",

@@ -28,8 +28,11 @@ class test_pipes_messages extends testClass{
         testQuery($this->link, 'SELECT * FROM pipes_messages WHERE name IN( "web_admins", "web_php_chat");'); 
         
         
+        testQuery($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('name".$rand."', 'event_in_pipe', 'text message".$rand."');");
         testQuery($this->link, "INSERT INTO pipes_settings (name, length )VALUES ('name".$rand."', 0);");
         testQuery($this->link, "INSERT INTO pipes_settings (name, length )VALUES ('name".$rand."', 10);");
+        testQuery($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('name".$rand."', 'event_in_pipe', 'text message".$rand."');");
+        testQuery($this->link, "INSERT INTO pipes_settings (name, length )VALUES ('name".$rand."', 0);");
         
         testQuery($this->link, "INSERT INTO pipes_messages (event, message)VALUES('event_in_pipe', 'text message".$rand."');");
         testQuery($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('e', 'event_in_pipe', 'text message".$rand."');");
@@ -47,6 +50,9 @@ class test_pipes_messages extends testClass{
             }
             echo json_encode($row)."\n";
         }
+        
+        
+        testQuery($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('trust_name".$rand."', 'event_in_pipe', 'text message".$rand."');");
         
         
         // @todo sql_delete_from_pipes_messages

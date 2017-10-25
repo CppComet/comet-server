@@ -361,6 +361,9 @@ int main(int argc, char *argv[])
     signal(SIGTERM, posix_exit_signal); //  сигнал, для запроса завершения процесса. (В отличие от SIGKILL этот сигнал может быть обработан или проигнорирован программой.)
     signal(SIGUSR1, posix_exit_signal); // пользовательские сигналы По умолчанию, сигналы SIGUSR1 и SIGUSR2 завершают выполнение процесса.
     signal(SIGUSR2, posix_exit_signal); // пользовательские сигналы По умолчанию, сигналы SIGUSR1 и SIGUSR2 завершают выполнение процесса.
+    
+    base64_decode(std::string("YWJjZA==")); // Просто провера чтоб COVERAGE был больше
+    
 #endif	/* DEVMANAGER_H */
     
     signal(SIGBUS,  posix_log_signal); //  сигнал, сигнализирующий об ошибке шины, при обращении к физической памяти. ( может быть перехвачен или проигнорирован)

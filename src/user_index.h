@@ -460,8 +460,7 @@ protected:
 
     /**
      * Запоминает время ухода пользователя и сохраняет эту информацию в редис
-     * Отправляет сообщение в канал user_status_{user_id} о том что человек offline
-     * @todo учесть работу в кластере
+     * Отправляет сообщение в канал user_status_{user_id} о том что человек offline 
      */
     void setOffline_time(thread_data* local_buf)
     {
@@ -483,9 +482,7 @@ protected:
                     auto it = local_buf->wsCluster.begin();
                     while(it != local_buf->wsCluster.end())
                     {
-                        auto link = *it;
-
-                        // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
+                        auto link = *it; 
                         link->query_format("INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'offline', 'offline');", pipe_name);
                         it++;
                     }
@@ -496,8 +493,7 @@ protected:
 
     /**
      * Устанавливает пользователю статус online и сохраняет эту информацию
-     * Отправляет сообщение в канал user_status_{user_id} о том что человек online
-     * @todo учесть работу в кластере
+     * Отправляет сообщение в канал user_status_{user_id} о том что человек online 
      */
     void setOnline_time(thread_data* local_buf)
     {
@@ -522,9 +518,7 @@ protected:
                     auto it = local_buf->wsCluster.begin();
                     while(it != local_buf->wsCluster.end())
                     {
-                        auto link = *it;
-
-                        // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
+                        auto link = *it; 
                         link->query_format("INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'online', 'online');", pipe_name);
                         it++;
                     }
