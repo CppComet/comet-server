@@ -1,44 +1,48 @@
 #!/bin/bash
-### BEGIN INIT INFO
-# Provides:          starComet
-# Required-Start:    $local_fs $network $remote_fs $syslog
-# Required-Stop:     $local_fs $remote_fs $syslog
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: comet service comet-server.com
-# Description:       comet service comet-server.com
-### END INIT INFO
+
+echo "CppComet"
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 RUNDIR=/etc/comet-server/
 EXTRAOPTS=
 PIDFILE=/var/run/cppcomet.pid
 
-echo "CppComet"
 
 cd ${RUNDIR}
 
 case "$1" in
     start) 
-        if [test -f "$PIDFILE"]
+        if test -f "$PIDFILE"
         then
             echo "CppComet already run"
         else
             echo "Starting CppComet"
-            nohup ./comet-start.sh > /var/log/cpp_comet.log &
+            ./cpp_comet > /var/log/cpp_comet.log 2>/var/log/cpp_comet.log &
         fi
         ;;
     stop)
-        echo "Stopping CppComet"
-        kill `cat $PIDFILE`
-        `rm -rf $PIDFILE`
+        if test -f "$PIDFILE"
+        then
+            echo "Stopping CppComet"
+            kill `cat $PIDFILE`
+            `rm -rf $PIDFILE`
+        else
+            echo "pid file does not exist" 
+	        echo 'exit' > /tmp/cpp.comet
+        fi
         ;;
     *)
-        echo "Stopping CppComet"
-        kill `cat $PIDFILE`
-        `rm -rf $PIDFILE`
-
+        if test -f "$PIDFILE"
+        then
+            echo "Stopping CppComet"
+            kill `cat $PIDFILE`
+            `rm -rf $PIDFILE`
+        else
+            echo "pid file does not exist" 
+        fi
         echo "Starting CppComet"
-        nohup ./cpp_comet > /var/log/cpp_comet.log &
+        ./cpp_comet > /var/log/cpp_comet.log 2>/var/log/cpp_comet.log &
         ;;
 esac
+
+
