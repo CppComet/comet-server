@@ -298,7 +298,7 @@ public:
 };
  
 class usage_statistics: public intervalLoopObject
-{
+{ 
 public:
     
     /**
@@ -306,7 +306,7 @@ public:
      * @param data данные
      * @return 
      */
-    static bool send(std::string data);
+    static bool send(std::string data, bool curl);
   
     void static start();
 };

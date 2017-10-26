@@ -198,15 +198,8 @@ bool tcpServer<connectionType>::start(const char* Host,const int Port, const cha
         // struct epoll_event ev;
         //     watch just incoming(EPOLLIN)
         //     and Edge Trigged(EPOLLET) events
-
-        if(use_ssl)
-        {
-            gev.events = EPOLLOUT | EPOLLIN | EPOLLERR | EPOLLRDHUP; // !|EPOLLET !|EPOLLRDHUP  --  {EPOLLIN | EPOLLET} |EPOLLOUT | EPOLLRDNORM |EPOLLRDBAND|EPOLLWRNORM | EPOLLWRNORM | EPOLLWRBAND |EPOLLMSG |EPOLLERR|EPOLLHUP|EPOLLRDHUP|EPOLLONESHOT
-        }
-        else
-        {
-            gev.events = EPOLLHUP | EPOLLIN | EPOLLERR | EPOLLRDHUP; // !|EPOLLET  !|EPOLLRDHUP  --  |EPOLLOUT | EPOLLRDNORM |EPOLLRDBAND|EPOLLWRNORM | EPOLLWRNORM | EPOLLWRBAND |EPOLLMSG |EPOLLERR|EPOLLHUP|EPOLLRDHUP|EPOLLONESHOT
-        }
+ 
+        gev.events = EPOLLHUP | EPOLLIN | EPOLLERR | EPOLLRDHUP; // !|EPOLLET  !|EPOLLRDHUP  --  |EPOLLOUT | EPOLLRDNORM |EPOLLRDBAND|EPOLLWRNORM | EPOLLWRNORM | EPOLLWRBAND |EPOLLMSG |EPOLLERR|EPOLLHUP|EPOLLRDHUP|EPOLLONESHOT
 
 
 
@@ -572,7 +565,7 @@ void tcpServer<connectionType>::loop(const tcpServer_loop_data<connectionType>* 
  
                 try{
                     CP<connectionType> clientObj;   
-                    clientObj->event.events = events[i].events;
+                    clientObj->event.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP; // events[i].events;
                     clientObj->event.data.fd = client_id;  
                     clientObj->event.data.ptr = (void*)clientObj.get();
 
