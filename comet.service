@@ -5,7 +5,7 @@ Documentation=http://comet-server.com
 
 [Service]
 Type=forking
-ExecStart=/etc/comet-server/comet-service.sh restart 
+ExecStart=/etc/comet-server/comet-service.sh start 
 ExecReload=/etc/comet-server/comet-service.sh restart 
 ExecStop=/etc/comet-server/comet-service.sh stop 
 TimeoutStopSec=0

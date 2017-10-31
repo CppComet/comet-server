@@ -60,7 +60,7 @@ bool usage_statistics::send(std::string data, bool curl)
     else
     {
         std::string wget;
-        wget.append("wget --post-data \"").append(data).append("\" --timeout=1 --header=\"Content-Type: text/plain\" http://statistics.comet-server.ru/api/statistics > /dev/null 2>&1");
+        wget.append("wget --post-data \"").append(data).append("\" -t=1 --output-document=/dev/null --timeout=1 --header=\"Content-Type: text/plain\" http://statistics.comet-server.ru/api/statistics > /dev/null 2>&1");
         if(exec(wget.data(), cli, 600))
         {
             return true;
