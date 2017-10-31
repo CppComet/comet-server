@@ -105,12 +105,7 @@ class tcpServer: public intervalLoopObject
     const char* name = NULL;
     char* host = NULL;
     int port = 80;
-
-    /**
-     * Включает или выключает использование ssl
-     */
-    bool use_ssl = false;
-
+ 
     /**
      * Возможность epoll впервые была представлена в разрабатываемом ядре 2.5.44, а завер-шен интерфейс был в версии ядра 2.5.66.
      *

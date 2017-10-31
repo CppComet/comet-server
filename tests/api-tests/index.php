@@ -57,7 +57,7 @@ hr{
 </style>
 
 <h3>CppComet tests</h3>
- 
+ <pre>mysql -htest.comet.su -uroot -p0000000000000000000000000000000000000000000000000000000000000000 -DCometQL_v1 -P3301 --skip-ssl</pre>
 <ul>
     <li><a href="#" onclick="runTest('mysqli_connect');">mysqli_connect</a></li>
     <li><a href="#" onclick="runTest('users_auth_insert', 10);">users_auth_insert (10)</a></li>

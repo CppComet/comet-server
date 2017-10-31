@@ -1,11 +1,13 @@
 [Unit]
 Description=Comet server
 After=network.target
-Documentation=http://comet-server.org
+Documentation=http://comet-server.com
 
 [Service]
 Type=forking
-ExecStart=/root/comet/comet-service.sh restart 
+ExecStart=/etc/comet-server/comet-service.sh start 
+ExecReload=/etc/comet-server/comet-service.sh restart 
+ExecStop=/etc/comet-server/comet-service.sh stop 
 TimeoutStopSec=0
 Restart=always
 User=root

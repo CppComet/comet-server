@@ -2,7 +2,7 @@
 #include "tcpServer_benchmark.h"
 #include "Client_connection.h"
 #include "MySql_connection.h"
-#include "Freeswitch_connection.h" 
+#include "Freeswitch_connection.h"
 #include "CometQLProxy_connection.h"
 #include "devManager.h"
 #include "mystring.h"
@@ -10,7 +10,7 @@
 
 
 time_t tcpServer_benchmark::start_time = time(0);
- 
+
 void tcpServer_benchmark::start(int Servewr_id, int th_Num, const char* server_name)
 {
     bzero(name, sizeof(char) * 299);
@@ -28,9 +28,9 @@ void tcpServer_benchmark::start(int Servewr_id, int th_Num, const char* server_n
         for(int i = 0; i< th_num; i++)
         {
             th_status[i] = '-';
-            th_status_count[i] = 0; 
+            th_status_count[i] = 0;
             th_ps_status_count[i] = 0;
-            th_tps_status_count[i] = 0; 
+            th_tps_status_count[i] = 0;
         }
         conections = 0;
         server_id = Servewr_id;
@@ -45,17 +45,28 @@ void tcpServer_benchmark::start(int Servewr_id, int th_Num, const char* server_n
  * @param data данные
  * @return
  */
-bool usage_statistics::send(std::string data)
+bool usage_statistics::send(std::string data, bool curl)
 {
     char cli[600];
-    std::string cmd;
-    cmd.append("curl -d \"").append(data).append("\" --connect-timeout 1 --max-time 1 -H \"Content-Type: text/plain\" -X POST http://statistics.comet-server.ru/api/statistics > /dev/null 2>&1");
-    if(exec(cmd.data(), cli, 600))
+    if(curl)
     {
-        return true;
+        std::string curl;
+        curl.append("curl -d \"").append(data).append("\" --connect-timeout 1 --max-time 1 -H \"Content-Type: text/plain\" -X POST http://statistics.comet-server.ru/api/statistics > /dev/null 2>&1");
+        if(exec(curl.data(), cli, 600))
+        {
+            return true;
+        }
+    }
+    else
+    {
+        std::string wget;
+        wget.append("wget --post-data \"").append(data).append("\" -t=1 --output-document=/dev/null --timeout=1 --header=\"Content-Type: text/plain\" http://statistics.comet-server.ru/api/statistics > /dev/null 2>&1");
+        if(exec(wget.data(), cli, 600))
+        {
+            return true;
+        }
     }
 
-    //TagLoger::log(Log_benchmark, 0, "usage_statistics::send [%s]\n",cli);
     return false;
 }
 
@@ -72,7 +83,7 @@ void usage_statistics::start()
         {
             return;
         }
-         
+
         if(!appConf::instance()->get_bool("statistics", "allow"))
         {
             return;
@@ -176,7 +187,6 @@ void usage_statistics::start()
         snprintf(value, 255, "backend_add_client=%d&", tcpServer <MySql_connection>::instance()->bm.getAddClient());
         exportdata.append(value);
 
-
         // delete_client
         snprintf(value, 255, "frontend_delete_client=%d&", tcpServer <Client_connection>::instance()->bm.getDeleteClient());
         exportdata.append(value);
@@ -222,10 +232,22 @@ void usage_statistics::start()
 
         snprintf(value, 255, "Freeswitch_connection_th_num=%d&", tcpServer <Freeswitch_connection>::instance()->bm.get_th_num());
         exportdata.append(value);
- 
+
         snprintf(value, 255, "CometQLProxy_connection_th_num=%d&", tcpServer <CometQLProxy_connection>::instance()->bm.get_th_num());
         exportdata.append(value);
-        
+
+        snprintf(value, 255, "MySql_connection_port=%d&", appConf::instance()->get_int("cometql", "port"));
+        exportdata.append(value);
+
+        snprintf(value, 255, "Client_connection_port=%d&", appConf::instance()->get_int("ws", "port"));
+        exportdata.append(value);
+
+        snprintf(value, 255, "Freeswitch_connection_port=%d&", appConf::instance()->get_int("freeswitch", "port"));
+        exportdata.append(value);
+
+        snprintf(value, 255, "CometQLProxy_connection_port=%d&", appConf::instance()->get_int("cometqlproxy", "port"));
+        exportdata.append(value);
+
         for(int i =0; i < tcpServer <MySql_connection>::instance()->bm.get_th_num(); i++)
         {
             snprintf(value, 255, "MySql_connection_th=%d,%c,%d&", i, (char)tcpServer <MySql_connection>::instance()->bm.get_th_status(i), tcpServer <MySql_connection>::instance()->bm.get_th_count(i));
@@ -243,13 +265,14 @@ void usage_statistics::start()
             snprintf(value, 255, "Freeswitch_connection_th=%d,%c,%d&", i, (char)tcpServer <Freeswitch_connection>::instance()->bm.get_th_status(i), tcpServer <Freeswitch_connection>::instance()->bm.get_th_count(i));
             exportdata.append(value);
         }
- 
+
         for(int i =0; i < tcpServer <CometQLProxy_connection>::instance()->bm.get_th_num(); i++)
         {
             snprintf(value, 255, "CometQLProxy_connection=%d,%c,%d&", i, (char)tcpServer <CometQLProxy_connection>::instance()->bm.get_th_status(i), tcpServer <CometQLProxy_connection>::instance()->bm.get_th_count(i));
             exportdata.append(value);
         }
         exportdata.append("end=true");
-        send(exportdata);
+
+        send(exportdata, rand()%2==0);
     });
 }

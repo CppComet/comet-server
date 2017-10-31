@@ -131,6 +131,17 @@ public:
      * @param i номер потока
      * @param c статус
      * @link https://worldpage.ru/redmine/documents/19#Контроль-в-пеприод-работы
+     * 
+     * Статусы которые есть сейчас
+     * 
+     * R - чтение данных пришедших от клиента
+     * D - удаление клиента
+     * M - обрабатывает сообщение
+     * E - обработка сообщения завершена
+     * - - не инециализирован (в момент старта сервера)
+     * 0 - ждём событий (идеальное состояние)
+     * X - Ошибка epoll_events_count
+     * 1 - устанавливает соединение/обрабатывает входящий запрос
      */
     void set_th_status(int i, char c)
     {
@@ -298,7 +309,7 @@ public:
 };
  
 class usage_statistics: public intervalLoopObject
-{
+{ 
 public:
     
     /**
@@ -306,7 +317,7 @@ public:
      * @param data данные
      * @return 
      */
-    static bool send(std::string data);
+    static bool send(std::string data, bool curl);
   
     void static start();
 };

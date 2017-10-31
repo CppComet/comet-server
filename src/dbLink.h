@@ -341,8 +341,14 @@ public:
         mysql_options(&mysqlLink, MYSQL_OPT_RECONNECT, &is_reconnect);
         mysql_options(&mysqlLink, MYSQL_SET_CHARSET_NAME, "utf8");
         mysql_options(&mysqlLink, MYSQL_INIT_COMMAND, "SET NAMES utf8");
-        //mysql_options(&mysqlLink, MYSQL_OPT_CONNECT_TIMEOUT, &connect_timeout);
-        //mysql_options(&mysqlLink, MYSQL_OPT_READ_TIMEOUT, &read_timeout);
+        mysql_options(&mysqlLink, MYSQL_OPT_CONNECT_TIMEOUT, &connect_timeout);
+        mysql_options(&mysqlLink, MYSQL_OPT_READ_TIMEOUT, &read_timeout);
+        
+        // MYSQL_OPT_CONNECT_TIMEOUT
+        // MYSQL_OPT_READ_TIMEOUT
+        // MYSQL_OPT_WRITE_TIMEOUT
+        //mysql_options(&mysql,MYSQL_OPT_COMPRESS,0);
+        
         return true;
     }
 
@@ -491,12 +497,13 @@ public:
     {
         if(!isInit)
         {
-            TagLoger::trace(Log_dbLink, 0, "\x1b[1;32mMySQL connection was not initialized\x1b[0m", db_host.data(), db_port, db_user.data());
+            TagLoger::trace(Log_dbLink, 0, "\x1b[1;32mMySQL connection was not initialized\x1b[0m");
             return false;
         }
         
         isConnected = true;
         
+        TagLoger::debug(Log_dbLink, 0, "\x1b[1;32mmysql_real_connect %s:%d user=%s\x1b[0m", db_host.data(), db_port, db_user.data());
         mysql_real_connect(&mysqlLink, db_host.data(), db_user.data(), db_pw.data(), db_name.data(), db_port, NULL, 0);
 
         if(mysql_errno(&mysqlLink))

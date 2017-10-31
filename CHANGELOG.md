@@ -5,6 +5,14 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v3.28
+
+BUG FIXES:
+
+ * fix bug in star and stop scripts
+ * fix bug in stats
+ 
+
 ## v3.26
 
 BUG FIXES:
