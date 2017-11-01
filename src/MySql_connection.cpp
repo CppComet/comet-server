@@ -2359,6 +2359,7 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
         "message",      // сообщение
         "mode"          // Режим  video_*, audio_*
     };
+    // Поле tabUUID передается или отслеживается через текст сообщения `message`
 
     if(!local_buf->sql.prepare_columns_for_insert(columDef, local_buf->qInfo))
     {
