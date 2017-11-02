@@ -276,6 +276,11 @@ void command_line_fork()
 
         if( strncmp(buf,"exit", strlen("exit") ) == 0 )
         {
+            if(tcpServer <MySql_connection>::instance()->bm.get_uptime() < 60)
+            {
+                printf("\x1b[31mExit command ignore\x1b[0m\n");
+                continue;
+            }
             printf("\x1b[31mExit command received\x1b[0m\n");
             //kill(getppid(), SIGTERM);
             close(fd);
@@ -285,7 +290,12 @@ void command_line_fork()
         }
         else if( strncmp(buf,"restart", strlen("restart") ) == 0 )
         {
-            printf("\x1b[31mExit command received\x1b[0m\n");
+            if(tcpServer <MySql_connection>::instance()->bm.get_uptime() < 60)
+            {
+                printf("\x1b[31mRestart command ignore\x1b[0m\n");
+                continue;
+            }
+            printf("\x1b[31mRestart command received\x1b[0m\n");
             //kill(pid, SIGTERM);
             close(fd);
             remove(NAMEDPIPE_NAME);
