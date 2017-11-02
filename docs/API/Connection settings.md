@@ -9,7 +9,7 @@ In the examples are usually referred as dev_id. Used only when connecting to [Sa
 
 Secret Developer key, it is composed of 64 characters and is used for authentication to the comet server. No it does not tell anyone. In the examples, commonly referred to as dev_key. 
  
-If you use [comet.ini](https://github.com/CppComet/comet-server]], it is specified in the settings in the [[/docs/EN/Administration/file%20comet.ini.md) file, if you use [SaaS version of CppComet](https://comet-server.com) it is issued when you add a new service in your account.
+If you use [comet.ini](https://github.com/CppComet/comet-server]], it is specified in the settings in the [[/docs/Administration/file%20comet.ini.md) file, if you use [SaaS version of CppComet](https://comet-server.com) it is issued when you add a new service in your account.
 
 # Possible problems after installation
  

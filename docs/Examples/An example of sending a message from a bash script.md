@@ -11,5 +11,5 @@ echo "INSERT INTO pipes_messages (name, event, message)VALUES('web_MainPageChat'
 
 Run this command in linux console and a message containing information about the load on the server in the chat window.
 <html>
-<iframe src="//comet-server.com/doc/CometQL/MainPageChat/index.php" style="width: 100%;  display: block;  height: 250px;"></iframe>
+
 </html>

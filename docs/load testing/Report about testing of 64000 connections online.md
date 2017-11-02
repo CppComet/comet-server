@@ -2,7 +2,7 @@
 # Report about testing of 64,000 connections online
 
 
-At previous article we examined the [ how to conduct the stress testing.](/docs/EN/load%20testing/Stress%20testing.md) And here I want to show you how I conducted it by myself, and give its results.
+At previous article we examined the [ how to conduct the stress testing.](/docs/load%20testing/Stress%20testing.md) And here I want to show you how I conducted it by myself, and give its results.
 
 
 ___
