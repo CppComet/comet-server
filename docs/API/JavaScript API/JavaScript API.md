@@ -13,7 +13,7 @@ The function start accepts connection settings and opens new connection. Here op
 cometApi.start({dev_id:15, user_id:1, user_key:"userHash", node:"app.comet-server.ru"})
 ```
 
-  * dev_id it’s a binding parameter – [public developers’ key](/docs/EN/Connection%20settings.md). 
+  * dev_id it’s a binding parameter – [public developers’ key](/docs/EN/API/Connection%20settings.md). 
   * user_id it’s a non-binding parameter – user’s identifier is necessary to  [authorization on the comet server](/docs/EN/API/Authorization%20on%20the%20CppComet.md); 
   * user_key it’s non-binding parameter – it is an authorization hash which necessary to [authorize user on the comet server](/docs/EN/API/Authorization%20on%20the%20CppComet.md).  
   * node - If you deploy [CppComet](https://github.com/CppComet/comet-server) on your server, you must specify the address of your server
@@ -67,7 +67,7 @@ cometApi.subscription(function(e){ console.log(e)})
 ```
 
 
-An example with online demo [How to accept message from channel in JavaScript](/docs/EN/How%20to%20take%20a%20message%20out%20of%20the%20channel%20in%20JavaScript.md)
+An example with online demo [How to accept message from channel in JavaScript](/docs/EN/Examples/How%20to%20take%20a%20message%20out%20of%20the%20channel%20in%20JavaScript.md)
 
 # Unsubscription of receiving messages from channel
 
@@ -99,7 +99,7 @@ Also we already have some channels with extra properties:
   * user_status_* - used for automatic notification JS API about users’ status;
   * web_* - channels which can receive messages from CometQL and JS API.
   * track_* - automatic notification JS api about what someone has subscribed or unsubscribed from this channel
-# The subscription on receiving private messages ( pipe msg )======
+# The subscription on receiving private messages ( pipe msg )
 The subscription on messages from server, delivered in order to authorization data (by user’s id):
 
 ```
@@ -119,7 +119,7 @@ More details about authorization mechanism on comet server you and about private
 ___
 
 
-# Subscription on changing user’s status ( pipes user_status_* )======
+# Subscription on changing user’s status ( pipes user_status_* )
 
 It is possible to subscribe from JS on notifications about some user’s activity on comet server. 
 
@@ -315,4 +315,4 @@ To prevent this situation you can just only once download the file with CometSer
  
   * [Reserved channel names](/docs/EN/API/Reserved%20channel%20names.md)
   * [CometQL API](/docs/EN/API/CometQL/CometQL%20API.md)
-  * [What is and why do we need "A public developer token" and "Secret developer key"](/docs/EN/Connection%20settings.md)
+  * [What is and why do we need "A public developer token" and "Secret developer key"](/docs/EN/API/Connection%20settings.md)

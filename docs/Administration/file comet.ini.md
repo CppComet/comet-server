@@ -7,7 +7,7 @@
  
 # Section [main]
  
-Password for access from cometQL
+Password for access from cometQL, this parameter is synonym for dev_key from saas version.
 
 ```
 password = 0000000000000000000000000000000000000000000000000000000000000000

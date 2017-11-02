@@ -48,11 +48,11 @@ mysql -h app.comet-server.ru -u15 -plPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgL
 ```
 
 
-Else you can use [online command prompt](/docs/EN/Online%20CometQL%20CLI.md). You can find it on the bottom of the right corner on all of the pages.  
+Else you can use [online command prompt](/docs/EN/Examples/Online%20CometQL%20CLI.md). You can find it on the bottom of the right corner on all of the pages.  
 
 
 ___
-[Here you can test source code based on PHP with CometQL](/docs/EN/Online%20CometQL%20CLI.md) using for online command prompt implementation.
+[Here you can test source code based on PHP with CometQL](/docs/EN/Examples/Online%20CometQL%20CLI.md) using for online command prompt implementation.
 ___
 
  
@@ -104,7 +104,7 @@ Notes of current implementation of CometSQL:
 
 
 ___
-Some of hosting providers determine forbiddance (или ban) on external connections – you can face with this on some free or half-free hosting services. In order to check ability to use CometQL, you can take advantage of [hosting verification script](/docs/EN/Checking%20the%20hosting%20for%20possible%20connect%20to%20the%20comet%20server.md). 
+Some of hosting providers determine forbiddance (или ban) on external connections – you can face with this on some free or half-free hosting services. In order to check ability to use CometQL, you can take advantage of [hosting verification script](/docs/EN/Troubleshooting/Checking%20the%20hosting%20for%20possible%20connect%20to%20the%20comet%20server.md). 
 ___
 
 # Table pipes_messages
@@ -157,7 +157,7 @@ Query OK, 0 rows affected (0.13 sec)
 # Online example
 Input channel name “pipe _name” and click “subscribe”.
 <html>
-
+<iframe src="//comet-server.com/doc/example/7/subscriptionTest.php" width="910px"></iframe>
 </html>
 Now perform with online command prompt insert-query with pipes_messages and check the result.
 
@@ -196,7 +196,7 @@ mysql> select * from pipes where name in( "web_admins", "web_php_chat");
 
 Input channel name “web_admins” and click “subscribe”. 
 <html>
-
+<iframe src="//comet-server.com/doc/example/7/subscriptionTest.php" width="910px"></iframe>
 </html>
 Now perform query again and you will see that amount of subscribers are increase.
 # Table users_in_pipes
@@ -378,11 +378,11 @@ ___
 
 # Other information
 
-  * [Example of sending messages from bash.](/docs/EN/An%20example%20of%20sending%20a%20message%20from%20a%20bash%20script.md)
+  * [Example of sending messages from bash.](/docs/EN/Examples/An%20example%20of%20sending%20a%20message%20from%20a%20bash%20script.md)
   * [Error code in CometQL](/docs/EN/API/Error%20codes%20in%20CometQL.md)
   * [Reserved channel names](/docs/EN/API/Reserved%20channel%20names.md)
   * [JavaScript API](/docs/EN/API/JavaScript%20API/JavaScript%20API.md)
-  * [What it is and why do we need "A public developer token" and "Secret developer key?"](/docs/EN/Connection%20settings.md)
+  * [What it is and why do we need "A public developer token" and "Secret developer key?"](/docs/EN/API/Connection%20settings.md)
 
 # Reserved channels names
 
