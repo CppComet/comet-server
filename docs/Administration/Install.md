@@ -50,6 +50,18 @@ password = 0000000000000000000000000000000000000000000000000000000000000000
 ```
 
  
+# Add to Startup
+ 
+
+```
+cp ./comet.service /etc/systemd/system
+systemctl daemon-reload
+systemctl enable comet.service
+```
+
+
+After successes run server we can begin create chat. If you get error create issue in [github repository](https://github.com/Levhav/comet-server/issues).
+
 # Launch
 Run in console mode
 
@@ -67,18 +79,6 @@ systemctl start comet.service
 
 ```
 
-
-# Add to Startup
- 
-
-```
-cp ./comet.service /etc/systemd/system
-systemctl daemon-reload
-systemctl enable comet.service
-```
-
-
-After successes run server we can begin create chat. If you get error create issue in [github repository](https://github.com/Levhav/comet-server/issues).
 
 # Configuring nginx as a reverse proxy
 
@@ -198,3 +198,48 @@ $link = mysqli_connect("example.ru", "root", "", "CometQL_v1", 3300);
 ```
 
 
+# Unreadable file comet.ini
+
+Some text editors add unprintable simbols to the utf8 file. After that, the file may look the same but the comet server will not parse it correctly. You can try using another editor or delete the old file and create a new one with the same text.
+
+# Error while assembling in CentOS
+
+
+```
+
+CMake Error: The following variables are used in this project, but they are set to NOTFOUND.
+Please set them or make sure they are set and tested correctly in the CMake files:
+MYSQL_INCLUDE_DIR (ADVANCED)
+
+```
+
+
+Can not find the client's mysql header files. You can try installing the mysql-devel package
+
+
+```
+
+yum install mysql-devel
+
+```
+
+
+# Error while assembling in CentOS
+
+
+```
+
+/etc/comet-server/comet-server/src/mystring.cpp:15:51: fatal error: uuid / uuid.h: No such file or directory exists
+ #include <uuid/uuid.h>
+
+```
+
+
+Can not find the file uuid.h. You can try installing the libuuid libuuid-devel package
+
+
+```
+
+yum install libuuid libuuid-devel
+
+```

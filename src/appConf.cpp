@@ -181,6 +181,12 @@ bool appConf::initFromFile(const char *fileName)
     /**
      *  mysql db 
      */
+    
+    if(!is_property_exists("db", "connection_attempts"))
+    {
+        sections["db"]["connection_attempts"] = "10"; 
+    } 
+    
     if(!is_property_exists("db", "host"))
     {
         // Ошибочка, параметр обязателен

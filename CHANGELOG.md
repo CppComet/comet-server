@@ -5,6 +5,18 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v3.29
+
+BUG FIXES:
+
+ * fix bug in star scripts
+
+IMPROVEMENTS:
+
+ * add parametr connection_attempts to section db
+ * rebild docs in .md files and impruve links in docs
+ 
+
 ## v3.28
 
 BUG FIXES:

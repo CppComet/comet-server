@@ -101,8 +101,8 @@ subscription Code to the pipe on comet server. This callback will be called when
 
 # Links
 
-  * [JavaScript API](/docs/API/JavaScript%20API/JavaScript%20API.md)
-  * [CometQL API](/docs/API/CometQL/CometQL%20API.md)
+  * [JavaScript API](/docs/API/JavaScript%20API/JavaScript%20API)
+  * [CometQL API](/docs/API/CometQL/CometQL%20API)
   * [Online demo](https://jsfiddle.net/o35kvmn2/5/)
   * [CppComet](https://github.com/CppComet/comet-server)
   * [Creating a simple chat using CppComet](https://www.codeproject.com/script/Articles/ArticleVersion.aspx?waid=235463&aid=1181698)
