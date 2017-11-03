@@ -406,7 +406,7 @@ int main(int argc, char *argv[])
         return 0;
     }
     
-    TagLoger::log(Log_Any, 0, "Server starting pid:%d, getrusage:%d\n", getpid());
+    TagLoger::log(Log_Any, 0, "Server starting pid:%d, getrusage:%d\n", (int)getpid());
     TagLoger::initTagLevels();
  
     dbLink mydb;
@@ -415,21 +415,56 @@ int main(int argc, char *argv[])
             appConf::instance()->get_chars("db", "password"),
             appConf::instance()->get_chars("db", "name"),
             appConf::instance()->get_int("db", "port"));
-    if(!mydb.connect())
+    
+    int connection_attempts = appConf::instance()->get_int("db", "connection_attempts");
+    if(!connection_attempts)
+    {
+        connection_attempts = 1;
+    }
+    
+    int count = 0;
+    bool isSuccess = false;
+    do{
+        count++;
+        if(!mydb.connect())
+        {
+            TagLoger::error(Log_Any, 0, "\x1b[1;31mError: MySQL connection not established (attempt=%d)\x1b[0m", count);
+            sleep(5);
+            continue;
+        }
+
+        if(!mydb.query_format("INSERT INTO `log_event`(`id`, `text`) VALUES (NULL,'start-%s');", appConf::instance()->get_string("main", "node_name").data()))
+        {
+            sleep(5);
+            continue;
+        }
+        else
+        {
+            isSuccess = true;
+            break;
+        }
+        
+    }while(count < connection_attempts);
+
+    if(!isSuccess)
     {
         TagLoger::error(Log_Any, 0, "\x1b[1;31mError: MySQL connection not established\x1b[0m");
+        return -1;
     }
-
-    if(!mydb.query_format("INSERT INTO `log_event`(`id`, `text`) VALUES (NULL,'start-%s');", appConf::instance()->get_chars("main", "node_name")))
-    {
-        return 0;
-    }
-
+    
     // Запись pid в var run 
     auto fp = fopen(appConf::instance()->get_chars("main", "pidfile"), "w");
-    fprintf(fp, "%d", getpid());
-    fclose(fp);
-
+    if(fp == NULL)
+    {
+        TagLoger::error(Log_Any, 0, "\x1b[1;31mError: pidfile is not updated\x1b[0m");
+        perror("Error: pidfile is not updated");
+    }
+    else
+    {
+        fprintf(fp, "%d", (int)getpid());
+        fclose(fp);
+    }
+    
     while(true)
     {
         pid_t pid = fork(); 
@@ -444,7 +479,7 @@ int main(int argc, char *argv[])
         else if(pid == 0)
         {
             // Это процесс-потомок
-            TagLoger::debug(Log_appConf, 0, "PID=%d, PPID=%d", getpid(), getppid());
+            TagLoger::debug(Log_appConf, 0, "PID=%d, PPID=%d", (int)getpid(), (int)getppid());
             signal(SIGHUP,  posix_death_signal); //  сигнал, посылаемый процессу для уведомления о потере соединения с управляющим терминалом пользователя. ( может быть перехвачен или проигнорирован программой. )
      
             break;
@@ -452,7 +487,7 @@ int main(int argc, char *argv[])
         else
         {
             // Это процесс-родитель 
-            TagLoger::debug(Log_appConf, 0, "PID=%d, Child PID=%d", getpid(), pid); 
+            TagLoger::debug(Log_appConf, 0, "PID=%d, Child PID=%d", (int)getpid(), pid); 
             signal(SIGHUP,  posix_log_signal); //  сигнал, посылаемый процессу для уведомления о потере соединения с управляющим терминалом пользователя. ( может быть перехвачен или проигнорирован программой. )
    
             int status;
