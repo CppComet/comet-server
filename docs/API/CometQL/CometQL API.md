@@ -48,11 +48,11 @@ mysql -h app.comet-server.ru -u15 -plPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgL
 ```
 
 
-Else you can use [online command prompt](/docs/Examples/Online%20CometQL%20CLI.md). You can find it on the bottom of the right corner on all of the pages.  
+Else you can use [online command prompt](/docs/Examples/Online%20CometQL%20CLI). You can find it on the bottom of the right corner on all of the pages.  
 
 
 ___
-[Here you can test source code based on PHP with CometQL](/docs/Examples/Online%20CometQL%20CLI.md) using for online command prompt implementation.
+[Here you can test source code based on PHP with CometQL](/docs/Examples/Online%20CometQL%20CLI) using for online command prompt implementation.
 ___
 
  
@@ -99,12 +99,12 @@ ___
 
 Notes of current implementation of CometSQL:
   * CometSQL doesn’t implement all methods of SQL. A part of functions planned to realize in future. But some notes were applied in order to optimize inner structure of Comet server.
-  * To [optimize internal logics](/docs/API/Optimization%20delete%2C%20and%20insert%20in%20CometQL.md), such operations like delete and insert doesn’t return amount of used lines (it belongs to CometQL v.1.0).
+  * To [optimize internal logics](/docs/API/Optimization%20delete%2C%20and%20insert%20in%20CometQL), such operations like delete and insert doesn’t return amount of used lines (it belongs to CometQL v.1.0).
   * Supporting such operators like AND, OR and ORDER BY in queries will be realize soon.
 
 
 ___
-Some of hosting providers determine forbiddance (или ban) on external connections – you can face with this on some free or half-free hosting services. In order to check ability to use CometQL, you can take advantage of [hosting verification script](/docs/Troubleshooting/Checking%20the%20hosting%20for%20possible%20connect%20to%20the%20comet%20server.md). 
+Some of hosting providers determine forbiddance (или ban) on external connections – you can face with this on some free or half-free hosting services. In order to check ability to use CometQL, you can take advantage of [hosting verification script](/docs/Troubleshooting/Checking%20the%20hosting%20for%20possible%20connect%20to%20the%20comet%20server). 
 ___
 
 # Table pipes_messages
@@ -200,7 +200,7 @@ Input channel name “web_admins” and click “subscribe”.
 </html>
 Now perform query again and you will see that amount of subscribers are increase.
 # Table users_in_pipes
-The table “users_in_pipes” contains data about [authorized users](/docs/API/Authorization%20on%20the%20CppComet.md) which subscribe on channel. This table is available only for reading.  
+The table “users_in_pipes” contains data about [authorized users](/docs/API/Authorization%20on%20the%20CppComet) which subscribe on channel. This table is available only for reading.  
 
 ```
 
@@ -220,7 +220,7 @@ mysql> select * from users_in_pipes where name = "web_admins";
 
 
 ___
-Field user in table pipes contain aggregate amount of subscribers ([authorized and non-authorized](/docs/API/Authorization%20on%20the%20CppComet.md)), besides of table users_in_pipes includes only authorized subscribers list.
+Field user in table pipes contain aggregate amount of subscribers ([authorized and non-authorized](/docs/API/Authorization%20on%20the%20CppComet)), besides of table users_in_pipes includes only authorized subscribers list.
 ___
 
 
@@ -263,7 +263,7 @@ Query OK, 0 rows affected (0.00 sec)
 
 
 # Table users_messages
-The table “users_messages” intended sending messages to [authorized users](/docs/API/Authorization%20on%20the%20CppComet.md) by their identifiers.
+The table “users_messages” intended sending messages to [authorized users](/docs/API/Authorization%20on%20the%20CppComet) by their identifiers.
 
 ___
 Sending messages by identifiers gives more powerful protection tools while data is transferring. Also it increases probability to deliver message to right user.
@@ -337,7 +337,7 @@ Here user with id=2 at that moment online, user with id=3 – was online at July
  
 # Table users_auth
 
-The table users_auth contains data of user’s [authorizing](/docs/API/Authorization%20on%20the%20CppComet.md) on comet server. 
+The table users_auth contains data of user’s [authorizing](/docs/API/Authorization%20on%20the%20CppComet) on comet server. 
 
 ```
 
@@ -361,7 +361,7 @@ ___
 In field hash you can transmit only lines (strings) less than 32 symbols and it must match with regular term [0-9A-z=+/_].
 ___
 
-To deleting data of [user’s authorizing](/docs/API/%D0%90%D0%B2%D1%82%D0%BE%D1%80%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F%20%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D0%B5%D0%B9%20%D0%BD%D0%B0%20%D0%BA%D0%BE%D0%BC%D0%B5%D1%82%20%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%B5.md), you can use “delete” query.
+To deleting data of [user’s authorizing](/docs/API/%D0%90%D0%B2%D1%82%D0%BE%D1%80%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F%20%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D0%B5%D0%B9%20%D0%BD%D0%B0%20%D0%BA%D0%BE%D0%BC%D0%B5%D1%82%20%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%B5), you can use “delete” query.
 
 ```
 
@@ -378,15 +378,15 @@ ___
 
 # Other information
 
-  * [Example of sending messages from bash.](/docs/Examples/An%20example%20of%20sending%20a%20message%20from%20a%20bash%20script.md)
-  * [Error code in CometQL](/docs/API/Error%20codes%20in%20CometQL.md)
-  * [Reserved channel names](/docs/API/Reserved%20channel%20names.md)
-  * [JavaScript API](/docs/API/JavaScript%20API/JavaScript%20API.md)
-  * [What it is and why do we need "A public developer token" and "Secret developer key?"](/docs/API/Connection%20settings.md)
+  * [Example of sending messages from bash.](/docs/Examples/An%20example%20of%20sending%20a%20message%20from%20a%20bash%20script)
+  * [Error code in CometQL](/docs/API/Error%20codes%20in%20CometQL)
+  * [Reserved channel names](/docs/API/Reserved%20channel%20names)
+  * [JavaScript API](/docs/API/JavaScript%20API/JavaScript%20API)
+  * [What it is and why do we need "A public developer token" and "Secret developer key?"](/docs/API/Connection%20settings)
 
 # Reserved channels names
 
-Main article [Reserved channels names and channels with extra properties](/docs/API/Reserved%20channel%20names.md).
+Main article [Reserved channels names and channels with extra properties](/docs/API/Reserved%20channel%20names).
 
 ___
 We don’t recommend to use in our project such channels names as «bin_*», «big_*», «push_*», «comet_*» и «sys_*». These names could be used for new functions. And they can have some special properties besides of current channels names.

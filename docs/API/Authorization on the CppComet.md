@@ -12,7 +12,7 @@ mysql> INSERT INTO users_auth (id, hash )VALUES (1, 'auth_hash1');
 
   * Here the line with auth_hash1 – an authorization text key. You can generate it by yourself on your server and send it to comet-server via insert query in table users_auth, then you pass on JavaScript to authorization a certain user on the comet-server;
   * Numeric_user’s_id – it is user’s ID on your site, any positive number not longer than 9 digits;
-  * dev_id – it’s a [public developer’s identifier](/docs/API/Connection%20settings.md).
+  * dev_id – it’s a [public developer’s identifier](/docs/API/Connection%20settings).
 
 ```
 
@@ -28,7 +28,7 @@ And now user can be successfully authorized on the comet-server.
 
 # Sending messages for authorized users
 
-While messages from authorized users are sending by its ID ([insert query to table users_messages](/docs/API/CometQL/CometQL%20API.md)), messages is sending to all user’s devices (up to 16), where he is authorizing at this moment. It’s very convenient when some user has visited your site and has authorized here by more than one device.
+While messages from authorized users are sending by its ID ([insert query to table users_messages](/docs/API/CometQL/CometQL%20API)), messages is sending to all user’s devices (up to 16), where he is authorizing at this moment. It’s very convenient when some user has visited your site and has authorized here by more than one device.
   
 If some user at that moment is offline, than sent message is placed into a queue of messages and would be delivered when it user will be online.
 
@@ -42,7 +42,7 @@ CometServer().subscription("msg.event1", function(e){ console.log(e)})
 ```
 
 
-The msg channel refers to [channels list with special properties](/docs/API/Reserved%20channel%20names.md).
+The msg channel refers to [channels list with special properties](/docs/API/Reserved%20channel%20names).
 
 # Determining the authorization status
 
