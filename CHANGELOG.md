@@ -5,6 +5,12 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v3.30
+
+BUG FIXES:
+
+ * fix bug in cmake files
+  
 ## v3.29
 
 BUG FIXES:

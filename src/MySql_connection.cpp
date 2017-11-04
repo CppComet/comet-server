@@ -279,6 +279,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
         {
             // string[NULL]    auth-response
             p++;
+            isRootUser = false;
         }
 
         if(ClientFlags & MYSQL_CLIENT_CONNECT_WITH_DB)
