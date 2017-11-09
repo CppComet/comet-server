@@ -13,11 +13,26 @@
  */
 #define	CR_COMMANDS_OUT_OF_SYNC 2014
 
+/** 
+ * https://dev.mysql.com/doc/refman/5.5/en/error-messages-client.html#error_cr_server_lost
+ */
+#define	CR_SERVER_LOST 2013
+
+/** 
+ * https://dev.mysql.com/doc/refman/5.5/en/error-messages-server.html#error_er_unknown_stmt_handler
+ */
+#define	ER_UNKNOWN_STMT_HANDLER 1243
+
+
 class stmMapper;
+class dbLink;
 
 class stmBase{
 
 protected:
+    bool isInited = false;
+    dbLink *db = NULL;
+    
     MYSQL_STMT    *stmt = NULL;
     MYSQL_BIND    *param = NULL;
     MYSQL_BIND    *result = NULL;
@@ -26,156 +41,35 @@ protected:
     int param_count = 0;
     int column_count = 0;
 
-    void setParamsCount(int size)
-    {
-        if(param != NULL)
-        {
-            delete[] param;
-        }
-        param = new MYSQL_BIND[size];
-        bzero(param, sizeof(MYSQL_BIND)*size);
-        param_count = size;
-    }
+    void setParamsCount(int size);
 
-    void setResultsCount(int size)
-    {
-        if(result != NULL)
-        {
-            delete[] result;
-        }
-        result = new MYSQL_BIND[size];
-        bzero(result, sizeof(MYSQL_BIND)*size);
-        column_count = size;
-    }
+    void setResultsCount(int size);
 
-    bool init(MYSQL *mysql, const char* q)
-    {
-        // https://docs.oracle.com/cd/E17952_01/mysql-5.5-en/mysql-stmt-execute.html
-        // https://gist.github.com/hoterran/6365915
-        stmt = mysql_stmt_init(mysql);
-        if (stmt == NULL)
-        {
-            TagLoger::error(Log_dbLink, 0, "Could not initialize statement handler [query=%s]\n", q);
-            return false;
-        }
-
-        if(mysql_stmt_prepare(stmt, q, strlen(q)))
-        {
-            TagLoger::error(Log_dbLink, 0, "mysql_stmt_prepare(), INSERT failed - %s [query=%s]\n", mysql_stmt_error(stmt), q);
-            return false;
-        }
-
-        /* Get the parameter count from the statement */
-        int count = mysql_stmt_param_count(stmt);
-        if(count != param_count)
-        {
-            TagLoger::error(Log_dbLink, 0, "mysql_stmt_prepare parameters not initialized: %d > %d [query=%s]\n", count, param_count, q);
-        }
-
-        // Bind param structure to statement
-        if (param != NULL && mysql_stmt_bind_param(stmt, param))
-        {
-            TagLoger::error(Log_dbLink, 0, "mysql_stmt_bind_param(), failed - %s [query=%s]\n", mysql_stmt_error(stmt), q);
-            return false;
-        }
-
-        // Result
-        if( result != NULL)
-        {
-            prepare_meta_result = mysql_stmt_result_metadata(stmt);
-            if (!prepare_meta_result)
-            {
-                TagLoger::error(Log_dbLink, 0, "mysql_stmt_result_metadata(), returned no meta information - %s [query=%s]\n", mysql_stmt_error(stmt), q);
-                return false;
-            }
-
-            /* Get total columns in the query */
-            count = mysql_num_fields(prepare_meta_result);
-            if (column_count != count) /* validate column count */
-            {
-                TagLoger::error(Log_dbLink, 0, "total columns in select statement [query=%s]: %d != %d\n", q, column_count, count);
-                return false;
-            }
-
-            // Bind result
-            if (mysql_stmt_bind_result(stmt, result))
-            {
-                TagLoger::error(Log_dbLink, 0, "Could not bind results - %s [query=%s]\n", mysql_stmt_error(stmt), q);
-                return false;
-            }
-        }
-        return true;
-    }
-
+    bool init(dbLink *mysql, const char* q);
 
     /**
      * Выполняет вставку, обновление, замену, удаление
      */
-    int insert()
-    {
-        if (mysql_stmt_execute(stmt) != 0)
-        {
-            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_execute(), 1 failed - %s [errno=%d]\x1b[0m\n", mysql_stmt_error(stmt), mysql_stmt_errno(stmt));
-            return -1;
-        }
-
-        /* Get the number of affected rows */
-        int affected_rows = mysql_stmt_affected_rows(stmt);
-        return affected_rows;
-    }
+    int insert();
 
     /**
      * Выполняет выборку
      */
-    bool select()
-    {
-        if (mysql_stmt_execute(stmt))
-        {
-            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_execute(), 1 failed - %s [errno=%d]\x1b[0m\n", mysql_stmt_error(stmt), mysql_stmt_errno(stmt));
-            return false;
-        }
-
-        if (mysql_stmt_store_result(stmt) != 0)
-        {
-            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_execute(), 1 failed - %s [errno=%d]\x1b[0m\n", mysql_stmt_error(stmt), mysql_stmt_errno(stmt));
-            return false;
-        }
-
-        return true;
-    }
+    bool select();
 
     /**
      * Извлекает результаты селекта построчно.
      * @return
      */
-    int fetch()
-    {
-        // Fetch
-        int res = mysql_stmt_fetch(stmt);
-        if(res == MYSQL_DATA_TRUNCATED)
-        {
-            TagLoger::warn(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_fetch(), MYSQL_DATA_TRUNCATED\x1b[0m\n");
-        }
-        else if(res == 1)
-        {
-            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_fetch(), 1 failed - %s [errno=%d]\x1b[0m\n", mysql_stmt_error(stmt), mysql_stmt_errno(stmt));
-        } 
-        return res;
-    }
+    int fetch();
 
     /**
      * Очищает память выделеную для хранения результатов селекта
      * @return
      */
-    bool free()
-    {
-        // Deallocate result set
-        if (mysql_stmt_free_result(stmt)) /*  deallocate result set*/
-        {
-            return true;
-        }
-        return false;
-    }
+    bool free();
+    
+    bool virtual prepare(dbLink *mysql){}
 };
 
 class dbLink {
@@ -193,6 +87,7 @@ class dbLink {
     int connect_timeout  = 1; // MYSQL_OPT_CONNECT_TIMEOUT
     int read_timeout  = 1; // MYSQL_OPT_READ_TIMEOUT
     
+    stmMapper *stm = NULL; // Привязаные stm запросы
 private:
 
     /**
@@ -207,6 +102,7 @@ private:
 
 public:
 
+    bool reconnect_on_error = true;
     dbLink(){
         connectionName = "noname";
         connectionName.append(std::to_string(random()));
@@ -226,131 +122,16 @@ public:
         }
     }
     
+    void setStmMapper(stmMapper *STM){
+        stm = STM;
+    }
+    
     const char* name(){
         return connectionName.data();
     }
 
-    bool init(std::string connectionString)
-    { 
-        int pos = 0;
-        int nextPos = 0;
-        
-        std::string Server = "localhost";
-        std::string Database;
-        std::string Uid = "root";
-        std::string Pwd;
-        int Port = 3301;
-        
-        int i = 0;
-        while(pos <= connectionString.length() && i < 10)
-        {
-            i++;
-            nextPos = connectionString.find('=', pos);
-            if(nextPos == std::string::npos)
-            {
-                break;
-            }
-            
-            auto paramName = connectionString.substr(pos, nextPos - pos); 
-            //TagLoger::debug(Log_dbLink, 0, "\x1b[1;32mparamName=%s, pos=%d, nextPos=%d\x1b[0m", paramName.data(), pos, nextPos);
-            pos = nextPos + 1;
-
-            nextPos = connectionString.find(',', pos);
-            if(nextPos == std::string::npos)
-            {
-                nextPos = connectionString.length();
-            }
-            
-            auto paramValue = connectionString.substr(pos, nextPos - pos); 
-            //TagLoger::debug(Log_dbLink, 0, "\x1b[1;32mparamValue=%s, pos=%d, nextPos=%d\x1b[0m", paramValue.data(), pos, nextPos);
-            pos = nextPos + 1;
-            
-            if(paramName.compare("Server") == 0)
-            {
-                Server = paramValue;
-            } 
-            else if(paramName.compare("Database") == 0)
-            {
-                Database = paramValue;
-            } 
-            else if(paramName.compare("Uid") == 0)
-            {
-                Uid = paramValue;
-            } 
-            else if(paramName.compare("Pwd") == 0)
-            {
-                Pwd = paramValue; 
-            } 
-            else if(paramName.compare("Port") == 0)
-            {
-                try{
-                    //printf("get_long [%s] %s=%s\n", section.data(), name.data(), sections.at(section).at(name).data());
-                    Port = std::stoi(paramValue);
-                }catch(...)
-                {
-                    printf("\x1b[1;31mexeption in parsing Port value Port=%s\x1b[0m\n", paramValue.data());
-                    return false;
-                } 
-            }
-        }
-        
-        return init(Server.data(), Uid.data(), Pwd.data(), Database.data(), Port);
-    }
-    
-    bool init(const char* host, const char* user, const char* pw, const char* name, int port)
-    {
-        if(host == NULL)
-        { 
-            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mCppComet MySQL connection `host` is NULL\x1b[0m");
-            return false;
-        }
-        
-        if(pw == NULL)
-        { 
-            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mCppComet MySQL connection `password` is NULL\x1b[0m");
-            return false;
-        }
-        
-        if(user == NULL)
-        { 
-            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mCppComet MySQL connection `user` is NULL\x1b[0m");
-            return false;
-        }
-        
-        if(name == NULL)
-        { 
-            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mCppComet MySQL connection `db_name` is NULL\x1b[0m");
-            return false;
-        }
-        
-        if(port <= 0)
-        {
-            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mCppComet MySQL connection `port` is %d\x1b[0m", port);
-            return false;
-        }
-        
-        TagLoger::log(Log_dbLink, 0, "init dbLink host=%s, user=%s, name=%s, port=%d\n", host, user, name, port);  
-        isInit = true; 
-        db_host = host;
-        db_pw = pw;
-        db_user = user;
-        db_name = name;
-
-        db_port = port;
-
-        mysql_options(&mysqlLink, MYSQL_OPT_RECONNECT, &is_reconnect);
-        mysql_options(&mysqlLink, MYSQL_SET_CHARSET_NAME, "utf8");
-        mysql_options(&mysqlLink, MYSQL_INIT_COMMAND, "SET NAMES utf8");
-        mysql_options(&mysqlLink, MYSQL_OPT_CONNECT_TIMEOUT, &connect_timeout);
-        mysql_options(&mysqlLink, MYSQL_OPT_READ_TIMEOUT, &read_timeout);
-        
-        // MYSQL_OPT_CONNECT_TIMEOUT
-        // MYSQL_OPT_READ_TIMEOUT
-        // MYSQL_OPT_WRITE_TIMEOUT
-        //mysql_options(&mysql,MYSQL_OPT_COMPRESS,0);
-        
-        return true;
-    }
+    bool init(std::string connectionString);    
+    bool init(const char* host, const char* user, const char* pw, const char* name, int port);
 
     MYSQL* getLink()
     {
@@ -362,163 +143,15 @@ public:
         return &mysqlLink;
     }
 
-    bool query(const char *q)
-    {
-        if(!isInit)
-        {
-            TagLoger::trace(Log_dbLink, 0, "\x1b[1;32mMySQL connection was not initialized\x1b[0m", db_host.data(), db_port, db_user.data());
-            return false;
-        }
-        
-        if(!isConnected)
-        {
-            connect();
-        }
-        
-        TagLoger::log(Log_dbLink, 0, "\x1b[1;32mMySQL query[%d]=%s\x1b[0m", strlen(q), q);
-        if(mysql_real_query(&mysqlLink, q, strlen(q)) == 0)
-        {
-            return true;
-        }
-         
-
-        if(mysql_errno(&mysqlLink))
-        {
-            TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn)error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), q);
-            if(mysql_errno(&mysqlLink) == CR_COMMANDS_OUT_OF_SYNC)
-            {
-                MYSQL_RES* res = mysql_store_result(&mysqlLink);
-                mysql_free_result(res);
-                
-                if(mysql_real_query(&mysqlLink, q, strlen(q)) == 0)
-                {
-                    return true;
-                }
-                
-                TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn[2])error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), q);
-            }
-            
-            if(reconnect())
-            {
-                if(mysql_real_query(&mysqlLink, q, strlen(q)) == 0)
-                {
-                    return true;
-                }
-                
-                if(mysql_errno(&mysqlLink))
-                {
-                    TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), q);
-                }
-            } 
-        }
-
-        return false;
-    }
-
-    bool query_format(const char *format, ...)
-    {
-        if(!isInit)
-        {
-            TagLoger::trace(Log_dbLink, 0, "\x1b[1;32mMySQL connection was not initialized\x1b[0m", db_host.data(), db_port, db_user.data());
-            return false;
-        }
-        
-        if(!isConnected)
-        {
-            connect();
-        }
-        
-        int buffer_size = 2000;
-        char buf[2000];
-        bzero(buf, buffer_size);
-        va_list ap;
-        va_start(ap, format);
-        vsnprintf(buf, buffer_size, format, ap);
-
-        TagLoger::log(Log_dbLink, 0, "\x1b[1;32mMySQL query[%d]=%s\x1b[0m", strlen(buf), buf);
-        if(mysql_real_query(&mysqlLink, buf, strlen(buf)) == 0)
-        {
-            va_end(ap);
-            return true;
-        }
-
-        if(mysql_errno(&mysqlLink))
-        {
-            // @todo Проверять код ошибки и не паниковать если по коду ясно что проблема в самом запросе а не соединении. 
-            TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn)error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), buf); 
-            if(mysql_errno(&mysqlLink) == CR_COMMANDS_OUT_OF_SYNC)
-            {
-                MYSQL_RES* res = mysql_store_result(&mysqlLink);
-                mysql_free_result(res);
-                
-                if(mysql_real_query(&mysqlLink, buf, strlen(buf)) == 0)
-                {
-                    return true;
-                }
-                
-                TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn[2])error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), buf);
-            }
-            
-            if(reconnect())
-            {
-                if(mysql_real_query(&mysqlLink, buf, strlen(buf)) == 0)
-                {
-                    va_end(ap);
-                    return true;
-                }
-                
-                if(mysql_errno(&mysqlLink))
-                {
-                    TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), buf);
-                }
-            } 
-        }
-         
-        va_end(ap);
-        return false;
-    }
-
-    bool reconnect()
-    {
-        close();
-        return connect();
-    }
+    bool query(const char *q);
     
-    void close()
-    {
-        if(isInit)
-        {
-            mysql_close(&mysqlLink);
-            isConnected = false;
-        } 
-    }
+    bool query_format(const char *format, ...);
+
+    bool reconnect();
     
-    bool connect()
-    {
-        if(!isInit)
-        {
-            TagLoger::trace(Log_dbLink, 0, "\x1b[1;32mMySQL connection was not initialized\x1b[0m");
-            return false;
-        }
-        
-        isConnected = true;
-        
-        TagLoger::debug(Log_dbLink, 0, "\x1b[1;32mmysql_real_connect %s:%d user=%s\x1b[0m", db_host.data(), db_port, db_user.data());
-        mysql_real_connect(&mysqlLink, db_host.data(), db_user.data(), db_pw.data(), db_name.data(), db_port, NULL, 0);
-
-        if(mysql_errno(&mysqlLink))
-        {
-            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL connection not established\n%s\nip=%s:%d user=%s [errno=%d]\x1b[0m", mysql_error(&mysqlLink),
-                    db_host.data(), db_port, db_user.data(), mysql_errno(&mysqlLink));
-            return false;
-        }
-
-
-        TagLoger::log(Log_dbLink, 0, "\x1b[1;32mMySQL connection established\nip=%s:%d user=%s\x1b[0m", db_host.data(), db_port, db_user.data());
-        return true;
-
-        //return query("SET CHARACTER SET 'utf8' ");
-    }
+    void close();
+    
+    bool connect();
 };
 
 class stm_log_query: public stmBase{
@@ -529,18 +162,21 @@ protected:
     char*         param_query = NULL;
     unsigned long param_query_length = 0;
 
-    bool prepare(MYSQL *mysql)
+    bool prepare(dbLink *mysql)
     {
-        setParamsCount(1);
-        param_query = new char[appConf::instance()->get_int("main", "buf_size")];
+        if(!isInited)
+        {
+            isInited = true;
+            setParamsCount(1);
+            param_query = new char[appConf::instance()->get_int("main", "buf_size")];
 
-        int i = 0;
-        param[i].buffer_type    = MYSQL_TYPE_STRING;
-        param[i].buffer         = (char *)param_query;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = &param_query_length;
-
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_STRING;
+            param[i].buffer         = (char *)param_query;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = &param_query_length;
+        }
         return init(mysql, "INSERT INTO `log_query`(`id`, `query`) VALUES (NULL, ?)");
     }
 
@@ -578,48 +214,51 @@ class stm_users_queue_insert: public stmBase{
     unsigned long  param_message_length = 0;
 
 public:
-    bool prepare(MYSQL *mysql)
+    bool prepare(dbLink *mysql)
     {
-        setParamsCount(5);
+        if(!isInited)
+        {
+            isInited = true;
+            setParamsCount(5);
 
-        param_message = new char[appConf::instance()->get_int("main", "buf_size")];
-        param_message_length = appConf::instance()->get_int("main", "buf_size");
+            param_message = new char[appConf::instance()->get_int("main", "buf_size")];
+            param_message_length = appConf::instance()->get_int("main", "buf_size");
 
-        int i = 0;
-        param[i].buffer_type    = MYSQL_TYPE_STRING;
-        param[i].buffer         = (void *) param_id;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = &param_id_length;
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_STRING;
+            param[i].buffer         = (void *) param_id;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = &param_id_length;
 
-        i++;
-        param[i].buffer_type    = MYSQL_TYPE_LONG;
-        param[i].buffer         = (void *)&param_time;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = 0;
+            i++;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_time;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
 
-        i++;
-        param[i].buffer_type    = MYSQL_TYPE_LONG;
-        param[i].buffer         = (void *)&param_user_id;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = 0;
+            i++;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_user_id;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
 
-        i++;
-        param[i].buffer_type    = MYSQL_TYPE_STRING;
-        param[i].buffer         = (void *) param_event;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = &param_event_length;
+            i++;
+            param[i].buffer_type    = MYSQL_TYPE_STRING;
+            param[i].buffer         = (void *) param_event;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = &param_event_length;
 
-        i++;
-        param[i].buffer_type    = MYSQL_TYPE_STRING;
-        param[i].buffer         = (void *) param_message;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = &param_message_length;
-
+            i++;
+            param[i].buffer_type    = MYSQL_TYPE_STRING;
+            param[i].buffer         = (void *) param_message;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = &param_message_length;
+        }
         return init(mysql, "INSERT INTO `users_messages`(`id`, `time`, `user_id`, `event`, `message`) VALUES (?,?,?,?,?)");
     }
 
@@ -693,61 +332,64 @@ public:
 
     }
 
-    bool prepare(MYSQL *mysql)
+    bool prepare(dbLink *mysql)
     {
-        result_message = new char[appConf::instance()->get_int("main", "buf_size")];
-        result_message_length = appConf::instance()->get_int("main", "buf_size");
+        if(!isInited)
+        {
+            isInited = true;
+            result_message = new char[appConf::instance()->get_int("main", "buf_size")];
+            result_message_length = appConf::instance()->get_int("main", "buf_size");
 
-        setParamsCount(2);
+            setParamsCount(2);
 
-        int i = 0;
-        param[i].buffer_type    = MYSQL_TYPE_LONG;
-        param[i].buffer         = (void *)&param_user_id;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = 0;
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_user_id;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
 
-        i++;
-        param[i].buffer_type    = MYSQL_TYPE_LONG;
-        param[i].buffer         = (void *)&param_limit;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = 0;
+            i++;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_limit;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
 
 
-        setResultsCount(4);
+            setResultsCount(4);
 
-        i = 0;
-        result[i].buffer_type    = MYSQL_TYPE_STRING;
-        result[i].buffer         = (char *)result_id;
-        result[i].is_null        = &is_null[i];
-        result[i].error          = &error[i];
-        result[i].length         = &length[i];
-        result[i].buffer_length  = EVENT_NAME_LEN;
+            i = 0;
+            result[i].buffer_type    = MYSQL_TYPE_STRING;
+            result[i].buffer         = (char *)result_id;
+            result[i].is_null        = &is_null[i];
+            result[i].error          = &error[i];
+            result[i].length         = &length[i];
+            result[i].buffer_length  = EVENT_NAME_LEN;
 
-        i++;
-        result[i].buffer_type    = MYSQL_TYPE_LONG;
-        result[i].buffer         = (void *)&result_time;
-        result[i].is_null        = &is_null[i];
-        result[i].error          = &error[i];
-        result[i].length         = &length[i];
+            i++;
+            result[i].buffer_type    = MYSQL_TYPE_LONG;
+            result[i].buffer         = (void *)&result_time;
+            result[i].is_null        = &is_null[i];
+            result[i].error          = &error[i];
+            result[i].length         = &length[i];
 
-        i++;
-        result[i].buffer_type    = MYSQL_TYPE_STRING;
-        result[i].buffer         = (char *)result_event;
-        result[i].is_null        = &is_null[i];
-        result[i].error          = &error[i];
-        result[i].length         = &length[i];
-        result[i].buffer_length  = EVENT_NAME_LEN;
+            i++;
+            result[i].buffer_type    = MYSQL_TYPE_STRING;
+            result[i].buffer         = (char *)result_event;
+            result[i].is_null        = &is_null[i];
+            result[i].error          = &error[i];
+            result[i].length         = &length[i];
+            result[i].buffer_length  = EVENT_NAME_LEN;
 
-        i++;
-        result[i].buffer_type    = MYSQL_TYPE_STRING;
-        result[i].buffer         = (char *)result_message;
-        result[i].is_null        = &is_null[i];
-        result[i].error          = &error[i];
-        result[i].length         = &length[i];
-        result[i].buffer_length  = result_message_length;
-
+            i++;
+            result[i].buffer_type    = MYSQL_TYPE_STRING;
+            result[i].buffer         = (char *)result_message;
+            result[i].is_null        = &is_null[i];
+            result[i].error          = &error[i];
+            result[i].length         = &length[i];
+            result[i].buffer_length  = result_message_length;
+        }
         return init(mysql, "SELECT `id`, `time`, `event`, `message` FROM `users_messages` WHERE user_id = ? order by time limit ?");
     }
 
@@ -796,24 +438,27 @@ class stm_users_queue_delete: public stmBase{
     unsigned long param_user_id = 0;
 
 public:
-    bool prepare(MYSQL *mysql)
+    bool prepare(dbLink *mysql)
     {
-        setParamsCount(2);
+        if(!isInited)
+        {
+            isInited = true;
+            setParamsCount(2);
 
-        int i = 0;
-        param[i].buffer_type    = MYSQL_TYPE_LONG;
-        param[i].buffer         = (void *)&param_time;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = 0;
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_time;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
 
-        i++;
-        param[i].buffer_type    = MYSQL_TYPE_LONG;
-        param[i].buffer         = (void *)&param_user_id;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = 0;
-
+            i++;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_user_id;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
+        }
         return init(mysql, "DELETE FROM `users_messages` where time < ? and user_id = ? ");
     }
 
@@ -848,55 +493,58 @@ class stm_pipe_messages_insert: public stmBase{
     unsigned long  param_message_length = 0;
 
 public:
-    bool prepare(MYSQL *mysql)
+    bool prepare(dbLink *mysql)
     {
-        setParamsCount(6);
+        if(!isInited)
+        {
+            isInited = true;
+            setParamsCount(6);
 
-        param_message = new char[appConf::instance()->get_int("main", "buf_size")];
-        param_message_length = appConf::instance()->get_int("main", "buf_size");
+            param_message = new char[appConf::instance()->get_int("main", "buf_size")];
+            param_message_length = appConf::instance()->get_int("main", "buf_size");
 
-        int i = 0;
-        param[i].buffer_type    = MYSQL_TYPE_STRING;
-        param[i].buffer         = (void *) param_id;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = &param_id_length;
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_STRING;
+            param[i].buffer         = (void *) param_id;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = &param_id_length;
 
-        i++;
-        param[i].buffer_type    = MYSQL_TYPE_LONG;
-        param[i].buffer         = (void *)&param_time;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = 0;
+            i++;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_time;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
 
-        i++;
-        param[i].buffer_type    = MYSQL_TYPE_STRING;
-        param[i].buffer         = (void *)&param_pipe_name;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = &param_pipe_name_length;
+            i++;
+            param[i].buffer_type    = MYSQL_TYPE_STRING;
+            param[i].buffer         = (void *)&param_pipe_name;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = &param_pipe_name_length;
 
-        i++;
-        param[i].buffer_type    = MYSQL_TYPE_STRING;
-        param[i].buffer         = (void *) param_event;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = &param_event_length;
+            i++;
+            param[i].buffer_type    = MYSQL_TYPE_STRING;
+            param[i].buffer         = (void *) param_event;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = &param_event_length;
 
-        i++;
-        param[i].buffer_type    = MYSQL_TYPE_STRING;
-        param[i].buffer         = (void *) param_message;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = &param_message_length;
+            i++;
+            param[i].buffer_type    = MYSQL_TYPE_STRING;
+            param[i].buffer         = (void *) param_message;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = &param_message_length;
 
-        i++;
-        param[i].buffer_type    = MYSQL_TYPE_LONG;
-        param[i].buffer         = (void *)&param_user_id;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = 0;
-
+            i++;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_user_id;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
+        }
         return init(mysql, "INSERT INTO `pipe_messages`(`id`, `time`, `pipe_name`, `event`, `message`, `user_id`) VALUES (?,?,?,?,?,?)");
     }
 
@@ -972,69 +620,72 @@ public:
     my_bool       error[5];
     unsigned long length[5];
 
-    bool prepare(MYSQL *mysql)
+    bool prepare(dbLink *mysql)
     {
-        result_message = new char[appConf::instance()->get_int("main", "buf_size")];
-        result_message_length = appConf::instance()->get_int("main", "buf_size");
-        bzero(result_message, result_message_length);
+        if(!isInited)
+        {
+            isInited = true;
+            result_message = new char[appConf::instance()->get_int("main", "buf_size")];
+            result_message_length = appConf::instance()->get_int("main", "buf_size");
+            bzero(result_message, result_message_length);
 
-        setParamsCount(2);
+            setParamsCount(2);
 
-        int i = 0;
-        param[i].buffer_type    = MYSQL_TYPE_STRING;
-        param[i].buffer         = (void *)&param_pipe_name;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = &param_pipe_name_length;
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_STRING;
+            param[i].buffer         = (void *)&param_pipe_name;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = &param_pipe_name_length;
 
-        i++;
-        param[i].buffer_type    = MYSQL_TYPE_LONG;
-        param[i].buffer         = (void *)&param_limit;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = 0;
+            i++;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_limit;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
 
 
-        setResultsCount(5);
+            setResultsCount(5);
 
-        i = 0;
-        result[i].buffer_type    = MYSQL_TYPE_STRING;
-        result[i].buffer         = (char *)result_id;
-        result[i].is_null        = &is_null[i];
-        result[i].error          = &error[i];
-        result[i].length         = &length[i];
-        result[i].buffer_length  = EVENT_NAME_LEN;
+            i = 0;
+            result[i].buffer_type    = MYSQL_TYPE_STRING;
+            result[i].buffer         = (char *)result_id;
+            result[i].is_null        = &is_null[i];
+            result[i].error          = &error[i];
+            result[i].length         = &length[i];
+            result[i].buffer_length  = EVENT_NAME_LEN;
 
-        i++;
-        result[i].buffer_type    = MYSQL_TYPE_LONG;
-        result[i].buffer         = (void *)&result_time;
-        result[i].is_null        = &is_null[i];
-        result[i].error          = &error[i];
-        result[i].length         = &length[i];
+            i++;
+            result[i].buffer_type    = MYSQL_TYPE_LONG;
+            result[i].buffer         = (void *)&result_time;
+            result[i].is_null        = &is_null[i];
+            result[i].error          = &error[i];
+            result[i].length         = &length[i];
 
-        i++;
-        result[i].buffer_type    = MYSQL_TYPE_STRING;
-        result[i].buffer         = (char *)result_event;
-        result[i].is_null        = &is_null[i];
-        result[i].error          = &error[i];
-        result[i].length         = &length[i];
-        result[i].buffer_length  = EVENT_NAME_LEN;
+            i++;
+            result[i].buffer_type    = MYSQL_TYPE_STRING;
+            result[i].buffer         = (char *)result_event;
+            result[i].is_null        = &is_null[i];
+            result[i].error          = &error[i];
+            result[i].length         = &length[i];
+            result[i].buffer_length  = EVENT_NAME_LEN;
 
-        i++;
-        result[i].buffer_type    = MYSQL_TYPE_STRING;
-        result[i].buffer         = (char *)result_message;
-        result[i].is_null        = &is_null[i];
-        result[i].error          = &error[i];
-        result[i].length         = &length[i];
-        result[i].buffer_length  = result_message_length;
+            i++;
+            result[i].buffer_type    = MYSQL_TYPE_STRING;
+            result[i].buffer         = (char *)result_message;
+            result[i].is_null        = &is_null[i];
+            result[i].error          = &error[i];
+            result[i].length         = &length[i];
+            result[i].buffer_length  = result_message_length;
 
-        i++;
-        result[i].buffer_type    = MYSQL_TYPE_LONG;
-        result[i].buffer         = (void *)&result_user_id;
-        result[i].is_null        = &is_null[i];
-        result[i].error          = &error[i];
-        result[i].length         = &length[i];
-
+            i++;
+            result[i].buffer_type    = MYSQL_TYPE_LONG;
+            result[i].buffer         = (void *)&result_user_id;
+            result[i].is_null        = &is_null[i];
+            result[i].error          = &error[i];
+            result[i].length         = &length[i];
+        }
         return init(mysql, "SELECT `id`, `time`, `event`, `message`, `user_id` FROM `pipe_messages` WHERE pipe_name = ? order by time limit ?");
     }
 
@@ -1104,24 +755,27 @@ class stm_pipe_messages_delete: public stmBase{
     unsigned long param_pipe_name_length = PIPE_NAME_LEN;
 
 public:
-    bool prepare(MYSQL *mysql)
+    bool prepare(dbLink *mysql)
     {
-        setParamsCount(2);
+        if(!isInited)
+        {
+            isInited = true;
+            setParamsCount(2);
 
-        int i = 0;
-        param[i].buffer_type    = MYSQL_TYPE_LONG;
-        param[i].buffer         = (void *)&param_time;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = 0;
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_time;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
 
-        i++;
-        param[i].buffer_type    = MYSQL_TYPE_STRING;
-        param[i].buffer         = (void *)&param_pipe_name;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = &param_pipe_name_length;
-
+            i++;
+            param[i].buffer_type    = MYSQL_TYPE_STRING;
+            param[i].buffer         = (void *)&param_pipe_name;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = &param_pipe_name_length;
+        }
         return init(mysql, "DELETE FROM `pipe_messages` where time < ? and pipe_name = ? ");
     }
 
@@ -1153,17 +807,20 @@ class stm_pipe_messages_delete_by_message_id: public stmBase{
     unsigned long param_id_length = MYSQL_UUID_LEN;
      
 public:
-    bool prepare(MYSQL *mysql)
+    bool prepare(dbLink *mysql)
     {
-        setParamsCount(1);
+        if(!isInited)
+        {
+            isInited = true;
+            setParamsCount(1);
 
-        int i = 0;
-        param[i].buffer_type    = MYSQL_TYPE_STRING;
-        param[i].buffer         = (void *)&param_id;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = &param_id_length;
- 
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_STRING;
+            param[i].buffer         = (void *)&param_id;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = &param_id_length;
+        }
         return init(mysql, "DELETE FROM `pipe_messages` where id = ? ");
     }
 
@@ -1190,24 +847,27 @@ class stm_users_auth_replace: public stmBase{
     unsigned long param_hash_length = USER_HASH_LEN;
 
 public:
-    bool prepare(MYSQL *mysql)
+    bool prepare(dbLink *mysql)
     {
-        setParamsCount(2);
+        if(!isInited)
+        {
+            isInited = true;
+            setParamsCount(2);
 
-        int i = 0;
-        param[i].buffer_type    = MYSQL_TYPE_LONG;
-        param[i].buffer         = (void *)&param_user_id;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = 0;
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_user_id;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
 
-        i++;
-        param[i].buffer_type    = MYSQL_TYPE_STRING;
-        param[i].buffer         = (void *)&param_hash;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = &param_hash_length;
-
+            i++;
+            param[i].buffer_type    = MYSQL_TYPE_STRING;
+            param[i].buffer         = (void *)&param_hash;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = &param_hash_length;
+        }
         return init(mysql, "REPLACE INTO `users_auth`(`user_id`, `hash`) VALUES (?,?)");
     }
 
@@ -1237,17 +897,20 @@ class stm_users_auth_delete: public stmBase{
     unsigned long param_user_id = 0;
 
 public:
-    bool prepare(MYSQL *mysql)
+    bool prepare(dbLink *mysql)
     {
-        setParamsCount(1);
+        if(!isInited)
+        {
+            isInited = true;
+            setParamsCount(1);
 
-        int i = 0;
-        param[i].buffer_type    = MYSQL_TYPE_LONG;
-        param[i].buffer         = (void *)&param_user_id;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = 0;
-
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_user_id;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
+        }
         return init(mysql, "delete from `users_auth` where `user_id` = ? ");
     }
 
@@ -1274,27 +937,30 @@ public:
     my_bool       error[1];
     unsigned long length[1];
  
-    bool prepare(MYSQL *mysql)
+    bool prepare(dbLink *mysql)
     {
-        setParamsCount(1);
+        if(!isInited)
+        {
+            isInited = true;
+            setParamsCount(1);
 
-        int i = 0;
-        param[i].buffer_type    = MYSQL_TYPE_LONG;
-        param[i].buffer         = (void *)&param_user_id;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = 0;
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_user_id;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
 
-        setResultsCount(1);
+            setResultsCount(1);
 
-        i = 0; 
-        result[i].buffer_type    = MYSQL_TYPE_STRING;
-        result[i].buffer         = (char *)result_hash;
-        result[i].is_null        = &is_null[i];
-        result[i].error          = &error[i];
-        result[i].length         = &length[i];
-        result[i].buffer_length  = USER_HASH_LEN;
-        
+            i = 0; 
+            result[i].buffer_type    = MYSQL_TYPE_STRING;
+            result[i].buffer         = (char *)result_hash;
+            result[i].is_null        = &is_null[i];
+            result[i].error          = &error[i];
+            result[i].length         = &length[i];
+            result[i].buffer_length  = USER_HASH_LEN;
+        }
         return init(mysql, "SELECT `hash` FROM `users_auth` WHERE user_id = ? ");
     }
 
@@ -1368,26 +1034,29 @@ public:
     my_bool       error[1];
     unsigned long length[1];
 
-    bool prepare(MYSQL *mysql)
+    bool prepare(dbLink *mysql)
     {
-        setParamsCount(1);
+        if(!isInited)
+        {
+            isInited = true;
+            setParamsCount(1);
 
-        int i = 0;
-        param[i].buffer_type    = MYSQL_TYPE_STRING;
-        param[i].buffer         = (void *)&param_pipe_name;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = &param_pipe_name_length;
-        
-        setResultsCount(1);
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_STRING;
+            param[i].buffer         = (void *)&param_pipe_name;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = &param_pipe_name_length;
 
-        i = 0; 
-        result[i].buffer_type    = MYSQL_TYPE_LONG;
-        result[i].buffer         = (void *)&result_length; 
-        result[i].is_null        = &is_null[i];
-        result[i].error          = &error[i];
-        result[i].length         = &length[i];
-          
+            setResultsCount(1);
+
+            i = 0; 
+            result[i].buffer_type    = MYSQL_TYPE_LONG;
+            result[i].buffer         = (void *)&result_length; 
+            result[i].is_null        = &is_null[i];
+            result[i].error          = &error[i];
+            result[i].length         = &length[i];
+        }
         return init(mysql, "SELECT `length` FROM `pipes_settings` WHERE `name` = ? limit 1");
     }
 
@@ -1465,26 +1134,29 @@ public:
     my_bool       error[1];
     unsigned long length[1];
 
-    bool prepare(MYSQL *mysql)
+    bool prepare(dbLink *mysql)
     {
-        setParamsCount(1);
+        if(!isInited)
+        {
+            isInited = true;
+            setParamsCount(1);
 
-        int i = 0;
-        param[i].buffer_type    = MYSQL_TYPE_LONG;
-        param[i].buffer         = (void *)&param_user_id;
-        param[i].is_unsigned    = 0;
-        param[i].is_null        = 0;
-        param[i].length         = 0;
-        
-        setResultsCount(1);
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_user_id;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
 
-        i = 0; 
-        result[i].buffer_type    = MYSQL_TYPE_LONG;
-        result[i].buffer         = (void *)&result_time;
-        result[i].is_null        = &is_null[i];
-        result[i].error          = &error[i];
-        result[i].length         = &length[i];
-          
+            setResultsCount(1);
+
+            i = 0; 
+            result[i].buffer_type    = MYSQL_TYPE_LONG;
+            result[i].buffer         = (void *)&result_time;
+            result[i].is_null        = &is_null[i];
+            result[i].error          = &error[i];
+            result[i].length         = &length[i];
+        }
         return init(mysql, "SELECT `time` FROM `users_time` WHERE `user_id` = ? ");
     }
 
@@ -1544,42 +1216,24 @@ public:
 
 class stmMapper{
 public:
-    stm_log_query queryLoger;
-    stm_users_queue_insert users_queue_insert;
-    stm_users_queue_select users_queue_select;
-    stm_users_queue_delete users_queue_delete;
+    stm_log_query *queryLoger = NULL;
+    stm_users_queue_insert *users_queue_insert= NULL;
+    stm_users_queue_select *users_queue_select= NULL;
+    stm_users_queue_delete *users_queue_delete= NULL;
 
-    stm_pipe_messages_insert pipe_messages_insert;
-    stm_pipe_messages_select pipe_messages_select;
-    stm_pipe_messages_delete pipe_messages_delete;
-    stm_pipe_messages_delete_by_message_id pipe_messages_delete_by_message_id;
+    stm_pipe_messages_insert *pipe_messages_insert= NULL;
+    stm_pipe_messages_select *pipe_messages_select= NULL;
+    stm_pipe_messages_delete *pipe_messages_delete= NULL;
+    stm_pipe_messages_delete_by_message_id *pipe_messages_delete_by_message_id= NULL;
 
-    stm_users_auth_replace users_auth_replace;
-    stm_users_auth_delete users_auth_delete;
-    stm_users_auth_select users_auth_select;
- 
-    stm_users_time_select users_time_select;
-    stm_pipes_settings_select pipes_settings_select;
+    stm_users_auth_replace *users_auth_replace= NULL;
+    stm_users_auth_delete *users_auth_delete= NULL;
+    stm_users_auth_select *users_auth_select= NULL;
+  
+    stm_users_time_select *users_time_select= NULL;
+    stm_pipes_settings_select *pipes_settings_select= NULL; 
     
-    void init(MYSQL *mysql)
-    {
-        queryLoger.prepare(mysql);
-        users_queue_insert.prepare(mysql);
-        users_queue_select.prepare(mysql);
-        users_queue_delete.prepare(mysql);
-
-        pipe_messages_insert.prepare(mysql);
-        pipe_messages_select.prepare(mysql);
-        pipe_messages_delete.prepare(mysql);
-        pipe_messages_delete_by_message_id.prepare(mysql);
-
-        users_auth_replace.prepare(mysql);
-        users_auth_delete.prepare(mysql);
-        users_auth_select.prepare(mysql);
-         
-        pipes_settings_select.prepare(mysql);
-        users_time_select.prepare(mysql);
-    }
+    void init(dbLink *mysql);
 };
 
 

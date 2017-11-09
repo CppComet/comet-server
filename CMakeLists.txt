@@ -103,6 +103,7 @@ set(SOURCE_EXE
         src/TagLoger.cpp 
         src/TagTimer.cpp 
         src/main.cpp 
+        src/dbLink.cpp 
         src/appConf.cpp 
         src/intervalLoop.cpp 
         src/tcpServer_benchmark.cpp 

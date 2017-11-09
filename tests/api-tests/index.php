@@ -57,20 +57,20 @@ hr{
 </style>
 
 <h3>CppComet tests</h3>
- <pre>mysql -htest.comet.su -uroot -p0000000000000000000000000000000000000000000000000000000000000000 -DCometQL_v1 -P3301 --skip-ssl</pre>
+ <pre>mysql -h<?php echo $serverConf['host']; ?> -u<?php echo $serverConf['user']; ?> -p<?php echo $serverConf['password']; ?> -D<?php echo $serverConf['api_version']; ?> -P<?php echo $serverConf['port']; ?> --skip-ssl</pre>
 <ul>
-    <li><a href="#" onclick="runTest('mysqli_connect');">mysqli_connect</a></li>
-    <li><a href="#" onclick="runTest('users_auth_insert', 10);">users_auth_insert (10)</a></li>
-    <li><a href="#" onclick="runTest('users_auth');">users_auth</a></li>
-    <li><a href="#" onclick="runTest('users_auth_select');">users_auth_select</a></li>
-    <li><a href="#" onclick="runTest('users_time');">users_time</a></li>
-    <li><a href="#" onclick="runTest('pipes_messages');">pipes_messages</a></li>
-    <li><a href="#" onclick="runTest('pipes');">pipes</a></li>
-    <li><a href="#" onclick="runTest('users_messages');">users_messages</a></li>
-    <li><a href="#" onclick="runTest('status');">status</a></li>
-    <li><a href="#" onclick="runTest('pipes_settings');">pipes_settings</a></li>
-    <li><a href="#" onclick="runTest('common');">common</a></li>
-    <li><a href="#" onclick="runTest('users_in_pipes');">users_in_pipes</a></li>
+    <li><a href="#" onclick="runTest('mysqli_connect'); return false;">mysqli_connect</a></li>
+    <li><a href="#" onclick="runTest('users_auth_insert', 10); return false;">users_auth_insert (10)</a></li>
+    <li><a href="#" onclick="runTest('users_auth'); return false;">users_auth</a></li>
+    <li><a href="#" onclick="runTest('users_auth_select'); return false;">users_auth_select</a></li>
+    <li><a href="#" onclick="runTest('users_time'); return false;">users_time</a></li>
+    <li><a href="#" onclick="runTest('pipes_messages'); return false;">pipes_messages</a></li>
+    <li><a href="#" onclick="runTest('pipes'); return false;">pipes</a></li>
+    <li><a href="#" onclick="runTest('users_messages'); return false;">users_messages</a></li>
+    <li><a href="#" onclick="runTest('status'); return false;">status</a></li>
+    <li><a href="#" onclick="runTest('pipes_settings'); return false;">pipes_settings</a></li>
+    <li><a href="#" onclick="runTest('common'); return false;">common</a></li>
+    <li><a href="#" onclick="runTest('users_in_pipes'); return false;">users_in_pipes</a></li>
 </ul>
     
 <div class="root"> 
@@ -156,11 +156,17 @@ function auth()
     })).always(function(res){
         status("We are waiting for connection to the comet server", "warn");
         
+        var user = serverConf.user
+        if(user == "root")
+        {
+            user = "0";
+        }  
+        
         // The function start accepts connection settings and opens new connection. 
         // https://comet-server.com/wiki/doku.php/en:comet:javascript_api#connection_with_server
         cometApi.start({
-            nodes: ["test.comet.su:8087", "test.comet.su:8087"],
-            dev_id: 0,
+            nodes: serverConf.js_nodes,
+            dev_id: user,
             user_id:user_id,
             user_key:user_key,
         })

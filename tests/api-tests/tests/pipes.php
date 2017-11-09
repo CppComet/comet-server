@@ -22,8 +22,8 @@ class test_pipes extends testClass{
             // @todo добавить проверку количества онлайн
         }
         
-        testQuery($this->link, "DELETE FROM pipes WHERE name = p23"); 
-        testQuery($this->link, "INSERT INTO pipes (name, event, message)VALUES('pi! pe_name', '#even t_in_pipe', 'text message');"); 
+        mysqli_query($this->link, "DELETE FROM pipes WHERE name = p23"); 
+        mysqli_query($this->link, "INSERT INTO pipes (name, event, message)VALUES('pi! pe_name', '#even t_in_pipe', 'text message');"); 
     }
 }
 

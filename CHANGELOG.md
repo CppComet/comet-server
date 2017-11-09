@@ -10,6 +10,7 @@ BUG FIXES:
 BUG FIXES:
 
  * fix bug in cmake files
+ * errors when restart mysql server
   
 ## v3.29
 

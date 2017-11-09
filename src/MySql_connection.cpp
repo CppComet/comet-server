@@ -74,25 +74,25 @@ int PipeLog::addToLog(thread_data* local_buf, const char* pipe_name, const char*
     uid37(uid);
     if(memcmp("trust_", pipe_name, 6) == 0)
     {
-        local_buf->stm.pipe_messages_insert.execute(uid, (long int)time(NULL), pipe_name, event_name, msg, msg_length, from_user_id);
+        local_buf->stm.pipe_messages_insert->execute(uid, (long int)time(NULL), pipe_name, event_name, msg, msg_length, from_user_id);
         return 0;
     }
 
 
-    local_buf->stm.pipes_settings_select.execute(pipe_name);
-    if(local_buf->stm.pipes_settings_select.fetch())
+    local_buf->stm.pipes_settings_select->execute(pipe_name);
+    if(local_buf->stm.pipes_settings_select->fetch())
     {
-        local_buf->stm.pipes_settings_select.free();
+        local_buf->stm.pipes_settings_select->free();
         return 0;
     }
 
-    int result_length = local_buf->stm.pipes_settings_select.result_length;
-    local_buf->stm.pipes_settings_select.free();
+    int result_length = local_buf->stm.pipes_settings_select->result_length;
+    local_buf->stm.pipes_settings_select->free();
 
     if(result_length > 0)
     {
         // Вставка в бд
-        local_buf->stm.pipe_messages_insert.execute(uid, (long int)time(NULL), pipe_name, event_name, msg, msg_length, from_user_id);
+        local_buf->stm.pipe_messages_insert->execute(uid, (long int)time(NULL), pipe_name, event_name, msg, msg_length, from_user_id);
 
         // @todo simpleTask Заменить потом на stm выражение
         local_buf->db.query_format("delete from pipe_messages where pipe_messages.id in( \
@@ -331,7 +331,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
                 )
                 {
                     // Пишем в лог запросов
-                    local_buf->stm.queryLoger.insert(startQuery);
+                    local_buf->stm.queryLoger->insert(startQuery);
                 }
             }
 
@@ -1616,17 +1616,17 @@ int MySql_connection::sql_select_from_users_messages(thread_data* local_buf, uns
         }
 
 
-        local_buf->stm.users_queue_select.execute(userId, 10);
-        while(!local_buf->stm.users_queue_select.fetch())
+        local_buf->stm.users_queue_select->execute(userId, 10);
+        while(!local_buf->stm.users_queue_select->fetch())
         {
             if(local_buf->sql.useColumn(0)) local_buf->sql.getValue(countRows, 0) = userId;
-            if(local_buf->sql.useColumn(1)) local_buf->sql.getValue(countRows, 1) = local_buf->stm.users_queue_select.result_id;
-            if(local_buf->sql.useColumn(2)) local_buf->sql.getValue(countRows, 2) = local_buf->stm.users_queue_select.result_event;
-            if(local_buf->sql.useColumn(3)) local_buf->sql.getValue(countRows, 3) = local_buf->stm.users_queue_select.result_message;
+            if(local_buf->sql.useColumn(1)) local_buf->sql.getValue(countRows, 1) = local_buf->stm.users_queue_select->result_id;
+            if(local_buf->sql.useColumn(2)) local_buf->sql.getValue(countRows, 2) = local_buf->stm.users_queue_select->result_event;
+            if(local_buf->sql.useColumn(3)) local_buf->sql.getValue(countRows, 3) = local_buf->stm.users_queue_select->result_message;
 
             countRows++;
         }
-        local_buf->stm.users_queue_select.free();
+        local_buf->stm.users_queue_select->free();
     }
 
     local_buf->sql.sendAllRowsAndHeaders(local_buf, PacketNomber, countRows, this);
@@ -1749,7 +1749,7 @@ int MySql_connection::sql_delete_from_users_messages(thread_data* local_buf, uns
             continue;
         }
 
-        local_buf->stm.users_queue_delete.execute((long int)time(NULL), user_id);
+        local_buf->stm.users_queue_delete->execute((long int)time(NULL), user_id);
         countRows++;
     }
 
@@ -1804,20 +1804,20 @@ int MySql_connection::sql_select_from_pipes_messages(thread_data* local_buf, uns
             continue;
         }
 
-        local_buf->stm.pipe_messages_select.execute(pipe_name, 99);
-        while(!local_buf->stm.pipe_messages_select.fetch())
+        local_buf->stm.pipe_messages_select->execute(pipe_name, 99);
+        while(!local_buf->stm.pipe_messages_select->fetch())
         {
-            if(local_buf->sql.useColumn(0)) local_buf->sql.getValue(countRows, 0) = local_buf->stm.pipe_messages_select.result_id;
-            if(local_buf->sql.useColumn(1)) local_buf->sql.getValue(countRows, 1) = (long)local_buf->stm.pipe_messages_select.result_time;
+            if(local_buf->sql.useColumn(0)) local_buf->sql.getValue(countRows, 0) = local_buf->stm.pipe_messages_select->result_id;
+            if(local_buf->sql.useColumn(1)) local_buf->sql.getValue(countRows, 1) = (long)local_buf->stm.pipe_messages_select->result_time;
             if(local_buf->sql.useColumn(2)) local_buf->sql.getValue(countRows, 2) = pipe_name;
             if(local_buf->sql.useColumn(3)) local_buf->sql.getValue(countRows, 3) = countRows;
-            if(local_buf->sql.useColumn(4)) local_buf->sql.getValue(countRows, 4) = local_buf->stm.pipe_messages_select.result_event;
-            if(local_buf->sql.useColumn(5)) local_buf->sql.getValue(countRows, 5) = local_buf->stm.pipe_messages_select.result_message;
-            if(local_buf->sql.useColumn(6)) local_buf->sql.getValue(countRows, 6) = (long)local_buf->stm.pipe_messages_select.result_user_id;
+            if(local_buf->sql.useColumn(4)) local_buf->sql.getValue(countRows, 4) = local_buf->stm.pipe_messages_select->result_event;
+            if(local_buf->sql.useColumn(5)) local_buf->sql.getValue(countRows, 5) = local_buf->stm.pipe_messages_select->result_message;
+            if(local_buf->sql.useColumn(6)) local_buf->sql.getValue(countRows, 6) = (long)local_buf->stm.pipe_messages_select->result_user_id;
 
             countRows++;
         }
-        local_buf->stm.pipe_messages_select.free();
+        local_buf->stm.pipe_messages_select->free();
     }
 
     local_buf->sql.sendAllRowsAndHeaders(local_buf, PacketNomber, countRows, this);
@@ -1967,7 +1967,7 @@ int MySql_connection::sql_delete_from_pipes_messages(thread_data* local_buf, uns
                 continue;
             }
 
-            local_buf->stm.pipe_messages_delete.execute(0x7FFFFFFF-1, pipe_name); // максимальное значение unixtime
+            local_buf->stm.pipe_messages_delete->execute(0x7FFFFFFF-1, pipe_name); // максимальное значение unixtime
             countRows++;
         }
     }
@@ -1992,7 +1992,7 @@ int MySql_connection::sql_delete_from_pipes_messages(thread_data* local_buf, uns
                 continue;
             }
 
-            local_buf->stm.pipe_messages_delete_by_message_id.execute(msg_uuid); // максимальное значение unixtime
+            local_buf->stm.pipe_messages_delete_by_message_id->execute(msg_uuid); // максимальное значение unixtime
             countRows++;
         }
     }
@@ -2220,15 +2220,15 @@ int MySql_connection::sql_select_from_pipes_settings(thread_data* local_buf, uns
 
         TagLoger::log(Log_MySqlServer, 0, "text>%s\n",pipe_name);
 
-        local_buf->stm.pipes_settings_select.execute(pipe_name);
-        if(local_buf->stm.pipes_settings_select.fetch())
+        local_buf->stm.pipes_settings_select->execute(pipe_name);
+        if(local_buf->stm.pipes_settings_select->fetch())
         {
-            local_buf->stm.pipes_settings_select.free();
+            local_buf->stm.pipes_settings_select->free();
             continue;
         }
 
-        int result_length = local_buf->stm.pipes_settings_select.result_length;
-        local_buf->stm.pipes_settings_select.free();
+        int result_length = local_buf->stm.pipes_settings_select->result_length;
+        local_buf->stm.pipes_settings_select->free();
 
         if(local_buf->sql.useColumn(0)) local_buf->sql.getValue(countRows, 0) = pipe_name;
         if(local_buf->sql.useColumn(1)) local_buf->sql.getValue(countRows, 1) = result_length;
@@ -2337,7 +2337,7 @@ int MySql_connection::sql_delete_from_pipes_settings(thread_data* local_buf, uns
         }
 
         local_buf->db.query_format("DELETE FROM `pipes_settings` WHERE `name` = '%s' ;", pipe_name);
-        local_buf->stm.pipe_messages_delete.execute(0x7FFFFFFF-1, pipe_name); // максимальное значение unixtime
+        local_buf->stm.pipe_messages_delete->execute(0x7FFFFFFF-1, pipe_name); // максимальное значение unixtime
 
         countRows++;
     }

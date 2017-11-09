@@ -53,7 +53,7 @@ int internalApi::send_to_user(thread_data* local_buf, int user_id, const char* p
         bzero(uid, 37);
         uid37(uid);
 
-        local_buf->stm.users_queue_insert.execute(uid, (long int)time(NULL), user_id, pipe_event, msg_data, strlen(msg_data));
+        local_buf->stm.users_queue_insert->execute(uid, (long int)time(NULL), user_id, pipe_event, msg_data, strlen(msg_data));
     } 
     return isSend;
 }

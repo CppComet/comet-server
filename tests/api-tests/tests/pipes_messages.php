@@ -23,7 +23,7 @@ class test_pipes_messages extends testClass{
         
         testQuery($this->link, "DELETE FROM pipes_messages WHERE name = p23");
         testQuery($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('pipe_name', 'event_in_pipe', 'text message');");
-        testQuery($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('pi! pe_name', '#even t_in_pipe', 'text message');");
+        mysqli_query($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('pi! pe_name', '#even t_in_pipe', 'text message');");
         
         testQuery($this->link, 'SELECT * FROM pipes_messages WHERE name IN( "web_admins", "web_php_chat");'); 
         
@@ -34,10 +34,10 @@ class test_pipes_messages extends testClass{
         testQuery($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('name".$rand."', 'event_in_pipe', 'text message".$rand."');");
         testQuery($this->link, "INSERT INTO pipes_settings (name, length )VALUES ('name".$rand."', 0);");
         
-        testQuery($this->link, "INSERT INTO pipes_messages (event, message)VALUES('event_in_pipe', 'text message".$rand."');");
-        testQuery($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('e', 'event_in_pipe', 'text message".$rand."');");
-        testQuery($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('event_in_pipe', '0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789', 'text message".$rand."');");
-        testQuery($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789', '', 'text message".$rand."');");
+        mysqli_query($this->link, "INSERT INTO pipes_messages (event, message)VALUES('event_in_pipe', 'text message".$rand."');");
+        mysqli_query($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('e', 'event_in_pipe', 'text message".$rand."');");
+        mysqli_query($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('event_in_pipe', '0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789', 'text message".$rand."');");
+        mysqli_query($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789', '', 'text message".$rand."');");
         
         testQuery($this->link, "INSERT INTO pipes_messages (name, event, message)VALUES('name".$rand."', 'event_in_pipe', 'text message".$rand."');");
         

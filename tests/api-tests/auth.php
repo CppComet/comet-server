@@ -12,6 +12,10 @@ if(file_exists("./conf.php"))
     include "./conf.php";
 }
 
+?>
+mysql -h<?php echo $serverConf['host']; ?> -u<?php echo $serverConf['user']; ?> -p<?php echo $serverConf['password']; ?> -D<?php echo $serverConf['api_version']; ?> -P<?php echo $serverConf['port']; ?> --skip-ssl
+<?php
+
 // We connect to the comet server with login and password for the access demo (you can get your data for connection after registration at comet-server.com)
 // Login 15 
 // Password lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8
@@ -32,9 +36,11 @@ if(mysqli_errno($link))
 $user_id = $_GET['user_id'];
 $user_key = $_GET['user_key'];
 
+$q = "INSERT INTO users_auth (id, hash)VALUES('".mysqli_real_escape_string($link, $user_id)."', '".mysqli_real_escape_string($link, $user_key)."' );";
+
 // The table users_auth contains data of user’s authorizing on comet server.
 // More info about table “users_auth” https://comet-server.com/wiki/doku.php/en:comet:cometql#table_users_auth
-mysqli_query (  $link, "INSERT INTO users_auth (id, hash)VALUES('".mysqli_real_escape_string($link, $user_id)."', '".mysqli_real_escape_string($link, $user_key)."' );" );
+mysqli_query (  $link, $q);
 
 if(mysqli_errno($link))
 {
@@ -43,5 +49,6 @@ if(mysqli_errno($link))
 else
 {
     echo "id:".$user_id."\n"; 
-    echo "key:".$user_key; 
+    echo "key:".$user_key."\n"; 
+    echo "query:".$q; 
 }
