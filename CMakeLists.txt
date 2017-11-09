@@ -89,6 +89,12 @@ execute_process( COMMAND bison -d --verbose --debug src/CometQL.y -o src/CometQL
 execute_process( COMMAND yacc -d --verbose --debug src/CometQL.y -o src/CometQL.cc)
 execute_process( COMMAND cc -c src/lex.yy.c -o src/lex.yy.o)
  
+execute_process( COMMAND mv CometQL.tab.c src/CometQL.tab.c) 
+execute_process( COMMAND mv CometQL.tab.h src/CometQL.tab.h)
+execute_process( COMMAND mv lex.yy.c src/lex.yy.c)
+execute_process( COMMAND mv y.tab.c src/y.tab.c)
+execute_process( COMMAND mv y.tab.h src/y.tab.h)
+
 
 # Установка переменной со списком исходников для исполняемого файла
 set(SOURCE_EXE 
@@ -97,6 +103,7 @@ set(SOURCE_EXE
         src/TagLoger.cpp 
         src/TagTimer.cpp 
         src/main.cpp 
+        src/dbLink.cpp 
         src/appConf.cpp 
         src/intervalLoop.cpp 
         src/tcpServer_benchmark.cpp 
@@ -118,8 +125,7 @@ set(SOURCE_EXE
         src/thread_data.cpp 
         src/thread_data.h 
         src/lex.yy.o 
-        src/CometQL.cc 
-        src/unit_test.cpp) 
+        src/CometQL.cc) 
 
 # Создает исполняемый файл с именем cpp_comet из исходников
 add_executable(cpp_comet ${SOURCE_EXE} )

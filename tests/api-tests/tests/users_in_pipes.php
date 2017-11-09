@@ -21,9 +21,9 @@ class test_users_in_pipes extends testClass{
             echo json_encode($row)."\n";
         }
         
-        testQuery($this->link, "DELETE FROM users_in_pipes WHERE name = p23");
-        testQuery($this->link, "INSERT INTO users_in_pipes (name, event, message)VALUES('pipe_name', 'event_in_pipe', 'text message');");
-        testQuery($this->link, "INSERT INTO users_in_pipes (name, event, message)VALUES('pi! pe_name', '#even t_in_pipe', 'text message');");
+        mysqli_query($this->link, "DELETE FROM users_in_pipes WHERE name = p23");
+        mysqli_query($this->link, "INSERT INTO users_in_pipes (name, event, message)VALUES('pipe_name', 'event_in_pipe', 'text message');");
+        mysqli_query($this->link, "INSERT INTO users_in_pipes (name, event, message)VALUES('pi! pe_name', '#even t_in_pipe', 'text message');");
         
         testQuery($this->link, 'SELECT * FROM users_in_pipes WHERE name IN( "web_admins", "web_php_chat");');  
     }

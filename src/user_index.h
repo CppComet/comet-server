@@ -89,7 +89,7 @@ public:
 
         TagLoger::log(Log_UserItem, 0, "auth_hash_test:%s\n", hash);
 
-        local_buf->stm.users_auth_replace.execute(user_id, hash);
+        local_buf->stm.users_auth_replace->execute(user_id, hash);
 
         bzero(conection_ids, sizeof(int) * MAX_CONECTION_ON_USER_ID);
     }
@@ -177,15 +177,15 @@ public:
     {
         if(last_online_time == -1)
         {
-            local_buf->stm.users_time_select.execute(user_id);
-            if(local_buf->stm.users_time_select.fetch())
+            local_buf->stm.users_time_select->execute(user_id);
+            if(local_buf->stm.users_time_select->fetch())
             {
-                local_buf->stm.users_time_select.free();
+                local_buf->stm.users_time_select->free();
                 return -1;
             }
 
-            last_online_time = local_buf->stm.users_time_select.result_time;
-            local_buf->stm.users_time_select.free();
+            last_online_time = local_buf->stm.users_time_select->result_time;
+            local_buf->stm.users_time_select->free();
         }
 
         return last_online_time;
@@ -207,19 +207,19 @@ public:
      */
     long static getLast_online_time(thread_data* local_buf, unsigned int user_id)
     {
-        if(!local_buf->stm.users_time_select.execute(user_id))
+        if(!local_buf->stm.users_time_select->execute(user_id))
         {
             return -1;
         }
 
-        if(local_buf->stm.users_time_select.fetch())
+        if(local_buf->stm.users_time_select->fetch())
         {
-            local_buf->stm.users_time_select.free();
+            local_buf->stm.users_time_select->free();
             return -1;
         }
 
-        long last_online_time = local_buf->stm.users_time_select.result_time;
-        local_buf->stm.users_time_select.free();
+        long last_online_time = local_buf->stm.users_time_select->result_time;
+        local_buf->stm.users_time_select->free();
 
         return last_online_time;
     }
@@ -244,7 +244,7 @@ public:
 
         memcpy(hash, Hash, copy_len);
         TagLoger::log(Log_UserItem, 0, "auth_hash_test:%s\n", hash);
-        local_buf->stm.users_auth_replace.execute(user_id, hash);
+        local_buf->stm.users_auth_replace->execute(user_id, hash);
         return true;
     }
 
@@ -254,7 +254,7 @@ public:
      */
     bool inline deleteHash(thread_data* local_buf)
     {
-        local_buf->stm.users_auth_delete.execute(user_id);
+        local_buf->stm.users_auth_delete->execute(user_id);
         if(hash == NULL)
         {
             return true;
@@ -276,28 +276,28 @@ public:
      */
     static bool getHash(thread_data* local_buf, unsigned int user_id, char* out_hash)
     {
-        local_buf->stm.users_auth_select.execute(user_id);
+        local_buf->stm.users_auth_select->execute(user_id);
 
-        if(local_buf->stm.users_auth_select.fetch())
+        if(local_buf->stm.users_auth_select->fetch())
         {
             TagLoger::log(Log_UserItem, 0, "[4]Hash, user_id=%d not found\n", user_id);
-            local_buf->stm.users_auth_select.free();
+            local_buf->stm.users_auth_select->free();
             return false;
         }
 
         if(out_hash != NULL)
         {
             bzero(out_hash, USER_HASH_LEN);
-            memcpy(out_hash, local_buf->stm.users_auth_select.result_hash, USER_HASH_LEN);
+            memcpy(out_hash, local_buf->stm.users_auth_select->result_hash, USER_HASH_LEN);
         }
-        TagLoger::log(Log_UserItem, 0, "[5]Hash user_id=%d is %s\n", user_id, local_buf->stm.users_auth_select.result_hash);
-        local_buf->stm.users_auth_select.free();
+        TagLoger::log(Log_UserItem, 0, "[5]Hash user_id=%d is %s\n", user_id, local_buf->stm.users_auth_select->result_hash);
+        local_buf->stm.users_auth_select->free();
         return true;
     }
 
     static bool deleteHash(thread_data* local_buf, unsigned int user_id)
     {
-        local_buf->stm.users_auth_delete.execute(user_id);
+        local_buf->stm.users_auth_delete->execute(user_id);
         return true;
     }
 
@@ -312,10 +312,10 @@ public:
     {
         if(hash == 0)
         {
-            local_buf->stm.users_auth_select.execute(user_id);
-            if(local_buf->stm.users_auth_select.fetch())
+            local_buf->stm.users_auth_select->execute(user_id);
+            if(local_buf->stm.users_auth_select->fetch())
             {
-                local_buf->stm.users_auth_select.free();
+                local_buf->stm.users_auth_select->free();
                 TagLoger::log(Log_UserItem, 0, "[3]Hash user_id=%d not found\n", user_id);
                 return false;
             }
@@ -323,8 +323,8 @@ public:
             hash = new char[USER_HASH_LEN+1];
             bzero(hash, USER_HASH_LEN+1);
 
-            memcpy(hash, local_buf->stm.users_auth_select.result_hash, USER_HASH_LEN );
-            local_buf->stm.users_auth_select.free();
+            memcpy(hash, local_buf->stm.users_auth_select->result_hash, USER_HASH_LEN );
+            local_buf->stm.users_auth_select->free();
             TagLoger::log(Log_UserItem, 0, "[1]Hash user_id=%d is %s\n", user_id, hash);
         }
         else
@@ -426,25 +426,25 @@ public:
             // Если токен верен но хеша авторизации нет то установим значение токена в качестве хеша авторизации
             if(!getHash(local_buf, user_id, NULL))
             {
-                local_buf->stm.users_auth_replace.execute(user_id, Hash);
+                local_buf->stm.users_auth_replace->execute(user_id, Hash);
             }
             return true;
         }
 
-        local_buf->stm.users_auth_select.execute(user_id);
-        if(local_buf->stm.users_auth_select.fetch())
+        local_buf->stm.users_auth_select->execute(user_id);
+        if(local_buf->stm.users_auth_select->fetch())
         {
-            local_buf->stm.users_auth_select.free();
+            local_buf->stm.users_auth_select->free();
             return false;
         }
 
-        if(memcmp(Hash, local_buf->stm.users_auth_select.result_hash, USER_HASH_LEN) == 0)
+        if(memcmp(Hash, local_buf->stm.users_auth_select->result_hash, USER_HASH_LEN) == 0)
         {
-            local_buf->stm.users_auth_select.free();
+            local_buf->stm.users_auth_select->free();
             return true;
         }
 
-        local_buf->stm.users_auth_select.free();
+        local_buf->stm.users_auth_select->free();
         return false;
     }
 

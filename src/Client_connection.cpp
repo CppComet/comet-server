@@ -190,19 +190,19 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
             if(memcmp(subscriptions[i], "trust_", strlen("trust_")) == 0)
             {
                 // Отправка последних 20 сообщений из канала trust_
-                local_buf->stm.pipe_messages_select.execute(subscriptions[i], 20);
-                while(!local_buf->stm.pipe_messages_select.fetch())
+                local_buf->stm.pipe_messages_select->execute(subscriptions[i], 20);
+                while(!local_buf->stm.pipe_messages_select->fetch())
                 {
                     char serverData[EVENT_NAME_LEN+256];
                     snprintf(serverData,
                             EVENT_NAME_LEN+256,
                             "\"fromQueue\":true,\"event_name\":\"%s\",\"uuid\":\"%s\"",
-                            local_buf->stm.pipe_messages_select.result_event,
-                            local_buf->stm.pipe_messages_select.result_id);
+                            local_buf->stm.pipe_messages_select->result_event,
+                            local_buf->stm.pipe_messages_select->result_id);
 
-                    message(local_buf, local_buf->stm.pipe_messages_select.result_message, NULL, MESSAGE_TEXT, serverData);
+                    message(local_buf, local_buf->stm.pipe_messages_select->result_message, NULL, MESSAGE_TEXT, serverData);
                 }
-                local_buf->stm.pipe_messages_select.free();
+                local_buf->stm.pipe_messages_select->free();
             }
 
             p++;
@@ -494,15 +494,15 @@ int Client_connection::web_socket_receive(thread_data* local_buf)
  */
 int Client_connection::msg_queue_send(int client, int len, thread_data* local_buf)
 {
-    local_buf->stm.users_queue_select.execute(web_user_id, 10);
-    while(!local_buf->stm.users_queue_select.fetch())
+    local_buf->stm.users_queue_select->execute(web_user_id, 10);
+    while(!local_buf->stm.users_queue_select->fetch())
     {
         char serverData[EVENT_NAME_LEN+64];
-        snprintf(serverData, EVENT_NAME_LEN+64, "\"fromQueue\":true,\"event_name\":\"%s\"", local_buf->stm.users_queue_select.result_event);
-        message(local_buf, local_buf->stm.users_queue_select.result_message, NULL, MESSAGE_TEXT, serverData);
+        snprintf(serverData, EVENT_NAME_LEN+64, "\"fromQueue\":true,\"event_name\":\"%s\"", local_buf->stm.users_queue_select->result_event);
+        message(local_buf, local_buf->stm.users_queue_select->result_message, NULL, MESSAGE_TEXT, serverData);
     }
-    local_buf->stm.users_queue_select.free();
-    local_buf->stm.users_queue_delete.execute((long int)time(NULL), web_user_id);
+    local_buf->stm.users_queue_select->free();
+    local_buf->stm.users_queue_delete->execute((long int)time(NULL), web_user_id);
 
     return 0;
 }
@@ -535,30 +535,30 @@ int Client_connection::send_pipe_log(thread_data* local_buf, char* pipe_name, co
     }
 
     int i = 0;
-    if(!local_buf->stm.pipe_messages_select.execute(pipe_name, 99))
+    if(!local_buf->stm.pipe_messages_select->execute(pipe_name, 99))
     {
         return 0;
     }
 
     char* tmp = new char[appConf::instance()->get_int("main", "buf_size")*8];
-    while(!local_buf->stm.pipe_messages_select.fetch())
+    while(!local_buf->stm.pipe_messages_select->fetch())
     {
         bzero(tmp, appConf::instance()->get_int("main", "buf_size")*8);
         mysql_real_escape_string(local_buf->db.getLink(), tmp,
-                local_buf->stm.pipe_messages_select.result_message, strlen(local_buf->stm.pipe_messages_select.result_message));
+                local_buf->stm.pipe_messages_select->result_message, strlen(local_buf->stm.pipe_messages_select->result_message));
 
         // Добавляем данные в поле event_name и user_id
         snprintf(addData + addData_lenStart, EVENT_NAME_LEN + 120 - addData_lenStart,
                 ",\"event_name\":\"%s\",\"user_id\":%ld",
-                local_buf->stm.pipe_messages_select.result_event,
-                local_buf->stm.pipe_messages_select.result_user_id);
+                local_buf->stm.pipe_messages_select->result_event,
+                local_buf->stm.pipe_messages_select->result_user_id);
 
         TagLoger::log(Log_ClientServer, 0, "send_pipe_log[]:%s [pipe_name=%s][addData=%s]\n", tmp, pipe_name, addData);
         message(local_buf, tmp, pipe_name, MESSAGE_TEXT, addData);
         bzero(addData + addData_lenStart, EVENT_NAME_LEN + 120 - addData_lenStart);
         i++;
     }
-    local_buf->stm.pipe_messages_select.free();
+    local_buf->stm.pipe_messages_select->free();
     delete[] tmp;
 
     return i;

@@ -133,7 +133,7 @@ public:
  
         // Сохраняем настройки канала в бд
         local_buf->db.query_format("REPLACE INTO `pipes_settings`(`name`, `type`, `length`) VALUES ('%s', '0', %d);", pipe_name, log_length);
-        local_buf->db.query_format("DELETE FROM `pipe_messages` WHERE `name` = '%s' ORDER BY `time` DESC limit %d, 99999", pipe_name, log_length);
+        //local_buf->db.query_format("DELETE FROM `pipe_messages` WHERE `name` = '%s' ORDER BY `time` DESC limit %d, 99999", pipe_name, log_length);
         return 0;
     }
 
@@ -144,16 +144,16 @@ public:
             return false;
         }
 
-        local_buf->stm.pipes_settings_select.execute(pipe_name);
-        if(local_buf->stm.pipes_settings_select.fetch())
+        local_buf->stm.pipes_settings_select->execute(pipe_name);
+        if(local_buf->stm.pipes_settings_select->fetch())
         {
             TagLoger::error(Log_UserItem, 0, "pipes_settings not found Error:pipes_settings_select [fetch-1] pipe_name = %s\n", pipe_name);
-            local_buf->stm.pipes_settings_select.free();
+            local_buf->stm.pipes_settings_select->free();
             return false;
         }
 
-        log_length = local_buf->stm.pipes_settings_select.result_length;
-        local_buf->stm.pipes_settings_select.free();
+        log_length = local_buf->stm.pipes_settings_select->result_length;
+        local_buf->stm.pipes_settings_select->free();
  
         return true;
     }

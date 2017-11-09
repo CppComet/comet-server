@@ -8,6 +8,7 @@
 class QueryData;
 class mysqlAnswer;
  
+#include "TagLoger.h"
 #include "MySqlProtocol.h"
 
 #define SQL_ERR_UNDEFINED           1
@@ -392,8 +393,8 @@ public:
     inline bool useColumn(int column)
     {
         if(column >= MAX_COLUMNS_COUNT)
-        {
-            printf("useColumn column=%d more than MAX_COLUMNS_COUNT=%d\n", column, MAX_COLUMNS_COUNT);
+        { 
+            TagLoger::trace(Log_MySqlServer, 0, "\x1b[1;31museColumn column=%d more than MAX_COLUMNS_COUNT=%d\x1b[0m", column, MAX_COLUMNS_COUNT); 
             return false;
         }
         
@@ -411,13 +412,13 @@ public:
         if(line >= MAX_LINES_IN_ANSWER)
         {
             line = MAX_LINES_IN_ANSWER - 1;
-            printf("Not enough memory for the line row=%d, MAX_LINES_IN_ANSWER=%d\n", line, MAX_LINES_IN_ANSWER);
+            TagLoger::trace(Log_MySqlServer, 0, "\x1b[1;31mNot enough memory for the line row=%d, MAX_LINES_IN_ANSWER=%d\x1b[0m", line, MAX_LINES_IN_ANSWER); 
         }
         
         if(column >= MAX_COLUMNS_COUNT)
         {
             column = MAX_COLUMNS_COUNT - 1;
-            printf("Not enough memory for the field column=%d, MAX_COLUMNS_COUNT=%d\n", column, MAX_COLUMNS_COUNT);
+            TagLoger::trace(Log_MySqlServer, 0, "\x1b[1;31mNot enough memory for the field column=%d, MAX_COLUMNS_COUNT=%d\x1b[0m", column, MAX_COLUMNS_COUNT);  
         }
         
         return values[line][columPositions[column]];

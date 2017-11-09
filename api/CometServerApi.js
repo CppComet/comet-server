@@ -18,10 +18,7 @@
 
 if(!window.tabSignal)
 {
-    function tabSignal()
-    {
-        return tabSignal;
-    }
+    tabSignal = {}
 
     tabSignal.slotArray = new Array();
     tabSignal.debug = false;
@@ -292,7 +289,7 @@ var _cometServerApi = function(opt)
 /**
  * @private
  */
-_cometServerApi.prototype.version = "3.29";
+_cometServerApi.prototype.version = "3.30";
 
 /**
  * @private
@@ -816,11 +813,6 @@ _cometServerApi.prototype.subscription = function(name, callback)
         return false;
     }
 
-    if(!/^[A-z0-9_.\-]+$/.test(name))
-    {
-        console.error("Invalid pipe name", name)
-    }
-
     var thisObj = _cometServerApi.prototype;
     var nameArray = name.split("\n");
     if(nameArray.length > 1)
@@ -832,7 +824,7 @@ _cometServerApi.prototype.subscription = function(name, callback)
         }
         return;
     }
-
+    
     if(callback === undefined)
     {
         // Подписка на канал без передачи колбека имеет смысл в том случаии когда это происходит по инициативе из другой вкладки.
@@ -879,7 +871,13 @@ _cometServerApi.prototype.subscription = function(name, callback)
     if(name.length < 2 )
     {
         // Имя канала слишком короткое
+        console.error("Error pipe is to short", name)
         return false;
+    }
+ 
+    if(!/^[A-z0-9_.\-]+$/.test(name))
+    {
+        console.error("Invalid pipe name", name)
     }
 
     var sigId = thisObj.subscription_callBack(name, callback);
@@ -1831,7 +1829,7 @@ _cometServerApi.prototype.add_msg_to_queue = function(msg)
     {
         // Проверка если сообщение о подписке на канал то его отправлять вне очереди
         // При этом нет необходимости отправлять предыдущие сообщение подписку.
-        _cometServerApi.prototype.send_msg_subscription = msg;
+        _cometServerApi.prototype.send_msg_subscription = msg.replace(/subscription\n/mg, "");
     }
     else
     {
