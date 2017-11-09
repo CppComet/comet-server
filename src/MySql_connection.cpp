@@ -678,30 +678,40 @@ int MySql_connection::sql_show_databases(thread_data* local_buf, unsigned int Pa
 int MySql_connection::sql_show_tables(thread_data* local_buf, unsigned int PacketNomber)
 {
     // Отправляем пакет описания 1 колонки
-    MySqlResultset_ColumDef column[1]; 
-    column[0] = "Tables"; 
-
+    local_buf->answer_buf.lock();
     char* answer = local_buf->answer_buf.getData();
-    int delta = HeadAnswer(1, column, PacketNomber, answer);
-    answer += delta;
+
+    local_buf->sql.columns[0] = "Tables";
+    answer += HeadAnswer(1, &local_buf->sql.columns[0], PacketNomber, answer);
+
+    MySqlResulValue value;
     
-    MySqlResulValue values[18];
-    int countRows = 0;
-    local_buf->sql.getValue(countRows++, 0) = "users_auth";
-    local_buf->sql.getValue(countRows++, 0) = "users_time";
-    local_buf->sql.getValue(countRows++, 0) = "users_messages";
-    local_buf->sql.getValue(countRows++, 0) = "pipes_messages";
-    local_buf->sql.getValue(countRows++, 0) = "users_in_pipes";
-    local_buf->sql.getValue(countRows++, 0) = "pipes";
-    local_buf->sql.getValue(countRows++, 0) = "pipes_settings";
+    value = "users_auth";
+    answer += RowPackage(1, &value, ++PacketNomber, answer);
     
-    delta = RowPackage(countRows, values, ++PacketNomber, answer);
-    answer += delta;
- 
+    value = "users_time";
+    answer += RowPackage(1, &value, ++PacketNomber, answer);
+    
+    value = "users_messages";
+    answer += RowPackage(1, &value, ++PacketNomber, answer);
+    
+    value = "pipes_messages";
+    answer += RowPackage(1, &value, ++PacketNomber, answer);
+    
+    value = "users_in_pipes";
+    answer += RowPackage(1, &value, ++PacketNomber, answer);
+    
+    value = "pipes";
+    answer += RowPackage(1, &value, ++PacketNomber, answer);
+    
+    value = "pipes_settings";
+    answer += RowPackage(1, &value, ++PacketNomber, answer);
+     
+
     web_write(local_buf->answer_buf.getData(), answer - local_buf->answer_buf.getData());
 
     local_buf->answer_buf.unlock();
-    Send_EOF_Package(++PacketNomber, local_buf, this); // Send_EOF_Package
+    Send_EOF_Package(++PacketNomber, local_buf, this); // Send_EOF_Package 
     return 0; 
 }
 

@@ -11,6 +11,9 @@ BUG FIXES:
 
  * fix bug in cmake files
  * errors when restart mysql server
+ * fix bug #36 CometServerApi.js:824 Invalid pipe name subscription web_chat_pipe chatControl
+ * fix bug #35 _cometServerApi.prototype.send_msg("pipe_log\n"+pipe_name+"\n"+marker+"\n"); 
+ * fix bug #34 tabSignal.connect is not a function 
   
 ## v3.29
 
