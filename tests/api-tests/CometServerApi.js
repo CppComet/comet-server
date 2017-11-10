@@ -268,6 +268,15 @@ if(!window.tabSignal)
 
 }
 
+if(!window.comet_server_signal)
+{
+    /**
+     * @deprecated Оставлено только в целях обратной совместимости, лучше использовать window.tabSignal
+     * @returns {Window.tabSignal|window.tabSignal}
+     */
+    window.comet_server_signal = function(){ return window.tabSignal};
+}
+
 var _cometServerApi = function(opt)
 {
 	if(opt)
@@ -1822,7 +1831,7 @@ _cometServerApi.prototype.add_msg_to_queue = function(msg)
 	{
 		// Проверка если сообщение о подписке на канал то его отправлять вне очереди
 		// При этом нет необходимости отправлять предыдущие сообщение подписку.
-		_cometServerApi.prototype.send_msg_subscription = msg.replace(/subscription\n/mg, "");
+		_cometServerApi.prototype.send_msg_subscription = msg;//.replace(/subscription\n/mg, "");
 	}
 	else
 	{
@@ -2006,9 +2015,10 @@ _cometServerApi.prototype.get_pipe_log = function(pipe_name, callBack)
 		return false;
 	}
 
+        var marker = _cometServerApi.prototype.custom_id
 	if(callBack !== undefined)
 	{
-		var marker = _cometServerApi.prototype.getCustomString();
+		marker = _cometServerApi.prototype.getCustomString();
 		_cometServerApi.prototype.subscription(pipe_name);
 		_cometServerApi.prototype.subscription_callBack(pipe_name, callBack, marker);
 	}
