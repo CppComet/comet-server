@@ -288,7 +288,7 @@ var _cometServerApi = function(opt)
 /**
  * @private
  */
-_cometServerApi.prototype.version = "3.30";
+_cometServerApi.prototype.version = "3.31";
 
 /**
  * @private
