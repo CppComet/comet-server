@@ -2402,7 +2402,7 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
         return 0;
     }
 
-    int user_id = local_buf->qInfo.tokToInt(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]]);
+    int user_id = local_buf->qInfo.tokToInt(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[1]]);
     if(user_id < 0)
     {
         Send_Err_Package(SQL_ERR_INVALID_DATA, "The id field must be non-negative", PacketNomber+1, local_buf, this);
