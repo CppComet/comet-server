@@ -23,6 +23,12 @@
  */
 #define	ER_UNKNOWN_STMT_HANDLER 1243
 
+/** 
+ * https://dev.mysql.com/doc/refman/5.5/en/error-messages-server.html#error_er_server_shutdown
+ */
+#define	ER_SERVER_SHUTDOWN 1053
+
+
 
 class stmMapper;
 class dbLink;
@@ -73,7 +79,7 @@ protected:
 };
 
 class dbLink {
-    MYSQL mysqlLink;
+    MYSQL* mysqlLink = NULL;
     bool isInit = false;
     bool isConnected = false;
 
@@ -106,20 +112,14 @@ public:
     dbLink(){
         connectionName = "noname";
         connectionName.append(std::to_string(random()));
-        mysql_init(&mysqlLink);
     }
     
     dbLink(std::string ConnectionName){
         connectionName = ConnectionName;
-        mysql_init(&mysqlLink);
     }
  
     ~dbLink(){
-
-        if(isInit)
-        {
-            mysql_close(&mysqlLink);
-        }
+        close();
     }
     
     void setStmMapper(stmMapper *STM){
@@ -135,12 +135,12 @@ public:
 
     MYSQL* getLink()
     {
-        return &mysqlLink;
+        return mysqlLink;
     }
 
     operator MYSQL* ()
     {
-        return &mysqlLink;
+        return mysqlLink;
     }
 
     bool query(const char *q);

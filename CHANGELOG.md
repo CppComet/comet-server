@@ -5,6 +5,12 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v3.31
+
+BUG FIXES:
+ 
+ * errors in history strigs and db connections
+ 
 ## v3.30
 
 BUG FIXES:

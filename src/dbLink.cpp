@@ -100,7 +100,7 @@ int stmBase::insert()
     if (mysql_stmt_execute(stmt) != 0)
     {
         int error_code = mysql_stmt_errno(stmt);
-        if( error_code != CR_SERVER_LOST && error_code != ER_UNKNOWN_STMT_HANDLER)
+        if( error_code != CR_SERVER_LOST && error_code != ER_UNKNOWN_STMT_HANDLER && error_code != ER_SERVER_SHUTDOWN)
         {
             TagLoger::trace(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_execute(insert), (1) failed - %s [errno=%d]\x1b[0m\n", mysql_stmt_error(stmt), mysql_stmt_errno(stmt));
             return false;
@@ -147,7 +147,8 @@ bool stmBase::select()
     if (mysql_stmt_execute(stmt))
     {
         int error_code = mysql_stmt_errno(stmt);
-        if( error_code != CR_SERVER_LOST && error_code != ER_UNKNOWN_STMT_HANDLER)
+         
+        if( error_code != CR_SERVER_LOST && error_code != ER_UNKNOWN_STMT_HANDLER && error_code != ER_SERVER_SHUTDOWN)
         {
             TagLoger::trace(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_execute(select), (1) failed - %s [errno=%d]\x1b[0m\n", mysql_stmt_error(stmt), mysql_stmt_errno(stmt));
             return false;
@@ -331,17 +332,6 @@ bool dbLink::init(const char* host, const char* user, const char* pw, const char
 
     db_port = port;
 
-    mysql_options(&mysqlLink, MYSQL_OPT_RECONNECT, &is_reconnect);
-    mysql_options(&mysqlLink, MYSQL_SET_CHARSET_NAME, "utf8");
-    mysql_options(&mysqlLink, MYSQL_INIT_COMMAND, "SET NAMES utf8");
-    mysql_options(&mysqlLink, MYSQL_OPT_CONNECT_TIMEOUT, &connect_timeout);
-    mysql_options(&mysqlLink, MYSQL_OPT_READ_TIMEOUT, &read_timeout);
-
-    // MYSQL_OPT_CONNECT_TIMEOUT
-    // MYSQL_OPT_READ_TIMEOUT
-    // MYSQL_OPT_WRITE_TIMEOUT
-    //mysql_options(&mysql,MYSQL_OPT_COMPRESS,0);
-
     return true;
 }
 
@@ -352,19 +342,32 @@ bool dbLink::connect()
         TagLoger::trace(Log_dbLink, 0, "\x1b[1;32mMySQL connection was not initialized\x1b[0m");
         return false;
     }
-
+    
     isConnected = true;
 
-    TagLoger::debug(Log_dbLink, 0, "\x1b[1;32mmysql_real_connect %s:%d user=%s\x1b[0m", db_host.data(), db_port, db_user.data());
-    mysql_real_connect(&mysqlLink, db_host.data(), db_user.data(), db_pw.data(), db_name.data(), db_port, NULL, 0);
+    mysqlLink = mysql_init(mysqlLink);
 
-    if(mysql_errno(&mysqlLink))
+    mysql_options(mysqlLink, MYSQL_OPT_RECONNECT, &is_reconnect);
+    mysql_options(mysqlLink, MYSQL_SET_CHARSET_NAME, "utf8");
+    mysql_options(mysqlLink, MYSQL_INIT_COMMAND, "SET NAMES utf8");
+    mysql_options(mysqlLink, MYSQL_OPT_CONNECT_TIMEOUT, &connect_timeout);
+    mysql_options(mysqlLink, MYSQL_OPT_READ_TIMEOUT, &read_timeout);
+
+    // MYSQL_OPT_CONNECT_TIMEOUT
+    // MYSQL_OPT_READ_TIMEOUT
+    // MYSQL_OPT_WRITE_TIMEOUT
+    //mysql_options(&mysql,MYSQL_OPT_COMPRESS,0);
+
+    TagLoger::debug(Log_dbLink, 0, "\x1b[1;32mmysql_real_connect %s:%d user=%s\x1b[0m", db_host.data(), db_port, db_user.data());
+    mysql_real_connect(mysqlLink, db_host.data(), db_user.data(), db_pw.data(), db_name.data(), db_port, NULL, 0);
+
+    if(mysql_errno(mysqlLink))
     {
-        TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL connection not established\n%s\nip=%s:%d user=%s [errno=%d]\x1b[0m", mysql_error(&mysqlLink),
-                db_host.data(), db_port, db_user.data(), mysql_errno(&mysqlLink));
+        TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL connection not established\n%s\nip=%s:%d user=%s [errno=%d]\x1b[0m", mysql_error(mysqlLink),
+                db_host.data(), db_port, db_user.data(), mysql_errno(mysqlLink));
         return false;
     }
-
+ 
     if(stm != NULL)
     {
         stm->init(this);
@@ -379,50 +382,44 @@ bool dbLink::connect()
 
 bool dbLink::query(const char *q)
 {
-    if(!isInit)
-    {
-        TagLoger::trace(Log_dbLink, 0, "\x1b[1;32mMySQL connection was not initialized\x1b[0m", db_host.data(), db_port, db_user.data());
-        return false;
-    }
-
     if(!isConnected)
     {
         connect();
     }
 
     TagLoger::log(Log_dbLink, 0, "\x1b[1;32mMySQL query[%d]=%s\x1b[0m", strlen(q), q);
-    if(mysql_real_query(&mysqlLink, q, strlen(q)) == 0)
+    if(mysql_real_query(mysqlLink, q, strlen(q)) == 0)
     {
         return true;
     }
 
 
-    if(mysql_errno(&mysqlLink))
+    if(mysql_errno(mysqlLink))
     {
-        TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn)error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), q);
-        if(mysql_errno(&mysqlLink) == CR_COMMANDS_OUT_OF_SYNC)
+        TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn)error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(mysqlLink), mysql_errno(mysqlLink), q);
+        if(mysql_errno(mysqlLink) == CR_COMMANDS_OUT_OF_SYNC)
         {
-            MYSQL_RES* res = mysql_store_result(&mysqlLink);
+            MYSQL_RES* res = mysql_store_result(mysqlLink);
             mysql_free_result(res);
 
-            if(mysql_real_query(&mysqlLink, q, strlen(q)) == 0)
+            if(mysql_real_query(mysqlLink, q, strlen(q)) == 0)
             {
                 return true;
             }
 
-            TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn[2])error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), q);
+            TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn[2])error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(mysqlLink), mysql_errno(mysqlLink), q);
         }
 
         if(reconnect_on_error && reconnect())
         {
-            if(mysql_real_query(&mysqlLink, q, strlen(q)) == 0)
+            if(mysql_real_query(mysqlLink, q, strlen(q)) == 0)
             {
                 return true;
             }
 
-            if(mysql_errno(&mysqlLink))
+            if(mysql_errno(mysqlLink))
             {
-                TagLoger::trace(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), q);
+                TagLoger::trace(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(mysqlLink), mysql_errno(mysqlLink), q);
             }
         } 
     }
@@ -432,12 +429,6 @@ bool dbLink::query(const char *q)
 
 bool dbLink::query_format(const char *format, ...)
 {
-    if(!isInit)
-    {
-        TagLoger::trace(Log_dbLink, 0, "\x1b[1;32mMySQL connection was not initialized\x1b[0m", db_host.data(), db_port, db_user.data());
-        return false;
-    }
-
     if(!isConnected)
     {
         connect();
@@ -451,40 +442,40 @@ bool dbLink::query_format(const char *format, ...)
     vsnprintf(buf, buffer_size, format, ap);
 
     TagLoger::log(Log_dbLink, 0, "\x1b[1;32mMySQL query[%d]=%s\x1b[0m", strlen(buf), buf);
-    if(mysql_real_query(&mysqlLink, buf, strlen(buf)) == 0)
+    if(mysql_real_query(mysqlLink, buf, strlen(buf)) == 0)
     {
         va_end(ap);
         return true;
     }
 
-    if(mysql_errno(&mysqlLink))
+    if(mysql_errno(mysqlLink))
     {
         // @todo Проверять код ошибки и не паниковать если по коду ясно что проблема в самом запросе а не соединении. 
-        TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn)error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), buf); 
-        if(mysql_errno(&mysqlLink) == CR_COMMANDS_OUT_OF_SYNC)
+        TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn)error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(mysqlLink), mysql_errno(mysqlLink), buf); 
+        if(mysql_errno(mysqlLink) == CR_COMMANDS_OUT_OF_SYNC)
         {
-            MYSQL_RES* res = mysql_store_result(&mysqlLink);
+            MYSQL_RES* res = mysql_store_result(mysqlLink);
             mysql_free_result(res);
 
-            if(mysql_real_query(&mysqlLink, buf, strlen(buf)) == 0)
+            if(mysql_real_query(mysqlLink, buf, strlen(buf)) == 0)
             {
                 return true;
             }
 
-            TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn[2])error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), buf);
+            TagLoger::warn(Log_dbLink, 0, "\x1b[1;33mMySQL (warn[2])error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(mysqlLink), mysql_errno(mysqlLink), buf);
         }
 
         if(reconnect_on_error && reconnect())
         {
-            if(mysql_real_query(&mysqlLink, buf, strlen(buf)) == 0)
+            if(mysql_real_query(mysqlLink, buf, strlen(buf)) == 0)
             {
                 va_end(ap);
                 return true;
             }
 
-            if(mysql_errno(&mysqlLink))
+            if(mysql_errno(mysqlLink))
             {
-                TagLoger::trace(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(&mysqlLink), mysql_errno(&mysqlLink), buf);
+                TagLoger::trace(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(mysqlLink), mysql_errno(mysqlLink), buf);
             }
         } 
     }
@@ -502,9 +493,10 @@ bool dbLink::reconnect()
 
 void dbLink::close()
 {
-    if(isInit)
+    if(isConnected)
     {
-        mysql_close(&mysqlLink);
+        mysql_close(mysqlLink);
+        mysqlLink = NULL;
         isConnected = false;
     } 
 }
@@ -513,96 +505,83 @@ void dbLink::close()
 void stmMapper::init(dbLink *mysql)
 {
     // \.(execute|fetch|result_id|result_event|result_message|free|result_length|result_time|result_user_id)
-    if(queryLoger != NULL)
+    if(queryLoger == NULL)
     {
-        delete queryLoger;
-    }
-    queryLoger = new stm_log_query(); 
+        queryLoger = new stm_log_query(); 
+    } 
     queryLoger->prepare(mysql);
     
-    if(users_queue_insert != NULL)
+    if(users_queue_insert == NULL)
     {
-        delete users_queue_insert;
+        users_queue_insert = new stm_users_queue_insert(); 
     }
-    users_queue_insert = new stm_users_queue_insert(); 
     users_queue_insert->prepare(mysql);
     
-    if(users_queue_select != NULL)
+    if(users_queue_select == NULL)
     {
-        delete users_queue_select;
-    }
-    users_queue_select = new stm_users_queue_select(); 
+        users_queue_select = new stm_users_queue_select(); 
+    } 
     users_queue_select->prepare(mysql);
     
-    if(users_queue_delete != NULL)
+    if(users_queue_delete == NULL)
     {
-        delete users_queue_delete;
-    }
-    users_queue_delete = new stm_users_queue_delete(); 
+        users_queue_delete = new stm_users_queue_delete(); 
+    }  
     users_queue_delete->prepare(mysql);
 
     
-    if(pipe_messages_insert != NULL)
+    if(pipe_messages_insert == NULL)
     {
-        delete pipe_messages_insert;
-    }
-    pipe_messages_insert = new stm_pipe_messages_insert(); 
+        pipe_messages_insert = new stm_pipe_messages_insert(); 
+    } 
     pipe_messages_insert->prepare(mysql);
     
-    if(pipe_messages_select != NULL)
+    if(pipe_messages_select == NULL)
     {
-        delete pipe_messages_select;
-    }
-    pipe_messages_select = new stm_pipe_messages_select(); 
+        pipe_messages_select = new stm_pipe_messages_select(); 
+    } 
     pipe_messages_select->prepare(mysql);
     
-    if(pipe_messages_delete != NULL)
+    if(pipe_messages_delete == NULL)
     {
-        delete pipe_messages_delete;
-    }
-    pipe_messages_delete = new stm_pipe_messages_delete(); 
+        pipe_messages_delete = new stm_pipe_messages_delete(); 
+    } 
     pipe_messages_delete->prepare(mysql);
     
-    if(pipe_messages_delete_by_message_id != NULL)
+    if(pipe_messages_delete_by_message_id == NULL)
     {
-        delete pipe_messages_delete_by_message_id;
-    }
-    pipe_messages_delete_by_message_id = new stm_pipe_messages_delete_by_message_id(); 
+        pipe_messages_delete_by_message_id = new stm_pipe_messages_delete_by_message_id(); 
+    } 
     pipe_messages_delete_by_message_id->prepare(mysql);
 
     
-    if(users_auth_replace != NULL)
+    if(users_auth_replace == NULL)
     {
-        delete users_auth_replace;
-    }
-    users_auth_replace = new stm_users_auth_replace(); 
+        users_auth_replace = new stm_users_auth_replace(); 
+    } 
     users_auth_replace->prepare(mysql);
     
-    if(users_auth_delete != NULL)
+    if(users_auth_delete == NULL)
     {
-        delete users_auth_delete;
-    }
-    users_auth_delete = new stm_users_auth_delete(); 
+        users_auth_delete = new stm_users_auth_delete(); 
+    } 
     users_auth_delete->prepare(mysql);
     
-    if(users_auth_select != NULL)
+    if(users_auth_select ==NULL)
     {
-        delete users_auth_select;
-    }
-    users_auth_select = new stm_users_auth_select(); 
+        users_auth_select = new stm_users_auth_select(); 
+    } 
     users_auth_select->prepare(mysql);
  
-    if(pipes_settings_select != NULL)
+    if(pipes_settings_select == NULL)
     {
-        delete pipes_settings_select;
-    }
-    pipes_settings_select = new stm_pipes_settings_select(); 
+        pipes_settings_select = new stm_pipes_settings_select(); 
+    } 
     pipes_settings_select->prepare(mysql);
     
-    if(users_time_select != NULL)
+    if(users_time_select == NULL)
     {
-        delete users_time_select;
-    }
-    users_time_select = new stm_users_time_select(); 
+        users_time_select = new stm_users_time_select(); 
+    } 
     users_time_select->prepare(mysql);
 }
