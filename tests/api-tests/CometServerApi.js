@@ -108,9 +108,9 @@ if(!window.tabSignal)
 			var obj = tabSignal.slotArray[signal_name];
 			for (var slot in obj)
 			{
-				if( obj.hasOwnProperty(slot) &&  obj[slot] !== undefined)
+				if( obj.hasOwnProperty(slot) && obj[slot] !== undefined)
 				{
-					obj[slot](param,signal_name, SignalNotFromThisTab === true)
+					obj[slot](param, signal_name, SignalNotFromThisTab === true)
 				}
 			}
 
@@ -708,7 +708,7 @@ _cometServerApi.prototype.subscription_callBack = function(name, callBack, speci
 _cometServerApi.prototype.subscription_slot_array = [];
 
 /**
- * Отписывает отпишет от всех подписок сразу.
+ * Отписывает от всех подписок сразу.
  * @public
  */
 _cometServerApi.prototype.unsubscriptionAll = function()
