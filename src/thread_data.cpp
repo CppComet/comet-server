@@ -25,7 +25,7 @@ thread_data::thread_data( appConf* app):buf(app->get_int("main", "buf_size")), m
     tmp_bufdataSize[0] = app->buf_size*2;*/
 
     db.setStmMapper(&stm);
-    db.reconnect_on_error = false;
+    //db.reconnect_on_error = false;
     db.init(app->get_chars("db", "host"), app->get_chars("db", "user"), app->get_chars("db", "password"), app->get_chars("db", "name"), app->get_int("db", "port"));
     db.connect();
 
