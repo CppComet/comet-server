@@ -366,7 +366,7 @@ class ini_parser
             filename = FileName;
             
             std::fstream file;
-            file.open(filename);
+            file.open(filename, std::fstream::in);
             if (!file.is_open())
             {
                 std::printf("error: could not open \"%s\". terminated parsing.\n", filename.c_str());
