@@ -2409,8 +2409,9 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
         return 0;
     }
 
+    int nameLength = local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]].tokLen;
     char* name = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]]);
-    name[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]].tokLen] = 0;
+    name[nameLength] = 0;
 
     char default_mode[] = "audio";
     char* mode = default_mode;
@@ -2454,8 +2455,60 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
     sipNumber.append(name);
     TagLoger::log(Log_MySqlServer, 0, " >sipNumber=%s", sipNumber.data());
 
-    int serverPort = appConf::instance()->get_int("sip", "port");
-    std::string serverName(appConf::instance()->get_string("sip", "host"));
+    int serverPort = 7443;
+    
+    auto sipclusterHost = appConf::instance()->get_list("ws", "cluster"); 
+    auto sipclusterPort = appConf::instance()->get_list("ws", "cluster"); 
+    long serverNumber = 0;
+    for(int i = 0; i< nameLength; i++)
+    {
+        serverNumber += name[i]*(10*i);
+    }
+    int serverIndex = serverNumber % sipclusterHost.size();
+    
+    std::string serverName;
+    
+    if(!sipclusterHost.empty())
+    {  
+        auto itHost = sipclusterHost.begin(); 
+        for(int i =0; i< serverIndex; i++)
+        {
+            itHost++;
+        }
+        
+        if(itHost == sipclusterHost.end())
+        {
+            // @note не понятно возможен ли такой слуйчай, но если да то надо будет его обрабатывать лучше чем назначать первый сервер в списке.
+            itHost = sipclusterHost.begin();
+        }
+        
+        serverName = itHost->data();
+    }
+    
+    if(!sipclusterPort.empty())
+    {  
+        auto itPort = sipclusterPort.begin(); 
+        for(int i =0; i< serverIndex; i++)
+        {
+            itPort++;
+        }
+        
+        if(itPort == sipclusterPort.end())
+        {
+            // @note не понятно возможен ли такой слуйчай, но если да то надо будет его обрабатывать лучше чем назначать первый сервер в списке.
+            itPort = sipclusterPort.begin();
+        }
+        
+        try{
+            serverPort = std::stoi(itPort->data());
+        }catch(...)
+        {
+            printf("\x1b[1;31mget_int exeption for serverPort=%s (port set as 7443)\x1b[0m\n", itPort->data());
+            serverPort = 7443; 
+        } 
+    }
+     
+     
 
     char callKey[37];
     bzero(callKey, 37);
@@ -2463,7 +2516,7 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
 
 
     char srcHash[255]; 
-    sprintf(srcHash, "%s_%s_%d_%s", sipNumber.data(), serverName.data(), serverPort,  appConf::instance()->get_chars("sip", "pipesalt"));
+    sprintf(srcHash, "%64s_%64s_%d_%64s", sipNumber.data(), serverName.data(), serverPort,  appConf::instance()->get_chars("sip", "pipesalt"));
 
     unsigned char sha1_data[20];
     bzero(sha1_data, 20);

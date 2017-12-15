@@ -5,6 +5,14 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v3.32
+ 
+FEATURES:
+ * now we can work with may FreeSwitch servers
+
+IMPROVEMENTS:
+ * add logs output to tcpServer
+
 ## v3.31
 
 BUG FIXES:
