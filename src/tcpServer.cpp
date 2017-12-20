@@ -551,8 +551,8 @@ void tcpServer<connectionType>::loop(const tcpServer_loop_data<connectionType>* 
                 int client_id=accept( listener, (struct sockaddr *) &their_addr, &socklen);
                 if(client_id < 0 )
                 {
-                    perror("Could not connect in accept in server loop");
-                    TagLoger::error(Log_tcpServer, 0, "\x1b[31mS%d:Could not connect %d (errno=%d)\x1b[0m",this->id, client_id, errno()); 
+                    perror("Could not connect in accept in server loop"); 
+                    TagLoger::error(Log_tcpServer, 0, "\x1b[31mS%d:Could not connect %d (errno=%d)\x1b[0m",this->id, client_id, errno); 
                     continue;
                 }
 
@@ -602,7 +602,7 @@ void tcpServer<connectionType>::loop(const tcpServer_loop_data<connectionType>* 
                     if(epoll_ctl(c_epfd, EPOLL_CTL_ADD, client_id, &clientObj->event) != 0)
                     {
                         perror("Add new client to epoll - faile");
-                        TagLoger::log(Log_tcpServer, 0, "\x1b[31madd new client to epoll - faile (errno=%d)\x1b[0m\n", errno());
+                        TagLoger::log(Log_tcpServer, 0, "\x1b[31madd new client to epoll - faile (errno=%d)\x1b[0m\n", errno);
                         close(client_id);
                         continue;
                     }

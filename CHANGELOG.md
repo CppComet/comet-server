@@ -12,6 +12,7 @@ FEATURES:
 
 IMPROVEMENTS:
  * add logs output to tcpServer
+ * remove limits to maximum lines in answer (remove MAX_LINES_IN_ANSWER constant from code)
 
 ## v3.31
 

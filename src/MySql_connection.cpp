@@ -2363,12 +2363,14 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
 {
     TagLoger::log(Log_MySqlServer, 0, " >MySql_connection::conference\n");
 
+    // @todo заменить на более читаемый код на базе перечислений или чего то подобного
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "name",         // имя конференции (только цифры)
         "user_id",      // пользователь
         "caller_id",    // инициатор звонка
         "message",      // сообщение
-        "mode"          // Режим  video_*, audio_*
+        "mode",         // Режим  video_*, audio_*
+        "stream"        // Не пусто и не 0 если активирован режим стриминга
     };
     // Поле tabUUID передается или отслеживается через текст сообщения `message`
 
@@ -2409,11 +2411,13 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
         return 0;
     }
 
+    int stream = local_buf->qInfo.tokToInt(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[5]]);;
+     
     int nameLength = local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]].tokLen;
     char* name = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]]);
     name[nameLength] = 0;
 
-    char default_mode[] = "audio";
+    char default_mode[] = "default";
     char* mode = default_mode;
     if(local_buf->sql.columPositions[4] >= 0)
     {
@@ -2421,38 +2425,20 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
         mode[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[4]].tokLen] = 0;
     }
 
-    // В начале шесть нулей для совместимости
-    std::string sipNumber("000000");
-
-    // Определение типа видеорежима
-    bool isAudio = strcmp(mode, "audio") == 0;
-    bool isVideo = strcmp(mode, "video") == 0;
- 
-    // isVideo = strcmp(mode, "videoMux") == 0;
-    // isVideo = strcmp(mode, "videoMux2") == 0;
-
-
-    if(isAudio)
-    {
-        sipNumber.append("0001");
-    }
-    else if(isVideo)
-    {
-        sipNumber.append("0003");
-    }
-    else
-    {
-        Send_Err_Package(SQL_ERR_INVALID_DATA, "field `mode` has invalid value", PacketNomber+1, local_buf, this);
-        return 0;
-    }
-    
     if(!appConf::instance()->is_property_exists("sip", "host"))
     {
         Send_Err_Package(SQL_ERR_INTERNAL_SERVER, "field in ini file not set option `host` in section `sip`", PacketNomber+1, local_buf, this);
         return 0;
     }
-    
+     
+    std::string sipNumber;
+     
+    sipNumber.append("0");
+    sipNumber.append("*"); 
     sipNumber.append(name);
+    sipNumber.append("*");
+    sipNumber.append(mode);
+        
     TagLoger::log(Log_MySqlServer, 0, " >sipNumber=%s", sipNumber.data());
 
     int serverPort = 7443;
@@ -2569,7 +2555,7 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
     bzero(msgData, appConf::instance()->get_int("main", "buf_size"));
 
     snprintf(msgData, appConf::instance()->get_int("main", "buf_size"),
-            "{\"message\":\"%s\",\"sys\":{\"conference\":true,\"serverName\":\"%s\",\"serverPort\":\"%d\",\"callKey\":\"%s\",\"callPipe\":\"%s\",\"sipNumber\":\"%s\",\"caller_id\":\"%d\",\"mode\":\"%s\",\"conference_name\":\"%s\"}}",
+            "{\"message\":\"%s\",\"sys\":{\"conference\":true,\"serverName\":\"%s\",\"serverPort\":\"%d\",\"callKey\":\"%s\",\"callPipe\":\"%s\",\"sipNumber\":\"%s\",\"caller_id\":\"%d\",\"mode\":\"%s\",\"conference_name\":\"%s\",\"stream\":%d}}",
             local_buf->answer_buf.getData(),
             serverName.data(),
             serverPort,
@@ -2578,13 +2564,15 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
             sipNumber.data(),
             caller_id,
             mode,
-            name);
+            name,
+            stream);
 
     local_buf->answer_buf.unlock();
 
     local_buf->answer_buf.lock();
     mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), msgData, strlen(msgData));
 
+    TagLoger::error(Log_MySqlServer, 0, " >conference answer=%s", local_buf->answer_buf.getData()); 
     internalApi::send_to_user(local_buf, user_id, "sys_sipCall", local_buf->answer_buf.getData());
 
     local_buf->answer_buf.unlock();
