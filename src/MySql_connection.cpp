@@ -2363,12 +2363,14 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
 {
     TagLoger::log(Log_MySqlServer, 0, " >MySql_connection::conference\n");
 
+    // @todo заменить на более читаемый код на базе перечислений или чего то подобного
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "name",         // имя конференции (только цифры)
         "user_id",      // пользователь
         "caller_id",    // инициатор звонка
         "message",      // сообщение
-        "mode"          // Режим  video_*, audio_*
+        "mode",         // Режим  video_*, audio_*
+        "stream"        // Не пусто и не 0 если активирован режим стриминга
     };
     // Поле tabUUID передается или отслеживается через текст сообщения `message`
 
@@ -2409,10 +2411,13 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
         return 0;
     }
 
+    int stream = local_buf->qInfo.tokToInt(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[5]]);;
+     
+    int nameLength = local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]].tokLen;
     char* name = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]]);
-    name[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]].tokLen] = 0;
+    name[nameLength] = 0;
 
-    char default_mode[] = "audio";
+    char default_mode[] = "default";
     char* mode = default_mode;
     if(local_buf->sql.columPositions[4] >= 0)
     {
@@ -2420,42 +2425,76 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
         mode[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[4]].tokLen] = 0;
     }
 
-    // В начале шесть нулей для совместимости
-    std::string sipNumber("000000");
-
-    // Определение типа видеорежима
-    bool isAudio = strcmp(mode, "audio") == 0;
-    bool isVideo = strcmp(mode, "video") == 0;
- 
-    // isVideo = strcmp(mode, "videoMux") == 0;
-    // isVideo = strcmp(mode, "videoMux2") == 0;
-
-
-    if(isAudio)
-    {
-        sipNumber.append("0001");
-    }
-    else if(isVideo)
-    {
-        sipNumber.append("0003");
-    }
-    else
-    {
-        Send_Err_Package(SQL_ERR_INVALID_DATA, "field `mode` has invalid value", PacketNomber+1, local_buf, this);
-        return 0;
-    }
-    
     if(!appConf::instance()->is_property_exists("sip", "host"))
     {
         Send_Err_Package(SQL_ERR_INTERNAL_SERVER, "field in ini file not set option `host` in section `sip`", PacketNomber+1, local_buf, this);
         return 0;
     }
-    
+     
+    std::string sipNumber;
+     
+    sipNumber.append("0");
+    sipNumber.append("*"); 
     sipNumber.append(name);
+    sipNumber.append("*");
+    sipNumber.append(mode);
+        
     TagLoger::log(Log_MySqlServer, 0, " >sipNumber=%s", sipNumber.data());
 
-    int serverPort = appConf::instance()->get_int("sip", "port");
-    std::string serverName(appConf::instance()->get_string("sip", "host"));
+    int serverPort = 7443;
+    
+    auto sipclusterHost = appConf::instance()->get_list("ws", "cluster"); 
+    auto sipclusterPort = appConf::instance()->get_list("ws", "cluster"); 
+    long serverNumber = 0;
+    for(int i = 0; i< nameLength; i++)
+    {
+        serverNumber += name[i]*(10*i);
+    }
+    int serverIndex = serverNumber % sipclusterHost.size();
+    
+    std::string serverName;
+    
+    if(!sipclusterHost.empty())
+    {  
+        auto itHost = sipclusterHost.begin(); 
+        for(int i =0; i< serverIndex; i++)
+        {
+            itHost++;
+        }
+        
+        if(itHost == sipclusterHost.end())
+        {
+            // @note не понятно возможен ли такой слуйчай, но если да то надо будет его обрабатывать лучше чем назначать первый сервер в списке.
+            itHost = sipclusterHost.begin();
+        }
+        
+        serverName = itHost->data();
+    }
+    
+    if(!sipclusterPort.empty())
+    {  
+        auto itPort = sipclusterPort.begin(); 
+        for(int i =0; i< serverIndex; i++)
+        {
+            itPort++;
+        }
+        
+        if(itPort == sipclusterPort.end())
+        {
+            // @note не понятно возможен ли такой слуйчай, но если да то надо будет его обрабатывать лучше чем назначать первый сервер в списке.
+            itPort = sipclusterPort.begin();
+        }
+        
+        try{
+            serverPort = std::stoi(itPort->data());
+        }catch(...)
+        {
+            printf("\x1b[1;31mget_int exeption for serverPort=%s (port set as 7443)\x1b[0m\n", itPort->data());
+            serverPort = 7443; 
+        } 
+    }
+     
+     
 
     char callKey[37];
     bzero(callKey, 37);
@@ -2463,7 +2502,7 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
 
 
     char srcHash[255]; 
-    sprintf(srcHash, "%s_%s_%d_%s", sipNumber.data(), serverName.data(), serverPort,  appConf::instance()->get_chars("sip", "pipesalt"));
+    sprintf(srcHash, "%64s_%64s_%d_%64s", sipNumber.data(), serverName.data(), serverPort,  appConf::instance()->get_chars("sip", "pipesalt"));
 
     unsigned char sha1_data[20];
     bzero(sha1_data, 20);
@@ -2516,7 +2555,7 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
     bzero(msgData, appConf::instance()->get_int("main", "buf_size"));
 
     snprintf(msgData, appConf::instance()->get_int("main", "buf_size"),
-            "{\"message\":\"%s\",\"sys\":{\"conference\":true,\"serverName\":\"%s\",\"serverPort\":\"%d\",\"callKey\":\"%s\",\"callPipe\":\"%s\",\"sipNumber\":\"%s\",\"caller_id\":\"%d\",\"mode\":\"%s\",\"conference_name\":\"%s\"}}",
+            "{\"message\":\"%s\",\"sys\":{\"conference\":true,\"serverName\":\"%s\",\"serverPort\":\"%d\",\"callKey\":\"%s\",\"callPipe\":\"%s\",\"sipNumber\":\"%s\",\"caller_id\":\"%d\",\"mode\":\"%s\",\"conference_name\":\"%s\",\"stream\":%d}}",
             local_buf->answer_buf.getData(),
             serverName.data(),
             serverPort,
@@ -2525,13 +2564,15 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
             sipNumber.data(),
             caller_id,
             mode,
-            name);
+            name,
+            stream);
 
     local_buf->answer_buf.unlock();
 
     local_buf->answer_buf.lock();
     mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), msgData, strlen(msgData));
 
+    TagLoger::error(Log_MySqlServer, 0, " >conference answer=%s", local_buf->answer_buf.getData()); 
     internalApi::send_to_user(local_buf, user_id, "sys_sipCall", local_buf->answer_buf.getData());
 
     local_buf->answer_buf.unlock();

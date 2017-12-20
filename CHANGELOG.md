@@ -5,6 +5,15 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v3.32
+ 
+FEATURES:
+ * now we can work with may FreeSwitch servers
+
+IMPROVEMENTS:
+ * add logs output to tcpServer
+ * remove limits to maximum lines in answer (remove MAX_LINES_IN_ANSWER constant from code)
+
 ## v3.31
 
 BUG FIXES:
