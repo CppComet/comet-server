@@ -5,6 +5,14 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v3.33
+ 
+FEATURES:
+ * video api 1.0
+
+BUG FIXES:
+ * fixed bug with large mysql packets
+
 ## v3.32
  
 FEATURES:

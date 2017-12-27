@@ -21,6 +21,8 @@ class tcpServer_benchmark;
 
 #include "CometQL.h"
   
+#include "freeswitch-esl/include/esl.h"
+
 #include "tcpServer_benchmark.h"
 
 #ifndef ARRAY_BUFFER_SIZE
@@ -197,6 +199,45 @@ public:
     }
 };
 
+class fs_esl{
+    esl_handle_t handle = {{0}};
+    
+    std::string name;
+    std::string host;
+    std::string id;
+    int port = 0;
+    std::string password; 
+    bool inited = false;
+    bool conected = false;
+    int timeout = 1000;
+    
+public:
+    
+    fs_esl(std::string Name){
+        name = Name;
+    }
+    
+    std::string getName(){
+        return name;
+    }
+    
+    std::string getId(){
+        return id;
+    }
+    
+    bool init(std::string connection);
+    bool init(std::string host, short port, std::string password);
+    esl_handle_t getHandle(); 
+    void connect();
+    void disconnect();
+    void exec(const char* command);
+    
+    virtual ~fs_esl() {
+        disconnect();
+    }
+
+};
+
 /**
  * Класс хранящий соединение с редисом и память для записи туда данных на короткий период.
  * Не является потокобезопасным и поэтому подразумевается что в каждом потке иметтся своя копия класса.
@@ -214,6 +255,8 @@ public:
 
     std::vector<dbLink*> wsCluster; 
     std::vector<dbLink*> proxyCluster;
+    
+    std::vector<fs_esl*> fs_eslCluster; 
     
     stmMapper stm;
 

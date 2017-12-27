@@ -25,7 +25,7 @@
 #include <stdexcept>
 #include <string>
 
-void uid37(char* src);
+void uuid37(char* src);
 
 int str_find(const char* s,char c,int n,int start);
 int str_find(const char* s,char c,int n,int start, int end);

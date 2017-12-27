@@ -3,6 +3,107 @@
 
 #include "thread_data.h"
 
+bool fs_esl::init(std::string connectionString){
+   
+    int pos = 0;
+    int nextPos = 0;
+
+    std::string Server = "localhost"; 
+    std::string Pwd;
+    int Port = 8021;
+
+    int i = 0;
+    while(pos <= connectionString.length() && i < 10)
+    {
+        i++;
+        nextPos = connectionString.find('=', pos);
+        if(nextPos == std::string::npos)
+        {
+            break;
+        }
+
+        auto paramName = connectionString.substr(pos, nextPos - pos); 
+        //TagLoger::debug(Log_dbLink, 0, "\x1b[1;32mparamName=%s, pos=%d, nextPos=%d\x1b[0m", paramName.data(), pos, nextPos);
+        pos = nextPos + 1;
+
+        nextPos = connectionString.find(',', pos);
+        if(nextPos == std::string::npos)
+        {
+            nextPos = connectionString.length();
+        }
+
+        auto paramValue = connectionString.substr(pos, nextPos - pos); 
+        //TagLoger::debug(Log_dbLink, 0, "\x1b[1;32mparamValue=%s, pos=%d, nextPos=%d\x1b[0m", paramValue.data(), pos, nextPos);
+        pos = nextPos + 1;
+
+        if(paramName.compare("Server") == 0)
+        {
+            Server = paramValue;
+        }  
+        else if(paramName.compare("Pwd") == 0)
+        {
+            Pwd = paramValue; 
+        } 
+        else if(paramName.compare("Port") == 0)
+        {
+            try{
+                //printf("get_long [%s] %s=%s\n", section.data(), name.data(), sections.at(section).at(name).data());
+                Port = std::stoi(paramValue);
+            }catch(...)
+            {
+                printf("\x1b[1;31mexeption in parsing Port value Port=%s\x1b[0m\n", paramValue.data());
+                return false;
+            } 
+        }
+    }
+
+    return init(Server.data(), Port, Pwd.data());
+}
+
+bool fs_esl::init(std::string Host, short Port, std::string Password){
+    host = Host;
+    port = Port;
+    password = Password;
+    inited = true;
+    timeout = 1;
+    
+    id = Host;
+    id.append(":");
+    id.append(std::to_string(Port));
+    
+    return true;
+}
+
+esl_handle_t fs_esl::getHandle()
+{
+    return handle;
+}
+
+void fs_esl::connect()
+{
+    conected = true;
+    esl_connect(&handle, host.data(), port, NULL, password.data());
+}
+
+void fs_esl::disconnect()
+{
+    if(conected)
+    {
+        esl_disconnect(&handle);
+    }
+}
+
+void fs_esl::exec(const char* command)
+{
+    if(!conected)
+    {
+        connect();
+    }
+    
+    esl_send_recv(&handle, command);
+}
+
+
 
 void thread_data::setThreadStatus(char c)
 {
@@ -29,6 +130,34 @@ thread_data::thread_data( appConf* app):buf(app->get_int("main", "buf_size")), m
     db.init(app->get_chars("db", "host"), app->get_chars("db", "user"), app->get_chars("db", "password"), app->get_chars("db", "name"), app->get_int("db", "port"));
     db.connect();
 
+    auto fsCluster = app->get_list("sip", "freeswitch");
+    if(!fsCluster.empty())
+    {
+        int id = 0;
+        TagLoger::log(Log_Any, LogColorGreen, "Starting SIP-FS cluster on %d nodes", fsCluster.size());
+        auto it = fsCluster.begin();
+        while(it != fsCluster.end())
+        {
+            id++;
+            std::string name;
+            name.append("FS-cluster-").append(std::to_string(id));
+
+            fs_esl *link = new fs_esl(name);
+            fs_eslCluster.push_back(link);
+            if(!link->init(it->data()))
+            {
+                TagLoger::error(Log_Any, LogColorRed, "Error, Proxy-CometQL connection %s does not establish", it->data());
+            }
+
+            it++;
+        }
+        TagLoger::log(Log_Any, LogColorGreen, "Starting Proxy-CometQL cluster on %d nodes complte", fs_eslCluster.size());
+    }
+    else
+    {
+        TagLoger::log(Log_Any, LogColorBase, "section [sip] value [freeswitch] is empty");
+    }
+    
     // cometqlproxy кластер для рассылки сообщений приходившех с cometqlproxy
     auto proxycluster = app->get_list("cometqlproxy", "cluster");
     if(!proxycluster.empty())

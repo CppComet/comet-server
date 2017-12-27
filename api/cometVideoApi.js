@@ -204,6 +204,11 @@ cometVideoApi._init = function()
     cometVideoApi.startCallWaiting() 
 }
 
+cometVideoApi.isInCall = function()
+{
+    return cometVideoApi.opt.activeCallEvent !== undefined
+}
+
 cometVideoApi.startCallWaiting = function()
 {
     // Пришли данные для подключения к sip серверу
@@ -1502,4 +1507,3 @@ cometVideoApi.isFullScreenSupport = function()
 
     return false;
 }
- 

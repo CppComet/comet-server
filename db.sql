@@ -110,3 +110,20 @@ CREATE TABLE IF NOT EXISTS `options` (
   `value` varbinary(250) NOT NULL,
   PRIMARY KEY (`section`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Table structure `conference`
+--
+
+CREATE TABLE IF NOT EXISTS `conference` (
+  `name` varchar(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `caller_id` int(11) NOT NULL,
+  `message` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `mode` varchar(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '',
+  `stream` varchar(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '',
+  `node` varchar(64) NOT NULL DEFAULT '0',
+  `time` int(13) NOT NULL DEFAULT '0',
+  `active` int(1) NOT NULL DEFAULT '0' COMMENT '',
+  PRIMARY KEY (`name`,`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='';

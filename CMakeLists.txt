@@ -75,8 +75,8 @@ MARK_AS_ADVANCED(
   MYSQL_LIBRARY
   MYSQL_INCLUDE_DIR
   )
-###########################################
-include_directories(${MYSQL_INCLUDE_DIR})
+########################################### 
+include_directories(${MYSQL_INCLUDE_DIR} src/freeswitch-esl/include)
 
 
 # Расположение заголовочных файлов
@@ -94,6 +94,19 @@ execute_process( COMMAND mv CometQL.tab.h src/CometQL.tab.h)
 execute_process( COMMAND mv lex.yy.c src/lex.yy.c)
 execute_process( COMMAND mv y.tab.c src/y.tab.c)
 execute_process( COMMAND mv y.tab.h src/y.tab.h)
+
+set(ESL_EXE 
+    src/freeswitch-esl/cJSON.c
+    src/freeswitch-esl/cJSON_Utils.c
+    src/freeswitch-esl/esl.c
+    src/freeswitch-esl/esl_buffer.c
+    src/freeswitch-esl/esl_config.c
+    src/freeswitch-esl/esl_event.c
+    src/freeswitch-esl/esl_json.c
+    src/freeswitch-esl/esl_threadmutex.c) 
+
+set(TINYXML2_EXE 
+    src/tinyxml2/tinyxml2.cpp) 
 
 
 # Установка переменной со списком исходников для исполняемого файла
@@ -127,8 +140,8 @@ set(SOURCE_EXE
         src/lex.yy.o 
         src/CometQL.cc) 
 
-# Создает исполняемый файл с именем cpp_comet из исходников
-add_executable(cpp_comet ${SOURCE_EXE} )
+# Создает исполняемый файл с именем cpp_comet_coverage из исходников
+add_executable(cpp_comet ${ESL_EXE} ${SOURCE_EXE} ${TINYXML2_EXE})
 
 # Подключение библиотеки pthreads
 target_link_libraries (cpp_comet ${CMAKE_THREAD_LIBS_INIT}  ${MYSQL_LIBRARIES} crypt uuid )

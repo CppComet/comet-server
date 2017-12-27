@@ -119,6 +119,11 @@ bool appConf::initFromFile(const char *fileName)
     {
         sections["main"]["buf_size"] = "10384";  
     }
+         
+    if(!is_property_exists("db", "buf_size"))
+    {
+        sections["db"]["buf_size"] = "10384";  
+    }
         
     if(!is_property_exists("main", "answer_buf_size"))
     {

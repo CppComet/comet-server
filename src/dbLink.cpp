@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #include "dbLink.h"
+#include "CometQL.h"
 
 void stmBase::setParamsCount(int size)
 {
@@ -39,13 +40,13 @@ bool stmBase::init(dbLink *mysql, const char* q)
     stmt = mysql_stmt_init(db->getLink());
     if (stmt == NULL)
     {
-        TagLoger::error(Log_dbLink, 0, "Could not initialize statement handler [query=%s]\n", q);
+        TagLoger::error(Log_dbLink, 0, "\x1b[1;31mCould not initialize statement handler [query=%s]\x1b[0m\n", q);
         return false;
     }
 
     if(mysql_stmt_prepare(stmt, q, strlen(q)))
     {
-        TagLoger::error(Log_dbLink, 0, "mysql_stmt_prepare(), INSERT failed - %s [query=%s]\n", mysql_stmt_error(stmt), q);
+        TagLoger::error(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_prepare(), INSERT failed - %s [query=%s]\x1b[0m\n", mysql_stmt_error(stmt), q);
         return false;
     }
 
@@ -53,13 +54,14 @@ bool stmBase::init(dbLink *mysql, const char* q)
     int count = mysql_stmt_param_count(stmt);
     if(count != param_count)
     {
-        TagLoger::error(Log_dbLink, 0, "mysql_stmt_prepare Не инициализированы параметнры: %d > %d [query=%s]\n", count, param_count, q);
+        TagLoger::error(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_prepare Parameters not initialized: %d > %d [query=%s]\x1b[0m\n", count, param_count, q);
+        return false;
     }
 
     // Bind param structure to statement
     if (param != NULL && mysql_stmt_bind_param(stmt, param))
     {
-        TagLoger::error(Log_dbLink, 0, "mysql_stmt_bind_param(), failed - %s [query=%s]\n", mysql_stmt_error(stmt), q);
+        TagLoger::error(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_bind_param(), failed - %s [query=%s]\x1b[0m\n", mysql_stmt_error(stmt), q);
         return false;
     }
 
@@ -69,7 +71,7 @@ bool stmBase::init(dbLink *mysql, const char* q)
         prepare_meta_result = mysql_stmt_result_metadata(stmt);
         if (!prepare_meta_result)
         {
-            TagLoger::error(Log_dbLink, 0, "mysql_stmt_result_metadata(), returned no meta information - %s [query=%s]\n", mysql_stmt_error(stmt), q);
+            TagLoger::error(Log_dbLink, 0, "mysql_stmt_result_metadata(), returned no meta information - %s [query=%s]\x1b[0m\n", mysql_stmt_error(stmt), q);
             return false;
         }
 
@@ -77,14 +79,14 @@ bool stmBase::init(dbLink *mysql, const char* q)
         count = mysql_num_fields(prepare_meta_result);
         if (column_count != count) /* validate column count */
         {
-            TagLoger::error(Log_dbLink, 0, "total columns in select statement [query=%s]: %d != %d\n", q, column_count, count);
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mtotal columns in select statement [query=%s]: %d != %d\x1b[0m\n", q, column_count, count);
             return false;
         }
 
         // Bind result
         if (mysql_stmt_bind_result(stmt, result))
         {
-            TagLoger::error(Log_dbLink, 0, "Could not bind results - %s [query=%s]\n", mysql_stmt_error(stmt), q);
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mCould not bind results - %s [query=%s]\x1b[0m\n", mysql_stmt_error(stmt), q);
             return false;
         }
     }
@@ -417,9 +419,17 @@ bool dbLink::query(const char *q)
                 return true;
             }
 
-            if(mysql_errno(mysqlLink))
+            int err = mysql_errno(mysqlLink);
+            if(err)
             {
-                TagLoger::trace(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(mysqlLink), mysql_errno(mysqlLink), q);
+                if(err == SQL_ERR_READ_ONLY || err == SQL_ERR_OVERFLOW)
+                {
+                    TagLoger::warn(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(mysqlLink), mysql_errno(mysqlLink), q);
+                }
+                else
+                {
+                    TagLoger::trace(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(mysqlLink), mysql_errno(mysqlLink), q);
+                }
             }
         } 
     }
@@ -473,9 +483,17 @@ bool dbLink::query_format(const char *format, ...)
                 return true;
             }
 
-            if(mysql_errno(mysqlLink))
+            int err = mysql_errno(mysqlLink);
+            if(err)
             {
-                TagLoger::trace(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(mysqlLink), mysql_errno(mysqlLink), buf);
+                if(err == SQL_ERR_READ_ONLY || err == SQL_ERR_OVERFLOW)
+                { 
+                    TagLoger::warn(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(mysqlLink), mysql_errno(mysqlLink), buf);
+                }
+                else
+                {
+                    TagLoger::trace(Log_dbLink, 0, "\x1b[1;31mMySQL error=%s [errno=%d] [query=%s]\x1b[0m", mysql_error(mysqlLink), mysql_errno(mysqlLink), buf);
+                }
             }
         } 
     }
@@ -487,7 +505,7 @@ bool dbLink::query_format(const char *format, ...)
 bool dbLink::reconnect()
 {
     close();
-    TagLoger::trace(Log_dbLink, 0, "\x1b[1;31mMySQL reconnect\x1b[0m");
+    TagLoger::warn(Log_dbLink, 0, "\x1b[1;31mMySQL reconnect\x1b[0m");
     return connect();
 }
 
@@ -584,4 +602,10 @@ void stmMapper::init(dbLink *mysql)
         users_time_select = new stm_users_time_select(); 
     } 
     users_time_select->prepare(mysql);
+    
+    if(conference_select == NULL)
+    {
+        conference_select = new stm_conference_select(); 
+    } 
+    conference_select->prepare(mysql);
 }

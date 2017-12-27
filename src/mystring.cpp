@@ -220,7 +220,7 @@ long read_long(const char* buffer, int* delta)
 }
  
 
-void uid37(char* src)
+void uuid37(char* src)
 {
     uuid_t uuid;
     uuid_generate_time ( uuid );
