@@ -53,13 +53,16 @@ CometQLProxy_connection::~CometQLProxy_connection()
 
 int CometQLProxy_connection::proxy_query(int node, thread_data* local_buf, unsigned int PacketNomber)
 {
+    std::string query("cometqlcluster_v1; ");
+    query.append(local_buf->qInfo.StartQury);
+    
     if(local_buf->qInfo.command == TOK_SELECT || local_buf->qInfo.command == TOK_SHOW)
     {
-        return proxy_union_select(node, local_buf->qInfo.StartQury, local_buf, PacketNomber);
+        return proxy_union_select(node, query.data(), local_buf, PacketNomber);
     }
     else if(local_buf->qInfo.command == TOK_INSERT || local_buf->qInfo.command == TOK_DELETE)
     {
-        return proxy_insert(node, local_buf->qInfo.StartQury, local_buf, PacketNomber);
+        return proxy_insert(node, query.data(), local_buf, PacketNomber);
     }
 }
 
@@ -89,7 +92,7 @@ int CometQLProxy_connection::proxy_union_select(int node, const char* query, thr
             // Не задана node выполнить запрос на случайной.
             node = random() % local_buf->proxyCluster.size();
 
-            TagLoger::log(Log_CometQLCluster, 0, "CometQLProxy query:`%s` send to node=%d from %d (errno=%d, error=%s)\n", query, node, local_buf->proxyCluster.size(), mysql_errno(link->getLink()), mysql_error(link->getLink()));
+            TagLoger::log(Log_CometQLCluster, 0, "CometQLProxy query:`%s` send to node=%d from %d\n", query, node, local_buf->proxyCluster.size());
             // Если задана node то выполнить запрос на конкретной ноде а не на всех нодах.
             link = local_buf->proxyCluster[node];
             if(!link->query(query))

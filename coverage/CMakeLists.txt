@@ -92,11 +92,11 @@ execute_process( COMMAND bison -d --verbose --debug ../src/CometQL.y -o ../src/C
 execute_process( COMMAND yacc -d --verbose --debug ../src/CometQL.y -o ../src/CometQL.cc)
 execute_process( COMMAND cc -c ../src/lex.yy.c -o ../src/lex.yy.o)
  
-execute_process( COMMAND mv ../CometQL.tab.c ../src/CometQL.tab.c) 
-execute_process( COMMAND mv ../CometQL.tab.h ../src/CometQL.tab.h)
-execute_process( COMMAND mv ../lex.yy.c ../src/lex.yy.c)
-execute_process( COMMAND mv ../y.tab.c ../src/y.tab.c)
-execute_process( COMMAND mv ../y.tab.h ../src/y.tab.h)
+execute_process( COMMAND mv ./CometQL.tab.c ../src/CometQL.tab.c) 
+execute_process( COMMAND mv ./CometQL.tab.h ../src/CometQL.tab.h)
+execute_process( COMMAND mv ./lex.yy.c ../src/lex.yy.c)
+execute_process( COMMAND mv ./y.tab.c ../src/y.tab.c)
+execute_process( COMMAND mv ./y.tab.h ../src/y.tab.h)
 
 add_definitions(-DUSE_COVERAGE=1) 
 

@@ -105,13 +105,13 @@ int internalApi::cluster_send_to_user(thread_data* local_buf, int user_id, const
             auto link = *it;
 
             // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
-            link->query_format("INSERT INTO users_messages (uuid, id, event, message)VALUES('%s', '%s', '%s');",
+            link->query_format("cometqlcluster_v1; INSERT INTO users_messages (uuid, id, event, message)VALUES('%s', '%d', '%s', '%s');",
                     uuid,
                     user_id,
                     pipe_event,
                     msg_data);
             
-            if(mysql_insert_id((MYSQL*)link) > 0)
+            if(mysql_insert_id(link->getLink()) > 0)
             {
                 return 1;
             }

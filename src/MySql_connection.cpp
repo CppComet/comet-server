@@ -347,6 +347,14 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
             _countUerys++;
             TagLoger::warn(Log_MySqlServer, 0, "QUERY[%d, len=%d][BASE]:%s\n", _countUerys, queryLen, startQuery);
 
+            int headerLength = strlen("cometqlcluster_v1;");
+            if(memcmp("cometqlcluster_v1;", startQuery, headerLength) == 0)
+            {
+                cometqlcluster = 1;
+                startQuery += headerLength;
+                TagLoger::log(Log_MySqlServer, 0, "QUERY set cometqlcluster = 1\n");
+            }
+
             if(appConf::instance()->get_bool("main", "useQueryLoger"))
             {
                 if(
