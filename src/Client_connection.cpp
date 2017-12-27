@@ -180,7 +180,7 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
                     while(it != local_buf->wsCluster.end())
                     {
                         auto link = *it;
-                        link->query_format("INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'subscription', '{\"user_id\":\"%d\",\"uuid\":\"%s\"');", subscriptions[i], web_user_id, web_user_uuid);
+                        link->query_format("cometqlcluster_v1; INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'subscription', '{\"user_id\":\"%d\",\"uuid\":\"%s\"');", subscriptions[i], web_user_id, web_user_uuid);
                         it++;
                     }
                 }
@@ -596,7 +596,7 @@ int Client_connection::send_pipe_count(thread_data* local_buf, char* pipe_name, 
         {
             auto link = *it;
 
-            if(!link->query_format("SELECT users FROM pipes WHERE name = '%s'", pipe_name))
+            if(!link->query_format("cometqlcluster_v1; SELECT users FROM pipes WHERE name = '%s'", pipe_name))
             {
                 break;
             }
@@ -1407,7 +1407,7 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
             auto link = *it;
 
             // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
-            link->query_format("INSERT INTO pipes_messages (name, event, message)VALUES('%s', '%s', '%s');", name, event_name,  local_buf->answer_buf.getData());
+            link->query_format("cometqlcluster_v1; INSERT INTO pipes_messages (name, event, message)VALUES('%s', '%s', '%s');", name, event_name,  local_buf->answer_buf.getData());
             it++;
         }
 

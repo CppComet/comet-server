@@ -714,6 +714,7 @@ void tcpServer<connectionType>::closeClientConnection(CP<connectionType> clientO
 template< class connectionType >
 void tcpServer<connectionType>::deleteClient(CP<connectionType> clientObj, thread_data* local_buf)
 { 
+    TagLoger::debug(Log_tcpServer, 0, "S%d:call closeClientConnection from deleteClient\n",this->id);
     deleteClientFromMap(clientObj);
     closeClientConnection(clientObj, local_buf);
 }
@@ -734,6 +735,8 @@ void tcpServer<connectionType>::deleteClient(int client_id, thread_data* local_b
     {
         CP<connectionType> clientObj = it->second;
         pthread_mutex_unlock(&request_mutex[client_id%map_index_size]);  
+        
+        TagLoger::debug(Log_tcpServer, 0, "S%d:call deleteClient client_id=%\n",this->id, client_id);
         deleteClient(clientObj, local_buf);
         return;
     }

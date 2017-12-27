@@ -192,6 +192,11 @@ class MySql_connection:public connection
 
 protected:
     
+    /**
+     * Не 0 если сообщение пришло из кластера
+     */
+    int cometqlcluster = 0;
+    
     bool isRootUser = true;  
     int api_version = 0;
 
@@ -206,6 +211,11 @@ protected:
      */
     char random20bytes[20];
 
+    /**
+     * Для хранения фрагментов сообщений которые пришли не полностью.
+     */
+    bufferController fragment_buf;
+    
   public:
       
     /*
@@ -284,10 +294,13 @@ protected:
     int sql_select_from_users_in_pipes(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_from_pipes(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_from_pipes_settings(thread_data* local_buf, unsigned int PacketNomber);
+    int sql_select_from_conference(thread_data* local_buf, unsigned int PacketNomber);
+    int sql_select_from_conference_members(thread_data* local_buf, unsigned int PacketNomber);
 
     int sql_insert_into_conference(thread_data* local_buf, unsigned int PacketNomber);
     int sql_insert_into_dialogs(thread_data* local_buf, unsigned int PacketNomber);
     
+    int sql_insert_into_conference_members(thread_data* local_buf, unsigned int PacketNomber);
     /**
      * Эквивалент таблицы содержащей ключи авторизации пользователей
      * @param local_buf
@@ -316,6 +329,8 @@ protected:
     int sql_delete_from_users_in_pipes(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_pipes(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_pipes_settings(thread_data* local_buf, unsigned int PacketNomber);
+    int sql_delete_from_conference(thread_data* local_buf, unsigned int PacketNomber);
+    int sql_delete_from_conference_members(thread_data* local_buf, unsigned int PacketNomber);
  
 };
 

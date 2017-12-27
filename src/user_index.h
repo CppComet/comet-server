@@ -483,7 +483,7 @@ protected:
                     while(it != local_buf->wsCluster.end())
                     {
                         auto link = *it; 
-                        link->query_format("INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'offline', 'offline');", pipe_name);
+                        link->query_format("cometqlcluster_v1; INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'offline', 'offline');", pipe_name);
                         it++;
                     }
                 }
@@ -519,7 +519,7 @@ protected:
                     while(it != local_buf->wsCluster.end())
                     {
                         auto link = *it; 
-                        link->query_format("INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'online', 'online');", pipe_name);
+                        link->query_format("cometqlcluster_v1; INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'online', 'online');", pipe_name);
                         it++;
                     }
                 }

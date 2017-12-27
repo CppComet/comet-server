@@ -31,6 +31,16 @@ public:
     
     static int send_to_user(thread_data* local_buf, int user_id, const char* pipe_event, const char* msg_data);
     static int send_to_user(thread_data* local_buf, int user_id, const char* pipe_event, const char* msg_data, const char* server_data);
+
+    /**
+     * Отправляет сообщение пользователю через все сервера кластера
+     */
+    static int cluster_send_to_user(thread_data* local_buf, int user_id, const char* pipe_event, const char* msg_data);
+    
+    /**
+     * Отправляет сообщение пользователю только через этот сервер и не сохраняет его в бд если пользователь оффлайн
+     */
+    static int local_send_to_user(thread_data* local_buf, int user_id, const char* pipe_event, const char* msg_data);
 };
 
 #endif	/* INTERNAL_API_H */

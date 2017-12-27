@@ -51,11 +51,88 @@ int internalApi::send_to_user(thread_data* local_buf, int user_id, const char* p
     { 
         char uid[37];
         bzero(uid, 37);
-        uid37(uid);
+        uuid37(uid);
 
         local_buf->stm.users_queue_insert->execute(uid, (long int)time(NULL), user_id, pipe_event, msg_data, strlen(msg_data));
     } 
     return isSend;
+}
+
+int internalApi::local_send_to_user(thread_data* local_buf, int user_id, const char* pipe_event, const char* msg_data)
+{
+    int *conection_id = devManager::instance()->getDevInfo()->index->get_conection_id(local_buf, user_id);
+    int isSend = -1;
+    if(conection_id != NULL)
+    {
+        for(int i=0; i< MAX_CONECTION_ON_USER_ID; i++)
+        {
+            if( conection_id[i] < 1 )
+            {
+                continue;
+            }
+
+            CP<Client_connection> r = tcpServer <Client_connection>::instance()->get(conection_id[i]);
+            if(r)
+            {
+                isSend = r->message(local_buf, msg_data, NULL, MESSAGE_TEXT, NULL);
+                TagLoger::log(Log_MySqlServer, 0, "Connection object is found i=%d, conection_id=%d\n", i, conection_id[i]);
+            }
+            else
+            {
+                TagLoger::log(Log_MySqlServer, 0, "Connection object is not found i=%d, conection_id=%d\n", i, conection_id[i]);
+            }
+        }
+    }
+    else
+    {
+        TagLoger::log(Log_MySqlServer, 0, "Connection ID not found for user_id=%d\n", user_id);
+    }
+ 
+    return isSend;
+}
+
+int internalApi::cluster_send_to_user(thread_data* local_buf, int user_id, const char* pipe_event, const char* msg_data)
+{
+    char uuid[37];
+    bzero(uuid, 37);
+    uuid37(uuid);
+
+    if(local_buf->isWSClusterActive())
+    {
+        auto it = local_buf->wsCluster.begin();
+        while(it != local_buf->wsCluster.end())
+        {
+            auto link = *it;
+
+            // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
+            link->query_format("cometqlcluster_v1; INSERT INTO users_messages (uuid, id, event, message)VALUES('%s', '%d', '%s', '%s');",
+                    uuid,
+                    user_id,
+                    pipe_event,
+                    msg_data);
+            
+            if(mysql_insert_id(link->getLink()) > 0)
+            {
+                return 1;
+            }
+            
+            it++;
+        }
+
+        local_buf->answer_buf.unlock();
+    }
+ 
+    
+    if(local_send_to_user(local_buf, user_id, pipe_event, msg_data) <= 0)
+    {
+        char uid[37];
+        bzero(uid, 37);
+        uuid37(uid);
+
+        local_buf->stm.users_queue_insert->execute(uid, (long int)time(NULL), user_id, pipe_event, msg_data, strlen(msg_data));
+    }
+    
+    return 0;
 }
 
 /**
