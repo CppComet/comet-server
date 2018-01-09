@@ -289,6 +289,7 @@ protected:
     int sql_select_systemvarible(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_from_users_auth(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_from_users_time(thread_data* local_buf, unsigned int PacketNomber);
+    int sql_select_from_users_data(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_from_users_messages(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_from_pipes_messages(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_from_users_in_pipes(thread_data* local_buf, unsigned int PacketNomber);
@@ -308,6 +309,7 @@ protected:
      * @return
      */
     int sql_insert_into_users_auth(thread_data* local_buf, unsigned int PacketNomber);
+    int sql_insert_into_users_data(thread_data* local_buf, unsigned int PacketNomber);
 
     /**
      * Эквивалент таблицы содержащей ключи авторизации время последнего пребывания пользователей online
@@ -323,6 +325,7 @@ protected:
     int sql_insert_into_pipes_settings(thread_data* local_buf, unsigned int PacketNomber);
  
     int sql_delete_from_users_auth(thread_data* local_buf, unsigned int PacketNomber);
+    int sql_delete_from_users_data(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_users_time(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_users_messages(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_pipes_messages(thread_data* local_buf, unsigned int PacketNomber);

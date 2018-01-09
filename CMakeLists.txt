@@ -12,7 +12,7 @@ add_definitions(-DCMAKE_BUILD_TYPE=debug)
 # Поиск библиотеки pthreads
 find_package(Threads REQUIRED)
 if(NOT Threads_FOUND)
-    message(SEND_ERROR "Threads - Not Found")
+    message(SEND_ERROR "Не найден Threads.")
     return()
 else()
     include_directories(${Threads_INCLUDE_DIRS})
@@ -75,9 +75,11 @@ MARK_AS_ADVANCED(
   MYSQL_LIBRARY
   MYSQL_INCLUDE_DIR
   )
-########################################### 
-include_directories(${MYSQL_INCLUDE_DIR} src/freeswitch-esl/include)
+###########################################
+ 
 
+include_directories(${MYSQL_INCLUDE_DIR} dependencies dependencies/freeswitch-esl/include dependencies/jwt-cpp/src/include)
+ 
 
 # Расположение заголовочных файлов
 #include_directories(foo)			
@@ -89,62 +91,67 @@ execute_process( COMMAND bison -d --verbose --debug src/CometQL.y -o src/CometQL
 execute_process( COMMAND yacc -d --verbose --debug src/CometQL.y -o src/CometQL.cc)
 execute_process( COMMAND cc -c src/lex.yy.c -o src/lex.yy.o)
  
+
 execute_process( COMMAND mv CometQL.tab.c src/CometQL.tab.c) 
 execute_process( COMMAND mv CometQL.tab.h src/CometQL.tab.h)
 execute_process( COMMAND mv lex.yy.c src/lex.yy.c)
 execute_process( COMMAND mv y.tab.c src/y.tab.c)
 execute_process( COMMAND mv y.tab.h src/y.tab.h)
 
+MESSAGE(STATUS "Build dependencies")
+execute_process( COMMAND sh dependencies/build.sh)
+ 
 set(ESL_EXE 
-    src/freeswitch-esl/cJSON.c
-    src/freeswitch-esl/cJSON_Utils.c
-    src/freeswitch-esl/esl.c
-    src/freeswitch-esl/esl_buffer.c
-    src/freeswitch-esl/esl_config.c
-    src/freeswitch-esl/esl_event.c
-    src/freeswitch-esl/esl_json.c
-    src/freeswitch-esl/esl_threadmutex.c) 
+    dependencies/freeswitch-esl/cJSON.c
+    dependencies/freeswitch-esl/cJSON_Utils.c
+    dependencies/freeswitch-esl/esl.c
+    dependencies/freeswitch-esl/esl_buffer.c
+    dependencies/freeswitch-esl/esl_config.c
+    dependencies/freeswitch-esl/esl_event.c
+    dependencies/freeswitch-esl/esl_json.c
+    dependencies/freeswitch-esl/esl_threadmutex.c) 
 
 set(TINYXML2_EXE 
-    src/tinyxml2/tinyxml2.cpp) 
+    dependencies/tinyxml2/tinyxml2.cpp) 
 
+set(HASHLIB2PLUS_EXE 
+    dependencies/hashlib2plus/src/hl_md5.cpp
+    dependencies/hashlib2plus/src/hl_md5wrapper.cpp) 
 
 # Установка переменной со списком исходников для исполняемого файла
 set(SOURCE_EXE 
-        src/hashlib2plus/src/hl_md5.cpp
-        src/hashlib2plus/src/hl_md5wrapper.cpp 
-        src/TagLoger.cpp 
-        src/TagTimer.cpp 
-        src/main.cpp 
-        src/dbLink.cpp 
-        src/appConf.cpp 
-        src/intervalLoop.cpp 
-        src/tcpServer_benchmark.cpp 
-        src/base64.cpp 
-        src/sha1.cpp 
-        src/CometQL.cpp 
-        src/devManager.cpp 
-        src/internalApi.cpp 
-        src/Client_connection.cpp 
-        src/Freeswitch_connection.cpp 
-        src/MySqlProtocol.cpp 
-        src/connection.cpp 
-        src/mystring.cpp 
-        src/MySql_connection.cpp
-        src/CometQLProxy_connection.cpp
-        src/tcpServer.cpp
-        src/user_index.cpp
-        src/backtrace.cpp 
-        src/thread_data.cpp 
-        src/thread_data.h 
-        src/lex.yy.o 
-        src/CometQL.cc) 
+    src/TagLoger.cpp
+    src/TagTimer.cpp
+    src/main.cpp
+    src/appConf.cpp
+    src/dbLink.cpp 
+    src/intervalLoop.cpp
+    src/tcpServer_benchmark.cpp
+    src/base64.cpp
+    src/sha1.cpp
+    src/CometQL.cpp
+    src/devManager.cpp
+    src/internalApi.cpp
+    src/Client_connection.cpp
+    src/Freeswitch_connection.cpp
+    src/MySqlProtocol.cpp
+    src/connection.cpp
+    src/mystring.cpp
+    src/MySql_connection.cpp
+    src/CometQLProxy_connection.cpp
+    src/tcpServer.cpp
+    src/user_index.cpp
+    src/backtrace.cpp
+    src/thread_data.cpp
+    src/thread_data.h
+    src/lex.yy.o
+    src/CometQL.cc) 
 
-# Создает исполняемый файл с именем cpp_comet_coverage из исходников
-add_executable(cpp_comet ${ESL_EXE} ${SOURCE_EXE} ${TINYXML2_EXE})
+# Создает исполняемый файл с именем cpp_comet из исходников
+add_executable(cpp_comet ${ESL_EXE} ${HASHLIB2PLUS_EXE} ${SOURCE_EXE} ${TINYXML2_EXE} ./dependencies/jwt-cpp/src/libjwt.a)
 
 # Подключение библиотеки pthreads
-target_link_libraries (cpp_comet ${CMAKE_THREAD_LIBS_INIT}  ${MYSQL_LIBRARIES} crypt uuid )
+target_link_libraries (cpp_comet ${CMAKE_THREAD_LIBS_INIT}  ${MYSQL_LIBRARIES} crypt uuid)
 
 
 #cmake ./ && make

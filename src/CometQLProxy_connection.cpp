@@ -419,6 +419,10 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
                 {
                     return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); //return sql_select_from_users_auth(local_buf,PacketNomber);
                 }
+                else if(local_buf->qInfo.tokCompare("users_data",  local_buf->qInfo.tableName))
+                {
+                    return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber);  
+                }
                 else if(local_buf->qInfo.tokCompare("users_time",  local_buf->qInfo.tableName))
                 {
                     if(appConf::instance()->get_bool("main", "save_users_last_online_time"))
@@ -480,6 +484,11 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
                 // @todo выбор от user_id
                 return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber); // return sql_insert_into_users_auth(local_buf,PacketNomber);
             }
+            else if(local_buf->qInfo.tokCompare("users_data",  local_buf->qInfo.tableName))
+            {
+                // @todo выбор от user_id
+                return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber);  
+            }
             else if(local_buf->qInfo.tokCompare("users_time",  local_buf->qInfo.tableName))
             {
                 // @todo выбор от user_id
@@ -532,6 +541,11 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
             {
                 // @todo выбор от user_id
                 return proxy_query(PROXY_TO_ALL, local_buf,PacketNomber); // return sql_delete_from_users_auth(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.tokCompare("users_data",  local_buf->qInfo.tableName))
+            {
+                // @todo выбор от user_id
+                return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber);  
             }
             else if(local_buf->qInfo.tokCompare("users_time",  local_buf->qInfo.tableName))
             {

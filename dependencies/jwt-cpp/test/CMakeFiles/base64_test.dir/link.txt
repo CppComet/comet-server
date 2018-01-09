@@ -1,0 +1,1 @@
+/usr/bin/c++    -Wall   CMakeFiles/base64_test.dir/base64/base64_test.cpp.o  -o base64_test -rdynamic ../src/libjwt.a ../ext/gtest-1.7.0/libgtest_main.a -lssl -lcrypto ../ext/gtest-1.7.0/libgtest.a -lpthread 

@@ -211,10 +211,20 @@ class fs_esl{
     bool conected = false;
     int timeout = 1000;
     
+    std::string WShost;
+    int WSport = 7443;
 public:
     
     fs_esl(std::string Name){
         name = Name;
+    }
+    
+    std::string getWSHost(){
+        return WShost;
+    }
+    
+    int getWSPort(){
+        return WSport;
     }
     
     std::string getName(){
@@ -226,7 +236,7 @@ public:
     }
     
     bool init(std::string connection);
-    bool init(std::string host, short port, std::string password);
+    
     esl_handle_t getHandle(); 
     void connect();
     void disconnect();

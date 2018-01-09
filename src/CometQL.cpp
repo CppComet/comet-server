@@ -161,11 +161,11 @@ bool mysqlAnswer::prepare_where_expressions(const char** columDef, QueryData &qI
             qInfo.setError("Operator OR is not yet implemented", SQL_ERR_NOT_IMPLEMENTED);
             return false;
         }
-        else if(qInfo.where.whereExprOperator[i] == TOK_AND)
-        {
-            qInfo.setError("Operator AND is not yet implemented", SQL_ERR_NOT_IMPLEMENTED);
-            return false;
-        }
+        //else if(qInfo.where.whereExprOperator[i] == TOK_AND)
+        //{
+        //    qInfo.setError("Operator AND is not yet implemented", SQL_ERR_NOT_IMPLEMENTED);
+        //    return false;
+        //}
     }
 
     return true;

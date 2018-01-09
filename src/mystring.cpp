@@ -218,15 +218,14 @@ long read_long(const char* buffer, int* delta)
     }
     return len;
 }
- 
-
+  
 void uuid37(char* src)
 {
     uuid_t uuid;
     uuid_generate_time ( uuid );
     uuid_unparse ( uuid, src );
 }
-
+  
 /**
  *
  * @param s исходня строка
@@ -236,28 +235,10 @@ void uuid37(char* src)
  * @return позиция в строке
  */
 int str_find(const char* s,const char c,int n,int start)
-{
-    int len = strlen(s);
-    for(int i=start; i<len; i++)
-    {
-        if(s[i] == c)
-        {
-            if(i+2<len)
-            {
-                if(n>1) return str_find( s,c, n-1,i+1);
-                return i+1;
-            }
-            else
-            {
-                return -1;
-            }
-            break;
-        }
-    }
-    return -1;
+{ 
+    return str_find(s, c, n, start, strlen(s));
 }
-
-
+   
 /**
  *
  * @param s исходня строка

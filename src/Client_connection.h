@@ -129,7 +129,12 @@ class Client_connection:public connection
     int http404_answer(int client, int len, thread_data* local_buf);
     int http403_answer(int client, int len, thread_data* local_buf);
     int get_custom_request(int client, int len, thread_data* local_buf);
+    int cultivate_custom_request(int client, const char* message, int len, thread_data* local_buf);
     
+    int web_user_data(thread_data* local_buf, char* event_data,int client, int len);
+     
+    int cgi_call(thread_data* local_buf, char* event_data,int client, int len);
+        
     int web_socket_request_message(int client, int len, thread_data* local_buf);
     int web_socket_request_message(int client, int len, thread_data* local_buf, int start_position);
     
