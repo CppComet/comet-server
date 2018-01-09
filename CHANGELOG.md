@@ -5,6 +5,12 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v3.34
+ 
+FEATURES:
+ * video api 1.01
+ * add table users_data 
+ 
 ## v3.33
  
 FEATURES:
