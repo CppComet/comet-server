@@ -96,6 +96,7 @@ bool stmBase::init(dbLink *mysql, const char* q)
 
 /**
  * Выполняет вставку, обновление, замену, удаление
+ * @rereturn -1 если ошибка и affected_rows если успех
  */
 int stmBase::insert()
 {
@@ -590,6 +591,24 @@ void stmMapper::init(dbLink *mysql)
         users_auth_select = new stm_users_auth_select(); 
     } 
     users_auth_select->prepare(mysql);
+
+    if(users_data_replace == NULL)
+    {
+        users_data_replace = new stm_users_data_replace(); 
+    } 
+    users_data_replace->prepare(mysql);
+    
+    if(users_data_delete == NULL)
+    {
+        users_data_delete = new stm_users_data_delete(); 
+    } 
+    users_data_delete->prepare(mysql);
+    
+    if(users_data_select ==NULL)
+    {
+        users_data_select = new stm_users_data_select(); 
+    } 
+    users_data_select->prepare(mysql);
  
     if(pipes_settings_select == NULL)
     {
@@ -603,9 +622,27 @@ void stmMapper::init(dbLink *mysql)
     } 
     users_time_select->prepare(mysql);
     
+    if(conference_insert == NULL)
+    {
+        conference_insert = new stm_conference_insert(); 
+    } 
+    conference_insert->prepare(mysql);
+    
+    if(conference_delete == NULL)
+    {
+        conference_delete = new stm_conference_delete(); 
+    } 
+    conference_delete->prepare(mysql);
+    
     if(conference_select == NULL)
     {
         conference_select = new stm_conference_select(); 
     } 
     conference_select->prepare(mysql);
+    
+    if(conference_select_nodes_for_room == NULL)
+    {
+        conference_select_nodes_for_room = new stm_conference_select_nodes_for_room(); 
+    } 
+    conference_select_nodes_for_room->prepare(mysql);
 }

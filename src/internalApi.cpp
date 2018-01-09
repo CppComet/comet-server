@@ -60,6 +60,11 @@ int internalApi::send_to_user(thread_data* local_buf, int user_id, const char* p
 
 int internalApi::local_send_to_user(thread_data* local_buf, int user_id, const char* pipe_event, const char* msg_data)
 {
+    //char server_data[EVENT_NAME_LEN+64];
+    //snprintf(server_data, EVENT_NAME_LEN+64, "\"event_name\":\"%s\",\"SendToUser\":true", pipe_event);
+    std::string server_data; 
+    server_data.append("\"event_name\":\"").append(pipe_event).append("\",\"SendToUser\":true");
+
     int *conection_id = devManager::instance()->getDevInfo()->index->get_conection_id(local_buf, user_id);
     int isSend = -1;
     if(conection_id != NULL)
@@ -74,7 +79,10 @@ int internalApi::local_send_to_user(thread_data* local_buf, int user_id, const c
             CP<Client_connection> r = tcpServer <Client_connection>::instance()->get(conection_id[i]);
             if(r)
             {
-                isSend = r->message(local_buf, msg_data, NULL, MESSAGE_TEXT, NULL);
+                if(r->message(local_buf, msg_data, NULL, MESSAGE_TEXT, server_data.data()) != -1)
+                {
+                    isSend = 0;
+                }
                 TagLoger::log(Log_MySqlServer, 0, "Connection object is found i=%d, conection_id=%d\n", i, conection_id[i]);
             }
             else
@@ -91,12 +99,21 @@ int internalApi::local_send_to_user(thread_data* local_buf, int user_id, const c
     return isSend;
 }
 
+/**  
+ * @param local_buf
+ * @param user_id
+ * @param pipe_event
+ * @param msg_data
+ * @return 
+ */
 int internalApi::cluster_send_to_user(thread_data* local_buf, int user_id, const char* pipe_event, const char* msg_data)
 {
     char uuid[37];
     bzero(uuid, 37);
     uuid37(uuid);
 
+    int needSave = local_send_to_user(local_buf, user_id, pipe_event, msg_data);
+     
     if(local_buf->isWSClusterActive())
     {
         auto it = local_buf->wsCluster.begin();
@@ -105,33 +122,27 @@ int internalApi::cluster_send_to_user(thread_data* local_buf, int user_id, const
             auto link = *it;
 
             // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
-            link->query_format("cometqlcluster_v1; INSERT INTO users_messages (uuid, id, event, message)VALUES('%s', '%d', '%s', '%s');",
+            if(link->query_format("cometqlcluster_v1; INSERT INTO users_messages (uuid, id, event, message)VALUES('%s', '%d', '%s', '%s');",
                     uuid,
                     user_id,
                     pipe_event,
-                    msg_data);
-            
-            if(mysql_insert_id(link->getLink()) > 0)
+                    msg_data))
             {
-                return 1;
+                if(mysql_insert_id((MYSQL*)link) > 0)
+                {
+                    needSave = 0;
+                } 
             }
-            
             it++;
         }
 
         local_buf->answer_buf.unlock();
     }
- 
-    
-    if(local_send_to_user(local_buf, user_id, pipe_event, msg_data) <= 0)
-    {
-        char uid[37];
-        bzero(uid, 37);
-        uuid37(uid);
 
-        local_buf->stm.users_queue_insert->execute(uid, (long int)time(NULL), user_id, pipe_event, msg_data, strlen(msg_data));
+    if(needSave == 0)
+    {
+        local_buf->stm.users_queue_insert->execute(uuid, (long int)time(NULL), user_id, pipe_event, msg_data, strlen(msg_data));
     }
-    
     return 0;
 }
 

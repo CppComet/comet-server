@@ -715,9 +715,9 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
  * Структура обрабатываемых сообщений имеет вид {команда}\n{Данные}
  * В данный момент обрабатываются следующие команды: subscription, web_pipe, pipe_log, user_status
  *
- * @param client
- * @param len
- * @param local_buf
+ * @param client идентификатор клиента
+ * @param len длина пришедшего сообщения
+ * @param local_buf ссылка на local_buf потока
  * @param start_position стартовая позиция в буфере входящих данных.
  *
  * @note Иногда так случается что 2 и более сообщений приходят вместе как бы
@@ -958,6 +958,18 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
         res = track_pipe_users(local_buf, (char*)(str_data + strlen("track_pipe_users") + 1), client, msg_data_len);
         if(res == -1) return -1;
     }
+    else if(memcmp( str_data, "user_data", strlen("user_data")) == 0)
+    {
+        TagLoger::log(Log_ClientServer, 0, "comand-cgi_call:\n" );
+        res = web_user_data(local_buf, (char*)(str_data + strlen("user_data") + 1), client, msg_data_len);
+        if(res == -1) return -1;
+    }
+    else if(memcmp( str_data, "cgi_call", strlen("cgi_call")) == 0)
+    {
+        TagLoger::log(Log_ClientServer, 0, "comand-cgi_call:\n" );
+        res = cgi_call(local_buf, (char*)(str_data + strlen("cgi_call") + 1), client, msg_data_len);
+        if(res == -1) return -1;
+    }
     else
     {
         TagLoger::error(Log_ClientServer, 0, "comand-undefined: len=%d [%s]\n", msg_data_len, str_data );
@@ -993,6 +1005,79 @@ int Client_connection::log_statistics(thread_data* local_buf, const char* event_
     //mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), event_data, strlen(event_data));
     //local_buf->clusterRC.lpush_printf("log_statistics \"%s\"", local_buf->answer_buf.getData());
     //local_buf->clusterRC.ltrim("log_statistics", 0, 1000);
+
+    return 0;
+}
+
+/**
+ * Для вызова внешних скриптов
+ * @param local_buf ссылка на local_buf потока
+ * @param event_data данные вызова
+ * @param client идентификатор клиента
+ * @param len длина пришедшего сообщения
+ * @return
+ *
+ *
+ * Вызов внешнего скрипта:
+ * exec синхронный, но можно спроектировать так чтоб он был как будто асинхронный и тогда надо будет просто
+ * передавать с ним колбек функцию которя могла бы отправлять ответ от сервера.
+ *
+ */
+int Client_connection::cgi_call(thread_data* local_buf, char* event_data,int client, int len)
+{ 
+    return 0;
+}
+
+/**
+ * Формат сообщения:
+ * user_data\n
+ * pMarker\n
+ * user_id
+ * 
+ * @param local_buf
+ * @param event_data
+ * @param client
+ * @param len
+ * @return 
+ */
+int Client_connection::web_user_data(thread_data* local_buf, char* event_data,int client, int len)
+{ 
+    char* pMarker = event_data; 
+    char* end_pMarker = checking_channel_name( local_buf, pMarker);
+    if(end_pMarker == NULL)
+    {
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"user_id\":-1,\"user_data\":\"\",\"error\":\"Invalid marker name.\"},\"event_name\":\"answer\"}").data(), "_answer");
+        return -1;
+    }
+
+    int userId = 0;
+    try{
+        userId = std::stoi(end_pMarker);
+    }catch(...)
+    {
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"user_id\":-1,\"user_data\":\"\",\"error\":\"Invalid marker name.\"},\"event_name\":\"answer\"}").data(), "_answer");
+        return -1;
+    }
+
+    std::string res;
+    res.append("{\"data\":{\"user_id\":").append(std::to_string(userId)).append(",\"user_data\":\"");
+
+    local_buf->stm.users_data_select->execute(userId);
+    if(local_buf->stm.users_data_select->fetch() == 0)
+    {
+        local_buf->answer_buf.lock();
+        
+        mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), local_buf->stm.users_data_select->result_data, local_buf->stm.users_data_select->result_data_length);
+        res.append(local_buf->answer_buf.getAndUnlock()).append("\",\"error\":\"internal server error\"},\"event_name\":\"answer\"}"); 
+        message(local_buf, base64_encode(res.data()).data(), "_answer");
+    }
+    else
+    { 
+        res.append("\",\"error\":\"internal server error\"},\"event_name\":\"answer\"}"); 
+        message(local_buf, base64_encode(res.data()).data(), "_answer");
+    }
+    
+    local_buf->stm.users_data_select->free();
 
     return 0;
 }
@@ -1213,7 +1298,7 @@ int Client_connection::get_pipe_count(thread_data* local_buf, char* event_data,i
 
 /**
  * Проверка на валидность имени канала
- * @Note Не забывать проверять код возврата, может вернуть NULL
+ * @note Не забывать проверять код возврата, может вернуть NULL
  * @param pipe_start
  * @return Указатель на первый символ после имени канала, тоесть указатель будет вести на символ разделителя
  * Если имя канала содержит не верные символы то вернёт 0
@@ -1544,22 +1629,27 @@ int Client_connection::get_favicon_request(int client, int len, thread_data* loc
     return -1;
 }
 
-int Client_connection::get_custom_request(int client, int len, thread_data* local_buf)
+/**
+ * Из строки GET запроса вынет имя файла и вернёт путь к нему на диске или вернёт
+ * пустую строку если операция не удалась или запрос пришёл не валидный.
+ *
+ * @note Если потом буду делать аналог файлов .htaccess то правки буду вносить гдето здесь.
+ */
+std::string get_file_name_from_HTTP_query(const char* message, int len)
 {
     TagLoger::log(Log_ClientServer, 0, ">Client GET get_custom_request\n");
-    char *p = local_buf->buf.getData();
-    int urlStart = strlen("GET ");
-    p = p + urlStart;
+    const char *p = message;
+    p = p + strlen("GET ");
 
-    int urlEnd = str_find(p, ' ', 0, 0);
+    int urlEnd = str_find(p, ' ', 0, 0, len);
     if(urlEnd <= 0)
     {
         // 404
-        return http404_answer(client, len, local_buf);
+        return std::string();
     }
 
-    p[urlEnd - 1] = 0;
-    char *uri = p;
+    const char *uri = p;
+
     if(strncmp(uri, "/comet-server", strlen("/comet-server")) == 0)
     {
         uri += strlen("/comet-server");
@@ -1569,39 +1659,111 @@ int Client_connection::get_custom_request(int client, int len, thread_data* loca
     if(name.empty())
     {
         // 403
-        return http403_answer(client, len, local_buf);
+        return std::string();
     }
 
-    name.append(uri);
+    name.append(uri, urlEnd - 1);
 
     auto pos = name.rfind('.');
     if(pos <= 0)
     {
         // 404
-        return http404_answer(client, len, local_buf);
+        return std::string();
     }
-
 
     TagLoger::log(Log_ClientServer, 0, " >Client GET [%s]\n", name.data());
     if(name.find("..") != std::string::npos)
     {
         // Проверка на две точки в урле.
         TagLoger::log(Log_ClientServer, 0, " >Client GET error403 [.. in url] [%s]\n", name.data());
-        return http403_answer(client, len, local_buf);
+        return std::string();
     }
 
-    /*auto it = ram_file_cache.find(name);
-    if(it != ram_file_cache.end())
-    {
-        TagLoger::debug(Log_ClientServer, 0, " >send name=%s from ram cache\n", name.data());
-        web_write(it->second);
-        return -1;
-    }*/
+    return name;
+}
 
+// https://app.comet-server.ru/api/CometServerApi.js
+/**
+ * Обработка произвольного GET запроса
+ * @param client
+ * @param len
+ * @param local_buf
+ * @return
+ */
+int Client_connection::get_custom_request(int client, int len, thread_data* local_buf)
+{
+    TagLoger::log(Log_ClientServer, 0, ">Client GET get_custom_request\n");
+
+    std::string name = get_file_name_from_HTTP_query(local_buf->buf.getData(), len);
+    if(name.empty())
+    {
+        // 404
+        return http404_answer(client, len, local_buf);
+    }
 
     char resp[]="HTTP/1.1 200 OK\r\nContent-Type:%s; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
     \r\nAccess-Control-Allow-Methods: GET\r\nAllow: GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nCache-Control: max-age=3600\r\nConnection: close\r\n\r\n";
 
+    auto pos = name.rfind('.');
+    std::string ext = name.substr(pos+1, 10);
+    std::string headers(appConf::instance()->get_string("content-type", ext));
+    if(headers.empty())
+    {
+        TagLoger::log(Log_ClientServer, 0, " >Client GET [%s][ext=%s] not found\n", name.data(), ext.data());
+        // 404
+        return http404_answer(client, len, local_buf);
+    }
+
+    char headers_resp[1024];
+    snprintf(headers_resp, 1024, resp, headers.data());
+
+    int fp = open(name.data(), O_RDONLY);
+    if(fp < 0)
+    {
+        // 404
+        TagLoger::log(Log_ClientServer, 0, " >Client GET error404 [%s]\n", name.data(), errno);
+        perror("error404:");
+        return http404_answer(client, len, local_buf);
+    }
+
+    web_write(headers_resp);
+    //std::string response(headers_resp);
+
+    int size = 0;
+    while(size = read(fp, local_buf->answer_buf.getData(),  local_buf->answer_buf.getSize()))
+    {
+        if(size <= 0)
+        {
+            break;
+        }
+
+        //response.append(local_buf->answer_buf.getData());
+        web_write( local_buf->answer_buf.getData(), size);
+        TagLoger::debug(Log_ClientServer, 0, " >send name=%s from disk [size=%d]\n", name.data(), size);
+    }
+
+    //ram_file_cache.insert(std::pair<std::string,const char*>(name, response.data()));
+    return -1;
+}
+
+
+// @todo уяснить как вебсервер отдаёт большие объёмы данных по http
+// @todo уяснить как фрагментировать ответ и как это делает php
+int Client_connection::cultivate_custom_request(int client, const char* message, int len, thread_data* local_buf)
+{
+    TagLoger::log(Log_ClientServer, 0, ">Client GET get_custom_request\n");
+
+    std::string name = get_file_name_from_HTTP_query(local_buf->buf.getData(), len);
+    if(name.empty())
+    {
+        // 404
+        return http404_answer(client, len, local_buf);
+    }
+
+    char resp[]="HTTP/1.1 200 OK\r\nContent-Type:%s; charset=UTF-8\r\nServer:CppComet Server\r\nComet-Server:CppComet Server\r\nAccess-Control-Allow-Origin: *\
+    \r\nAccess-Control-Allow-Methods: GET\r\nAllow: GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nCache-Control: max-age=3600\r\nConnection: close\r\n\r\n";
+
+    auto pos = name.rfind('.');
     std::string ext = name.substr(pos+1, 10);
     std::string headers(appConf::instance()->get_string("content-type", ext));
     if(headers.empty())
@@ -1649,6 +1811,18 @@ int Client_connection::get_custom_request(int client, int len, thread_data* loca
  * @param text Сообщение
  * @param len Длина сообщения
  * @return 0 в случае успеха
+ *
+ *
+ *
+ * @note для того чтоб стать вебсервером надо включить поддержку
+ *  POST запросов, Причём больших запросов и работу с бинарными данными в запросах.
+ *  В целом не мало работы, но решаемо на самом деле.
+ *
+ * @note Чтоб отдавать данные эффективно надо бы ещё и прикрутить поддержку сжатия gzip и плюшки http версии болше чем 1.0
+ *
+ *
+ *
+ *
  */
 int Client_connection::request(int client, int len, thread_data* local_buf)
 {

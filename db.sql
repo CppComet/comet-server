@@ -1,36 +1,78 @@
+-- phpMyAdmin SQL Dump
+-- version 3.4.11.1deb2+deb7u8
+-- http://www.phpmyadmin.net
+--
+-- Хост: test.comet.su:3305
+-- Время создания: Янв 09 2018 г., 02:23
+-- Версия сервера: 5.5.57
+-- Версия PHP: 5.6.31-1~dotdeb+7.1
+
+SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
 
 --
--- Database: `comet_db`
+-- База данных: `comet_db`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure `log_event`
+-- Структура таблицы `conference`
+--
+
+CREATE TABLE IF NOT EXISTS `conference` (
+  `name` varchar(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `caller_id` int(11) NOT NULL,
+  `message` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `profile` varchar(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '',
+  `stream` varchar(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '',
+  `node` varchar(64) NOT NULL DEFAULT '0',
+  `time` int(13) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`name`,`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Кому и к какой конференции дан доступ';
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `log_event`
 --
 
 CREATE TABLE IF NOT EXISTS `log_event` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `text` varchar(250) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=18 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=188 ;
 
 -- --------------------------------------------------------
 
 --
--- Table structure `log_query`
+-- Структура таблицы `log_query`
 --
 
 CREATE TABLE IF NOT EXISTS `log_query` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `query` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2244 ;
 
 -- --------------------------------------------------------
 
 --
--- Table structure `pipes_settings`
+-- Структура таблицы `options`
+--
+
+CREATE TABLE IF NOT EXISTS `options` (
+  `section` varbinary(250) NOT NULL,
+  `name` varbinary(250) NOT NULL,
+  `value` varbinary(250) NOT NULL,
+  PRIMARY KEY (`section`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `pipes_settings`
 --
 
 CREATE TABLE IF NOT EXISTS `pipes_settings` (
@@ -43,7 +85,7 @@ CREATE TABLE IF NOT EXISTS `pipes_settings` (
 -- --------------------------------------------------------
 
 --
--- Table structure `pipe_messages`
+-- Структура таблицы `pipe_messages`
 --
 
 CREATE TABLE IF NOT EXISTS `pipe_messages` (
@@ -61,7 +103,7 @@ CREATE TABLE IF NOT EXISTS `pipe_messages` (
 -- --------------------------------------------------------
 
 --
--- Table structure `users_auth`
+-- Структура таблицы `users_auth`
 --
 
 CREATE TABLE IF NOT EXISTS `users_auth` (
@@ -73,7 +115,19 @@ CREATE TABLE IF NOT EXISTS `users_auth` (
 -- --------------------------------------------------------
 
 --
--- Table structure `users_messages`
+-- Структура таблицы `users_data`
+--
+
+CREATE TABLE IF NOT EXISTS `users_data` (
+  `user_id` int(11) NOT NULL,
+  `data` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `users_messages`
 --
 
 CREATE TABLE IF NOT EXISTS `users_messages` (
@@ -88,7 +142,7 @@ CREATE TABLE IF NOT EXISTS `users_messages` (
 -- --------------------------------------------------------
 
 --
--- Table structure `users_time`
+-- Структура таблицы `users_time`
 --
 
 CREATE TABLE IF NOT EXISTS `users_time` (
@@ -96,34 +150,3 @@ CREATE TABLE IF NOT EXISTS `users_time` (
   `time` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
--- --------------------------------------------------------
-
---
--- Table structure `options`
---
-
-CREATE TABLE IF NOT EXISTS `options` (
-  `section` varbinary(250) NOT NULL,
-  `name` varbinary(250) NOT NULL,
-  `value` varbinary(250) NOT NULL,
-  PRIMARY KEY (`section`,`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Table structure `conference`
---
-
-CREATE TABLE IF NOT EXISTS `conference` (
-  `name` varchar(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `caller_id` int(11) NOT NULL,
-  `message` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-  `mode` varchar(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '',
-  `stream` varchar(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '',
-  `node` varchar(64) NOT NULL DEFAULT '0',
-  `time` int(13) NOT NULL DEFAULT '0',
-  `active` int(1) NOT NULL DEFAULT '0' COMMENT '',
-  PRIMARY KEY (`name`,`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='';

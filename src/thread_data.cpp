@@ -9,9 +9,8 @@ bool fs_esl::init(std::string connectionString){
     int nextPos = 0;
 
     std::string Server = "localhost"; 
-    std::string Pwd;
-    int Port = 8021;
-
+    std::string Pwd = "CueCon";
+     
     int i = 0;
     while(pos <= connectionString.length() && i < 10)
     {
@@ -44,36 +43,51 @@ bool fs_esl::init(std::string connectionString){
         {
             Pwd = paramValue; 
         } 
+        else if(paramName.compare("WShost") == 0)
+        {
+            WShost = paramValue; 
+        } 
         else if(paramName.compare("Port") == 0)
         {
             try{
                 //printf("get_long [%s] %s=%s\n", section.data(), name.data(), sections.at(section).at(name).data());
-                Port = std::stoi(paramValue);
+                port = std::stoi(paramValue);
             }catch(...)
             {
                 printf("\x1b[1;31mexeption in parsing Port value Port=%s\x1b[0m\n", paramValue.data());
                 return false;
             } 
         }
+        else if(paramName.compare("WSport") == 0)
+        {
+            try{
+                //printf("get_long [%s] %s=%s\n", section.data(), name.data(), sections.at(section).at(name).data());
+                WSport = std::stoi(paramValue);
+            }catch(...)
+            {
+                printf("\x1b[1;31mexeption in parsing WSport value WSport=%s\x1b[0m\n", paramValue.data());
+                return false;
+            } 
+        }
     }
-
-    return init(Server.data(), Port, Pwd.data());
-}
-
-bool fs_esl::init(std::string Host, short Port, std::string Password){
-    host = Host;
-    port = Port;
-    password = Password;
+    
+    if(WShost.empty())
+    {
+        WShost = Server;
+    }
+     
+    host = Server.data(); 
+    password = Pwd.data();
     inited = true;
     timeout = 1;
     
-    id = Host;
+    id = host;
     id.append(":");
-    id.append(std::to_string(Port));
+    id.append(std::to_string(WSport));
     
-    return true;
+    return true; 
 }
-
+ 
 esl_handle_t fs_esl::getHandle()
 {
     return handle;

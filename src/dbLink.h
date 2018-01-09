@@ -322,6 +322,56 @@ public:
     }
 };
 
+class stm_conference_delete: public stmBase{
+
+    friend stmMapper;
+    unsigned long param_user_id = 0;
+    
+    char          param_name[EVENT_NAME_LEN];
+    unsigned long param_name_length = EVENT_NAME_LEN;
+
+public:
+    bool virtual prepare(dbLink *mysql)
+    {
+        if(!isInited)
+        {
+            isInited = true;
+            setParamsCount(2);
+
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_STRING;
+            param[i].buffer         = (void *)&param_name;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = &param_name_length; 
+            
+            i++;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_user_id;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
+        }
+        return init(mysql, "delete from `conference` WHERE name = ? and user_id = ? ");
+    }
+
+    stm_conference_delete(){}
+
+    int execute(const char* name, unsigned long user_id)
+    {
+        param_user_id = user_id;
+        
+        param_name_length = strlen(name);
+        if(param_name_length > EVENT_NAME_LEN)
+        {
+            param_name_length = EVENT_NAME_LEN;
+        }
+        strncpy(param_name, name, param_name_length);
+         
+        return stmBase::insert();
+    }
+};
+
 class stm_conference_insert: public stmBase{
 
     friend stmMapper; 
@@ -334,8 +384,8 @@ class stm_conference_insert: public stmBase{
     char          param_name[EVENT_NAME_LEN];
     unsigned long param_name_length = EVENT_NAME_LEN;
 
-    char          param_mode[EVENT_NAME_LEN];
-    unsigned long param_mode_length = EVENT_NAME_LEN;
+    char          param_profile[EVENT_NAME_LEN];
+    unsigned long param_profile_length = EVENT_NAME_LEN;
 
     char          param_stream[EVENT_NAME_LEN];
     unsigned long param_stream_length = EVENT_NAME_LEN;
@@ -391,10 +441,10 @@ public:
             
             i++;
             param[i].buffer_type    = MYSQL_TYPE_STRING;
-            param[i].buffer         = (void *) param_mode;
+            param[i].buffer         = (void *) param_profile;
             param[i].is_unsigned    = 0;
             param[i].is_null        = 0;
-            param[i].length         = &param_mode_length;
+            param[i].length         = &param_profile_length;
 
             i++;
             param[i].buffer_type    = MYSQL_TYPE_STRING;
@@ -419,15 +469,15 @@ public:
 
         }
         
-        return init(mysql, "REPLACE INTO `conference`(`dev_id`, `name`, `user_id`, `caller_id`, `message`, `mode`, `stream`, `node`, `time`)"
-                " VALUES (?,?,?,?,?,?,?,?,?)");
+        return init(mysql, "REPLACE INTO `conference`(`name`, `user_id`, `caller_id`, `message`, `profile`, `stream`, `node`, `time`)"
+                " VALUES (?,?,?,?,?,?,?,?)");
     }
 
     stm_conference_insert()
     { 
         bzero(param_node, EVENT_NAME_LEN);
         bzero(param_stream, EVENT_NAME_LEN);
-        bzero(param_mode, EVENT_NAME_LEN);
+        bzero(param_profile, EVENT_NAME_LEN);
         bzero(param_name, EVENT_NAME_LEN); 
     }
 
@@ -437,7 +487,7 @@ public:
             unsigned long caller_id,
             const char* message,
             unsigned long message_length,
-            const char* mode,
+            const char* profile,
             const char* stream,
             const char* node)
     { 
@@ -457,12 +507,12 @@ public:
         }
         strncpy(param_name, name, param_name_length);
         
-        param_mode_length = strlen(mode);
-        if(param_mode_length > EVENT_NAME_LEN)
+        param_profile_length = strlen(profile);
+        if(param_profile_length > EVENT_NAME_LEN)
         {
-            param_mode_length = EVENT_NAME_LEN;
+            param_profile_length = EVENT_NAME_LEN;
         }
-        strncpy(param_mode, mode, param_mode_length);
+        strncpy(param_profile, profile, param_profile_length);
         
         param_stream_length = strlen(stream);
         if(param_stream_length > EVENT_NAME_LEN)
@@ -505,8 +555,8 @@ public:
     char          result_node[EVENT_NAME_LEN];
     unsigned long result_node_length = EVENT_NAME_LEN;
 
-    char          result_mode[EVENT_NAME_LEN];
-    unsigned long result_mode_length = EVENT_NAME_LEN;
+    char          result_profile[EVENT_NAME_LEN];
+    unsigned long result_profile_length = EVENT_NAME_LEN;
 
     char          result_stream[EVENT_NAME_LEN];
     unsigned long result_stream_length = EVENT_NAME_LEN;
@@ -526,7 +576,7 @@ public:
 
         bzero(result_node, EVENT_NAME_LEN);
         bzero(result_stream, EVENT_NAME_LEN);
-        bzero(result_mode, EVENT_NAME_LEN);
+        bzero(result_profile, EVENT_NAME_LEN);
         bzero(param_name, EVENT_NAME_LEN); 
     }
 
@@ -577,11 +627,11 @@ public:
             
             i++;
             result[i].buffer_type    = MYSQL_TYPE_STRING;
-            result[i].buffer         = (char *)result_mode;
+            result[i].buffer         = (char *)result_profile;
             result[i].is_null        = &is_null[i];
             result[i].error          = &error[i];
             result[i].length         = &length[i];
-            result[i].buffer_length  = result_mode_length;
+            result[i].buffer_length  = result_profile_length;
             
             i++;
             result[i].buffer_type    = MYSQL_TYPE_STRING;
@@ -600,7 +650,102 @@ public:
             result[i].buffer_length  = result_node_length;
 
         }
-        return init(mysql, "SELECT `user_id`, `caller_id`, `message`, `mode`, `stream`, `node` FROM `conference` WHERE name = ?");
+        return init(mysql, "SELECT `user_id`, `caller_id`, `message`, `profile`, `stream`, `node` FROM `conference` WHERE name = ?");
+    }
+
+    bool execute(const char* name)
+    {
+        param_name_length = strlen(name);
+        if(param_name_length > EVENT_NAME_LEN)
+        {
+            param_name_length = EVENT_NAME_LEN;
+        }
+        strncpy(param_name, name, param_name_length);
+        
+        return stmBase::select();
+    }
+
+    /**
+     * Извлекает результаты селекта построчно.
+     * @return
+     */
+    int fetch()
+    {
+        // Fetch
+        // https://docs.oracle.com/cd/E17952_01/mysql-5.5-en/mysql-stmt-fetch.html
+        int res = mysql_stmt_fetch(stmt);
+        if(res == MYSQL_DATA_TRUNCATED)
+        {
+            TagLoger::warn(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_fetch(), MYSQL_DATA_TRUNCATED\x1b[0m\n");
+        }
+        else if(res == 1)
+        {
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_fetch(), 1 failed - %s [errno=%d]\x1b[0m\n", mysql_stmt_error(stmt), mysql_stmt_errno(stmt));
+        } 
+        return res;
+    }
+
+    /**
+     * Очищает память выделеную для хранения результатов селекта
+     * @return
+     */
+    bool free()
+    {
+        return stmBase::free();
+    }
+};
+
+class stm_conference_select_nodes_for_room: public stmBase{
+
+    friend stmMapper; 
+    char          param_name[EVENT_NAME_LEN];
+    unsigned long param_name_length = EVENT_NAME_LEN;
+
+public:
+    
+    char          result_node[EVENT_NAME_LEN];
+    unsigned long result_node_length = EVENT_NAME_LEN;
+ 
+    my_bool       is_null[1];
+    my_bool       error[1];
+    unsigned long length[1];
+
+    stm_conference_select_nodes_for_room()
+    { 
+        bzero(is_null, 1);
+        bzero(error, 1);
+        bzero(length, 1); 
+        bzero(result_node, EVENT_NAME_LEN); 
+    }
+
+    bool virtual prepare(dbLink *mysql)
+    {
+        if(!isInited)
+        {
+            isInited = true; 
+            
+            setParamsCount(1);
+
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_STRING;
+            param[i].buffer         = (void *)&param_name;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = &param_name_length;
+
+
+            setResultsCount(1);
+
+            i = 0;  
+            result[i].buffer_type    = MYSQL_TYPE_STRING;
+            result[i].buffer         = (char *)result_node;
+            result[i].is_null        = &is_null[i];
+            result[i].error          = &error[i];
+            result[i].length         = &length[i];
+            result[i].buffer_length  = result_node_length;
+
+        }
+        return init(mysql, "SELECT `node` FROM `conference` WHERE name = ? GROUP BY `node`");
     }
 
     bool execute(const char* name)
@@ -1382,6 +1527,198 @@ public:
     }
 };
 
+class stm_users_data_replace: public stmBase{
+
+    friend stmMapper;
+    unsigned long param_user_id = 0;
+
+    char*          param_data = NULL;
+    unsigned long param_data_length = 0;
+  
+public:
+    bool virtual prepare(dbLink *mysql)
+    {
+        if(!isInited)
+        {
+            isInited = true;
+            setParamsCount(2);
+
+            if(param_data == NULL)
+            {
+                param_data = new char[appConf::instance()->get_int("db", "buf_size")];
+                param_data_length = appConf::instance()->get_int("db", "buf_size");
+            }
+            
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_user_id;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
+
+            i++;
+            param[i].buffer_type    = MYSQL_TYPE_STRING;
+            param[i].buffer         = (void *)&param_data;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = &param_data_length;
+        }
+        return init(mysql, "REPLACE INTO `users_data`(`user_id`, `data`) VALUES (?,?)");
+    }
+
+    stm_users_data_replace()
+    { 
+    }
+
+    int execute(unsigned long user_id, const char* data, int data_length)
+    {
+        param_user_id = user_id;
+        
+        if(data_length > appConf::instance()->get_int("db", "buf_size"))
+        {
+            data_length = appConf::instance()->get_int("db", "buf_size") - 1;
+        }
+        
+        memcpy(param_data, data, data_length);
+        param_data_length = data_length;
+        
+        return stmBase::insert();
+    }
+};
+
+class stm_users_data_delete: public stmBase{
+
+    friend stmMapper;
+    unsigned long param_user_id = 0;
+
+public:
+    bool virtual prepare(dbLink *mysql)
+    {
+        if(!isInited)
+        {
+            isInited = true;
+            setParamsCount(1);
+
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_user_id;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
+        }
+        return init(mysql, "delete from `users_data` where `user_id` = ? ");
+    }
+
+    stm_users_data_delete(){}
+
+    int execute(unsigned long user_id)
+    {
+        param_user_id = user_id;
+
+        return stmBase::insert();
+    }
+};
+
+class stm_users_data_select: public stmBase{
+
+    friend stmMapper;
+    unsigned long param_user_id = 0;
+
+public:
+   
+    char*         result_data = NULL;
+    unsigned long result_data_length = 0;
+    
+    my_bool       is_null[2];
+    my_bool       error[2];
+    unsigned long length[2];
+
+    bool virtual prepare(dbLink *mysql)
+    {
+        if(!isInited)
+        {
+            isInited = true;
+            
+            if(result_data == NULL)
+            {
+                result_data = new char[appConf::instance()->get_int("db", "buf_size")];
+                result_data_length = appConf::instance()->get_int("db", "buf_size");
+            }
+            
+            setParamsCount(1);
+
+            int i = 0;
+            param[i].buffer_type    = MYSQL_TYPE_LONG;
+            param[i].buffer         = (void *)&param_user_id;
+            param[i].is_unsigned    = 0;
+            param[i].is_null        = 0;
+            param[i].length         = 0;
+
+            setResultsCount(1);
+
+            i = 0; 
+            result[i].buffer_type    = MYSQL_TYPE_STRING;
+            result[i].buffer         = (char *)result_data;
+            result[i].is_null        = &is_null[i];
+            result[i].error          = &error[i];
+            result[i].length         = &length[i];
+            result[i].buffer_length  = result_data_length;
+        }
+        return init(mysql, "SELECT `data` FROM `users_data` WHERE user_id = ? ");
+    }
+
+public:
+    stm_users_data_select()
+    { 
+    }
+
+    bool execute(unsigned long user_id)
+    {
+        // https://docs.oracle.com/cd/E17952_01/mysql-5.5-en/mysql-stmt-fetch.html
+        param_user_id = user_id;
+
+        return stmBase::select();
+    }
+
+    /**
+     * Извлекает результаты селекта построчно.
+     * @return 0 если успех или MYSQL_NO_DATA или MYSQL_DATA_TRUNCATED и -1 если ошибка
+     */
+    int fetch()
+    {
+        // Fetch
+        int res = mysql_stmt_fetch(stmt);
+        if(res == MYSQL_DATA_TRUNCATED)
+        {
+            TagLoger::warn(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_fetch(), MYSQL_DATA_TRUNCATED\x1b[0m\n");
+        }
+        else if(res == 1)
+        {
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_fetch(), 1 failed - %s [errno=%d]\x1b[0m\n", mysql_stmt_error(stmt), mysql_stmt_errno(stmt));
+        } 
+        return res;
+    }
+
+    /**
+     * Извлекает num_rows
+     * @return
+     */
+    int num_rows()
+    {
+        // Fetch
+        return mysql_stmt_num_rows(stmt);
+    }
+
+    /**
+     * Очищает память выделеную для хранения результатов селекта
+     * @return
+     */
+    bool free()
+    {
+        return stmBase::free();
+    }
+};
+
 class stm_pipes_settings_select: public stmBase{
 
     friend stmMapper;
@@ -1579,24 +1916,30 @@ public:
 class stmMapper{
 public:
     stm_log_query *queryLoger = NULL;
-    stm_users_queue_insert *users_queue_insert= NULL;
-    stm_users_queue_select *users_queue_select= NULL;
-    stm_users_queue_delete *users_queue_delete= NULL;
+    stm_users_queue_insert *users_queue_insert = NULL;
+    stm_users_queue_select *users_queue_select = NULL;
+    stm_users_queue_delete *users_queue_delete = NULL;
 
-    stm_pipe_messages_insert *pipe_messages_insert= NULL;
-    stm_pipe_messages_select *pipe_messages_select= NULL;
-    stm_pipe_messages_delete *pipe_messages_delete= NULL;
-    stm_pipe_messages_delete_by_message_id *pipe_messages_delete_by_message_id= NULL;
+    stm_pipe_messages_insert *pipe_messages_insert = NULL;
+    stm_pipe_messages_select *pipe_messages_select = NULL;
+    stm_pipe_messages_delete *pipe_messages_delete = NULL;
+    stm_pipe_messages_delete_by_message_id *pipe_messages_delete_by_message_id = NULL;
 
-    stm_users_auth_replace *users_auth_replace= NULL;
-    stm_users_auth_delete *users_auth_delete= NULL;
-    stm_users_auth_select *users_auth_select= NULL;
-  
-    stm_users_time_select *users_time_select= NULL;
-    stm_pipes_settings_select *pipes_settings_select= NULL; 
+    stm_users_auth_replace *users_auth_replace = NULL;
+    stm_users_auth_delete *users_auth_delete = NULL;
+    stm_users_auth_select *users_auth_select = NULL;
+ 
+    stm_users_data_replace *users_data_replace = NULL;
+    stm_users_data_delete *users_data_delete = NULL;
+    stm_users_data_select *users_data_select = NULL;
+    
+    stm_users_time_select *users_time_select = NULL;
+    stm_pipes_settings_select *pipes_settings_select = NULL; 
     
     stm_conference_insert *conference_insert = NULL;
     stm_conference_select *conference_select = NULL;
+    stm_conference_delete *conference_delete = NULL;
+    stm_conference_select_nodes_for_room *conference_select_nodes_for_room = NULL;
     void init(dbLink *mysql);
 };
 

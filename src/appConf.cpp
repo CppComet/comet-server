@@ -89,6 +89,11 @@ bool appConf::initFromFile(const char *fileName)
         sections["main"]["pidfile"] = "/var/run/cppcomet.pid";  
     }
     
+    if(!is_property_exists("main", "api_version"))
+    {
+        sections["main"]["api_version"] = "1";  
+    }
+    
     /*
     ; Объём буфера для сообщения
     ; Много ставить не надо, комет сервер не расчитан на передачу больших сообщений

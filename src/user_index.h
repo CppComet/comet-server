@@ -61,39 +61,12 @@ public:
     int user_id = 0;
 
 
-    useritem()
-    {
-        bzero(conection_ids, sizeof(int) * MAX_CONECTION_ON_USER_ID);
-    }
+    useritem();
 
-    useritem(thread_data* local_buf, unsigned int User_id,int Conection_id)
-    {
-        user_id = User_id;
-        bzero(conection_ids, sizeof(int) * MAX_CONECTION_ON_USER_ID);
-        setConection_id(local_buf, Conection_id);
-    }
+    useritem(thread_data* local_buf, unsigned int User_id,int Conection_id);
 
-    useritem(thread_data* local_buf, unsigned int User_id,const char* Hash)
-    {
-        user_id = User_id;
-
-        int copy_len = strlen(Hash);
-        if( copy_len > USER_HASH_LEN)
-        {
-            copy_len = USER_HASH_LEN;
-        }
-
-        hash = new char[USER_HASH_LEN+1];
-        bzero(hash, USER_HASH_LEN+1);
-        memcpy(hash, Hash, copy_len);
-
-        TagLoger::log(Log_UserItem, 0, "auth_hash_test:%s\n", hash);
-
-        local_buf->stm.users_auth_replace->execute(user_id, hash);
-
-        bzero(conection_ids, sizeof(int) * MAX_CONECTION_ON_USER_ID);
-    }
-
+    useritem(thread_data* local_buf, unsigned int User_id,const char* Hash);
+    
     /**
      * Добавляет id нового соединения к пользователю.
      * Если этот пользователь до этого не имел не одного соединения то вызовет ему setOnline_time()
@@ -101,103 +74,30 @@ public:
      * @param Conection_id
      * @return
      */
-    int setConection_id(thread_data* local_buf, int Conection_id)
-    {
-        int isOnline = false;
-        for(int i=0; i<MAX_CONECTION_ON_USER_ID; i++)
-        {
-            if(conection_ids[i] > 0)
-            {
-                isOnline = true;
-                break;
-            }
-        }
-
-        if(!isOnline)
-        {
-            setOnline_time(local_buf);
-        }
-
-        for(int i=0; i<MAX_CONECTION_ON_USER_ID; i++)
-        {
-            if(conection_ids[i] <= 0)
-            {
-                conection_ids[i] = Conection_id;
-                TagLoger::log(Log_UserItem, 0, "\x1b[34mAdd Conection_id=%d to user_id=%d i=%d\x1b[0m\n", Conection_id,  user_id, i);
-                return 1;
-            }
-        }
-
-        TagLoger::log(Log_UserItem, 0, "\x1b[34mAdd Conection_id=%d to user_id=%d i=%d\x1b[0m\n", Conection_id,  user_id, -1);
-        return 0;
-    }
+    int setConection_id(thread_data* local_buf, int Conection_id);
 
     /**
      * Массив идентификаторов соединений пользователя длиной MAX_CONECTION_ON_USER_ID
      * @return
      */
-    int* getConection_ids()
-    {
-        return conection_ids;
-    }
-
+    int* getConection_ids();
+    
     /**
      * Отключает конкретный Conection_id для user_id, если это последниее соединение пользователя вызовет setOffline_time() для него
      * @param Conection_id
      * @return
      */
-    int unsetConection_id(thread_data* local_buf, int Conection_id)
-    {
-        for(int i=0; i<MAX_CONECTION_ON_USER_ID; i++)
-        {
-            if(conection_ids[i] == Conection_id)
-            {
-                TagLoger::log(Log_UserItem, 0, "\x1b[34munsetConection_id=%d from user_id=%d, i=%d\x1b[0m\n", Conection_id,  user_id, i);
-                conection_ids[i] = USER_INDEX_NO_CONNECT;
-                break;
-            }
-        }
-
-        for(int i=0; i<MAX_CONECTION_ON_USER_ID; i++)
-        {
-            if(conection_ids[i] > 0)
-            {
-                return 1;
-            }
-        }
-
-        setOffline_time(local_buf);
-        return 0;
-    }
+    int unsetConection_id(thread_data* local_buf, int Conection_id);
 
     /**
      * Возвращает имеющиеся значение, но если данных нет то обратится в редис.
      */
-    long getLast_online_time(thread_data* local_buf)
-    {
-        if(last_online_time == -1)
-        {
-            local_buf->stm.users_time_select->execute(user_id);
-            if(local_buf->stm.users_time_select->fetch())
-            {
-                local_buf->stm.users_time_select->free();
-                return -1;
-            }
-
-            last_online_time = local_buf->stm.users_time_select->result_time;
-            local_buf->stm.users_time_select->free();
-        }
-
-        return last_online_time;
-    }
+    long getLast_online_time(thread_data* local_buf);
 
     /**
      * Возвращает имеющиеся значение
      */
-    int getLast_online_time()
-    {
-        return last_online_time;
-    }
+    int getLast_online_time();
 
     /**
      * Определяет время последней авторизации, берёт значение из редиса.
@@ -205,65 +105,18 @@ public:
      * @param user_id
      * @return
      */
-    long static getLast_online_time(thread_data* local_buf, unsigned int user_id)
-    {
-        if(!local_buf->stm.users_time_select->execute(user_id))
-        {
-            return -1;
-        }
-
-        if(local_buf->stm.users_time_select->fetch())
-        {
-            local_buf->stm.users_time_select->free();
-            return -1;
-        }
-
-        long last_online_time = local_buf->stm.users_time_select->result_time;
-        local_buf->stm.users_time_select->free();
-
-        return last_online_time;
-    }
+    long static getLast_online_time(thread_data* local_buf, unsigned int user_id);
 
     /**
      * Устанавливает хеш авторизации
      */
-    bool inline setHash(thread_data* local_buf, const char* Hash)
-    {
-        if(hash == 0)
-        {
-            hash = new char[USER_HASH_LEN+1];
-        }
-
-        int copy_len = strlen(Hash);
-        if( copy_len > USER_HASH_LEN)
-        {
-            copy_len = USER_HASH_LEN;
-        }
-
-        bzero(hash, USER_HASH_LEN+1);
-
-        memcpy(hash, Hash, copy_len);
-        TagLoger::log(Log_UserItem, 0, "auth_hash_test:%s\n", hash);
-        local_buf->stm.users_auth_replace->execute(user_id, hash);
-        return true;
-    }
+    bool setHash(thread_data* local_buf, const char* Hash);
 
 
     /**
      * Удаляет хеш авторизации
      */
-    bool inline deleteHash(thread_data* local_buf)
-    {
-        local_buf->stm.users_auth_delete->execute(user_id);
-        if(hash == NULL)
-        {
-            return true;
-        }
-
-        delete[] hash;
-        hash = NULL;
-        return true;
-    }
+    bool deleteHash(thread_data* local_buf);
 
     /**
      * Вернёт ссылку на строку с хешем авторизации или NULL если данных нет.
@@ -274,32 +127,9 @@ public:
      *
      * @deprecated В замен таблицы хешей пользователей решено переходить на алгоритм авторизации по токену
      */
-    static bool getHash(thread_data* local_buf, unsigned int user_id, char* out_hash)
-    {
-        local_buf->stm.users_auth_select->execute(user_id);
+    static bool getHash(thread_data* local_buf, unsigned int user_id, char* out_hash);
 
-        if(local_buf->stm.users_auth_select->fetch())
-        {
-            TagLoger::log(Log_UserItem, 0, "[4]Hash, user_id=%d not found\n", user_id);
-            local_buf->stm.users_auth_select->free();
-            return false;
-        }
-
-        if(out_hash != NULL)
-        {
-            bzero(out_hash, USER_HASH_LEN);
-            memcpy(out_hash, local_buf->stm.users_auth_select->result_hash, USER_HASH_LEN);
-        }
-        TagLoger::log(Log_UserItem, 0, "[5]Hash user_id=%d is %s\n", user_id, local_buf->stm.users_auth_select->result_hash);
-        local_buf->stm.users_auth_select->free();
-        return true;
-    }
-
-    static bool deleteHash(thread_data* local_buf, unsigned int user_id)
-    {
-        local_buf->stm.users_auth_delete->execute(user_id);
-        return true;
-    }
+    static bool deleteHash(thread_data* local_buf, unsigned int user_id);
 
     /**
      * Вернёт ссылку на строку с хешем авторизации или NULL если данных нет.
@@ -308,37 +138,7 @@ public:
      * @param local_buf
      * @return
      */
-    bool getHash(thread_data* local_buf, char* out_hash)
-    {
-        if(hash == 0)
-        {
-            local_buf->stm.users_auth_select->execute(user_id);
-            if(local_buf->stm.users_auth_select->fetch())
-            {
-                local_buf->stm.users_auth_select->free();
-                TagLoger::log(Log_UserItem, 0, "[3]Hash user_id=%d not found\n", user_id);
-                return false;
-            }
-
-            hash = new char[USER_HASH_LEN+1];
-            bzero(hash, USER_HASH_LEN+1);
-
-            memcpy(hash, local_buf->stm.users_auth_select->result_hash, USER_HASH_LEN );
-            local_buf->stm.users_auth_select->free();
-            TagLoger::log(Log_UserItem, 0, "[1]Hash user_id=%d is %s\n", user_id, hash);
-        }
-        else
-        {
-            TagLoger::log(Log_UserItem, 0, "[2]Hash user_id=%d is %s\n", user_id, hash);
-        }
-
-        if(out_hash != NULL)
-        {
-            bzero(out_hash, USER_HASH_LEN);
-            memcpy(out_hash, hash, USER_HASH_LEN);
-        }
-        return true;
-    }
+    bool getHash(thread_data* local_buf, char* out_hash);
 
     /**
      *
@@ -361,55 +161,7 @@ public:
      * @param Hash
      * @return
      */
-    bool inline testHash(thread_data* local_buf, const char* Hash)
-    {
-        // Если в друг нам пришёл не хеш авторизации а токен то проверим его как токен
-        if(testToken(local_buf, Hash, user_id))
-        {
-            // Если токен верен но хеша авторизации нет то установим значение токена в качестве хеша авторизации
-            if(!getHash(local_buf, NULL))
-            {
-                setHash(local_buf, Hash);
-            }
-            return true;
-        }
-
-        if(!getHash(local_buf, NULL))
-        {
-            return false;
-        }
-
-
-        int Hash_len = strlen(Hash);
-        if(Hash_len > USER_HASH_LEN)
-        {
-            // Если хеш длинее USER_HASH_LEN то ограничемся USER_HASH_LEN
-            Hash_len = USER_HASH_LEN;
-        }
-
-
-        int local_hash_len = strlen(hash);
-        if(local_hash_len > USER_HASH_LEN)
-        {
-            // По какойто причине какимто неведомым образом hash может указывать на строку больше USER_HASH_LEN
-            // Если хеш длинее USER_HASH_LEN то ограничемся USER_HASH_LEN
-            local_hash_len = USER_HASH_LEN;
-        }
-
-        TagLoger::log(Log_UserItem, 0, "testHash: [%zu]%s = [%d]%s\n", local_hash_len, hash,  Hash_len, Hash);
-
-        if(local_hash_len > Hash_len)
-        {
-            return false;
-        }
-
-        if(memcmp(hash, Hash, local_hash_len ) == 0)
-        {
-            return true;
-        }
-
-        return false;
-    }
+    bool testHash(thread_data* local_buf, const char* Hash);
 
     /**
      * Проверяет хеш авторизации
@@ -418,43 +170,9 @@ public:
      * @param user_id
      * @return
      */
-    bool static testHash(thread_data* local_buf, const char* Hash, unsigned int user_id)
-    {
-        // Если в друг нам пришёл не хеш авторизации а токен то проверим его как токен
-        if(testToken(local_buf, Hash, user_id))
-        {
-            // Если токен верен но хеша авторизации нет то установим значение токена в качестве хеша авторизации
-            if(!getHash(local_buf, user_id, NULL))
-            {
-                local_buf->stm.users_auth_replace->execute(user_id, Hash);
-            }
-            return true;
-        }
+    bool static testHash(thread_data* local_buf, const char* Hash, unsigned int user_id);
 
-        local_buf->stm.users_auth_select->execute(user_id);
-        if(local_buf->stm.users_auth_select->fetch())
-        {
-            local_buf->stm.users_auth_select->free();
-            return false;
-        }
-
-        if(memcmp(Hash, local_buf->stm.users_auth_select->result_hash, USER_HASH_LEN) == 0)
-        {
-            local_buf->stm.users_auth_select->free();
-            return true;
-        }
-
-        local_buf->stm.users_auth_select->free();
-        return false;
-    }
-
-    ~useritem()
-    {
-        if(hash == 0)
-        {
-            delete[] hash;
-        }
-    }
+    ~useritem();
 
 protected:
 
@@ -462,70 +180,13 @@ protected:
      * Запоминает время ухода пользователя и сохраняет эту информацию в редис
      * Отправляет сообщение в канал user_status_{user_id} о том что человек offline 
      */
-    void setOffline_time(thread_data* local_buf)
-    {
-        last_online_time = time(0);
-        if(user_id > 0)
-        {
-            if(appConf::instance()->get_bool("main", "save_users_last_online_time"))
-            {
-                local_buf->db.query_format("replace into `users_time` (`user_id`, `time`) VALUES ('%d', '%d')", user_id, last_online_time);
-            }
-            if(appConf::instance()->get_bool("main", "send_user_offline_events"))
-            {
-                char pipe_name[100];
-                snprintf(pipe_name, 100,"user_status_%d", user_id);
-                internalApi::send_event_to_pipe(local_buf, pipe_name, "{\\\"data\\\":\\\"offline\\\",\\\"event_name\\\":\\\"offline\\\"}", NULL);
-
-                if(local_buf->isWSClusterActive())
-                {
-                    auto it = local_buf->wsCluster.begin();
-                    while(it != local_buf->wsCluster.end())
-                    {
-                        auto link = *it; 
-                        link->query_format("cometqlcluster_v1; INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'offline', 'offline');", pipe_name);
-                        it++;
-                    }
-                }
-            }
-        }
-    }
+    void setOffline_time(thread_data* local_buf);
 
     /**
      * Устанавливает пользователю статус online и сохраняет эту информацию
      * Отправляет сообщение в канал user_status_{user_id} о том что человек online 
      */
-    void setOnline_time(thread_data* local_buf)
-    {
-        last_online_time = 0;
-        if(user_id > 0)
-        {
-            if(appConf::instance()->get_bool("main", "save_users_last_online_time") && !local_buf->isWSClusterActive())
-            {
-                // В не кластерной работы точно нет необходимости в этом запросе
-                local_buf->db.query_format("replace into `users_time` (`user_id`, `time`) VALUES ('%d', 0)", user_id);
-            }
-
-            if(appConf::instance()->get_bool("main", "send_user_online_events"))
-            {
-                char pipe_name[100];
-                snprintf(pipe_name, 100, "user_status_%d", user_id);
-                internalApi::send_event_to_pipe(local_buf, pipe_name, "{\\\"data\\\":\\\"online\\\",\\\"event_name\\\":\\\"online\\\"}", NULL);
-
-
-                if(local_buf->isWSClusterActive())
-                {
-                    auto it = local_buf->wsCluster.begin();
-                    while(it != local_buf->wsCluster.end())
-                    {
-                        auto link = *it; 
-                        link->query_format("cometqlcluster_v1; INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'online', 'online');", pipe_name);
-                        it++;
-                    }
-                }
-            }
-        }
-    }
+    void setOnline_time(thread_data* local_buf);
 
 
 };
