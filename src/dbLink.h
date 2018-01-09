@@ -470,7 +470,7 @@ public:
         }
         
         return init(mysql, "REPLACE INTO `conference`(`name`, `user_id`, `caller_id`, `message`, `profile`, `stream`, `node`, `time`)"
-                " VALUES (?,?,?,?,?,?,?,?,?)");
+                " VALUES (?,?,?,?,?,?,?,?)");
     }
 
     stm_conference_insert()
