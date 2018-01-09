@@ -1,1 +1,0 @@
-/usr/bin/c++    -Wall   CMakeFiles/all_tests.dir/all.cpp.o  -o all_tests -rdynamic ../src/libjwt.a ../ext/gtest-1.7.0/libgtest_main.a -lssl -lcrypto ../ext/gtest-1.7.0/libgtest.a -lpthread 
