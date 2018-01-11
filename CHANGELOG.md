@@ -5,6 +5,11 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v3.35
+ 
+BUG FIXES:
+ * bug `Table doesn't exist` for table `conference_members`
+ 
 ## v3.34
  
 FEATURES:

@@ -540,6 +540,14 @@ int MySql_connection::query_router(thread_data* local_buf, int PacketNomber)
                 {
                     return sql_select_from_pipes_settings(local_buf,PacketNomber);
                 }
+                else if(local_buf->qInfo.tokCompare("conference",  local_buf->qInfo.tableName))
+                {
+                    return sql_select_from_conference(local_buf,PacketNomber);
+                }
+                else if(local_buf->qInfo.tokCompare("conference_members",  local_buf->qInfo.tableName))
+                {
+                    return sql_select_from_conference_members(local_buf,PacketNomber);
+                }
                 else
                 {
                     return Send_Err_Package(SQL_ERR_NOT_EXIST, "Table doesn't exist", PacketNomber+1, local_buf, this);
@@ -591,9 +599,9 @@ int MySql_connection::query_router(thread_data* local_buf, int PacketNomber)
             {
                 return sql_insert_into_conference(local_buf,PacketNomber);
             }
-            else if(local_buf->qInfo.tokCompare("dialogs",  local_buf->qInfo.tableName))
+            else if(local_buf->qInfo.tokCompare("conference_members",  local_buf->qInfo.tableName))
             {
-                return sql_insert_into_dialogs(local_buf,PacketNomber);
+                return sql_insert_into_conference_members(local_buf,PacketNomber);
             }
             else
             {
@@ -636,6 +644,14 @@ int MySql_connection::query_router(thread_data* local_buf, int PacketNomber)
             else if(local_buf->qInfo.tokCompare("pipes_settings",  local_buf->qInfo.tableName))
             {
                 return sql_delete_from_pipes_settings(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.tokCompare("conference",  local_buf->qInfo.tableName))
+            {
+                return sql_delete_from_conference(local_buf,PacketNomber);
+            }
+            else if(local_buf->qInfo.tokCompare("conference_members",  local_buf->qInfo.tableName))
+            {
+                return sql_delete_from_conference_members(local_buf,PacketNomber);
             }
             else
             {
