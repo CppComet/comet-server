@@ -735,13 +735,26 @@ bool MySql_connection::test_api_version(thread_data* local_buf, unsigned int Pac
 }
 
 bool MySql_connection::sql_use_db(char* db_name)
-{
-    // Работает но с багами
+{ 
     if(strcmp(db_name, "CometQL_v1") == 0)
     {
         TagLoger::log(Log_MySqlServer, 0, "OK set api_version `%d`", 1);
         api_version = 1;
         return true;
+    }
+    else if(strlen(db_name) > 3 && memcmp(db_name, "db_", strlen("db_")) == 0)
+    { 
+        try{
+            int t_dev_id = std::stoi(db_name + strlen("db_"));
+            if(t_dev_id >= 0 && t_dev_id < devManager::instance()->getDevIndexSize())
+            {
+                dev_id = t_dev_id;
+            }
+        }catch(...)
+        {
+            TagLoger::error(Log_MySqlServer, 0, "\x1b[1;31msql use db exeption for db_name=%s\x1b[0m\n", db_name); 
+            return false;
+        }
     }
 
     TagLoger::log(Log_MySqlServer, 0, "Error: set api_version `%s`", db_name); 
