@@ -76,6 +76,7 @@ public:
       
     /**
      * Устанавливает ствтус соединения
+     * @note Выполняется в контексте потока приёма входящих сообщений
      */
     int set_online(thread_data* local_buf );
     int set_offline(thread_data* local_buf );

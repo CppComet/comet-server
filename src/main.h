@@ -10,19 +10,29 @@
  
 #define NODE_NAME "NoName" 
 #define MAIN_BACKLOG_SIZE 1024 
-#define MAIN_EPOLL_SIZE 10000 
+#define MAIN_EPOLL_SIZE 10000
+#define MAIN_DEV_INDEX_SIZE "100000"
 
 /**
  * Надо ли вообще проверять с какого урла пишёл запрос.
  */
 #define testUrl
-   
+  
+/**
+ * Режим сборки для однопользовательского режима работы
+ */ 
+// #define monoURL { "chat.lovelama.ru", "lovelama.net", "lovelama.ru", "www.lovelama.net", "www.lovelama.ru" }
+// #define monoUrlsCount 4
+
+// #define monoURL "78.47.206.108,inparadise.info,demo.inparadise.info,n2.comet-server.com,chat.inparadise.info,demo-chat.inparadise.info,int.dev,social-chat.comet-server.com,chat.emed24.ru"
+// #define monoUrlsCount 8
+       
 /**
  * Максимальная длина имени канала 
  */
 #define	PIPE_NAME_LEN           64 
 #define	EVENT_NAME_LEN          64
- 
+  
 # define ARRAY_BUFFER_SIZE 64
 
 #define DEV_KEY_LEN 64
@@ -51,6 +61,11 @@
  */
 #define  USER_HASH_LEN 32
 
+/**
+ * Максимальная длина jwt токена
+ */
+#define  MAX_JWT_LEN 600
+
 #define  MAX_MAP_SIZE 500
 
 /**
@@ -71,7 +86,7 @@
 #define printGreen printf("\x1b[32m")
 #define printBGreen printf("\x1b[1;32m")
  */
-  
+   
     #define logoPage "<!DOCTYPE html>\
     <html>\
     <head>\
@@ -101,9 +116,10 @@
             </table>\
     </body>\
     </html>" 
- 
-#define MYSQL_SERVERNAME "CppComet 3.35"
-#define MYSQL_SYSTEMVARIBLE "CppComet 3.35 (comet-server.com, support@comet-server.com)"
+  
+#define MYSQL_SERVERNAME "CppComet enterprise 3.34"
+#define MYSQL_SYSTEMVARIBLE "CppComet enterprise 3.34 (comet-server.com, support@comet-server.com)"
+
 
 #define maxValue( a, b ) ( (a) > (b) ? (a) : (b) )
 #define minValue( a, b ) ( (a) < (b) ? (a) : (b) )

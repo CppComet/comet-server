@@ -176,7 +176,7 @@ int LengthEncodedInteger::setToBuff(long long value, char* buff)
     {
         printf("warning LengthEncodedInteger is %lld (9)\n", value); 
         *buff = 0xfe;
-        memcpy(buff+1, &value, 8); // @fixme уточнить можноли так чтоб 9 байт
+        memcpy(buff+1, &value, 8); // @todo уточнить можноли так чтоб 9 байт
         return 9;
     }
     
@@ -278,7 +278,7 @@ MySqlResultset_ColumDef::MySqlResultset_ColumDef(const char* text)
     int data_len = strlen(text);
     if(data_len > 250)
     {
-        TagLoger::error(Log_MySqlServer, 0, "MySqlResultset_ColumDef not completed before working with lines longer than 250 characters\n");
+        TagLoger::error(Log_MySqlServer, 0, "MySqlResultset_ColumDef не доделан до работы со строками длинее 250 символов\n");
         data_len = 250;
     }
     memcpy(column_name, text, data_len); 
@@ -294,7 +294,7 @@ void MySqlResultset_ColumDef::setName(const char* text, int data_len)
     bzero(column_name, MAX_COLUMN_NAME_LENGTH);
     if(data_len > 250)
     {
-        TagLoger::error(Log_MySqlServer, 0, "MySqlResultset_ColumDef not completed before working with lines longer than 250 characters\n");
+        TagLoger::error(Log_MySqlServer, 0, "MySqlResultset_ColumDef не доделан до работы со строками длинее 250 символов\n");
         data_len = 250;
     }
     memcpy(column_name, text, data_len); 
@@ -395,7 +395,7 @@ char* MySqlResultset_ColumDef::operator = (const char* text)
     int data_len = strlen(text);
     if(data_len > 250)
     {
-        TagLoger::error(Log_MySqlServer, 0, "MySqlResultset_ColumDef not completed before working with lines longer than 250 characters\n");
+        TagLoger::error(Log_MySqlServer, 0, "MySqlResultset_ColumDef не доделан до работы со строками длинее 250 символов\n");
         data_len = 250;
     }
     clear();
@@ -466,7 +466,6 @@ char* MySqlResulValue::setValue(const char* text, int data_len)
     { 
         longDataLen = data_len;
         longData = new char[data_len+1];
-        bzero(data, data_len+1);
         memcpy(longData, text, data_len); 
         return longData;
     }
@@ -542,7 +541,7 @@ char& MySqlResulValue::operator[] (int key)
     {
         if(longDataLen <= key)
         { 
-            TagLoger::error(Log_MySqlServer, 0, "MySqlResulValue::operator[%d] more them longDataLen=%d\n", key, longDataLen);
+            TagLoger::error(Log_MySqlServer, 0, "MySqlResulValue::operator[%d] больше longDataLen=%d\n", key, longDataLen);
             return longData[longDataLen-1]; 
         }
         return longData[key];

@@ -4,6 +4,18 @@ cmake_minimum_required(VERSION 2.6)
 message(STATUS "System: " ${CMAKE_SYSTEM_NAME} " " ${CMAKE_SYSTEM_VERSION})
 message(STATUS "Processor: " ${CMAKE_HOST_SYSTEM_PROCESSOR})
 
+# Проверить версию gcc так как на меньше чем 4.9 не собирается 
+# Установка версии gcc 4.9 в убунту https://askubuntu.com/questions/428198/getting-installing-gcc-g-4-9-on-ubuntu/507068#507068
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    # require at least gcc 4.9
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9)
+        message(FATAL_ERROR "GCC version must be at least 4.9! Now ${CMAKE_CXX_COMPILER_VERSION}")
+        message(FATAL_ERROR "GCC version must be at least 4.9!")
+    endif()
+endif()
+
+
+
 SET(CMAKE_CXX_FLAGS "-std=c++11 -g3")
 
 #add_definitions(-DMY_PROJECT)
@@ -78,6 +90,15 @@ MARK_AS_ADVANCED(
 ###########################################
  
 
+find_package(OpenSSL REQUIRED)
+if(NOT Threads_FOUND)
+    message(FATAL_ERROR "OpenSSL Not found.")
+    return()
+else()
+    include_directories(${OpenSSL_INCLUDE_DIRS})
+endif() 
+
+
 include_directories(${MYSQL_INCLUDE_DIR} dependencies dependencies/freeswitch-esl/include dependencies/jwt-cpp/src/include)
  
 
@@ -129,7 +150,7 @@ set(SOURCE_EXE
     src/tcpServer_benchmark.cpp
     src/base64.cpp
     src/sha1.cpp
-    src/CometQL.cpp
+    src/CometQL.cpp 
     src/devManager.cpp
     src/internalApi.cpp
     src/Client_connection.cpp
@@ -147,11 +168,17 @@ set(SOURCE_EXE
     src/lex.yy.o
     src/CometQL.cc) 
 
+
+add_library(libjwta STATIC IMPORTED)
+set_property(TARGET libjwta PROPERTY
+             IMPORTED_LOCATION dependencies/jwt-cpp/src/libjwt.a)
+
+
 # Создает исполняемый файл с именем cpp_comet из исходников
-add_executable(cpp_comet ${ESL_EXE} ${HASHLIB2PLUS_EXE} ${SOURCE_EXE} ${TINYXML2_EXE} ./dependencies/jwt-cpp/src/libjwt.a)
+add_executable(cpp_comet ${HASHLIB2PLUS_EXE} ${SOURCE_EXE} ${TINYXML2_EXE} ${ESL_EXE} )
 
 # Подключение библиотеки pthreads
-target_link_libraries (cpp_comet ${CMAKE_THREAD_LIBS_INIT}  ${MYSQL_LIBRARIES} crypt uuid)
+target_link_libraries (cpp_comet ${CMAKE_THREAD_LIBS_INIT}  ${MYSQL_LIBRARIES} ${OPENSSL_LIBRARIES} crypt uuid libjwta)
 
 
 #cmake ./ && make

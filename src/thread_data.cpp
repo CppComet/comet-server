@@ -3,6 +3,7 @@
 
 #include "thread_data.h"
 
+
 bool fs_esl::init(std::string connectionString){
    
     int pos = 0;
@@ -87,7 +88,7 @@ bool fs_esl::init(std::string connectionString){
     
     return true; 
 }
- 
+
 esl_handle_t fs_esl::getHandle()
 {
     return handle;
@@ -118,7 +119,6 @@ void fs_esl::exec(const char* command)
 }
 
 
-
 void thread_data::setThreadStatus(char c)
 {
     if(bm != NULL)
@@ -143,7 +143,7 @@ thread_data::thread_data( appConf* app):buf(app->get_int("main", "buf_size")), m
     //db.reconnect_on_error = false;
     db.init(app->get_chars("db", "host"), app->get_chars("db", "user"), app->get_chars("db", "password"), app->get_chars("db", "name"), app->get_int("db", "port"));
     db.connect();
-
+    
     auto fsCluster = app->get_list("sip", "freeswitch");
     if(!fsCluster.empty())
     {
@@ -171,6 +171,7 @@ thread_data::thread_data( appConf* app):buf(app->get_int("main", "buf_size")), m
     {
         TagLoger::log(Log_Any, LogColorBase, "section [sip] value [freeswitch] is empty");
     }
+    
     
     // cometqlproxy кластер для рассылки сообщений приходившех с cometqlproxy
     auto proxycluster = app->get_list("cometqlproxy", "cluster");

@@ -124,7 +124,7 @@ bool appConf::initFromFile(const char *fileName)
     {
         sections["main"]["buf_size"] = "10384";  
     }
-         
+        
     if(!is_property_exists("db", "buf_size"))
     {
         sections["db"]["buf_size"] = "10384";  
@@ -150,11 +150,21 @@ bool appConf::initFromFile(const char *fileName)
         sections["main"]["password"] = MAIN_PASSWORD;  
     }
      
+    if(!is_property_exists("main", "mono_password"))
+    {
+        sections["main"]["mono_password"] = MAIN_PASSWORD;  
+    }
+    
     if(!is_property_exists("main", "node_name"))
     {
         sections["main"]["node_name"] = NODE_NAME;  
     }
      
+    if(!is_property_exists("main", "dev_index_size"))
+    {
+        sections["main"]["dev_index_size"] = MAIN_DEV_INDEX_SIZE;  
+    }
+    
     if(!is_property_exists("http", "base_dir"))
     { 
         sections["http"]["base_dir"] = HTTP_BASE_DIR;   

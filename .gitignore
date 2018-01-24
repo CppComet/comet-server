@@ -1,1 +1,22 @@
-/CMakeFiles/
+*~
+*.o
+*.so
+*.lo
+*.a
+*.la
+*.loT
+*.orig
+*.rej
+*.dirstamp
+.libs
+.deps
+ 
+# CMake  
+/CMakeCache.txt
+/nbproject
+/nbproject/*
+*Makefile*
+*cmake_install*
+/compile_commands*
+*CMakeFiles*
+/cpp_comet

@@ -272,9 +272,8 @@ class devInfo
 {
     friend class devManager;
 
-        bool active = false;
-        char* key = NULL;
-
+        int id;
+        bool active = false;  
         char* url = NULL;
 
         char** urls = NULL;
@@ -301,12 +300,11 @@ class devInfo
             pthread_mutex_unlock(&pipe_index_mutex);
         }
 
-    protected:
-        devInfo(const char* dev_key);
-
+    protected: 
+        devInfo(int dev_id);
+        
     public:
-
-        void setDevKey(const char* devKey);
+ 
         void setDevUrl(const char* devUrl);
 
         int countDevUrl() const;
@@ -322,7 +320,7 @@ class devInfo
          * @param dev_key
          * @return
          */
-        static bool testDevKey(const char* random20bytes, const char* DevKeyHashStart, thread_data* local_buf);
+        static bool testDevKey(const char* random20bytes, const char* DevKeyHashStart);
 
         CP<Pipe> getPipe(const std::string &pipe_name)
         {
@@ -380,8 +378,9 @@ class devInfo
         user_index* index;
 
         ~devInfo();
+ 
+        int getDevId() const { return id;}
 
-        const char* getDevKey() const;
         bool testDevKey(const char* devKey) const;
 
     /**
@@ -442,7 +441,12 @@ class devInfo
  */
 class devManager
 { 
-    devInfo* index; 
+    devInfo** index = NULL;
+    /**
+     * Размер индекса дев клиентов
+     */
+    int dev_index_size = 0;
+
     int tps_network_events = 0;
     float ps_network_events = 0;
 
@@ -454,17 +458,16 @@ class devManager
     ~devManager();
     devManager()
     {
-        index = new devInfo(appConf::instance()->get_chars("main", "password") ); 
         intervalLoop::instance()->add([](int uptime, thread_data* local_buf)
         {
             int benchmark = appConf::instance()->get_int("ws", "statistics");
-            if( !benchmark || uptime% benchmark != 0)
+            if( !benchmark || uptime % benchmark != 0)
             {
                 return;
             }
             
-            devManager::instance()->ps_network_events = devManager::instance()->tps_network_events / benchmark;
-            devManager::instance()->tps_network_events = 0;
+            //devManager::instance()->ps_network_events = devManager::instance()->tps_network_events / benchmark;
+            //devManager::instance()->tps_network_events = 0;
         });
 
     }  
@@ -477,13 +480,20 @@ class devManager
     void addNetworkEvents(){ tps_network_events++; }
 
     /**
+     * Устанавливает максимальное количество разных dev_id и создаёт под них масив user_index**
+     * @param size
+     */
+    void setDevIndexSize(int size);
+    int getDevIndexSize() const { return dev_index_size;}
+
+    /**
      * Вернёт devInfo по dev_id
      * @param dev_id
      * @return
      *
      * Если dev_id не валидный то будет возвращатся index[0]
      */
-    devInfo* getDevInfo();
+    devInfo* getDevInfo(int dev_id);
 
 protected:
 

@@ -5,6 +5,15 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v3.36
+  
+FEATURES:
+ * add table users_data
+ * add table revoked_tokens 
+ * add jwt support
+ * add web_pipe_count command for track_* pipes
+ * add multi db
+ 
 ## v3.35
  
 BUG FIXES:

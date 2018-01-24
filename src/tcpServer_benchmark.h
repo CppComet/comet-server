@@ -138,6 +138,10 @@ public:
      * D - удаление клиента
      * M - обрабатывает сообщение
      * E - обработка сообщения завершена
+     * U - в начале вызова subscription функции в Client_connection
+     * S - в начале вызова ws_subscription функции в Client_connection
+     * W - Перед вызовом web_socket_request функции в Client_connection
+     * Q - Перед вызовом web_socket_request_message функции в Client_connection
      * - - не инециализирован (в момент старта сервера)
      * 0 - ждём событий (идеальное состояние)
      * X - Ошибка epoll_events_count
@@ -322,4 +326,34 @@ public:
     void static start();
 };
  
+
+#define make_str( bar ) # bar
+
+enum UA {
+    DB_QUERY_CONTER = 1
+};
+
+class usage_analytics: public intervalLoopObject
+{
+    float stat[100];
+    
+    float getValue(int key){
+        return stat[key];
+    }
+    
+    void setValue(int key, float value){
+        stat[key] = value;
+    }
+    
+    
+    void incrementValue(int key, float value){
+        stat[key] += value;
+    }
+    
+    void incrementValue(int key){
+        stat[key]++;
+    }
+    
+};
+
 #endif	/* TCPSERVER_BENCHMARK_H */

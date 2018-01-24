@@ -84,7 +84,7 @@ using namespace std;
 class PipeLog
 {
 public:
-    static int addToLog(thread_data* local_buf, const char* pipe_name, const char* event_name, unsigned int from_user_id, const char* msg, unsigned int msg_length);
+    static int addToLog(thread_data* local_buf, unsigned int dev_id, const char* pipe_name, const char* event_name, unsigned int from_user_id, const char* msg, unsigned int msg_length);
 };
 
 
@@ -93,12 +93,15 @@ class PipeSettings
     unsigned int log_length = 0;
 public:
     char* pipe_name = 0;
+    unsigned int dev_id = 0;
+
     /**
      *
+     * @param Dev_id
      * @param Pipe_name Предполагается что имя канала проверено и соответсвует AZ09test
      */
-    PipeSettings(char* Pipe_name):pipe_name(Pipe_name){}
-    PipeSettings(char* Pipe_name, unsigned int Log_length):pipe_name(Pipe_name), log_length(Log_length){}
+    PipeSettings(unsigned int Dev_id, char* Pipe_name):dev_id(Dev_id), pipe_name(Pipe_name){}
+    PipeSettings(unsigned int Dev_id, char* Pipe_name, unsigned int Log_length):dev_id(Dev_id), pipe_name(Pipe_name), log_length(Log_length){}
 
     void setLogLength(unsigned int length)
     {
@@ -132,8 +135,8 @@ public:
         }
  
         // Сохраняем настройки канала в бд
-        local_buf->db.query_format("REPLACE INTO `pipes_settings`(`name`, `type`, `length`) VALUES ('%s', '0', %d);", pipe_name, log_length);
-        //local_buf->db.query_format("DELETE FROM `pipe_messages` WHERE `name` = '%s' ORDER BY `time` DESC limit %d, 99999", pipe_name, log_length);
+        local_buf->db.query_format("REPLACE INTO `pipes_settings`(`dev_id`, `name`, `type`, `length`) VALUES (%d, '%s', '0', %d);", dev_id, pipe_name, log_length);
+        //local_buf->db.query_format("DELETE FROM `pipe_messages` WHERE `dev_id` = %d and `pipe_name` = '%s' ORDER BY `time` DESC limit %d, 99999", dev_id, pipe_name, log_length);
         return 0;
     }
 
@@ -144,10 +147,10 @@ public:
             return false;
         }
 
-        local_buf->stm.pipes_settings_select->execute(pipe_name);
+        local_buf->stm.pipes_settings_select->execute(dev_id, pipe_name);
         if(local_buf->stm.pipes_settings_select->fetch())
         {
-            TagLoger::error(Log_UserItem, 0, "pipes_settings not found Error:pipes_settings_select [fetch-1] pipe_name = %s\n", pipe_name);
+            TagLoger::error(Log_UserItem, 0, "pipes_settings not found Error:pipes_settings_select [fetch-1] pipe_name = %s, dev_id = %d\n", pipe_name, dev_id);
             local_buf->stm.pipes_settings_select->free();
             return false;
         }
@@ -165,8 +168,8 @@ public:
             return false;
         }
    
-        local_buf->db.query_format("DELETE FROM `pipe_messages` WHERE `name` = '%s' ;", pipe_name);
-        local_buf->db.query_format("DELETE FROM `pipes_settings` WHERE `name` = '%s' ;", pipe_name); 
+        local_buf->db.query_format("DELETE FROM `pipe_messages` WHERE `dev_id` = %d, `name` = '%s' ;", dev_id, pipe_name);
+        local_buf->db.query_format("DELETE FROM `pipes_settings` WHERE `dev_id` = %d and `name` = '%s' ;", dev_id, pipe_name); 
         
         return true;
     }
@@ -193,11 +196,17 @@ class MySql_connection:public connection
 protected:
     
     /**
+     * Идентификатор dev_id
+     */
+    int dev_id = 0;
+    
+    /**
      * Не 0 если сообщение пришло из кластера
      */
     int cometqlcluster = 0;
-    
-    bool isRootUser = true;  
+     
+    bool isAuthUser = false;
+
     int api_version = 0;
 
     long clientState = STATE_0;
@@ -294,7 +303,7 @@ protected:
     int sql_select_from_pipes_messages(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_from_users_in_pipes(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_from_pipes(thread_data* local_buf, unsigned int PacketNomber);
-    int sql_select_from_pipes_settings(thread_data* local_buf, unsigned int PacketNomber);
+    int sql_select_from_pipes_settings(thread_data* local_buf, unsigned int PacketNomber); 
     int sql_select_from_conference(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_from_conference_members(thread_data* local_buf, unsigned int PacketNomber);
 
@@ -322,8 +331,8 @@ protected:
     int sql_insert_into_pipes_messages(thread_data* local_buf, unsigned int PacketNomber);
     int sql_insert_into_users_in_pipes(thread_data* local_buf, unsigned int PacketNomber);
     int sql_insert_into_pipes(thread_data* local_buf, unsigned int PacketNomber);
-    int sql_insert_into_pipes_settings(thread_data* local_buf, unsigned int PacketNomber);
- 
+    int sql_insert_into_pipes_settings(thread_data* local_buf, unsigned int PacketNomber); 
+  
     int sql_delete_from_users_auth(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_users_data(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_users_time(thread_data* local_buf, unsigned int PacketNomber);
@@ -331,10 +340,13 @@ protected:
     int sql_delete_from_pipes_messages(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_users_in_pipes(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_pipes(thread_data* local_buf, unsigned int PacketNomber);
-    int sql_delete_from_pipes_settings(thread_data* local_buf, unsigned int PacketNomber);
+    int sql_delete_from_pipes_settings(thread_data* local_buf, unsigned int PacketNomber); 
     int sql_delete_from_conference(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_conference_members(thread_data* local_buf, unsigned int PacketNomber);
- 
+    
+    int sql_select_from_revoked_tokens(thread_data* local_buf, unsigned int PacketNomber);
+    int sql_insert_into_revoked_tokens(thread_data* local_buf, unsigned int PacketNomber);
+    int sql_delete_from_revoked_tokens(thread_data* local_buf, unsigned int PacketNomber);
 };
 
 #endif	/* MYSQL_CONNECTION_H */

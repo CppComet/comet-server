@@ -105,6 +105,39 @@ public:
  */
 #define MAX_EXPRESSIONS_VALUES 4000
 
+class sqlExpression
+{
+public:
+    
+    // Таблица значений переменных key->value
+    //std::map<std::string, MySqlResulValue>* vars;
+    
+    /**
+     * Содержит количество выражений
+     */
+    int tokensCount = 0;
+    
+    tokPlace exprTokens[MAX_EXPRESSIONS_COUNT]; // Токены токенов по порядку в выражении
+    int exprTokensTypes[MAX_EXPRESSIONS_COUNT]; // Типы токенов по порядку в выражении
+    
+    
+    bool isMatch(){
+        
+    }
+    
+    MySqlResulValue getValue(){
+        
+    }
+       
+    sqlExpression operator = (sqlExpression exp){
+        return exp;
+    }
+    
+    sqlExpression* operator = (sqlExpression* exp){
+        return exp;
+    }
+};
+
 class sqlWhere
 {
 public:
@@ -217,6 +250,12 @@ public:
      * Содержит список выбираемых колонок
      */
     tokPlace selectedColumns[MAX_COLUMNS_COUNT];
+    
+    /**
+     * Содержит количество выбираемых колонок выражений
+     */
+    int selectedExpressionsCount = 0;
+    sqlExpression selectedExpressions[MAX_COLUMNS_COUNT];
 };
 
 class Query_insert
@@ -245,6 +284,8 @@ class QueryData
 {
 public:
     char* StartQury = NULL;
+    
+    sqlExpression* currentExpression;
 
     /**
      * Для сохранения текста ошибки

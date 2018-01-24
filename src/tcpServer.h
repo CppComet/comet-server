@@ -105,7 +105,12 @@ class tcpServer: public intervalLoopObject
     const char* name = NULL;
     char* host = NULL;
     int port = 80;
- 
+
+    /**
+     * Включает или выключает использование ssl
+     */
+    bool use_ssl = false;
+
     /**
      * Возможность epoll впервые была представлена в разрабатываемом ядре 2.5.44, а завер-шен интерфейс был в версии ядра 2.5.66.
      *
@@ -138,7 +143,7 @@ class tcpServer: public intervalLoopObject
     pthread_mutex_t* request_mutex;
 
     /**
-     *  @todo simpleTask | Заменить std::map на std::unordered_map так как он быстрее http://forum.vingrad.ru/topic-341520.html
+     *  @todo Заменить std::map на std::unordered_map так как он быстрее http://forum.vingrad.ru/topic-341520.html
      */
     inline std::map<int,CP<connectionType>>& getMapToUserId(unsigned int client_id) const
     { 

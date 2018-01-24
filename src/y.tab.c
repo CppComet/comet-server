@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.4.  */
+/* A Bison parser, made by GNU Bison 3.0.2.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "3.0.4"
+#define YYBISON_VERSION "3.0.2"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -305,7 +305,7 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-
+typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
 #line 115 "src/CometQL.y" /* yacc.c:355  */
@@ -318,8 +318,6 @@ union YYSTYPE
 
 #line 320 "y.tab.c" /* yacc.c:355  */
 };
-
-typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
@@ -333,7 +331,7 @@ int yyparse (void* qInfo);
 
 /* Copy the second part of user declarations.  */
 
-#line 337 "y.tab.c" /* yacc.c:358  */
+#line 335 "y.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -1512,7 +1510,7 @@ yyreduce:
                 setTokValue(qData, qData->arg_set.value, (yyvsp[0].tokStruct));  
                 //printf("\tСписок баз данных\n");
         }
-#line 1516 "y.tab.c" /* yacc.c:1646  */
+#line 1514 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
@@ -1523,7 +1521,7 @@ yyreduce:
                 setTokValue(qData, qData->arg_set.varible, (yyvsp[-1].tokStruct));  
                 setTokValue(qData, qData->arg_set.value, (yyvsp[0].tokStruct));   
         }
-#line 1527 "y.tab.c" /* yacc.c:1646  */
+#line 1525 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
@@ -1535,7 +1533,7 @@ yyreduce:
                 setTokValue(qData, qData->arg_set.varible, (yyvsp[-1].tokStruct));  
                 setTokValue(qData, qData->arg_set.value, (yyvsp[0].tokStruct));  
         }
-#line 1539 "y.tab.c" /* yacc.c:1646  */
+#line 1537 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
@@ -1546,7 +1544,7 @@ yyreduce:
                 qData->arg_show.command = TOK_DATABASES; 
                 //printf("\tСписок баз данных\n");
         }
-#line 1550 "y.tab.c" /* yacc.c:1646  */
+#line 1548 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
@@ -1557,7 +1555,7 @@ yyreduce:
                 qData->arg_show.command = TOK_PROCESSLIST; 
                 //printf("\tСписок потоков\n");
         }
-#line 1561 "y.tab.c" /* yacc.c:1646  */
+#line 1559 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
@@ -1568,7 +1566,7 @@ yyreduce:
                 qData->arg_show.command = TOK_TABLES; 
                 //printf("\tСписок таблиц\n");
         }
-#line 1572 "y.tab.c" /* yacc.c:1646  */
+#line 1570 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
@@ -1580,7 +1578,7 @@ yyreduce:
                 
                 //printf("\tСписок таблиц\n");
         }
-#line 1584 "y.tab.c" /* yacc.c:1646  */
+#line 1582 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
@@ -1591,7 +1589,7 @@ yyreduce:
                 qData->arg_show.command = TOK_STATUS; 
                 //printf("\tСтатус системы\n");
         }
-#line 1595 "y.tab.c" /* yacc.c:1646  */
+#line 1593 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
@@ -1603,7 +1601,7 @@ yyreduce:
                 qData->arg_show.command = TOK_COLUMNS;  
                 //printf("\tСписок колонок\n");
         }
-#line 1607 "y.tab.c" /* yacc.c:1646  */
+#line 1605 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
@@ -1615,7 +1613,7 @@ yyreduce:
                 qData->arg_show.command = TOK_COLUMNS;  
                 //printf("\tСписок колонок\n");
         }
-#line 1619 "y.tab.c" /* yacc.c:1646  */
+#line 1617 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
@@ -1628,7 +1626,7 @@ yyreduce:
                 setTokValue(qData, qData->arg_show.like, (yyvsp[0].tokStruct)); 
                 //printf("\tПоказать переменные\n");
         }
-#line 1632 "y.tab.c" /* yacc.c:1646  */
+#line 1630 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 23:
@@ -1637,7 +1635,7 @@ yyreduce:
                 setQData;
                 qData->arg_show.flag = FLAG_GLOBAL;
         }
-#line 1641 "y.tab.c" /* yacc.c:1646  */
+#line 1639 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 24:
@@ -1646,7 +1644,7 @@ yyreduce:
                 setQData;
                 qData->arg_show.flag = FLAG_SESSION;
         }
-#line 1650 "y.tab.c" /* yacc.c:1646  */
+#line 1648 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
@@ -1655,7 +1653,7 @@ yyreduce:
                 setQData;
                 qData->arg_show.flag = FLAG_FILESYSTEM;
         }
-#line 1659 "y.tab.c" /* yacc.c:1646  */
+#line 1657 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 26:
@@ -1664,7 +1662,7 @@ yyreduce:
                 setQData;
                 qData->arg_show.flag = FLAG_RAM;
         }
-#line 1668 "y.tab.c" /* yacc.c:1646  */
+#line 1666 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 27:
@@ -1673,7 +1671,7 @@ yyreduce:
                 setQData;
                 qData->arg_show.flag = FLAG_AVG;
         }
-#line 1677 "y.tab.c" /* yacc.c:1646  */
+#line 1675 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 28:
@@ -1682,7 +1680,7 @@ yyreduce:
                 setQData;
                 qData->arg_show.flag = FLAG_UPTIME;
         }
-#line 1686 "y.tab.c" /* yacc.c:1646  */
+#line 1684 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 30:
@@ -1691,7 +1689,7 @@ yyreduce:
                 setQData;
                 qData->arg_show.flag = FLAG_FULL;
         }
-#line 1695 "y.tab.c" /* yacc.c:1646  */
+#line 1693 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 31:
@@ -1704,7 +1702,7 @@ yyreduce:
                 
                 //printf("\tВыборка %s\n", $2.text);
         }
-#line 1708 "y.tab.c" /* yacc.c:1646  */
+#line 1706 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 32:
@@ -1715,7 +1713,7 @@ yyreduce:
                 qData->arg_select.command = TOK_DATABASE;  
                 //printf("\tВыборка DATABASE\n");
         }
-#line 1719 "y.tab.c" /* yacc.c:1646  */
+#line 1717 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 33:
@@ -1725,7 +1723,7 @@ yyreduce:
                 qData->command = TOK_SELECT;
                 qData->arg_select.command = TOK_FROM;  
         }
-#line 1729 "y.tab.c" /* yacc.c:1646  */
+#line 1727 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 36:
@@ -1740,7 +1738,7 @@ yyreduce:
                 qData->where.whereExprValueCount = 0;
                 qData->where.whereExprCount++;
         }
-#line 1744 "y.tab.c" /* yacc.c:1646  */
+#line 1742 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 37:
@@ -1759,7 +1757,7 @@ yyreduce:
                 qData->where.whereExprCount++;
                 qData->where.whereExprValueCount = 0;
         }
-#line 1763 "y.tab.c" /* yacc.c:1646  */
+#line 1761 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 38:
@@ -1778,7 +1776,7 @@ yyreduce:
                 qData->where.whereExprCount++;
                 qData->where.whereExprValueCount = 0;
         }
-#line 1782 "y.tab.c" /* yacc.c:1646  */
+#line 1780 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 39:
@@ -1787,7 +1785,7 @@ yyreduce:
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = TOK_LIKE;
         }
-#line 1791 "y.tab.c" /* yacc.c:1646  */
+#line 1789 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 40:
@@ -1796,7 +1794,7 @@ yyreduce:
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = MORE;
         }
-#line 1800 "y.tab.c" /* yacc.c:1646  */
+#line 1798 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 41:
@@ -1805,7 +1803,7 @@ yyreduce:
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = LESS;
         }
-#line 1809 "y.tab.c" /* yacc.c:1646  */
+#line 1807 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 42:
@@ -1814,7 +1812,7 @@ yyreduce:
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = EQUALLY;
         }
-#line 1818 "y.tab.c" /* yacc.c:1646  */
+#line 1816 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 43:
@@ -1823,7 +1821,7 @@ yyreduce:
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = TOK_IN;
         }
-#line 1827 "y.tab.c" /* yacc.c:1646  */
+#line 1825 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 46:
@@ -1833,7 +1831,7 @@ yyreduce:
                 setTokValue(qData, qData->where.whereExprColum[qData->where.whereExprCount], (yyvsp[0].tokStruct));   
                 //printf("\texpr_Name %d[%.3s...]\n", qData->where.whereExprCount, $1.text);
         }
-#line 1837 "y.tab.c" /* yacc.c:1646  */
+#line 1835 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 47:
@@ -1852,7 +1850,7 @@ yyreduce:
                     //printf("\texpr_Value %d[%.3s...]\n", qData->where.whereExprValueCount, $1.text);
                 }
         }
-#line 1856 "y.tab.c" /* yacc.c:1646  */
+#line 1854 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 49:
@@ -1862,7 +1860,7 @@ yyreduce:
                 setTokValue(qData, qData->orderBy.name, (yyvsp[-1].tokStruct));   
                 qData->orderBy.type = TOK_ASC;
         }
-#line 1866 "y.tab.c" /* yacc.c:1646  */
+#line 1864 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 50:
@@ -1872,7 +1870,7 @@ yyreduce:
                 setTokValue(qData, qData->orderBy.name, (yyvsp[-1].tokStruct));  
                 qData->orderBy.type = TOK_ASC;
         }
-#line 1876 "y.tab.c" /* yacc.c:1646  */
+#line 1874 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 51:
@@ -1882,7 +1880,7 @@ yyreduce:
                 setTokValue(qData, qData->orderBy.name, (yyvsp[-1].tokStruct));   
                 qData->orderBy.type = TOK_DESC;
         }
-#line 1886 "y.tab.c" /* yacc.c:1646  */
+#line 1884 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 53:
@@ -1893,7 +1891,7 @@ yyreduce:
                 
                 //printf("\tВыборка limit %d\n", qData->limit.rows);
         }
-#line 1897 "y.tab.c" /* yacc.c:1646  */
+#line 1895 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 54:
@@ -1905,7 +1903,7 @@ yyreduce:
                 
                 //printf("\tВыборка limit_start %d, limit %d\n", qData->limit.start, qData->limit.rows);
         }
-#line 1909 "y.tab.c" /* yacc.c:1646  */
+#line 1907 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 55:
@@ -1914,7 +1912,7 @@ yyreduce:
                 setQData; 
                 qData->arg_select.selectedColumnsCount=0;
         }
-#line 1918 "y.tab.c" /* yacc.c:1646  */
+#line 1916 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 59:
@@ -1933,7 +1931,7 @@ yyreduce:
                     //printf("\tQUOTED_Name %d[%.3s...]\n", qData->arg_select.selectedColumnsCount, $1.text);
                 }
         }
-#line 1937 "y.tab.c" /* yacc.c:1646  */
+#line 1935 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 60:
@@ -1943,7 +1941,7 @@ yyreduce:
                 qData->command = TOK_INSERT;  
                 //printf("\tВставка\n");
         }
-#line 1947 "y.tab.c" /* yacc.c:1646  */
+#line 1945 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 61:
@@ -1953,7 +1951,7 @@ yyreduce:
                 qData->command = TOK_INSERT;         
                 //printf("\tВставка\n"); 
         }
-#line 1957 "y.tab.c" /* yacc.c:1646  */
+#line 1955 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 66:
@@ -1972,7 +1970,7 @@ yyreduce:
                     //printf("\tQUOTED_Name %d[%.3s...]\n", qData->arg_insert.namesCount, $1.text);
                 }
         }
-#line 1976 "y.tab.c" /* yacc.c:1646  */
+#line 1974 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 67:
@@ -1991,7 +1989,7 @@ yyreduce:
                     //printf("\tQUOTED_Value %d[%.3s...%d]\n", qData->arg_insert.valuesCount, $1.text, $1.len);
                 }
         }
-#line 1995 "y.tab.c" /* yacc.c:1646  */
+#line 1993 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 68:
@@ -2001,7 +1999,7 @@ yyreduce:
                 qData->command = TOK_DELETE;  
                 //printf("\tУдаление\n");
         }
-#line 2005 "y.tab.c" /* yacc.c:1646  */
+#line 2003 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 69:
@@ -2011,11 +2009,11 @@ yyreduce:
                 setTokValue(qData, qData->tableName, (yyvsp[0].tokStruct));   
                 //printf("\tTable_Name [%.3s...%d]\n", $1.text, $1.len);
         }
-#line 2015 "y.tab.c" /* yacc.c:1646  */
+#line 2013 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 2019 "y.tab.c" /* yacc.c:1646  */
+#line 2017 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires

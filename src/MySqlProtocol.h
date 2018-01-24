@@ -183,7 +183,7 @@ class MySqlResulValue
     char data[255]; 
     
     /**
-     * Для хранения строк длинее 250 символов 
+     * Для хранения строк длинее 250 символов
      */
     char* longData = 0;
     int longDataLen = 0;
@@ -213,6 +213,22 @@ public:
     char* operator = (const bool value);
     
     char* setValue(const char* text, int data_len);
+    
+    // Операторы для сравнения и арифметических операций над данными выбраными для отправки клиенту.
+    bool isNotNULL();
+    
+    MySqlResulValue operator + (MySqlResulValue val);
+    MySqlResulValue operator - (MySqlResulValue val);
+    MySqlResulValue operator * (MySqlResulValue val);
+    MySqlResulValue operator / (MySqlResulValue val);
+    
+    MySqlResulValue operator > (MySqlResulValue val);
+    MySqlResulValue operator < (MySqlResulValue val);
+    MySqlResulValue operator >= (MySqlResulValue val);
+    MySqlResulValue operator <= (MySqlResulValue val);
+    MySqlResulValue operator == (MySqlResulValue val);
+    MySqlResulValue operator != (MySqlResulValue val);
+    
 };
    
 /**

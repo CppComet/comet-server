@@ -42,14 +42,13 @@
 #include <functional> 
 #include <cctype>
 #include <locale>
-
-
+ 
 class confVar{ 
     /**
      * @todo simpleTask оптимизировать функции get_* и set_* так чтоб не преобразовывать каждый раз из строки в нужный тип 
      */ 
     std::string value;
-    std::list<std::string> list;
+    std::list<std::string> list; 
 public:
     
     int get_int() const

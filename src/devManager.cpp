@@ -5,16 +5,6 @@
 #include "sha1.h"
 #include "base64.h"
 #include "devManager.h"
-
-void devInfo::setDevKey(const char* devKey)
-{
-    if(key == NULL)
-    {
-        key = new char[DEV_KEY_LEN+1];
-    }
-    bzero(key, DEV_KEY_LEN+1);
-    strncpy(key,devKey,DEV_KEY_LEN);
-}
  
 const char* devInfo::getDevUrl(int i) const
 {
@@ -22,7 +12,7 @@ const char* devInfo::getDevUrl(int i) const
     {
         return NULL;
     }
-    
+
     return urls[i];
 }
 
@@ -37,16 +27,16 @@ void devInfo::setDevUrl(const char* devUrl)
     {
         return;
     }
-    
+
     if(url == NULL)
     {
         url = new char[DEV_URL_LEN+1];
     }
     bzero(url, DEV_URL_LEN+1);
     strncpy(url,devUrl,DEV_URL_LEN);
-    
+
     char* start = url;
-    
+
     urls_count =0;
     for(int i = 0; i<DEV_URL_LEN; i++)
     {
@@ -54,7 +44,7 @@ void devInfo::setDevUrl(const char* devUrl)
         {
             break;
         }
-        
+
         if(url[i] == ',')
         {
             url[i] = 0;
@@ -62,41 +52,29 @@ void devInfo::setDevUrl(const char* devUrl)
             {
                 urls = new char*[DEV_MAX_URLS];
             }
-            
+
             urls[urls_count] = start;
             start = url + i + 1;
             urls_count++;
         }
     }
 }
-  
-devInfo::devInfo(const char* dev_key)
-{ 
-    setDevKey(dev_key);
-    index = new user_index(); 
-    active = true;
+
+devInfo::devInfo(int dev_id)
+{
+    id = dev_id;
+    index = new user_index(dev_id);
     pthread_mutex_init(&pipe_index_mutex,NULL);
 }
-
+ 
 devInfo::~devInfo()
 {
-    delete index;
-    delete[] key;
+    delete index; 
 }
 
 bool devInfo::testDevKey(const char* devKey) const
-{
-    if(key == NULL)
-    {
-        return false;
-    }
-    
-    return memcmp(key,devKey,DEV_KEY_LEN) == 0;
-}
-
-const char* devInfo::getDevKey() const
-{
-    return key;
+{ 
+    return memcmp(appConf::instance()->get_chars("main", "password"), devKey, DEV_KEY_LEN) == 0; 
 }
 
 /**
@@ -106,9 +84,9 @@ const char* devInfo::getDevKey() const
  * @param DevKeyHashStart
  * @return
  */
-bool devInfo::testDevKey(const char* random20bytes, const char* DevKeyHashStart, thread_data* local_buf)
+bool devInfo::testDevKey(const char* random20bytes, const char* DevKeyHashStart)
 { 
-    const char* devKeyPassword = appConf::instance()->get_chars("main", "password"); 
+    const char* devKeyPassword = appConf::instance()->get_chars("main", "password");
     
     unsigned char sha1_password[20];
     bzero(sha1_password, 20);
@@ -141,10 +119,9 @@ bool devInfo::testDevKey(const char* random20bytes, const char* DevKeyHashStart,
 
 void devInfo::incrMessages()
 {
-    messages++; 
-    devManager::instance()->addNetworkEvents(); 
+    messages++;
+    devManager::instance()->addNetworkEvents();
 }
-
 
 //**************************
 //* devManager
@@ -162,11 +139,56 @@ devManager* devManager::instance()
 }
 
 devManager::~devManager()
-{ 
-    delete[] index;
-}
- 
-devInfo* devManager::getDevInfo()
 {
-    return index;
-} 
+    if(dev_index_size > 0)
+    {
+        for(int i =0; i< dev_index_size; i++)
+        {
+            delete index[i];
+        }
+        delete[] index;
+    }
+}
+
+/**
+ * Устанавливает максимальное количество разных dev_id и создаёт под них масив user_index**
+ * @param size
+ */
+void devManager::setDevIndexSize(int size)
+{
+    TagLoger::log(Log_devManager, 0, "devManager::setDevIndexSize dev_index_size=%d\n", dev_index_size);
+
+    if(index == NULL)
+    {
+        dev_index_size = size;
+        index = new devInfo*[size];
+        bzero(index, size *sizeof(devInfo*));
+
+        /**
+         * Инициализация первого devInfo
+         * Он будет возвращатся во всех случаях кода getDevInfo(int dev_id) будет получать не валидный dev_id
+         */
+        index[0] = new devInfo(0);
+    }
+    
+    else if(dev_index_size > size)
+    {
+        dev_index_size = size;
+    }
+}
+
+devInfo* devManager::getDevInfo(int dev_id)
+{
+    if(dev_id < 0 || dev_id >= dev_index_size)
+    {
+        TagLoger::error(Log_devManager, 0, "Запрвшивается не доступный devInfo с dev_id=%d, dev_index_size = %d\n",dev_id, dev_index_size);
+        return index[0];
+    }
+
+    if( index[dev_id] == NULL)
+    {
+        index[dev_id] = new devInfo(dev_id); 
+    }
+
+    return index[dev_id];
+}

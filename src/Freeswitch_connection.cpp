@@ -53,7 +53,7 @@ int Freeswitch_connection::options(int client, int len, thread_data* local_buf)
 
     if(web_write( resp ) < 0)
     {
-      TagLoger::warn(Log_FreeswitchServer, 0, " >Client Failed to send data %d\n", fd);
+      TagLoger::log(Log_FreeswitchServer, 0, " >Client Не удалось отправить данные %d\n", fd);
     }
 
     return -1;
@@ -72,7 +72,7 @@ int Freeswitch_connection::get_request(int client, int len, thread_data* local_b
 
     if(web_write( resp ) < 0 || web_write( logoPage ) < 0)
     {
-      TagLoger::log(Log_FreeswitchServer, 0, " >Client Failed to send data %d\n", fd);
+      TagLoger::log(Log_FreeswitchServer, 0, " >Client Не удалось отправить данные %d\n", fd);
     }
     return -1;
 }
@@ -139,6 +139,7 @@ int Freeswitch_connection::get_request(int client, int len, thread_data* local_b
 int Freeswitch_connection::get_directory_request(int client, int len, thread_data* local_buf)
 {
     int userId = 1;
+    int dev_id = 1;
     char user[64];
     bzero(user, 64);
 
@@ -185,20 +186,41 @@ int Freeswitch_connection::get_directory_request(int client, int len, thread_dat
     
     if(strlen(user) < 7)
     {
+        // Нет данных авторизации - ответ 404
+        local_buf->answer_buf.lock();
+        snprintf(local_buf->answer_buf, local_buf->answer_buf.getSize(),
+                "HTTP/1.1 404 Error\r\nContent-Type:text/html; charset=UTF-8\r\nServer:Star.Comet Server\r\nComet-Server:Star.Comet Server\r\nAccess-Control-Allow-Origin: *\r\n\
+    Access-Control-Allow-Methods:GET\r\nAllow: GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n");
+        if(web_write( local_buf->answer_buf ) < 0 )
+        {
+          TagLoger::log(Log_FreeswitchServer, 0, " >Client Не удалось отправить данные %d\n", fd);
+        }
+        local_buf->answer_buf.unlock(); 
         return -1;
     }
-     
-    sscanf(user, "%9d", &userId);
+    
+    sscanf(user, "%6d", &dev_id);
+    sscanf(user+6, "%9d", &userId);
 
     char hash[USER_HASH_LEN+1];  
     bzero(hash, USER_HASH_LEN+1);
     
-    if(!devManager::instance()->getDevInfo()->index->get_hash(local_buf, userId, hash))
+    if(!devManager::instance()->getDevInfo(dev_id)->index->get_hash(local_buf, userId, hash))
     {
-        TagLoger::log(Log_FreeswitchServer, 0, "\x1b[35mNo authorization data for user:%d [%s]\x1b[0m\n", userId, user);
+        TagLoger::log(Log_FreeswitchServer, 0, "\x1b[35mНет данных авторизации user:%d - %d [%s]\x1b[0m\n", dev_id, userId, user);
+        // Нет данных авторизации - ответ 404
+        local_buf->answer_buf.lock();
+        snprintf(local_buf->answer_buf, local_buf->answer_buf.getSize(),
+                "HTTP/1.1 404 Error\r\nContent-Type:text/html; charset=UTF-8\r\nServer:Star.Comet Server\r\nComet-Server:Star.Comet Server\r\nAccess-Control-Allow-Origin: *\r\n\
+    Access-Control-Allow-Methods:GET\r\nAllow: GET\r\nAccess-Control-Allow-Headers: origin, content-type, accept\r\nConnection: close\r\n\r\n");
+        if(web_write( local_buf->answer_buf ) < 0 )
+        {
+          TagLoger::log(Log_FreeswitchServer, 0, " >Client Не удалось отправить данные %d\n", fd);
+        }
+        local_buf->answer_buf.unlock(); 
         return -1;
     }
-    TagLoger::log(Log_FreeswitchServer, 0, "\x1b[34mAuthorization completed for user:%d [%s], hash=%s\x1b[0m\n", userId, user, hash);
+    TagLoger::log(Log_FreeswitchServer, 0, "\x1b[34mАвторизация пройдена user:%d - %d [%s], hash=%s\x1b[0m\n", dev_id, userId, user, hash);
 
     local_buf->answer_buf.lock();
     snprintf(local_buf->answer_buf, local_buf->answer_buf.getSize(),
@@ -236,7 +258,7 @@ Access-Control-Allow-Methods:GET\r\nAllow: GET\r\nAccess-Control-Allow-Headers: 
 </document>", user, hash, user, user, user);
     if(web_write( local_buf->answer_buf ) < 0 )
     {
-      TagLoger::log(Log_FreeswitchServer, 0, " >Client Failed to send data %d\n", fd);
+      TagLoger::log(Log_FreeswitchServer, 0, " >Client Не удалось отправить данные %d\n", fd);
     }
     local_buf->answer_buf.unlock();
     return -1;
@@ -274,7 +296,7 @@ int Freeswitch_connection::request(int client, int len, thread_data* local_buf)
             len += fragment_buf.getSize();
             delete[] tmpMsgData;
             fragment_buf.unlock();
-            TagLoger::log(Log_FreeswitchServer, 0, "\x1b[1;32mAssembled HTTP WS GET header len=%d\x1b[0m\n[%s]\n",len, (char*)local_buf->buf);
+            TagLoger::log(Log_FreeswitchServer, 0, "\x1b[1;32mСобран HTTP WS GET заголовок len=%d\x1b[0m\n[%s]\n",len, (char*)local_buf->buf);
         }
 
         if(local_buf->buf[len-2] != '\r' && local_buf->buf[len-1] != '\n')
@@ -282,7 +304,7 @@ int Freeswitch_connection::request(int client, int len, thread_data* local_buf)
             // Все запросы кроме POST заканчиваются на \r\n по этому для них выполняем сборку из нескольких пакетов
             fragment_buf.lock();
             fragment_buf.setSize(len);
-            TagLoger::log(Log_FreeswitchServer, 0, "\x1b[1;31mThe HTTP WS GET header did not fully come len=%d\x1b[0m\n[%s]\n",len, (char*)local_buf->buf);
+            TagLoger::log(Log_FreeswitchServer, 0, "\x1b[1;31mНе полностью пришёл HTTP GET заголовок len=%d\x1b[0m\n[%s]\n",len, (char*)local_buf->buf);
             memcpy(fragment_buf.getData(), local_buf->buf.getData(), len);
             return 0;
         }
@@ -294,9 +316,7 @@ int Freeswitch_connection::request(int client, int len, thread_data* local_buf)
             connection_type = REQUEST_OPTIONS;
             r = options(client,len, local_buf);
         } 
-        else if( memcmp((char*)local_buf->buf, "GET /directory", strlen("GET /directory")) == 0 
-                || memcmp((char*)local_buf->buf, "GET /comet-server-com/directory", strlen("GET /comet-server-com/directory")) == 0
-                || memcmp((char*)local_buf->buf, "GET /comet-server/directory", strlen("GET /comet-server/directory")) == 0 )
+        else if( memcmp((char*)local_buf->buf, "GET /directory", strlen("GET /directory")) == 0 || memcmp((char*)local_buf->buf, "GET /comet-server-com/directory", strlen("GET /comet-server-com/directory")) == 0 )
         {
             // GET /directory от Freeswitch
             TagLoger::log(Log_FreeswitchServer, 0, " >HTTP GET /directory\n");
@@ -318,7 +338,9 @@ int Freeswitch_connection::request(int client, int len, thread_data* local_buf)
 
 /**
  * Устанавливает соединению статус
- * Вызывается при создании соединения с аргументом true и при удалении соединения с аргументом false 
+ * Вызывается при создании соединения с аргументом true и при удалении соединения с аргументом false
+ * @todo Было бы круто разделить на 2 функции set_online и set_offline
+ *
  * @param local_buf
  * @param IsOnLine статус который надо постивить online или offline
  * @return
@@ -327,7 +349,7 @@ int Freeswitch_connection::set_online(thread_data* local_buf)
 {
     if(isOnLine)
     {
-        TagLoger::warn(Log_FreeswitchServer, 0, "\x1b[31mset_online: Recalling fd=%d\x1b[0m\n", fd);
+        TagLoger::warn(Log_FreeswitchServer, 0, "\x1b[31mset_online: Повторный вызов fd=%d\x1b[0m\n", fd);
         return 0;
     }
     start_online_time = time(0);
@@ -342,7 +364,7 @@ int Freeswitch_connection::set_offline(thread_data* local_buf)
 {
     if(!isOnLine)
     {
-        TagLoger::log(Log_FreeswitchServer, 0, "\x1b[31mset_offline: Recalling fd=%d\x1b[0m\n", fd);
+        TagLoger::log(Log_FreeswitchServer, 0, "\x1b[31mset_offline: Повторный вызов fd=%d\x1b[0m\n", fd);
         return 0;
     }
 

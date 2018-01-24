@@ -350,6 +350,7 @@ bool tcpServer<connectionType>::start(const char* Host,const int Port, const cha
             th[i].listener = listener;
             th[i].parent_server_obj=this;
  
+            TagLoger::log(Log_tcpServer, 0, "Создаётся новый поток обработки сообщений %d\n",i);
             pthread_create(&th[i].th_id, NULL, add_th_loop , (void *)&th[i]);
         }
 
@@ -398,6 +399,7 @@ void tcpServer<connectionType>::step(int uptime, thread_data* local_buf)
                     if(clientObj->getUptime() > maxUptime)
                     {
                         it = map_index[i].erase(it);
+                        TagLoger::log(Log_tcpServer, 0, "S%d:tcpServer::closeClientConnection maxUptime=%d, uptime=%d\n",this->id, maxUptime, clientObj->getUptime()); 
                         closeClientConnection(clientObj, local_buf);
                     }
                     else
@@ -551,7 +553,7 @@ void tcpServer<connectionType>::loop(const tcpServer_loop_data<connectionType>* 
                 int client_id=accept( listener, (struct sockaddr *) &their_addr, &socklen);
                 if(client_id < 0 )
                 {
-                    perror("Could not connect in accept in server loop"); 
+                    perror("Could not connect in accept in server loop");
                     TagLoger::error(Log_tcpServer, 0, "\x1b[31mS%d:Could not connect %d (errno=%d)\x1b[0m",this->id, client_id, errno); 
                     continue;
                 }
@@ -608,6 +610,7 @@ void tcpServer<connectionType>::loop(const tcpServer_loop_data<connectionType>* 
                     }
                 }catch(...)
                 {
+                    close(client_id);
                     TagLoger::warn(Log_tcpServer, 0, "S%d:Fail in establish new connection");
                     continue;
                 } 

@@ -27,7 +27,6 @@ class appConf: public ini_parser
 {
     
     static appConf* inst;
-    bool initFromFile(const char *fileName);
 public:
     bool isHelp = false;
     
@@ -46,11 +45,12 @@ public:
      * Порты нод
      */
     int hl_port[MAX_HL_CLUSTER_SIZE];
-     
+    
 public:
     appConf();
     void print(void);
     bool init(int argc, char *argv[]);
+    bool initFromFile(const char *fileName);
  
     static appConf* instance()
     {

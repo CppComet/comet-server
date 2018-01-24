@@ -39,6 +39,7 @@ connection::connection():isOnLine(false)
 
 connection::~connection()
 {  
+    web_close();
 }
 
 
@@ -80,13 +81,18 @@ int connection::web_write(const char *msg, int len)
     // The adjustment of the file offset and the write operation are performed as an atomic step.
     return write(fd, msg, len);  
 }
-   
+  
 /**
  * Закрывает соединение fd
  * @return 
  */
 int connection::web_close()
 {
+    if(fd < 0)
+    {
+        return 0;
+    }
+    
     int r = close(fd); 
     fd = -1; // Иначе мы могли бы ещё и попытаться туда что то отправить.
     return r;

@@ -53,8 +53,9 @@ CometQLProxy_connection::~CometQLProxy_connection()
 
 int CometQLProxy_connection::proxy_query(int node, thread_data* local_buf, unsigned int PacketNomber)
 {
-    std::string query("cometqlcluster_v1; ");
-    query.append(local_buf->qInfo.StartQury);
+    std::string query("cometqlcluster_v1 set dev_id=");
+    query.append(std::to_string(dev_id)).append("; ").append(local_buf->qInfo.StartQury);
+    
     
     if(local_buf->qInfo.command == TOK_SELECT || local_buf->qInfo.command == TOK_SHOW)
     {
@@ -91,7 +92,7 @@ int CometQLProxy_connection::proxy_union_select(int node, const char* query, thr
         {
             // Не задана node выполнить запрос на случайной.
             node = random() % local_buf->proxyCluster.size();
-
+ 
             TagLoger::log(Log_CometQLCluster, 0, "CometQLProxy query:`%s` send to node=%d from %d\n", query, node, local_buf->proxyCluster.size());
             // Если задана node то выполнить запрос на конкретной ноде а не на всех нодах.
             link = local_buf->proxyCluster[node];
@@ -423,6 +424,10 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
                 {
                     return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber);  
                 }
+                else if(local_buf->qInfo.tokCompare("revoked_tokens",  local_buf->qInfo.tableName))
+                {
+                    return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber);  
+                }
                 else if(local_buf->qInfo.tokCompare("users_time",  local_buf->qInfo.tableName))
                 {
                     if(appConf::instance()->get_bool("main", "save_users_last_online_time"))
@@ -489,6 +494,11 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
                 // @todo выбор от user_id
                 return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber);  
             }
+            else if(local_buf->qInfo.tokCompare("revoked_tokens",  local_buf->qInfo.tableName))
+            {
+                // @todo выбор от user_id
+                return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber);  
+            }
             else if(local_buf->qInfo.tokCompare("users_time",  local_buf->qInfo.tableName))
             {
                 // @todo выбор от user_id
@@ -543,6 +553,11 @@ int CometQLProxy_connection::query_router(thread_data* local_buf, int PacketNomb
                 return proxy_query(PROXY_TO_ALL, local_buf,PacketNomber); // return sql_delete_from_users_auth(local_buf,PacketNomber);
             }
             else if(local_buf->qInfo.tokCompare("users_data",  local_buf->qInfo.tableName))
+            {
+                // @todo выбор от user_id
+                return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber);  
+            }
+            else if(local_buf->qInfo.tokCompare("revoked_tokens",  local_buf->qInfo.tableName))
             {
                 // @todo выбор от user_id
                 return proxy_query(PROXY_TO_RANDOM, local_buf,PacketNomber);  
@@ -641,7 +656,7 @@ int CometQLProxy_connection::sql_select_from_pipes(thread_data* local_buf, unsig
         while(it != local_buf->proxyCluster.end())
         {
             auto link = *it;
-            if(!link->query_format("SELECT users FROM pipes WHERE name = \"%s\" ", pipe_name))
+            if(!link->query_format("cometqlcluster_v1 set dev_id=%d; SELECT users FROM pipes WHERE name = \"%s\" ", dev_id, pipe_name))
             {
                 it++;
                 continue; 
@@ -653,7 +668,7 @@ int CometQLProxy_connection::sql_select_from_pipes(thread_data* local_buf, unsig
                 TagLoger::error(Log_CometQLCluster, 0, "CometQLProxy error[14] on node=%d (errno=%d, error=%s)\n", link->name(), mysql_errno(link->getLink()), mysql_error(link->getLink()));
                 continue; 
             }
-            
+
             while((row = mysql_fetch_row(result)))
             {
                 long int_size = 0;
@@ -730,7 +745,7 @@ int CometQLProxy_connection::sql_union_select_from_users_time(thread_data* local
         while(it != local_buf->proxyCluster.end())
         {
             auto link = *it;
-            if(!link->query_format("SELECT time FROM users_time WHERE name = %d ", userId))
+            if(!link->query_format("cometqlcluster_v1 set dev_id=%d; SELECT time FROM users_time WHERE name = %d ", dev_id, userId))
             {
                 it++; 
                 continue;

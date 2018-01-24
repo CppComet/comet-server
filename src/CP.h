@@ -14,6 +14,7 @@
  
 #include <stdio.h>
  
+#include <unistd.h>
 
 /*
  * CP
@@ -30,7 +31,7 @@ class CP
   public:
     CP() : pointer(0)
     {
-            pointer = new type();
+        pointer = new type();
     }
 
     CP(type* p) :pointer(p)
@@ -129,15 +130,16 @@ public:
  */
    virtual void Release()
    {
+       //sleep(1);
        _cp_type_count--;
        if(_cp_type_count<1)
        {
-           //if(memdebug) printf("> Delete %d\n",_cp_type_id);
+           //printf("> Delete %d\n",_cp_type_count);
            delete this;
        }
        else
        {
-           //if(memdebug) printf("> NO delete %d\n",_cp_type_id);
+           //printf("> NO delete %d\n",_cp_type_count);
        }
    }
 

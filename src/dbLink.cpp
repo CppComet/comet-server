@@ -106,7 +106,7 @@ int stmBase::insert()
         if( error_code != CR_SERVER_LOST && error_code != ER_UNKNOWN_STMT_HANDLER && error_code != ER_SERVER_SHUTDOWN)
         {
             TagLoger::trace(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_execute(insert), (1) failed - %s [errno=%d]\x1b[0m\n", mysql_stmt_error(stmt), mysql_stmt_errno(stmt));
-            return false;
+            return -1;
         }
         
         TagLoger::log(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_execute(insert), (1) failed - %s [errno=%d]\x1b[0m\n", mysql_stmt_error(stmt), mysql_stmt_errno(stmt));
@@ -639,6 +639,24 @@ void stmMapper::init(dbLink *mysql)
         conference_select = new stm_conference_select(); 
     } 
     conference_select->prepare(mysql);
+    
+    if(revoked_tokens_delete == NULL)
+    {
+        revoked_tokens_delete = new stm_revoked_tokens_delete(); 
+    } 
+    revoked_tokens_delete->prepare(mysql);
+    
+    if(revoked_tokens_select == NULL)
+    {
+        revoked_tokens_select = new stm_revoked_tokens_select(); 
+    } 
+    revoked_tokens_select->prepare(mysql);
+    
+    if(revoked_tokens_replace == NULL)
+    {
+        revoked_tokens_replace = new stm_revoked_tokens_replace(); 
+    }
+    revoked_tokens_replace->prepare(mysql);
     
     if(conference_select_nodes_for_room == NULL)
     {

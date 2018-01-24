@@ -29,7 +29,6 @@
 
 char* getGETdata(const char* c,int& user_id);
 
-std::map<std::string, const char*> Client_connection::ram_file_cache;
 int Client_connection::request_mutex_init = 0;
 int Client_connection::max_subscription_event = 50;
 
@@ -48,6 +47,7 @@ Client_connection::Client_connection():connection(),fragment_buf(appConf::instan
 
 Client_connection::~Client_connection(){
     //printf("delete Client_connection\n");
+    web_close();
 }
 
 /**
@@ -57,6 +57,7 @@ Client_connection::~Client_connection(){
  */
 int Client_connection::un_subscription(thread_data* local_buf)
 {
+    local_buf->setThreadStatus('U');
     for(int i=0; i< MAX_SUBSCRIPTION_PIPE; i++)
     {
         if(subscriptions[i] !=0 )
@@ -64,7 +65,7 @@ int Client_connection::un_subscription(thread_data* local_buf)
             TagLoger::log(Log_ClientServer, 0, "un_subscription[%d]%s\n",i, subscriptions[i]);
 
             // В замен srem_printf
-            devInfo* dev = devManager::instance()->getDevInfo();
+            devInfo* dev = devManager::instance()->getDevInfo(web_user_dev_id);
             CP<Pipe> pipe = dev->findPipe(std::string(subscriptions[i]));
             if(!pipe.isNULL())
             {
@@ -87,7 +88,7 @@ int Client_connection::un_subscription(thread_data* local_buf)
                 char addData[300];
                 bzero(addData, 300);
                 snprintf(addData, 300, "\"user_id\":\"%d\",\"uuid\":\"%s\",\"event_name\":\"unsubscription\"", web_user_id, web_user_uuid);
-                internalApi::send_event_to_pipe(local_buf, subscriptions[i], "{\\\"data\\\":\\\"\\\"}", addData);
+                internalApi::send_event_to_pipe(local_buf, subscriptions[i], "{\\\"data\\\":\\\"\\\"}", web_user_dev_id, addData);
             }
         }
         else
@@ -114,12 +115,12 @@ int Client_connection::un_subscription(thread_data* local_buf)
  */
 int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,int client, int len)
 {
+    local_buf->setThreadStatus('S');
     int event_data_len = strlen(event_data);
     if(event_data_len > SUBSCRIPTION_DATA_LEN)
     {
             TagLoger::error(Log_ClientServer, 0, "\x1b[1;31mToo many letters[%d]\x1b[0m\n", event_data_len);
-            message(local_buf, base64_encode( (const unsigned char*) "{\"error\":\"Too many letters\"}",
-                       strlen("{\"error\":\"Too many letters\"}") ).data(), "_answer");
+            message(local_buf, base64_encode( (const char*) "{\"error\":\"Too many letters\"}").data(), "_answer");
             return -1;
     }
 
@@ -145,16 +146,15 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
 
             if( i >= MAX_SUBSCRIPTION_PIPE)
             {
-                TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mToo many subscriptions [%d]\x1b[0m\n", i);
-                message(local_buf, base64_encode( (const unsigned char*) "{\"error\":\"Too many subscriptions\"}",
-                       strlen("{\"error\":\"Too many subscriptions\"}") ).data(), "_answer");
+                TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mToo many letters [%d]\x1b[0m\n", i);
+                message(local_buf, base64_encode( (const char*) "{\"error\":\"Too many letters\"}").data(), "_answer");
                 return 0;
             }
 
             TagLoger::log(Log_ClientServer, 0, "start_key::[%zu][%s]\n",strlen(start_subscription_name), start_subscription_name);
 
             // В замен sadd_printf
-            devManager::instance()->getDevInfo()->getPipe(std::string(start_subscription_name))->insert(fd);
+            devManager::instance()->getDevInfo(web_user_dev_id)->getPipe(std::string(start_subscription_name))->insert(fd);
 
             subscriptions[i] = start_subscription_name;
             TagLoger::log(Log_ClientServer, 0, "subscriptions[%d]=[%s]\n", i, start_subscription_name);
@@ -171,7 +171,7 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
                 char data[500];
                 bzero(data, 500);
                 snprintf(data, 500, "{\\\"data\\\":{\\\"user_id\\\":\\\"%d\\\",\\\"uuid\\\":\\\"%s\\\"}}", web_user_id, web_user_uuid);
-                internalApi::send_event_to_pipe(local_buf, subscriptions[i], data, "\"event_name\":\"subscription\"");
+                internalApi::send_event_to_pipe(local_buf, subscriptions[i], data, web_user_dev_id, "\"event_name\":\"subscription\"");
 
                 // @todo Вставить правку в js апи для совместимости (перенести данные из data в addData)
                 if(local_buf->isWSClusterActive())
@@ -180,7 +180,12 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
                     while(it != local_buf->wsCluster.end())
                     {
                         auto link = *it;
-                        link->query_format("cometqlcluster_v1; INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'subscription', '{\"user_id\":\"%d\",\"uuid\":\"%s\"');", subscriptions[i], web_user_id, web_user_uuid);
+                        link->query_format(
+                        "cometqlcluster_v1 set dev_id=%d; INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'subscription', '{\"user_id\":\"%d\",\"uuid\":\"%s\"');",
+                                web_user_dev_id,
+                                subscriptions[i],
+                                web_user_id,
+                                web_user_uuid);
                         it++;
                     }
                 }
@@ -190,7 +195,7 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
             if(memcmp(subscriptions[i], "trust_", strlen("trust_")) == 0)
             {
                 // Отправка последних 20 сообщений из канала trust_
-                local_buf->stm.pipe_messages_select->execute(subscriptions[i], 20);
+                local_buf->stm.pipe_messages_select->execute(web_user_dev_id, subscriptions[i], 20);
                 while(!local_buf->stm.pipe_messages_select->fetch())
                 {
                     char serverData[EVENT_NAME_LEN+256];
@@ -213,8 +218,7 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
         if(p - start_subscription_name >= PIPE_NAME_LEN)
         {
             TagLoger::error(Log_ClientServer, 0, "\x1b[1;31mChannel name is too long [%s]\x1b[0m\n", start_subscription_name);
-            message(local_buf, base64_encode( (const unsigned char*) "{\"error\":\"Channel name is too long\"}",
-                       strlen("{\"error\":\"Channel name is too long\"}") ).data(), "_answer");
+            message(local_buf, base64_encode( (const char*) "{\"error\":\"Channel name is too long\"}").data(), "_answer");
             return -1;
         }
     }
@@ -283,12 +287,12 @@ int Client_connection::web_write_error(const char* text, int code, thread_data* 
  * Белый список доменов содержится в redis с ключём dev_host_{devId}
  * Если белый список не задан то проверка не осуществлятся
  *
- * Извлекает данный web_user_id, client_major_version, client_minor_version
+ * Извлекает данный web_user_id, web_user_dev_id, client_major_version, client_minor_version
  * @param client
  * @param len
- * @return указатель на web_session или 0 в случаии ошибки
+ * @return web_hash или пустую строку в случаии ошибки
  */
-char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
+std::string Client_connection::parse_url(int client, int len, thread_data* local_buf)
 {
     isAuthUser = false;
     char * mytext = local_buf->buf;
@@ -297,17 +301,19 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [Session ID not found] \x1b[0m\n");
         web_write_error( "Error code 401(Invalid request, session ID not found)", 401, local_buf);
-        return 0;
+        return std::string();
     }
 
     char * web_session = &mytext[ses_index+1];
+     
+    std::string web_hash(web_session, str_find(web_session, '&', 600));
 
     int uid_index = str_find(mytext,'=',2,0,300);
     if(uid_index == -1)
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mWrong WS request [No user ID found] \x1b[0m\n");
         web_write_error( "Error code 401(Invalid request, the user ID can not be found)", 401, local_buf);
-        return 0;
+        return std::string();
     }
 
 
@@ -321,8 +327,24 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     if(udev_id_index == -1)
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] \x1b[0m\n");
-        web_write_error( "Error code 406(Invalid request, no public key found)" , 406, local_buf);
-        return 0;
+        web_write_error( "Error code 406(Invalid request, no public key found [1])" , 406, local_buf);
+        return std::string();
+    }
+
+
+    web_user_dev_id = read_long(mytext + udev_id_index,'&');
+    if(web_user_dev_id <= 0)
+    {
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] \x1b[0m\n");
+        web_write_error( "Error code 406(Invalid request, no public key found [2])" , 406, local_buf);
+        return std::string();
+    }
+
+    if(web_user_dev_id > devManager::instance()->getDevIndexSize())
+    {
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] \x1b[0m\n");
+        web_write_error( "Error code 406(Invalid request, no public key found [3])" , 406, local_buf);
+        return std::string();
     }
 
     int version_index = str_find(mytext,'=',4,0,300);
@@ -330,7 +352,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No version of api client transferred] \x1b[0m\n");
         web_write_error( "Error code 418(Invalid request Not assigned client api version)\n", 418, local_buf);
-        return 0;
+        return std::string();
     }
 
     int delta = 0;
@@ -340,7 +362,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No version of api client transferred] \x1b[0m\n");
         web_write_error( "Error code 418(Invalid request Not assigned client api version)\n", 418, local_buf);
-        return 0;
+        return std::string();
     }
 
     client_minor_version = read_int(mytext+version_index + delta+1,'&');
@@ -349,7 +371,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No version of api client transferred] \x1b[0m\n");
         web_write_error( "Error code 418(Invalid request Not assigned client api version)\n", 418, local_buf);
-        return 0;
+        return std::string();
     }
 
     int web_user_uuid_pos = str_find(mytext,'=',5,0,300);
@@ -381,12 +403,12 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
             int headerLineLength = str_find(pos+7,'\r') - 1;
             strncpy(web_user_host, pos+7+1, minValue(USER_HOST_LEN, headerLineLength));
 
-            int urls = devManager::instance()->getDevInfo()->countDevUrl();
+            int urls = devManager::instance()->getDevInfo(web_user_dev_id)->countDevUrl();
             if(urls > 0)
             {
                 for(int k = 0; k< urls; k++ )
                 {
-                    const char* urlK = devManager::instance()->getDevInfo()->getDevUrl(k);
+                    const char* urlK = devManager::instance()->getDevInfo(web_user_dev_id)->getDevUrl(k);
 
                     int len = strlen(urlK);
                     if( memcmp( urlK, pos+7+1, len ) == 0
@@ -411,17 +433,17 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
         }
     }
 
-    if(host_error && devManager::instance()->getDevInfo()->countDevUrl())
+    if(host_error && devManager::instance()->getDevInfo(web_user_dev_id)->countDevUrl())
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [Request from a denied domain] \x1b[0m\n");
         web_write_error( "Error code 423(Access denied, Request from unauthorized domain.)" , 423, local_buf);
-        return 0;
+        return std::string();
     }
 
-    TagLoger::log(Log_ClientServer, 0, "web_user_id[API=%d.%d] web_user_id->%d\n",client_major_version,client_minor_version,  web_user_id);
+    TagLoger::log(Log_ClientServer, 0, "web_user_id[API=%d.%d] web_user_id->%d web_user_dev_id->%d\n",client_major_version,client_minor_version,  web_user_id,web_user_dev_id);
 
     isAuthUser = true;
-    return web_session;
+    return web_hash;
 }
 
 /**
@@ -477,7 +499,7 @@ int Client_connection::web_socket_receive(thread_data* local_buf)
     else
     {
         snprintf(local_buf->answer_buf, local_buf->answer_buf.getSize(), "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: %s\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Protocol: chat\r\n\r\n", base64_encode( sha1_data, 20).c_str());
-    }// Sec-WebSocket-Extensions: permessage-deflate; client_max_window_bits, x-webkit-deflate-frame
+    }
 
     int res = web_write( local_buf->answer_buf );
     local_buf->answer_buf.unlock();
@@ -494,7 +516,7 @@ int Client_connection::web_socket_receive(thread_data* local_buf)
  */
 int Client_connection::msg_queue_send(int client, int len, thread_data* local_buf)
 {
-    local_buf->stm.users_queue_select->execute(web_user_id, 10);
+    local_buf->stm.users_queue_select->execute(web_user_dev_id, web_user_id, 10);
     while(!local_buf->stm.users_queue_select->fetch())
     {
         char serverData[EVENT_NAME_LEN+64];
@@ -502,7 +524,7 @@ int Client_connection::msg_queue_send(int client, int len, thread_data* local_bu
         message(local_buf, local_buf->stm.users_queue_select->result_message, NULL, MESSAGE_TEXT, serverData);
     }
     local_buf->stm.users_queue_select->free();
-    local_buf->stm.users_queue_delete->execute((long int)time(NULL), web_user_id);
+    local_buf->stm.users_queue_delete->execute((long int)time(NULL), web_user_dev_id, web_user_id);
 
     return 0;
 }
@@ -535,7 +557,7 @@ int Client_connection::send_pipe_log(thread_data* local_buf, char* pipe_name, co
     }
 
     int i = 0;
-    if(!local_buf->stm.pipe_messages_select->execute(pipe_name, 99))
+    if(!local_buf->stm.pipe_messages_select->execute(web_user_dev_id, pipe_name, 99))
     {
         return 0;
     }
@@ -565,7 +587,7 @@ int Client_connection::send_pipe_log(thread_data* local_buf, char* pipe_name, co
 }
 
 /**
- * Возвращает количество подписчиков в канале (доступно только для каналов web_)
+ * Возвращает количество подписчиков в канале (доступно только для каналов web_ и track_)
  * @param local_buf
  * @param pipe_name
  * @param MarkerName
@@ -573,16 +595,15 @@ int Client_connection::send_pipe_log(thread_data* local_buf, char* pipe_name, co
  */
 int Client_connection::send_pipe_count(thread_data* local_buf, char* pipe_name, const char* MarkerName)
 {
-    if(memcmp(pipe_name, "web_", 4) != 0)
+    if(memcmp(pipe_name, "web_", 4) != 0 && memcmp(pipe_name, "track_", 6) != 0)
     {
         // @todo добавить ссылку на описание ошибки
-        message(local_buf, base64_encode((const unsigned char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_count] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}",
-                       strlen("{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_count] Invalid channel name. The channel should begin with web_\"},\"event_name\":\"answer\"}") ).data(), "_answer");
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"number_messages\":-1,\"error\":\"[pipe_count] Invalid channel name. The channel should start with web_\"},\"event_name\":\"answer\"}").data(), "_answer");
         return 0;
     }
 
     int num_user = 0;
-    CP<Pipe> pipe = devManager::instance()->getDevInfo()->findPipe(std::string(pipe_name));
+    CP<Pipe> pipe = devManager::instance()->getDevInfo(web_user_dev_id)->findPipe(std::string(pipe_name));
     if(!pipe.isNULL())
     {
         num_user = pipe->size();
@@ -596,7 +617,7 @@ int Client_connection::send_pipe_count(thread_data* local_buf, char* pipe_name, 
         {
             auto link = *it;
 
-            if(!link->query_format("cometqlcluster_v1; SELECT users FROM pipes WHERE name = '%s'", pipe_name))
+            if(!link->query_format("cometqlcluster_v1 set dev_id=%d; SELECT users FROM pipes WHERE name = '%s'", web_user_dev_id, pipe_name))
             {
                 break;
             }
@@ -648,8 +669,8 @@ int Client_connection::web_socket_request(int client, int len, thread_data* loca
 {
     TagLoger::log(Log_ClientServer, 0, "[Client=%d, len=%d]\n[%s]\n",client, len, (char*)local_buf->buf);
 
-    char * web_session = parse_url(client, len, local_buf);
-    if(web_session == 0)
+    std::string web_session = parse_url(client, len, local_buf);
+    if(web_session.empty())
     {
         return -1;
     }
@@ -662,22 +683,21 @@ int Client_connection::web_socket_request(int client, int len, thread_data* loca
     /**
      *  Инкремент количиства людей удачных конектов
      */
-    devManager::instance()->getDevInfo()->incrFrontendConnections();
-
+    devManager::instance()->getDevInfo(web_user_dev_id)->incrFrontendConnections();
+ 
     char newHash[USER_HASH_LEN+1];
     bzero(newHash, USER_HASH_LEN+1);
-    strncpy(newHash, web_session, USER_HASH_LEN);
-
+    
     std::string addInfo("\"server\":\"");
     addInfo.append(MYSQL_SERVERNAME).append("\",");
 
-    if(devManager::instance()->getDevInfo()->index->get_link(local_buf, web_user_id, newHash))
+    if(devManager::instance()->getDevInfo(web_user_dev_id)->index->get_link(local_buf, web_user_id, web_session))
     {
         TagLoger::log(Log_ClientServer, 0, " >Client Authorized %ld\n",web_user_id);
         addInfo.append("\"authorized\":\"true\"");
 
 
-        if(!devManager::instance()->getDevInfo()->index->get_hash(local_buf, web_user_id, newHash))
+        if(!devManager::instance()->getDevInfo(web_user_dev_id)->index->get_hash(local_buf, web_user_id, newHash))
         {
             TagLoger::error(Log_ClientServer, 0, " >Client get_hash return false %ld\n",web_user_id);
             message(local_buf, "", "undefined", MESSAGE_TEXT, addInfo.data());
@@ -688,13 +708,13 @@ int Client_connection::web_socket_request(int client, int len, thread_data* loca
         }
 
         msg_queue_send(client, len, local_buf);
-        devManager::instance()->getDevInfo()->index->set_link(local_buf, web_user_id,client);
+        devManager::instance()->getDevInfo(web_user_dev_id)->index->set_link(local_buf, web_user_id,client);
     }
     else
     {
         addInfo.append("\"authorized\":\"false\"");
         message(local_buf, "", "undefined", MESSAGE_TEXT, addInfo.data());
-        TagLoger::log(Log_ClientServer, 0, " >Client not Authorized user_id=%ld\n", web_user_id);
+        TagLoger::log(Log_ClientServer, 0, " >Client not Authorized dev_id=%d, user_id=%ld\n", web_user_dev_id, web_user_id);
         web_user_id = 0;
     }
 
@@ -945,7 +965,7 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
         TagLoger::log(Log_ClientServer, 0, "comand-web_pipe:web_pipe_msg_v2\n" );
         res = web_pipe_msg_v2(local_buf, (char*)(str_data + strlen("web_pipe2") + 1), client, msg_data_len);
         if(res == -1) return -1;
-    } 
+    }
     else if(memcmp( str_data, "pipe_log", strlen("pipe_log")) == 0)
     {
         TagLoger::log(Log_ClientServer, 0, "comand-pipe_log:\n" );
@@ -1010,185 +1030,6 @@ int Client_connection::log_statistics(thread_data* local_buf, const char* event_
 }
 
 /**
- * Для вызова внешних скриптов
- * @param local_buf ссылка на local_buf потока
- * @param event_data данные вызова
- * @param client идентификатор клиента
- * @param len длина пришедшего сообщения
- * @return
- *
- *
- * Вызов внешнего скрипта:
- * exec синхронный, но можно спроектировать так чтоб он был как будто асинхронный и тогда надо будет просто
- * передавать с ним колбек функцию которя могла бы отправлять ответ от сервера.
- *
- */
-int Client_connection::cgi_call(thread_data* local_buf, char* event_data,int client, int len)
-{ 
-    return 0;
-}
-
-/**
- * Формат сообщения:
- * user_data\n
- * pMarker\n
- * user_id
- * 
- * @param local_buf
- * @param event_data
- * @param client
- * @param len
- * @return 
- */
-int Client_connection::web_user_data(thread_data* local_buf, char* event_data,int client, int len)
-{ 
-    char* pMarker = event_data; 
-    char* end_pMarker = checking_channel_name( local_buf, pMarker);
-    if(end_pMarker == NULL)
-    {
-        message(local_buf, base64_encode((const char*) "{\"data\":{\"user_id\":-1,\"user_data\":\"\",\"error\":\"Invalid marker name.\"},\"event_name\":\"answer\"}").data(), "_answer");
-        return -1;
-    }
-
-    int userId = 0;
-    try{
-        userId = std::stoi(end_pMarker);
-    }catch(...)
-    {
-        message(local_buf, base64_encode((const char*) "{\"data\":{\"user_id\":-1,\"user_data\":\"\",\"error\":\"Invalid marker name.\"},\"event_name\":\"answer\"}").data(), "_answer");
-        return -1;
-    }
-
-    std::string res;
-    res.append("{\"data\":{\"user_id\":").append(std::to_string(userId)).append(",\"user_data\":\"");
-
-    local_buf->stm.users_data_select->execute(userId);
-    if(local_buf->stm.users_data_select->fetch() == 0)
-    {
-        local_buf->answer_buf.lock();
-        
-        mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), local_buf->stm.users_data_select->result_data, local_buf->stm.users_data_select->result_data_length);
-        res.append(local_buf->answer_buf.getAndUnlock()).append("\",\"error\":\"internal server error\"},\"event_name\":\"answer\"}"); 
-        message(local_buf, base64_encode(res.data()).data(), "_answer");
-    }
-    else
-    { 
-        res.append("\",\"error\":\"internal server error\"},\"event_name\":\"answer\"}"); 
-        message(local_buf, base64_encode(res.data()).data(), "_answer");
-    }
-    
-    local_buf->stm.users_data_select->free();
-
-    return 0;
-}
-
-/**
- * Обрабатывает событие пришедшие от js для получения списка подписчиков на канале track_*
- * @param event_data
- * @param client
- * @param len
- * @return
- * @todo учесть работу в кластере
- */
-int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data,int client, int len)
-{
-    char pipe_name[PIPE_NAME_LEN+1];
-    bzero(pipe_name, PIPE_NAME_LEN+1);
-
-    char marker[PIPE_NAME_LEN+1];
-    bzero(marker, PIPE_NAME_LEN+1);
-    sscanf(event_data, "%64s\n%64s\n", pipe_name, marker);
-
-    if(memcmp(pipe_name, "track_", strlen("track_")) != 0)
-    {
-        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mtrack_pipe_users Invalid channel name[name=%s]\x1b[0m\n", pipe_name);
-
-        // @todo добавить ссылку на описание ошибки
-        message(local_buf, base64_encode((const char*) "{\"data\":{\"number_users\":-1,\"error\":\"[track_pipe_users] Invalid channel name. The channel should start with track_\"},\"event_name\":\"answer\"}").data(), "_answer");
-        return -1;
-    }
-
-
-    std::string usersstr("{\"event_name\":\"answer\",\"data\":{\"users\":[");
-
-    bool hasData = false;
-    char strtmp[200];
-    TagLoger::log(Log_ClientServer, 0, "track_pipe_users pipe:%s\n", pipe_name);
-    CP<Pipe> pipe = devManager::instance()->getDevInfo()->findPipe(std::string(pipe_name));
-    if(!pipe.isNULL())
-    {
-        auto it = pipe->subscribers->begin();
-        while(it)
-        {
-            int conection_id = it->data;
-            TagLoger::log(Log_ClientServer, 0, "Answer[]->%d\n", conection_id );
-
-            CP<Client_connection> r = tcpServer <Client_connection>::instance()->get(conection_id);
-            if(r)
-            {
-                // @todo simpleTask отдавать всем не uuid а его солёный хеш.
-                bzero(strtmp, 200);
-                snprintf(strtmp, 200, "{\"user_id\":%d,\"uuid\":\"%s\"}", r->web_user_id, r->web_user_uuid);
-                usersstr.append(strtmp);
-                hasData = true;
-            }
-
-            it = it->Next();
-            if(it)
-            {
-                usersstr.append(",");
-            }
-        }
-    }
-
-    if(local_buf->isWSClusterActive())
-    {
-        MYSQL_ROW row;
-        auto it = local_buf->wsCluster.begin();
-        while(it != local_buf->wsCluster.end())
-        {
-            auto link = *it;
-
-            if(!link->query_format("SELECT user_id, uuid FROM users_in_pipes WHERE name = '%s'", pipe_name))
-            {
-                break;
-            }
-
-            auto result = mysql_store_result(link->getLink());
-
-            while((row = mysql_fetch_row(result)))
-            {
-                if(hasData)
-                {
-                    usersstr.append(",");
-                }
-
-                bzero(strtmp, 200);
-                snprintf(strtmp, 200, "{\"user_id\":%s,\"uuid\":\"%s\"}", row[0], row[1]);
-                usersstr.append(strtmp);
-                hasData = true;
-            }
-            mysql_free_result(result);
-            it++;
-        }
-    }
-
-    usersstr.append("]}}");
-
-    std::string rdname("_answer_to_");
-    rdname.append(pipe_name);
-    std::string addData("\"marker\":\"");
-    addData.append(marker).append("\"");
-
-    TagLoger::log(Log_ClientServer, 0, "answer:%s\n", usersstr.data());
-    if(message(local_buf, base64_encode( (const char*)usersstr.data()).data() , rdname.data(), MESSAGE_TEXT, addData.data()) < 0)
-    {
-        return -1;
-    }
-    return 0;
-}
-
-/**
  * Отвечает на запрос вида
  * pipe_log\nadminChat\nMarkerName
  */
@@ -1244,13 +1085,12 @@ int Client_connection::get_user_last_online_time(thread_data* local_buf, char* e
 
     int delta = 0;
     long get_user_id = read_long(pipe_name, &delta);
-    long user_time = devManager::instance()->getDevInfo()->index->get_last_online_time(local_buf, get_user_id);
+    long user_time = devManager::instance()->getDevInfo(web_user_dev_id)->index->get_last_online_time(local_buf, get_user_id);
 
     char answer_data[300];
     snprintf(answer_data, 300,"{\"data\":\"%ld\",\"event_name\":\"user_status_%ld\"}", time(0) - user_time, get_user_id ); // @todo Проверить работоспособность
 
-    message(local_buf, base64_encode((const unsigned char*) answer_data,
-                       strlen(answer_data) ).data(), "_answer_user_status");
+    message(local_buf, base64_encode((const char*) answer_data).data(), "_answer_user_status");
     return 0;
 }
 
@@ -1363,7 +1203,7 @@ char* Client_connection::checking_event_name(thread_data* local_buf, const char*
 
     return p;
 }
- 
+
 /**
  * Обрабатывает событие пришедшие от js для отправки в web_pipe
  * @param event_data
@@ -1433,14 +1273,14 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
 
 
     TagLoger::log(Log_ClientServer, 0, "json_msg:%s\n", local_buf->answer_buf.getData());
-    PipeLog::addToLog(local_buf, name, event_name, set_user_id , msg, strlen(msg));
+    PipeLog::addToLog(local_buf, web_user_dev_id, name, event_name, set_user_id , msg, strlen(msg));
 
     // Дополнительные данные в json отправляемые сервером.
     char addData[EVENT_NAME_LEN + 64];
     snprintf(addData, EVENT_NAME_LEN + 64, "\"event_name\":\"%s\",\"user_id\":%d", event_name, set_user_id);
 
 
-    CP<Pipe> pipe = devManager::instance()->getDevInfo()->findPipe(std::string(name));
+    CP<Pipe> pipe = devManager::instance()->getDevInfo(web_user_dev_id)->findPipe(std::string(name));
     int num_msg = 0;
     if(!pipe.isNULL())
     {
@@ -1453,7 +1293,7 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
             TagLoger::log(Log_ClientServer, 0, "Answer[]->%d\n", conection_id );
 
             CP<Client_connection> r = tcpServer <Client_connection>::instance()->get(conection_id);
-            if(r)
+            if(r && r->web_user_dev_id == web_user_dev_id)
             {
                 if( r->getfd() != fd ) // Не отправлять самому себе события.
                 {
@@ -1480,7 +1320,6 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
         }
     }
 
-    // @todo учесть работу в кластере
     // @todo Отметить в документации что number_messages относится только к инфе
     // этого сервера и сколько было сообщений доставлено по нодам кластера не известно.
     // @todo добавить как баг тот фапкт что будет терятся user_id отправителя при работе в кластере.
@@ -1492,7 +1331,11 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
             auto link = *it;
 
             // @todo Проверять что если ошибка сетевая или что то ещё то повторять попытку.
-            link->query_format("cometqlcluster_v1; INSERT INTO pipes_messages (name, event, message)VALUES('%s', '%s', '%s');", name, event_name,  local_buf->answer_buf.getData());
+            link->query_format("cometqlcluster_v1 set dev_id=%d; INSERT INTO pipes_messages (name, event, message)VALUES('%s', '%s', '%s');",
+                    web_user_dev_id,
+                    name,
+                    event_name,
+                    local_buf->answer_buf.getData());
             it++;
         }
 
@@ -1525,6 +1368,183 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
     return 0;
 }
 
+/**
+ * Для вызова внешних скриптов
+ * @param local_buf ссылка на local_buf потока
+ * @param event_data данные вызова
+ * @param client идентификатор клиента
+ * @param len длина пришедшего сообщения
+ * @return
+ *
+ *
+ * Вызов внешнего скрипта:
+ * exec синхронный, но можно спроектировать так чтоб он был как будто асинхронный и тогда надо будет просто
+ * передавать с ним колбек функцию которя могла бы отправлять ответ от сервера.
+ *
+ */
+int Client_connection::cgi_call(thread_data* local_buf, char* event_data,int client, int len)
+{ 
+    return 0;
+}
+
+/**
+ * Формат сообщения:
+ * user_data\n
+ * pMarker\n
+ * user_id
+ * 
+ * @param local_buf
+ * @param event_data
+ * @param client
+ * @param len
+ * @return 
+ */
+int Client_connection::web_user_data(thread_data* local_buf, char* event_data,int client, int len)
+{ 
+    char* pMarker = event_data; 
+    char* end_pMarker = checking_channel_name( local_buf, pMarker);
+    if(end_pMarker == NULL)
+    {
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"user_id\":-1,\"user_data\":\"\",\"error\":\"Invalid marker name.\"},\"event_name\":\"answer\"}").data(), "_answer");
+        return -1;
+    }
+
+    int userId = 0;
+    try{
+        userId = std::stoi(end_pMarker);
+    }catch(...)
+    {
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"user_id\":-1,\"user_data\":\"\",\"error\":\"Invalid marker name.\"},\"event_name\":\"answer\"}").data(), "_answer");
+        return -1;
+    }
+
+    std::string res;
+    res.append("{\"data\":{\"user_id\":").append(std::to_string(userId)).append(",\"user_data\":\"");
+
+    local_buf->stm.users_data_select->execute(web_user_dev_id, userId);
+    if(local_buf->stm.users_data_select->fetch() == 0)
+    {
+        local_buf->answer_buf.lock();
+        
+        mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), local_buf->stm.users_data_select->result_data, local_buf->stm.users_data_select->result_data_length);
+        res.append(local_buf->answer_buf.getAndUnlock()).append("\",\"error\":\"internal server error\"},\"event_name\":\"answer\"}"); 
+        message(local_buf, base64_encode(res.data()).data(), "_answer");
+    }
+    else
+    { 
+        res.append("\",\"error\":\"internal server error\"},\"event_name\":\"answer\"}"); 
+        message(local_buf, base64_encode(res.data()).data(), "_answer");
+    }
+    
+    local_buf->stm.users_data_select->free();
+
+    return 0;
+}
+
+/**
+ * Обрабатывает событие пришедшие от js для получения списка подписчиков на канале track_*
+ * @param event_data
+ * @param client
+ * @param len
+ * @return
+ */
+int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data,int client, int len)
+{
+    char pipe_name[PIPE_NAME_LEN+1];
+    bzero(pipe_name, PIPE_NAME_LEN+1);
+
+    char marker[PIPE_NAME_LEN+1];
+    bzero(marker, PIPE_NAME_LEN+1);
+    sscanf(event_data, "%64s\n%64s\n", pipe_name, marker);
+
+    if(memcmp(pipe_name, "track_", strlen("track_")) != 0)
+    {
+        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mtrack_pipe_users Invalid channel name[name=%s]\x1b[0m\n", pipe_name);
+
+        // @todo добавить ссылку на описание ошибки
+        message(local_buf, base64_encode((const char*) "{\"data\":{\"number_users\":-1,\"error\":\"[track_pipe_users] Invalid channel name. The channel should start with track_\"},\"event_name\":\"answer\"}").data(), "_answer");
+        return -1;
+    }
+
+
+    std::string usersstr("{\"event_name\":\"answer\",\"data\":{\"users\":[");
+
+    bool hasData = false;
+    char strtmp[200];
+    TagLoger::log(Log_ClientServer, 0, "track_pipe_users pipe:%s\n", pipe_name);
+    CP<Pipe> pipe = devManager::instance()->getDevInfo(web_user_dev_id)->findPipe(std::string(pipe_name));
+    if(!pipe.isNULL())
+    {
+        auto it = pipe->subscribers->begin();
+        while(it)
+        {
+            int conection_id = it->data;
+            TagLoger::log(Log_ClientServer, 0, "Answer[]->%d\n", conection_id );
+
+            CP<Client_connection> r = tcpServer <Client_connection>::instance()->get(conection_id);
+            if(r && r->web_user_dev_id == web_user_dev_id)
+            {
+                // @todo simpleTask отдавать всем не uuid а его солёный хеш.
+                bzero(strtmp, 200);
+                snprintf(strtmp, 200, "{\"user_id\":%d,\"uuid\":\"%s\"}", r->web_user_id, r->web_user_uuid);
+                usersstr.append(strtmp);
+                hasData = true;
+            }
+
+            it = it->Next();
+            if(it)
+            {
+                usersstr.append(",");
+            }
+        }
+    }
+
+    if(local_buf->isWSClusterActive())
+    {
+        MYSQL_ROW row;
+        auto it = local_buf->wsCluster.begin();
+        while(it != local_buf->wsCluster.end())
+        {
+            auto link = *it;
+
+            if(!link->query_format("cometqlcluster_v1 set dev_id=%d; SELECT user_id, uuid FROM users_in_pipes WHERE name = '%s'", web_user_dev_id, pipe_name))
+            {
+                break;
+            }
+
+            auto result = mysql_store_result(link->getLink());
+
+            while((row = mysql_fetch_row(result)))
+            {
+                if(hasData)
+                {
+                    usersstr.append(",");
+                }
+
+                bzero(strtmp, 200);
+                snprintf(strtmp, 200, "{\"user_id\":%s,\"uuid\":\"%s\"}", row[0], row[1]);
+                usersstr.append(strtmp);
+                hasData = true;
+            }
+            mysql_free_result(result);
+            it++;
+        }
+    }
+
+    usersstr.append("]}}");
+
+    std::string rdname("_answer_to_");
+    rdname.append(pipe_name);
+    std::string addData("\"marker\":\"");
+    addData.append(marker).append("\"");
+
+    TagLoger::log(Log_ClientServer, 0, "answer:%s\n", usersstr.data());
+    if(message(local_buf, base64_encode( (const char*)usersstr.data()).data() , rdname.data(), MESSAGE_TEXT, addData.data()) < 0)
+    {
+        return -1;
+    }
+    return 0;
+}
 
 /**
  * Отвечает  на запрос options
@@ -1582,6 +1602,7 @@ int Client_connection::http403_answer(int client, int len, thread_data* local_bu
     }
     return -1;
 }
+
 /**
  * Отвечает  на запрос get с урлом /info
  * Ответ всегда выглядит {"status":"ok"}
@@ -1837,11 +1858,11 @@ int Client_connection::request(int client, int len, thread_data* local_buf)
     {
         if(  connection_type != REQUEST_WS)
         {
-            TagLoger::log(Log_ClientServer, 0, "Processing request - [Client_connection] -----------------------%d\n[%s]\n------------------------\n",len, (char*)local_buf->buf);
-//            for(int i =0; i< len; i++)
-//            {
-//                TagLoger::log(Log_ClientServer, 0, "[%c|%d]",local_buf->buf[i],local_buf->buf[i]);
-//            }
+            TagLoger::log(Log_ClientServer, 0, "Обработка запроса - [Client_connection] -----------------------%d\n[%s]\n------------------------\n",len, (char*)local_buf->buf);
+            //for(int i =0; i< len; i++)
+            //{
+            //    TagLoger::log(Log_ClientServer, 0, "![%c|%d]",local_buf->buf[i], (unsigned char)local_buf->buf[i]);
+            //}
         }
         else
         {
@@ -1893,7 +1914,7 @@ int Client_connection::request(int client, int len, thread_data* local_buf)
         {
             // GET Вебсокет
             TagLoger::log(Log_ClientServer, 0, " >WS GET\n");
-
+            local_buf->setThreadStatus('W');
             connection_type = REQUEST_WS;
             r = web_socket_request(client,len, local_buf);
         }
@@ -1942,13 +1963,14 @@ int Client_connection::request(int client, int len, thread_data* local_buf)
     }
     else if(  connection_type == REQUEST_WS)
     {
+        local_buf->setThreadStatus('Q');
         TagLoger::log(Log_ClientServer, 0, " >HTTP REQUEST_WS\n");
         r = web_socket_request_message(client,len, local_buf);
     }
 
     if(isAuthUser)
     {
-        devManager::instance()->getDevInfo()->incrMessages();
+        devManager::instance()->getDevInfo(web_user_dev_id)->incrMessages();
     }
     //pthread_mutex_unlock(&request_mutex);
     return r;
@@ -1959,7 +1981,7 @@ int Client_connection::request(int client, int len, thread_data* local_buf)
  */
 bool Client_connection::online_incr(thread_data* local_buf)
 {
-    devManager::instance()->getDevInfo()->incrFrontendOnline();
+    devManager::instance()->getDevInfo(web_user_dev_id)->incrFrontendOnline();
     return true;
 }
 
@@ -1968,7 +1990,7 @@ bool Client_connection::online_incr(thread_data* local_buf)
  */
 bool Client_connection::online_decr(thread_data* local_buf)
 {
-    devManager::instance()->getDevInfo()->decrFrontendOnline();
+    devManager::instance()->getDevInfo(web_user_dev_id)->decrFrontendOnline();
     return true;
 }
 
@@ -2038,7 +2060,7 @@ int Client_connection::message(thread_data* local_buf, const char* msg, const ch
 
 
     TagLoger::log(Log_ClientServer, 0, "\x1b[33mmessage[len:%d|", answer_messge_len);
-    // printHexMin(messge, answer_messge_len, Log_ClientServer);
+    //printHexMin(messge, answer_messge_len, Log_ClientServer);
 
     TagLoger::log(Log_ClientServer, 0, "]->write\x1b[0m");
 
@@ -2051,7 +2073,7 @@ int Client_connection::message(thread_data* local_buf, const char* msg, const ch
     local_buf->messge_buf.unlock();
 
     //delete messge;
-    devManager::instance()->getDevInfo()->incrMessages();
+    devManager::instance()->getDevInfo(web_user_dev_id)->incrMessages();
 
     // pthread_mutex_unlock(&message_mutex);
     return ret;
@@ -2094,19 +2116,21 @@ int Client_connection::set_offline(thread_data* local_buf)
     if(!isOnLine)
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mset_offline: Recalling fd=%d\x1b[0m\n", fd);
-        return 0;
+        return web_close();
     }
 
     online_decr(local_buf);
     //pthread_mutex_lock(&request_mutex);
     isOnLine = false;
     isAuthUser = false;
-    devManager::instance()->getDevInfo()->index->un_link(local_buf, web_user_id, fd);
+    devManager::instance()->getDevInfo(web_user_dev_id)->index->un_link(local_buf, web_user_id, fd);
 
     un_subscription(local_buf);
     int close = web_close();
     connection_type = REQUEST_NULL;
 
+
+    web_user_dev_id = 0;
     client_major_version = 0;
     client_minor_version = 0;
     start_online_time = 0;

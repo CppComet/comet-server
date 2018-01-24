@@ -57,7 +57,6 @@ class Client_connection;
  */
 class Client_connection:public connection
 {
-    static std::map<std::string, const char*> ram_file_cache;
     friend class tcpServer<Client_connection>;
       
     /**
@@ -131,10 +130,6 @@ class Client_connection:public connection
     int get_custom_request(int client, int len, thread_data* local_buf);
     int cultivate_custom_request(int client, const char* message, int len, thread_data* local_buf);
     
-    int web_user_data(thread_data* local_buf, char* event_data,int client, int len);
-     
-    int cgi_call(thread_data* local_buf, char* event_data,int client, int len);
-        
     int web_socket_request_message(int client, int len, thread_data* local_buf);
     int web_socket_request_message(int client, int len, thread_data* local_buf, int start_position);
     
@@ -156,12 +151,16 @@ class Client_connection:public connection
     int un_subscription(thread_data* local_buf);
      
     int log_statistics(thread_data* local_buf, const char* event_data,int client, int len); 
+    int web_pipe_msg_v1(thread_data* local_buf, char* event_data,int client, int len);
     int web_pipe_msg_v2(thread_data* local_buf, char* event_data,int client, int len);
     int get_pipe_log(thread_data* local_buf, char* event_data,int client, int len);
     int get_user_last_online_time(thread_data* local_buf, char* event_data,int client, int len);
     int get_pipe_count(thread_data* local_buf, char* event_data,int client, int len);
     int track_pipe_users(thread_data* local_buf, char* event_data,int client, int len);
+    int web_user_data(thread_data* local_buf, char* event_data,int client, int len);
      
+    int cgi_call(thread_data* local_buf, char* event_data,int client, int len);
+    
     bool online_incr(thread_data* local_buf);
     bool online_decr(thread_data* local_buf);
     
@@ -189,7 +188,7 @@ class Client_connection:public connection
     int client_major_version = 0;
     int client_minor_version = 0;
     
-    char* parse_url(int client, int len, thread_data* local_buf);
+    std::string parse_url(int client, int len, thread_data* local_buf);
     int web_write_error(const char* text, thread_data* local_buf);
     int web_write_error(const char* text, int code, thread_data* local_buf);
     int web_socket_receive(thread_data* local_buf);
@@ -202,6 +201,7 @@ class Client_connection:public connection
      * id пользователя если он авторизован или ноль если не авторизован.
      */
     int web_user_id = 0; 
+    int web_user_dev_id = 0;
     
     /**
      * Самоназвание клиента (для случаев если надо идентифицировать и дифференцировать не авторизованных пользователей)
@@ -234,6 +234,12 @@ class Client_connection:public connection
      */
     static int max_arg_length;
         
+    /**
+     * Устанавливает размер Dev индекса
+     * @return 
+     */
+    static void setDevIndexSize(int size);
+      
     Client_connection();  
     virtual ~Client_connection();
      

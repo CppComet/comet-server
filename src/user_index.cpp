@@ -11,38 +11,33 @@ time_t user_index::start_time=time(0);
 
 #include "devManager.h"
 
-
-#define SALT_LEN 10
+  
+#include "jwt/jwt_all.h"
+using json = nlohmann::json;
 
 useritem::useritem()
 {
     bzero(conection_ids, sizeof(int) * MAX_CONECTION_ON_USER_ID);
 }
 
-useritem::useritem(thread_data* local_buf, unsigned int User_id,int Conection_id)
+useritem::useritem(thread_data* local_buf, int Dev_Id, unsigned int User_id,int Conection_id)
 {
+    dev_id = Dev_Id;
     user_id = User_id;
     bzero(conection_ids, sizeof(int) * MAX_CONECTION_ON_USER_ID);
     setConection_id(local_buf, Conection_id);
 }
 
-useritem::useritem(thread_data* local_buf, unsigned int User_id,const char* Hash)
+useritem::useritem(thread_data* local_buf, int Dev_Id, unsigned int User_id,std::string Hash)
 {
+    dev_id = Dev_Id;
     user_id = User_id;
+ 
+    hash = Hash;
 
-    int copy_len = strlen(Hash);
-    if( copy_len > USER_HASH_LEN)
-    {
-        copy_len = USER_HASH_LEN;
-    }
+    TagLoger::log(Log_UserItem, 0, "auth_hash_test:%s\n", hash.data());
 
-    hash = new char[USER_HASH_LEN+1];
-    bzero(hash, USER_HASH_LEN+1);
-    memcpy(hash, Hash, copy_len);
-
-    TagLoger::log(Log_UserItem, 0, "auth_hash_test:%s\n", hash);
-
-    local_buf->stm.users_auth_replace->execute(user_id, hash);
+    local_buf->stm.users_auth_replace->execute(dev_id, user_id, hash.data());
 
     bzero(conection_ids, sizeof(int) * MAX_CONECTION_ON_USER_ID);
 }
@@ -123,6 +118,16 @@ int useritem::unsetConection_id(thread_data* local_buf, int Conection_id)
     return 0;
 }
 
+void useritem::setDevId(int Dev_id)
+{
+    dev_id = Dev_id;
+}
+
+int useritem::getDevId(void)
+{
+    return dev_id;
+}
+
 /**
  * Возвращает имеющиеся значение, но если данных нет то обратится в редис.
  */
@@ -130,7 +135,7 @@ long useritem::getLast_online_time(thread_data* local_buf)
 {
     if(last_online_time == -1)
     {
-        local_buf->stm.users_time_select->execute(user_id);
+        local_buf->stm.users_time_select->execute(dev_id, user_id); 
         if(local_buf->stm.users_time_select->fetch())
         {
             local_buf->stm.users_time_select->free();
@@ -156,11 +161,12 @@ int useritem::getLast_online_time()
  * Определяет время последней авторизации, берёт значение из редиса.
  * @param local_buf
  * @param user_id
+ * @param dev_id
  * @return
  */
-long useritem::getLast_online_time(thread_data* local_buf, unsigned int user_id)
+long useritem::getLast_online_time(thread_data* local_buf, unsigned int user_id, int dev_id)
 {
-    if(!local_buf->stm.users_time_select->execute(user_id))
+    if(!local_buf->stm.users_time_select->execute(dev_id, user_id))
     {
         return -1;
     }
@@ -180,24 +186,12 @@ long useritem::getLast_online_time(thread_data* local_buf, unsigned int user_id)
 /**
  * Устанавливает хеш авторизации
  */
-bool useritem::setHash(thread_data* local_buf, const char* Hash)
+bool useritem::setHash(thread_data* local_buf, std::string Hash)
 {
-    if(hash == 0)
-    {
-        hash = new char[USER_HASH_LEN+1];
-    }
-
-    int copy_len = strlen(Hash);
-    if( copy_len > USER_HASH_LEN)
-    {
-        copy_len = USER_HASH_LEN;
-    }
-
-    bzero(hash, USER_HASH_LEN+1);
-
-    memcpy(hash, Hash, copy_len);
-    TagLoger::log(Log_UserItem, 0, "auth_hash_test:%s\n", hash);
-    local_buf->stm.users_auth_replace->execute(user_id, hash);
+    hash = Hash;
+ 
+    TagLoger::log(Log_UserItem, 0, "auth_hash_test:%s\n", hash.data());
+    local_buf->stm.users_auth_replace->execute(dev_id, user_id, hash.data());
     return true;
 }
 
@@ -207,14 +201,13 @@ bool useritem::setHash(thread_data* local_buf, const char* Hash)
  */
 bool useritem::deleteHash(thread_data* local_buf)
 {
-    local_buf->stm.users_auth_delete->execute(user_id);
-    if(hash == NULL)
+    local_buf->stm.users_auth_delete->execute(dev_id, user_id);
+    if(hash.empty())
     {
         return true;
     }
 
-    delete[] hash;
-    hash = NULL;
+    hash.erase();
     return true;
 }
 
@@ -225,15 +218,14 @@ bool useritem::deleteHash(thread_data* local_buf)
  * @param local_buf
  * @return
  *
- * @deprecated В замен таблицы хешей пользователей решено переходить на алгоритм авторизации по токену
  */
-bool useritem::getHash(thread_data* local_buf, unsigned int user_id, char* out_hash)
+bool useritem::getHash(thread_data* local_buf, unsigned int user_id, int dev_id, char* out_hash)
 {
-    local_buf->stm.users_auth_select->execute(user_id);
+    local_buf->stm.users_auth_select->execute(dev_id, user_id);
 
     if(local_buf->stm.users_auth_select->fetch())
     {
-        TagLoger::log(Log_UserItem, 0, "[4]Hash, user_id=%d not found\n", user_id);
+        TagLoger::log(Log_UserItem, 0, "[4]Hash dev_id=%d, user_id=%d not found\n", dev_id, user_id);
         local_buf->stm.users_auth_select->free();
         return false;
     }
@@ -243,14 +235,15 @@ bool useritem::getHash(thread_data* local_buf, unsigned int user_id, char* out_h
         bzero(out_hash, USER_HASH_LEN);
         memcpy(out_hash, local_buf->stm.users_auth_select->result_hash, USER_HASH_LEN);
     }
-    TagLoger::log(Log_UserItem, 0, "[5]Hash user_id=%d is %s\n", user_id, local_buf->stm.users_auth_select->result_hash);
+    
+    TagLoger::log(Log_UserItem, 0, "[5]Hash dev_id=%d, user_id=%d is %s\n", dev_id, user_id, local_buf->stm.users_auth_select->result_hash);
     local_buf->stm.users_auth_select->free();
     return true;
 }
 
-bool useritem::deleteHash(thread_data* local_buf, unsigned int user_id)
+bool useritem::deleteHash(thread_data* local_buf, unsigned int user_id, int dev_id)
 {
-    local_buf->stm.users_auth_delete->execute(user_id);
+    local_buf->stm.users_auth_delete->execute(dev_id, user_id);
     return true;
 }
 
@@ -263,46 +256,103 @@ bool useritem::deleteHash(thread_data* local_buf, unsigned int user_id)
  */
 bool useritem::getHash(thread_data* local_buf, char* out_hash)
 {
-    if(hash == 0)
+    if(hash.empty())
     {
-        local_buf->stm.users_auth_select->execute(user_id);
+        local_buf->stm.users_auth_select->execute(dev_id, user_id); 
         if(local_buf->stm.users_auth_select->fetch())
         {
             local_buf->stm.users_auth_select->free();
-            TagLoger::log(Log_UserItem, 0, "[3]Hash user_id=%d not found\n", user_id);
+            TagLoger::log(Log_UserItem, 0, "[3]Hash dev_id=%d, user_id=%d not found\n", dev_id, user_id);
             return false;
         }
 
-        hash = new char[USER_HASH_LEN+1];
-        bzero(hash, USER_HASH_LEN+1);
-
-        memcpy(hash, local_buf->stm.users_auth_select->result_hash, USER_HASH_LEN );
+        hash = local_buf->stm.users_auth_select->result_hash;
+ 
         local_buf->stm.users_auth_select->free();
-        TagLoger::log(Log_UserItem, 0, "[1]Hash user_id=%d is %s\n", user_id, hash);
+        TagLoger::log(Log_UserItem, 0, "[1]Hash dev_id=%d, user_id=%d is %s\n", dev_id, user_id, hash.data());
     }
     else
     {
-        TagLoger::log(Log_UserItem, 0, "[2]Hash user_id=%d is %s\n", user_id, hash);
+        TagLoger::log(Log_UserItem, 0, "[2]Hash dev_id=%d, user_id=%d is %s\n", dev_id, user_id, hash.data());
     }
 
     if(out_hash != NULL)
     {
         bzero(out_hash, USER_HASH_LEN);
-        memcpy(out_hash, hash, USER_HASH_LEN);
+        memcpy(out_hash, hash.data(), USER_HASH_LEN);
     }
     return true;
 }
 
 /**
- * Проверяет хеш авторизации
+ * 
  * @param local_buf
- * @param Hash
- * @return
+ * @param token строка из 32 символов
+ * @return 
+ * 
+ * http://redmine.comet-server.com/issues/65
+ * http://redmine.comet-server.com/issues/67
+ * http://redmine.comet-server.com/issues/68
+ * 
+ * http://hashlib2plus.sourceforge.net/example.html
+ * https://learn.javascript.ru/csrf 
+ * 
+ * Hash вида
+ * token = salt + MD5(salt + dev_key + dev_id + user_id )
+ * salt - всегда 10 символов 
+ * 
+ * 
+ * 
+ * JWT
+ * 
+ * 
+ * 
  */
-bool useritem::testHash(thread_data* local_buf, const char* Hash)
+bool useritem::testToken(thread_data* local_buf, std::string token, int dev_id, int user_id)
+{  
+    ExpValidator exp;
+    HS256Validator signer(appConf::instance()->get_chars("main", "password"));
+ 
+    // https://jwt.io/
+    // Now let's use these validators to parse and verify the token we created
+    // in the previous example
+  
+    try {
+        // Decode and validate the token
+        ::json header, payload;
+
+        std::tie(header, payload) = JWT::Decode(token, &signer, &exp);
+        //std::cout << "Header: " << header << std::endl;
+        //std::cout << "Payload: " << payload << std::endl;
+        
+        if(payload["user_id"] != user_id)
+        { 
+            return false;
+        }
+         
+        local_buf->stm.revoked_tokens_select->execute(dev_id, token.data());
+        if(local_buf->stm.revoked_tokens_select->fetch())
+        { 
+            // Токен не найден среди отозванных
+            local_buf->stm.revoked_tokens_select->free();
+            return true;
+        }
+
+        local_buf->stm.revoked_tokens_select->free(); 
+        return false;
+        
+    } catch (InvalidTokenError &tfe) {
+        // An invalid token 
+        TagLoger::debug(Log_UserItem, 0, "Validation failed: %s\n", tfe.what());
+    }
+  
+    return false;
+}
+  
+bool useritem::testHash(thread_data* local_buf, std::string Hash)
 {
     // Если в друг нам пришёл не хеш авторизации а токен то проверим его как токен
-    if(testToken(local_buf, Hash, user_id))
+    if(testToken(local_buf, Hash, dev_id, user_id))
     {
         // Если токен верен но хеша авторизации нет то установим значение токена в качестве хеша авторизации
         if(!getHash(local_buf, NULL))
@@ -316,37 +366,10 @@ bool useritem::testHash(thread_data* local_buf, const char* Hash)
     {
         return false;
     }
-
-
-    int Hash_len = strlen(Hash);
-    if(Hash_len > USER_HASH_LEN)
-    {
-        // Если хеш длинее USER_HASH_LEN то ограничемся USER_HASH_LEN
-        Hash_len = USER_HASH_LEN;
-    }
-
-
-    int local_hash_len = strlen(hash);
-    if(local_hash_len > USER_HASH_LEN)
-    {
-        // По какойто причине какимто неведомым образом hash может указывать на строку больше USER_HASH_LEN
-        // Если хеш длинее USER_HASH_LEN то ограничемся USER_HASH_LEN
-        local_hash_len = USER_HASH_LEN;
-    }
-
-    TagLoger::log(Log_UserItem, 0, "testHash: [%zu]%s = [%d]%s\n", local_hash_len, hash,  Hash_len, Hash);
-
-    if(local_hash_len > Hash_len)
-    {
-        return false;
-    }
-
-    if(memcmp(hash, Hash, local_hash_len ) == 0)
-    {
-        return true;
-    }
-
-    return false;
+ 
+    TagLoger::log(Log_UserItem, 0, "testHash: %s = %s\n", hash.data(), Hash.data());
+   
+    return Hash == hash;
 }
 
 /**
@@ -354,29 +377,30 @@ bool useritem::testHash(thread_data* local_buf, const char* Hash)
  * @param local_buf
  * @param Hash
  * @param user_id
+ * @param dev_id
  * @return
  */
-bool useritem::testHash(thread_data* local_buf, const char* Hash, unsigned int user_id)
+bool useritem::testHash(thread_data* local_buf, std::string Hash, unsigned int user_id, int dev_id)
 {
     // Если в друг нам пришёл не хеш авторизации а токен то проверим его как токен
-    if(testToken(local_buf, Hash, user_id))
+    if(testToken(local_buf, Hash, dev_id, user_id))
     {
         // Если токен верен но хеша авторизации нет то установим значение токена в качестве хеша авторизации
-        if(!getHash(local_buf, user_id, NULL))
+        if(!getHash(local_buf, user_id, dev_id, NULL))
         {
-            local_buf->stm.users_auth_replace->execute(user_id, Hash);
+            local_buf->stm.users_auth_replace->execute(dev_id, user_id, Hash.data());
         }
         return true;
     }
 
-    local_buf->stm.users_auth_select->execute(user_id);
+    local_buf->stm.users_auth_select->execute(dev_id, user_id);
     if(local_buf->stm.users_auth_select->fetch())
     {
         local_buf->stm.users_auth_select->free();
         return false;
     }
 
-    if(memcmp(Hash, local_buf->stm.users_auth_select->result_hash, USER_HASH_LEN) == 0)
+    if(Hash == local_buf->stm.users_auth_select->result_hash)
     {
         local_buf->stm.users_auth_select->free();
         return true;
@@ -386,13 +410,6 @@ bool useritem::testHash(thread_data* local_buf, const char* Hash, unsigned int u
     return false;
 }
 
-useritem::~useritem()
-{
-    if(hash == 0)
-    {
-        delete[] hash;
-    }
-}
 
 /**
  * Запоминает время ухода пользователя и сохраняет эту информацию в редис
@@ -405,13 +422,13 @@ void useritem::setOffline_time(thread_data* local_buf)
     {
         if(appConf::instance()->get_bool("main", "save_users_last_online_time"))
         {
-            local_buf->db.query_format("replace into `users_time` (`user_id`, `time`) VALUES ('%d', '%d')", user_id, last_online_time);
+            local_buf->db.query_format("replace into `users_time` (`dev_id`, `user_id`, `time`) VALUES ('%d', '%d', '%d')", dev_id, user_id, last_online_time); 
         }
         if(appConf::instance()->get_bool("main", "send_user_offline_events"))
         {
             char pipe_name[100];
             snprintf(pipe_name, 100,"user_status_%d", user_id);
-            internalApi::send_event_to_pipe(local_buf, pipe_name, "{\\\"data\\\":\\\"offline\\\",\\\"event_name\\\":\\\"offline\\\"}", NULL);
+            internalApi::send_event_to_pipe(local_buf, pipe_name, "{\\\"data\\\":\\\"offline\\\",\\\"event_name\\\":\\\"offline\\\"}", dev_id, NULL);
 
             if(local_buf->isWSClusterActive())
             {
@@ -419,7 +436,7 @@ void useritem::setOffline_time(thread_data* local_buf)
                 while(it != local_buf->wsCluster.end())
                 {
                     auto link = *it; 
-                    link->query_format("cometqlcluster_v1; INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'offline', 'offline');", pipe_name);
+                    link->query_format("cometqlcluster_v1 set dev_id=%d; INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'offline', 'offline');", dev_id, pipe_name);
                     it++;
                 }
             }
@@ -439,14 +456,14 @@ void useritem::setOnline_time(thread_data* local_buf)
         if(appConf::instance()->get_bool("main", "save_users_last_online_time") && !local_buf->isWSClusterActive())
         {
             // В не кластерной работы точно нет необходимости в этом запросе
-            local_buf->db.query_format("replace into `users_time` (`user_id`, `time`) VALUES ('%d', 0)", user_id);
+            local_buf->db.query_format("replace into `users_time` (`dev_id`, `user_id`, `time`) VALUES ('%d', '%d', 0)", dev_id, user_id); 
         }
 
         if(appConf::instance()->get_bool("main", "send_user_online_events"))
         {
             char pipe_name[100];
             snprintf(pipe_name, 100, "user_status_%d", user_id);
-            internalApi::send_event_to_pipe(local_buf, pipe_name, "{\\\"data\\\":\\\"online\\\",\\\"event_name\\\":\\\"online\\\"}", NULL);
+            internalApi::send_event_to_pipe(local_buf, pipe_name, "{\\\"data\\\":\\\"online\\\",\\\"event_name\\\":\\\"online\\\"}", dev_id, NULL);
 
 
             if(local_buf->isWSClusterActive())
@@ -455,7 +472,7 @@ void useritem::setOnline_time(thread_data* local_buf)
                 while(it != local_buf->wsCluster.end())
                 {
                     auto link = *it; 
-                    link->query_format("cometqlcluster_v1; INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'online', 'online');", pipe_name);
+                    link->query_format("cometqlcluster_v1 set dev_id=%d; INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'online', 'online');", dev_id, pipe_name);
                     it++;
                 }
             }
@@ -464,55 +481,7 @@ void useritem::setOnline_time(thread_data* local_buf)
 }
 
 
-/**
- * 
- * @param local_buf
- * @param token строка из 32 символов
- * @return 
- * 
- * http://redmine.comet-server.com/issues/65
- * http://redmine.comet-server.com/issues/67
- * http://redmine.comet-server.com/issues/68
- * 
- * http://hashlib2plus.sourceforge.net/example.html
- * https://learn.javascript.ru/csrf 
- * 
- * Hash вида
- * token = salt + MD5(salt + dev_key + user_id )
- * salt - всегда 10 символов 
- */
-bool useritem::testToken(thread_data* local_buf, const char* token, int user_id)
-{ 
-    if(strlen(token) < 32)
-    {
-        return false;
-    }
-    
-    const char* dev_key = devManager::instance()->getDevInfo()->getDevKey();
-    if(dev_key == NULL)
-    {
-        return false;
-    }
 
-    char hashStr[256];
-    bzero(hashStr, 256);
-    
-    memcpy(hashStr, token, SALT_LEN);
-    memcpy(hashStr+SALT_LEN, dev_key, DEV_KEY_LEN); 
-    snprintf(hashStr+SALT_LEN+DEV_KEY_LEN, 32, "%d", user_id);
-    
-    //printf("token %10s|%s\n", token, token+SALT_LEN);
-    //printf("hashStr %s\n", hashStr);
-
-    hashwrapper *myWrapper = new md5wrapper();
-    std::string test_hash = myWrapper->getHashFromString(hashStr);
-
-    
-    //printf("test_hash %10s|%s\n", test_hash.data(), test_hash.data()+SALT_LEN);
-    
-    return memcmp(token+SALT_LEN, test_hash.data()+SALT_LEN, 32-SALT_LEN) == 0;
-}
-  
 
 #endif	/* USER_INDEX_CPP */
 

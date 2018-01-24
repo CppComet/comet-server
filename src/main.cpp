@@ -19,8 +19,8 @@
 
 #include "Client_connection.h"
 #include "MySql_connection.h"
-#include "Freeswitch_connection.h"  
-#include "CometQLProxy_connection.h" 
+#include "Freeswitch_connection.h"
+#include "CometQLProxy_connection.h"
 
 #include "intervalLoop.h"
 
@@ -48,11 +48,11 @@
 #include "appConf.h"
 
 #include <ctime>
- 
+
 template< class connectionType >
 void th_startServer(int threadid, const char* server_name)
 {
-    
+
     if(!appConf::instance()->is_property_exists(server_name, "thread_num") || appConf::instance()->get_int(server_name, "thread_num") == 0)
     {
         return;
@@ -60,24 +60,24 @@ void th_startServer(int threadid, const char* server_name)
 
     if(!appConf::instance()->is_property_exists("main", "buf_size"))
     {
-        appConf::instance()->set_value("main", "buf_size", MAIN_BUF_SIZE);  
+        appConf::instance()->set_value("main", "buf_size", MAIN_BUF_SIZE);
     }
-    
+
     if(!appConf::instance()->is_property_exists(server_name, "ip"))
     {
-        appConf::instance()->set_value(server_name, "ip", NULL_IP);  
+        appConf::instance()->set_value(server_name, "ip", NULL_IP);
     }
-    
+
     if(!appConf::instance()->is_property_exists(server_name, "backlog"))
     {
-        appConf::instance()->set_value(server_name, "backlog", MAIN_BACKLOG_SIZE);  
+        appConf::instance()->set_value(server_name, "backlog", MAIN_BACKLOG_SIZE);
     }
-    
+
     if(!appConf::instance()->is_property_exists(server_name, "epoll_size"))
     {
-        appConf::instance()->set_value(server_name, "epoll_size", MAIN_EPOLL_SIZE);  
+        appConf::instance()->set_value(server_name, "epoll_size", MAIN_EPOLL_SIZE);
     }
-    
+
     TagLoger::log(Log_Any, 0, "Hello World! It's me, %s #%ld!\n", server_name, threadid);
 
     tcpServer <connectionType>::instance()->id = threadid;
@@ -100,7 +100,7 @@ void th_startServer(int threadid, const char* server_name)
     tcpServer <connectionType>::instance()->start(appConf::instance()->get_string(server_name, "ip").data(), appConf::instance()->get_int(server_name, "port"), server_name);
     return;
 }
- 
+
 /**
  * Обрабатывает сигнал смерти.
  * @link http://habrahabr.ru/post/131412/
@@ -189,7 +189,7 @@ void posix_exit_signal(int signum)
     close(fp);
     TagLoger::log(Log_Any, 0, "\x1b[1;33m%s\x1b[0m\n", error_string);
 
-    signal(signum, SIG_DFL); // перепосылка сигнала 
+    signal(signum, SIG_DFL); // перепосылка сигнала
     exit(0);
 }
 
@@ -216,7 +216,7 @@ void posix_ignor_signal(int signum)
 
     signal(signum, SIG_IGN); // перепосылка сигнала
 }
- 
+
 #define NAMEDPIPE_NAME "/tmp/cpp.comet"
 #define BUFSIZE        150
 
@@ -236,7 +236,7 @@ void posix_ignor_signal(int signum)
  * echo 'LogLevel 500' > /tmp/cpp.comet -- Логирует если разрешено по тегу
  *
  * echo 'TagLog 0 600' > /tmp/cpp.comet -- Установить тегу разрешение на полный лог.
- * 
+ *
  */
 void command_line_fork()
 {
@@ -335,20 +335,22 @@ void command_line_fork()
 
     } while ( 1 );
 }
- 
+
+#include <iostream>
+
 /**
  * valgrind --tool=memcheck --track-origins=yes --leak-check=yes ./cpp_comet
  * valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-reachable=yes ./cpp_comet
  * valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-reachable=yes ./cpp_comet --test
  *
  * cppcheck -q -j4 --enable=performance,portability,warning,style .
- * 
+ *
  * @param argc
  * @param argv
  * @return
  */
 int main(int argc, char *argv[])
-{ 
+{  
     TagTimer::start(Time_start);
 
     // Назначает обработчик на сигнал смерти
@@ -356,7 +358,7 @@ int main(int argc, char *argv[])
 
     signal(SIGFPE,  posix_log_signal); //  сигнал, посылаемый процессу, при попытке выполнения ошибочной арифметической операции. ( может быть перехвачен или проигнорирован программой.)
     signal(SIGILL,  posix_log_signal); //  сигнал, посылаемый процессу при попытке выполнить неправильно сформированную, несуществующую или привилегированную инструкцию. (или попытке выполнения инструкции, требующей специальных привилегий. ) ( может быть перехвачен или проигнорирован)
-   
+
 
 //#define	USE_COVERAGE
 #ifndef USE_COVERAGE
@@ -371,11 +373,11 @@ int main(int argc, char *argv[])
     signal(SIGTERM, posix_exit_signal); //  сигнал, для запроса завершения процесса. (В отличие от SIGKILL этот сигнал может быть обработан или проигнорирован программой.)
     signal(SIGUSR1, posix_exit_signal); // пользовательские сигналы По умолчанию, сигналы SIGUSR1 и SIGUSR2 завершают выполнение процесса.
     signal(SIGUSR2, posix_exit_signal); // пользовательские сигналы По умолчанию, сигналы SIGUSR1 и SIGUSR2 завершают выполнение процесса.
-    
+
     base64_decode(std::string("YWJjZA==")); // Просто провера чтоб COVERAGE был больше
-    
+
 #endif	/* DEVMANAGER_H */
-    
+
     signal(SIGBUS,  posix_log_signal); //  сигнал, сигнализирующий об ошибке шины, при обращении к физической памяти. ( может быть перехвачен или проигнорирован)
     signal(SIGSYS,  posix_log_signal); //  сигнал, предназначенный для посылки программе, при попытке передать неправильный аргумент в системный вызов.
     signal(SIGXCPU, posix_log_signal); //  сигнал, посылаемый компьютерной программе, превышающей лимит процессорного времени.
@@ -398,30 +400,30 @@ int main(int argc, char *argv[])
     //signal(SIGTRAP, posix_death_signal); //  сигнал, посылаемый для информирования отладчика о возникновении интересующего события.
     //signal(SIGURG,  posix_death_signal); //  сигнал, посылаемый процессу при появлении на сокете доступных для чтения срочных (англ. urgent) данных.
     //signal(SIGVTALRM, posix_death_signal); //  сигнал, посылаемый процессу по истечении времени заданном в «виртуальном» таймере.
-  
-    // Чтение конфига и ключей запуска 
+
+    // Чтение конфига и ключей запуска
     if(!appConf::instance()->init(argc, argv))
-    { 
+    {
         TagLoger::error(Log_appConf, 0, "\x1b[1;32mCppComet error in parsing comet.ini file\x1b[0m");
         return 0;
     }
-    
+
     TagLoger::log(Log_Any, 0, "Server starting pid:%d, getrusage:%d\n", (int)getpid());
     TagLoger::initTagLevels();
- 
+
     dbLink mydb;
     mydb.init(appConf::instance()->get_chars("db", "host"),
             appConf::instance()->get_chars("db", "user"),
             appConf::instance()->get_chars("db", "password"),
             appConf::instance()->get_chars("db", "name"),
             appConf::instance()->get_int("db", "port"));
-    
+
     int connection_attempts = appConf::instance()->get_int("db", "connection_attempts");
     if(!connection_attempts)
     {
         connection_attempts = 1;
     }
-    
+
     int count = 0;
     bool isSuccess = false;
     do{
@@ -443,7 +445,7 @@ int main(int argc, char *argv[])
             isSuccess = true;
             break;
         }
-        
+
     }while(count < connection_attempts);
 
     if(!isSuccess)
@@ -451,8 +453,8 @@ int main(int argc, char *argv[])
         TagLoger::error(Log_Any, 0, "\x1b[1;31mError: MySQL connection not established\x1b[0m");
         return -1;
     }
-    
-    // Запись pid в var run 
+
+    // Запись pid в var run
     auto fp = fopen(appConf::instance()->get_chars("main", "pidfile"), "w");
     if(fp == NULL)
     {
@@ -464,10 +466,10 @@ int main(int argc, char *argv[])
         fprintf(fp, "%d", (int)getpid());
         fclose(fp);
     }
-    
+
     while(true)
     {
-        pid_t pid = fork(); 
+        pid_t pid = fork();
         if(pid == -1)
         {
             TagLoger::error(Log_appConf, 0, "\x1b[1;32mError in fork result of function\x1b[0m");
@@ -481,47 +483,44 @@ int main(int argc, char *argv[])
             // Это процесс-потомок
             TagLoger::debug(Log_appConf, 0, "PID=%d, PPID=%d", (int)getpid(), (int)getppid());
             signal(SIGHUP,  posix_death_signal); //  сигнал, посылаемый процессу для уведомления о потере соединения с управляющим терминалом пользователя. ( может быть перехвачен или проигнорирован программой. )
-     
+
             break;
         }
         else
         {
-            // Это процесс-родитель 
-            TagLoger::debug(Log_appConf, 0, "PID=%d, Child PID=%d", (int)getpid(), pid); 
+            // Это процесс-родитель
+            TagLoger::debug(Log_appConf, 0, "PID=%d, Child PID=%d", (int)getpid(), pid);
             signal(SIGHUP,  posix_log_signal); //  сигнал, посылаемый процессу для уведомления о потере соединения с управляющим терминалом пользователя. ( может быть перехвачен или проигнорирован программой. )
-   
+
             int status;
-            waitpid(pid, &status, 0); 
+            waitpid(pid, &status, 0);
             if(status == 0)
             {
-                TagLoger::log(Log_appConf, 0, "Completion of work");  
+                TagLoger::log(Log_appConf, 0, "Completion of work");
                 remove(appConf::instance()->get_chars("main", "pidfile"));
                 remove(NAMEDPIPE_NAME);
                 exit(0);
             }
             else
             {
-                TagLoger::error(Log_appConf, 0, "Child return status is %d", status);  
+                TagLoger::error(Log_appConf, 0, "Child return status is %d", status);
             }
         }
     }
-    
-    if(!appConf::instance()->get_string("main", "host").empty())
-    {
-        devManager::instance()->getDevInfo()->setDevUrl(appConf::instance()->get_chars("main", "host"));
-    }
+
+    devManager::instance()->setDevIndexSize(appConf::instance()->get_int("main", "dev_index_size"));
 
     intervalLoop::instance()->start();
-    usage_statistics::start(); 
-  
+    usage_statistics::start();
+
     // Запуск потока обработки сообщений от браузеров
     th_startServer<Client_connection>(1, "ws");
     th_startServer<MySql_connection>(2, "cometql");
-    
+
     // Запуск потока обработки сообщений от серверов freeswitch
-    th_startServer<Freeswitch_connection>(3, "freeswitch");  
+    th_startServer<Freeswitch_connection>(3, "freeswitch");
     th_startServer<CometQLProxy_connection>(4, "cometqlproxy");
-    
+
     command_line_fork();
 
     TagTimer::end(Time_start);
