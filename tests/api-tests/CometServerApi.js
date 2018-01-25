@@ -108,9 +108,9 @@ if(!window.tabSignal)
 			var obj = tabSignal.slotArray[signal_name];
 			for (var slot in obj)
 			{
-				if( obj.hasOwnProperty(slot) && obj[slot] !== undefined)
+				if( obj.hasOwnProperty(slot) &&  obj[slot] !== undefined)
 				{
-					obj[slot](param, signal_name, SignalNotFromThisTab === true)
+					obj[slot](param,signal_name, SignalNotFromThisTab === true)
 				}
 			}
 
@@ -297,7 +297,7 @@ var _cometServerApi = function(opt)
 /**
  * @private
  */
-_cometServerApi.prototype.version = "3.31";
+_cometServerApi.prototype.version = "3.32";
 
 /**
  * @private
@@ -708,7 +708,7 @@ _cometServerApi.prototype.subscription_callBack = function(name, callBack, speci
 _cometServerApi.prototype.subscription_slot_array = [];
 
 /**
- * Отписывает от всех подписок сразу.
+ * Отписывает отпишет от всех подписок сразу.
  * @public
  */
 _cometServerApi.prototype.unsubscriptionAll = function()
@@ -1934,6 +1934,21 @@ _cometServerApi.prototype.getTrackPipeUsers = function(pipe_name, callBack)
 
 	if(_cometServerApi.prototype.LogLevel) console.log(["track_pipe_users", pipe_name]);
 	return _cometServerApi.prototype.send_msg("track_pipe_users\n"+pipe_name+"\n"+marker);
+};
+
+_cometServerApi.prototype.getUserData = function(user_id, callBack)
+{ 
+	if(!user_id || /[^0-9]/.test(user_id))
+	{
+            console.error("Invalid user_id=`"+user_id+"`. The user_id should is integer");
+            return;
+	}
+ 
+        var marker = _cometServerApi.prototype.getCustomString();  
+        _cometServerApi.prototype.subscription_callBack("_answer", callBack, marker);
+
+	if(_cometServerApi.prototype.LogLevel) console.log(["user_data", user_id]);
+	return _cometServerApi.prototype.send_msg("user_data\n"+marker+"\n"+user_id);
 };
 
 /**

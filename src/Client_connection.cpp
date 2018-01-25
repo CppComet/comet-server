@@ -333,7 +333,7 @@ std::string Client_connection::parse_url(int client, int len, thread_data* local
 
 
     web_user_dev_id = read_long(mytext + udev_id_index,'&');
-    if(web_user_dev_id <= 0)
+    if(web_user_dev_id < 0)
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] \x1b[0m\n");
         web_write_error( "Error code 406(Invalid request, no public key found [2])" , 406, local_buf);
@@ -980,7 +980,7 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
     }
     else if(memcmp( str_data, "user_data", strlen("user_data")) == 0)
     {
-        TagLoger::log(Log_ClientServer, 0, "comand-cgi_call:\n" );
+        TagLoger::log(Log_ClientServer, 0, "user_data:\n" );
         res = web_user_data(local_buf, (char*)(str_data + strlen("user_data") + 1), client, msg_data_len);
         if(res == -1) return -1;
     }
@@ -1408,7 +1408,9 @@ int Client_connection::web_user_data(thread_data* local_buf, char* event_data,in
         message(local_buf, base64_encode((const char*) "{\"data\":{\"user_id\":-1,\"user_data\":\"\",\"error\":\"Invalid marker name.\"},\"event_name\":\"answer\"}").data(), "_answer");
         return -1;
     }
-
+    
+    *(end_pMarker-1) = 0;
+    
     int userId = 0;
     try{
         userId = std::stoi(end_pMarker);
@@ -1419,21 +1421,24 @@ int Client_connection::web_user_data(thread_data* local_buf, char* event_data,in
     }
 
     std::string res;
+    std::string server_info;
     res.append("{\"data\":{\"user_id\":").append(std::to_string(userId)).append(",\"user_data\":\"");
-
+    server_info.append("\"marker\":\"").append(pMarker).append("\"");
+    
+    
     local_buf->stm.users_data_select->execute(web_user_dev_id, userId);
-    if(local_buf->stm.users_data_select->fetch() == 0)
+    if(!local_buf->stm.users_data_select->fetch())
     {
         local_buf->answer_buf.lock();
         
-        mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), local_buf->stm.users_data_select->result_data, local_buf->stm.users_data_select->result_data_length);
-        res.append(local_buf->answer_buf.getAndUnlock()).append("\",\"error\":\"internal server error\"},\"event_name\":\"answer\"}"); 
-        message(local_buf, base64_encode(res.data()).data(), "_answer");
+        mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), local_buf->stm.users_data_select->result_data, strlen(local_buf->stm.users_data_select->result_data));
+        res.append(local_buf->answer_buf.getAndUnlock()).append("\"},\"event_name\":\"answer\"}"); 
+        message(local_buf, base64_encode(res.data()).data(), "_answer", MESSAGE_TEXT, server_info.data());
     }
     else
     { 
-        res.append("\",\"error\":\"internal server error\"},\"event_name\":\"answer\"}"); 
-        message(local_buf, base64_encode(res.data()).data(), "_answer");
+        res.append("\"},\"event_name\":\"answer\"}"); 
+        message(local_buf, base64_encode(res.data()).data(), "_answer", MESSAGE_TEXT, server_info.data());
     }
     
     local_buf->stm.users_data_select->free();

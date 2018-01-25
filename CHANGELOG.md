@@ -5,6 +5,11 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v3.37
+BUG FIXES:
+ * bug fix for dev_id=0
+ * bug fix for users_data js api call
+  
 ## v3.36
   
 FEATURES:

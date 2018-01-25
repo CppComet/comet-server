@@ -297,7 +297,7 @@ var _cometServerApi = function(opt)
 /**
  * @private
  */
-_cometServerApi.prototype.version = "3.31";
+_cometServerApi.prototype.version = "3.33";
 
 /**
  * @private
@@ -1934,6 +1934,26 @@ _cometServerApi.prototype.getTrackPipeUsers = function(pipe_name, callBack)
 
 	if(_cometServerApi.prototype.LogLevel) console.log(["track_pipe_users", pipe_name]);
 	return _cometServerApi.prototype.send_msg("track_pipe_users\n"+pipe_name+"\n"+marker);
+};
+
+_cometServerApi.prototype.getUserData = function(user_id, callBack)
+{ 
+	if(!user_id || /[^0-9]/.test(user_id))
+	{
+            console.error("Invalid user_id=`"+user_id+"`. The user_id should is integer");
+            return;
+	}
+ 
+	if(callBack === undefined)
+        {
+            return;
+        }
+        
+        var marker = _cometServerApi.prototype.getCustomString();  
+        _cometServerApi.prototype.subscription_callBack("_answer", callBack, marker);
+
+	if(_cometServerApi.prototype.LogLevel) console.log(["user_data", user_id]);
+	return _cometServerApi.prototype.send_msg("user_data\n"+marker+"\n"+user_id);
 };
 
 /**
