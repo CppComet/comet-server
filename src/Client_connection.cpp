@@ -290,9 +290,9 @@ int Client_connection::web_write_error(const char* text, int code, thread_data* 
  * Извлекает данный web_user_id, web_user_dev_id, client_major_version, client_minor_version
  * @param client
  * @param len
- * @return web_hash или пустую строку в случаии ошибки
+ * @return указатель на начало строки web_hash или NULL в случаии ошибки
  */
-std::string Client_connection::parse_url(int client, int len, thread_data* local_buf)
+char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
 {
     isAuthUser = false;
     char * mytext = local_buf->buf;
@@ -301,19 +301,17 @@ std::string Client_connection::parse_url(int client, int len, thread_data* local
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [Session ID not found] \x1b[0m\n");
         web_write_error( "Error code 401(Invalid request, session ID not found)", 401, local_buf);
-        return std::string();
+        return NULL;
     }
 
     char * web_session = &mytext[ses_index+1];
      
-    std::string web_hash(web_session, str_find(web_session, '&', 600));
-
     int uid_index = str_find(mytext,'=',2,0,300);
     if(uid_index == -1)
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mWrong WS request [No user ID found] \x1b[0m\n");
         web_write_error( "Error code 401(Invalid request, the user ID can not be found)", 401, local_buf);
-        return std::string();
+        return NULL;
     }
 
 
@@ -328,7 +326,7 @@ std::string Client_connection::parse_url(int client, int len, thread_data* local
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] \x1b[0m\n");
         web_write_error( "Error code 406(Invalid request, no public key found [1])" , 406, local_buf);
-        return std::string();
+        return NULL;
     }
 
 
@@ -337,14 +335,14 @@ std::string Client_connection::parse_url(int client, int len, thread_data* local
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] \x1b[0m\n");
         web_write_error( "Error code 406(Invalid request, no public key found [2])" , 406, local_buf);
-        return std::string();
+        return NULL;
     }
 
     if(web_user_dev_id > devManager::instance()->getDevIndexSize())
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] \x1b[0m\n");
         web_write_error( "Error code 406(Invalid request, no public key found [3])" , 406, local_buf);
-        return std::string();
+        return NULL;
     }
 
     int version_index = str_find(mytext,'=',4,0,300);
@@ -352,7 +350,7 @@ std::string Client_connection::parse_url(int client, int len, thread_data* local
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No version of api client transferred] \x1b[0m\n");
         web_write_error( "Error code 418(Invalid request Not assigned client api version)\n", 418, local_buf);
-        return std::string();
+        return NULL;
     }
 
     int delta = 0;
@@ -362,7 +360,7 @@ std::string Client_connection::parse_url(int client, int len, thread_data* local
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No version of api client transferred] \x1b[0m\n");
         web_write_error( "Error code 418(Invalid request Not assigned client api version)\n", 418, local_buf);
-        return std::string();
+        return NULL;
     }
 
     client_minor_version = read_int(mytext+version_index + delta+1,'&');
@@ -371,7 +369,7 @@ std::string Client_connection::parse_url(int client, int len, thread_data* local
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No version of api client transferred] \x1b[0m\n");
         web_write_error( "Error code 418(Invalid request Not assigned client api version)\n", 418, local_buf);
-        return std::string();
+        return NULL;
     }
 
     int web_user_uuid_pos = str_find(mytext,'=',5,0,300);
@@ -437,13 +435,13 @@ std::string Client_connection::parse_url(int client, int len, thread_data* local
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [Request from a denied domain] \x1b[0m\n");
         web_write_error( "Error code 423(Access denied, Request from unauthorized domain.)" , 423, local_buf);
-        return std::string();
+        return NULL;
     }
 
     TagLoger::log(Log_ClientServer, 0, "web_user_id[API=%d.%d] web_user_id->%d web_user_dev_id->%d\n",client_major_version,client_minor_version,  web_user_id,web_user_dev_id);
 
     isAuthUser = true;
-    return web_hash;
+    return web_session;
 }
 
 /**
@@ -669,11 +667,13 @@ int Client_connection::web_socket_request(int client, int len, thread_data* loca
 {
     TagLoger::log(Log_ClientServer, 0, "[Client=%d, len=%d]\n[%s]\n",client, len, (char*)local_buf->buf);
 
-    std::string web_session = parse_url(client, len, local_buf);
-    if(web_session.empty())
+    char* web_hash = parse_url(client, len, local_buf);
+    if(web_hash == NULL)
     {
         return -1;
     }
+
+    std::string web_session(web_hash, str_find(web_hash, '&', 600));
 
     if(web_socket_receive(local_buf) < 0)
     {

@@ -188,7 +188,7 @@ class Client_connection:public connection
     int client_major_version = 0;
     int client_minor_version = 0;
     
-    std::string parse_url(int client, int len, thread_data* local_buf);
+    char* parse_url(int client, int len, thread_data* local_buf);
     int web_write_error(const char* text, thread_data* local_buf);
     int web_write_error(const char* text, int code, thread_data* local_buf);
     int web_socket_receive(thread_data* local_buf);
