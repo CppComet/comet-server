@@ -338,6 +338,8 @@ void command_line_fork()
 
 #include <iostream>
 
+#include "jwt/jwt_all.h"
+using json = nlohmann::json;
 /**
  * valgrind --tool=memcheck --track-origins=yes --leak-check=yes ./cpp_comet
  * valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-reachable=yes ./cpp_comet
@@ -350,9 +352,35 @@ void command_line_fork()
  * @return
  */
 int main(int argc, char *argv[])
-{  
-    TagTimer::start(Time_start);
+{   
+    //    
+    //secret=OTRpassfs4V9b5ptNtOTKIH93lED05es41,
+    //token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNjM0NTY3ODkwIiwidXNlcl9pZCI6NX0.B4P8ONwZZPtb4Zb9zNmV9fdF0WjqxfQy19l4LjK_qtU
+/*
+    ExpValidator exp;
+    HS256Validator signer("OTRpassfs4V9b5ptNtOTKIH93lED05es41");
 
+    // Now let's use these validators to parse and verify the token we created
+    // in the previous example
+    std::string str_token =
+        "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiNSIsImV4cCI6MTY4MzIyODgwMH0.xYfZWh6HmBs88Bb07QxdaM4r59IgqNjPJjr_BJx0U2k";
+    try {
+        // Decode and validate the token
+        ::json header, payload;
+
+        std::tie(header, payload) = JWT::Decode(str_token, &signer, &exp);
+        std::cout << "Header: " << header << std::endl;
+        std::cout << "Payload: " << payload << std::endl;
+    } catch (InvalidTokenError &tfe) {
+        // An invalid token
+        std::cout << "Validation failed: " << tfe.what() << std::endl;
+    }
+    return 0;*/
+    
+    // @todo добавить автоматическое создание бд и таблиц если их нет в базе от которой получили логин и пароль.
+    // @todo добавить параметр для того чтоб можно было включать/отключать перехват и игнорирование сигнала отрыва от терминала.
+    
+    
     // Назначает обработчик на сигнал смерти
     signal(SIGSEGV, posix_death_signal);
 
@@ -410,6 +438,8 @@ int main(int argc, char *argv[])
 
     TagLoger::log(Log_Any, 0, "Server starting pid:%d, getrusage:%d\n", (int)getpid());
     TagLoger::initTagLevels();
+    
+    TagTimer::setStatus(appConf::instance()->get_chars("statistics", "profiler"));
 
     dbLink mydb;
     mydb.init(appConf::instance()->get_chars("db", "host"),
@@ -466,7 +496,7 @@ int main(int argc, char *argv[])
         fprintf(fp, "%d", (int)getpid());
         fclose(fp);
     }
-
+    
     while(true)
     {
         pid_t pid = fork();
@@ -523,7 +553,6 @@ int main(int argc, char *argv[])
 
     command_line_fork();
 
-    TagTimer::end(Time_start);
     pthread_exit(NULL);
 
   return 0;

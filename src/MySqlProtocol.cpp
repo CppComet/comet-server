@@ -174,7 +174,7 @@ int LengthEncodedInteger::setToBuff(long long value, char* buff)
     
     if(abs(value) < pow(2,64))
     {
-        printf("warning LengthEncodedInteger is %lld (9)\n", value); 
+        TagLoger::trace(Log_MySqlServer, 0,"warning LengthEncodedInteger is %lld (9)\n", value);  
         *buff = 0xfe;
         memcpy(buff+1, &value, 8); // @todo уточнить можноли так чтоб 9 байт
         return 9;

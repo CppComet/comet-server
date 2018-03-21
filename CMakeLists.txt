@@ -175,12 +175,35 @@ set_property(TARGET libjwta PROPERTY
 
 
 # Создает исполняемый файл с именем cpp_comet из исходников
-add_executable(cpp_comet ${HASHLIB2PLUS_EXE} ${SOURCE_EXE} ${TINYXML2_EXE} ${ESL_EXE} )
+add_executable(cppcomet ${HASHLIB2PLUS_EXE} ${SOURCE_EXE} ${TINYXML2_EXE} ${ESL_EXE} )
 
 # Подключение библиотеки pthreads
-target_link_libraries (cpp_comet ${CMAKE_THREAD_LIBS_INIT}  ${MYSQL_LIBRARIES} ${OPENSSL_LIBRARIES} crypt uuid libjwta)
+target_link_libraries (cppcomet ${CMAKE_THREAD_LIBS_INIT}  ${MYSQL_LIBRARIES} ${OPENSSL_LIBRARIES} crypt uuid libjwta)
 
 
 #cmake ./ && make
 
+#INSTALL( DIRECTORY <directory> DESTINATION usr/myproject )
 
+#mkdir /etc/comet-server
+#cp ./comet-service.sh /etc/comet-server/comet-service.sh
+#cp ./comet.ini /etc/comet-server/comet.ini
+#cp ./cpp_comet /etc/comet-server/cpp_comet
+# https://mirkokiefer.com/cmake-by-example-f95eb47d45b1
+
+set(INSTALL_CONF_DIR
+    /etc/comet-server) 
+
+set(INSTALL_BIN_DIR
+    /usr/bin) 
+
+set(INSTALL_SYSTEMD_DIR
+    /etc/systemd/system) 
+
+install(FILES comet.service         DESTINATION ${INSTALL_SYSTEMD_DIR})
+install(FILES comet.ini             DESTINATION ${INSTALL_CONF_DIR})
+install(FILES comet-service.sh      DESTINATION ${INSTALL_CONF_DIR})
+install(TARGETS cppcomet              DESTINATION ${INSTALL_BIN_DIR})
+
+# https://cmake.org/pipermail/cmake/2009-September/031887.html
+# INSTALL(SCRIPT CopyIfNotExists.cmake)

@@ -3,7 +3,7 @@
 echo "CppComet"
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-RUNDIR=/etc/comet-server/
+RUNDIR=/usr/bin
 EXTRAOPTS=
 PIDFILE=/var/run/cppcomet.pid
 
@@ -17,7 +17,7 @@ case "$1" in
             echo "CppComet already run"
         else
             echo "Starting CppComet"
-            ./cpp_comet > /var/log/cpp_comet.log 2>/var/log/cpp_comet.log &
+            /usr/bin/cppcomet --conf /etc/comet-server/comet.ini > /var/log/cpp_comet.log 2>/var/log/cpp_comet.log &
         fi
         ;;
     stop)
@@ -41,7 +41,7 @@ case "$1" in
             echo "pid file does not exist" 
         fi
         echo "Starting CppComet"
-        ./cpp_comet > /var/log/cpp_comet.log 2>/var/log/cpp_comet.log &
+        /usr/bin/cppcomet > /var/log/cpp_comet.log 2>/var/log/cpp_comet.log &
         ;;
 esac
 

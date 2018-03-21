@@ -240,6 +240,19 @@ bool appConf::initFromFile(const char *fileName)
     return true;
 }
 
+bool file_exists(const std::string& name)
+{
+    if (FILE *file = fopen(name.c_str(), "r"))
+    {
+        fclose(file);
+        return true;
+    } 
+    else 
+    {
+        return false;
+    }   
+}
+
 bool appConf::init(int argc, char *argv[])
 {
     int conf_path = -1;
@@ -267,12 +280,19 @@ bool appConf::init(int argc, char *argv[])
             }
         }
     }
-    
-    if(conf_path == -1)
+     
+    if(conf_path == -1 && file_exists("comet.ini"))
     {
+        printf("Config file: ./comet.ini\n"); 
         return initFromFile("comet.ini"); 
     }
+    else if(conf_path == -1 && file_exists("/etc/comet-server/comet.ini"))
+    {
+        printf("Config file: /etc/comet-server/comet.ini\n"); 
+        return initFromFile("/etc/comet-server/comet.ini"); 
+    }
     
+    printf("Config file: %s\n", argv[conf_path]); 
     return initFromFile(argv[conf_path]);  
 }
 

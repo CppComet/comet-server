@@ -1,4 +1,8 @@
- 
+
+
+//#define CE_VERSION  
+
+
 #define MAIN_BUF_SIZE 10384
 #define MAIN_PASSWORD "password"
 
@@ -117,8 +121,8 @@
     </body>\
     </html>" 
   
-#define MYSQL_SERVERNAME "CppComet enterprise 3.35"
-#define MYSQL_SYSTEMVARIBLE "CppComet enterprise 3.35 (comet-server.com, support@comet-server.com)"
+#define MYSQL_SERVERNAME "CppComet enterprise 3.36"
+#define MYSQL_SYSTEMVARIBLE "CppComet enterprise 3.36 (comet-server.com, support@comet-server.com)"
 
 
 #define maxValue( a, b ) ( (a) > (b) ? (a) : (b) )

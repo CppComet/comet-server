@@ -297,7 +297,7 @@ var _cometServerApi = function(opt)
 /**
  * @private
  */
-_cometServerApi.prototype.version = "3.32";
+_cometServerApi.prototype.version = "3.33";
 
 /**
  * @private
@@ -1944,6 +1944,11 @@ _cometServerApi.prototype.getUserData = function(user_id, callBack)
             return;
 	}
  
+	if(callBack === undefined)
+        {
+            return;
+        }
+        
         var marker = _cometServerApi.prototype.getCustomString();  
         _cometServerApi.prototype.subscription_callBack("_answer", callBack, marker);
 

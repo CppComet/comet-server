@@ -523,6 +523,7 @@ public:
             return false;
         }
 
+        local_buf->setThreadStatus('u');
         pthread_mutex_lock(&request_mutex[user_id%map_index_size]);
         std::map<int,useritem*>::const_iterator it = getMapToUserId(user_id).find(user_id);
         if( it != getMapToUserId(user_id).end() )

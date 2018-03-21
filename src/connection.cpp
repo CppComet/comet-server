@@ -43,7 +43,7 @@ connection::~connection()
 }
 
 
-long connection::getUptime()
+long connection::getUptime() const
 {
     if(start_online_time <= 0)
     {

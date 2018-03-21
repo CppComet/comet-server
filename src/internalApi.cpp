@@ -19,6 +19,8 @@ int internalApi::send_to_user(thread_data* local_buf, int dev_id, int user_id, c
 
 int internalApi::send_to_user(thread_data* local_buf, int dev_id, int user_id, const char* pipe_event, const char* msg_data, const char* server_data)
 {
+    auto t = TagTimer::mtime();
+    local_buf->setThreadStatus('t');
     int *conection_id = devManager::instance()->getDevInfo(dev_id)->index->get_conection_id(local_buf, user_id);
     int isSend = -1;
     if(conection_id != NULL)
@@ -55,11 +57,14 @@ int internalApi::send_to_user(thread_data* local_buf, int dev_id, int user_id, c
 
         local_buf->stm.users_queue_insert->execute(uid, (long int)time(NULL), dev_id, user_id, pipe_event, msg_data, strlen(msg_data));
     }
+    TagTimer::add("internalApi::send_to_user", t);
     return isSend;
 }
 
 int internalApi::local_send_to_user(thread_data* local_buf, int dev_id, int user_id, const char* pipe_event, const char* msg_data)
 {
+    auto t = TagTimer::mtime();
+    local_buf->setThreadStatus('l');
     //char server_data[EVENT_NAME_LEN+64];
     //snprintf(server_data, EVENT_NAME_LEN+64, "\"event_name\":\"%s\",\"SendToUser\":true", pipe_event);
     std::string server_data; 
@@ -96,6 +101,7 @@ int internalApi::local_send_to_user(thread_data* local_buf, int dev_id, int user
         TagLoger::log(Log_MySqlServer, 0, "Connection ID not found for dev_id=%d, user_id=%d\n", dev_id, user_id);
     }
  
+    TagTimer::add("internalApi::local_send_to_user", t);
     return isSend;
 }
 
@@ -109,6 +115,8 @@ int internalApi::local_send_to_user(thread_data* local_buf, int dev_id, int user
  */
 int internalApi::cluster_send_to_user(thread_data* local_buf, int dev_id, int user_id, const char* pipe_event, const char* msg_data)
 {
+    auto t = TagTimer::mtime();
+    local_buf->setThreadStatus('s');
     char uuid[37];
     bzero(uuid, 37);
     uuid37(uuid);
@@ -145,6 +153,8 @@ int internalApi::cluster_send_to_user(thread_data* local_buf, int dev_id, int us
     {
         local_buf->stm.users_queue_insert->execute(uuid, (long int)time(NULL), dev_id, user_id, pipe_event, msg_data, strlen(msg_data));
     }
+    
+    TagTimer::add("internalApi::cluster_send_to_user", t);
     return 0;
 }
 
@@ -157,20 +167,31 @@ int internalApi::cluster_send_to_user(thread_data* local_buf, int dev_id, int us
  * @return
  */
 int internalApi::send_event_to_pipe(thread_data* local_buf, const char* pipe_name, const char* msg_data, int dev_id, const char* server_data)
-{
+{  
+    auto t = TagTimer::mtime();
 
-    CP<Pipe> pipe = devManager::instance()->getDevInfo(dev_id)->findPipe(std::string(pipe_name));
-
+    local_buf->setThreadStatus('P');
+    
+    auto dinfo = devManager::instance()->getDevInfo(dev_id);
+    
+    local_buf->setThreadStatus('8');
+    
+    CP<Pipe> pipe = dinfo->findPipe(std::string(pipe_name)); 
+    
+    local_buf->setThreadStatus('7');
+    
     if(pipe.isNULL())
     {
         // internal server error
         TagLoger::log(Log_Any, 0, "pipe[%s] == NULL\n",pipe_name);
+        TagTimer::add("internalApi::send_event_to_pipe", t);
         return 0;
     }
     else if(pipe->empty() )
     {
         // internal server error
         TagLoger::log(Log_Any, 0, "pipe[%s] == empty\n",pipe_name);
+        TagTimer::add("internalApi::send_event_to_pipe", t);
         return 0;
     }
 
@@ -198,5 +219,6 @@ int internalApi::send_event_to_pipe(thread_data* local_buf, const char* pipe_nam
         it = it->Next();
     }
 
+    TagTimer::add("internalApi::send_event_to_pipe", t);
     return num_msg;
 }

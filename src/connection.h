@@ -89,7 +89,7 @@ public:
     /**
      * Возвращает Uptime соединения
      */
-    long getUptime();
+    long getUptime() const;
     
     
     inline void setfd(int Fd){ fd = Fd;}
