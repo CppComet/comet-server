@@ -5,27 +5,47 @@
 #include <stdio.h>
 #include <sys/time.h>
 
+#include <map>
+#include <string>
+
 #ifndef TAG_TIMER_H
 #define	TAG_TIMER_H
 
 #define mTime long long
 
 #define Time_start 1 
+#define Time_db_query 2 
  
-class TagTimer
-{
-    static mTime tagTimer[100];
-    static mTime tagTimerStart[100];
-
+class statItem{
 public:
-    
-    static void end(int tag);
-    
-    static void start(int tag);
+    mTime time;
+    int count;
+     
+};
 
-    static void add(int tag, mTime t);
+class TagTimer
+{ 
+    static std::map<std::string, statItem> timeMap;  
     
+    static bool on;
+public:
+    static mTime lastReadTime;
+    
+    static void setStatus(bool status)
+    {
+        on = status;
+    }
+    
+    static void init(); 
+    static void add(const char* key, mTime t); 
     static mTime mtime();
+    
+    static void lock(); 
+    static void unlock(); 
+    static std::map<std::string, statItem> get()
+    {
+        return timeMap;
+    }
     
 };
 

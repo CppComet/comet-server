@@ -273,7 +273,8 @@ class devInfo
     friend class devManager;
 
         int id;
-        bool active = false;  
+        bool active = false;
+
         char* url = NULL;
 
         char** urls = NULL;
@@ -300,11 +301,13 @@ class devInfo
             pthread_mutex_unlock(&pipe_index_mutex);
         }
 
-    protected: 
+    protected:
+
         devInfo(int dev_id);
-        
+  
+
     public:
- 
+
         void setDevUrl(const char* devUrl);
 
         int countDevUrl() const;
@@ -319,7 +322,7 @@ class devInfo
          * @param random20bytes
          * @param dev_key
          * @return
-         */
+         */ 
         static bool testDevKey(const char* random20bytes, const char* DevKeyHashStart);
 
         CP<Pipe> getPipe(const std::string &pipe_name)
@@ -378,7 +381,7 @@ class devInfo
         user_index* index;
 
         ~devInfo();
- 
+
         int getDevId() const { return id;}
 
         bool testDevKey(const char* devKey) const;

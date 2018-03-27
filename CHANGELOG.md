@@ -5,6 +5,10 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v3.38
+BUG FIXES:
+ * add make install instruction
+  
 ## v3.37
 BUG FIXES:
  * bug fix for dev_id=0

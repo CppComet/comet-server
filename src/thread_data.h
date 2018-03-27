@@ -214,6 +214,8 @@ class fs_esl{
     
     std::string WShost;
     int WSport = 7443;
+    
+    std::string StreamServer;
 public:
     
     fs_esl(std::string Name){
@@ -222,6 +224,10 @@ public:
     
     std::string getWSHost(){
         return WShost;
+    }
+    
+    std::string getStreamServer(){
+        return StreamServer;
     }
     
     int getWSPort(){

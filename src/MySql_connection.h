@@ -204,7 +204,10 @@ protected:
      * Не 0 если сообщение пришло из кластера
      */
     int cometqlcluster = 0;
-     
+    
+    /**
+     * Указывает на то что у пользователя есть права супер пользователя
+     */
     bool isAuthUser = false;
 
     int api_version = 0;
@@ -294,6 +297,7 @@ protected:
     int sql_set_value(thread_data* local_buf, unsigned int PacketNomber);
     
     
+    int sql_select_from_profiler(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_database_name(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_systemvarible(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_from_users_auth(thread_data* local_buf, unsigned int PacketNomber);
@@ -303,7 +307,7 @@ protected:
     int sql_select_from_pipes_messages(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_from_users_in_pipes(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_from_pipes(thread_data* local_buf, unsigned int PacketNomber);
-    int sql_select_from_pipes_settings(thread_data* local_buf, unsigned int PacketNomber); 
+    int sql_select_from_pipes_settings(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_from_conference(thread_data* local_buf, unsigned int PacketNomber);
     int sql_select_from_conference_members(thread_data* local_buf, unsigned int PacketNomber);
 
@@ -311,6 +315,7 @@ protected:
     int sql_insert_into_dialogs(thread_data* local_buf, unsigned int PacketNomber);
     
     int sql_insert_into_conference_members(thread_data* local_buf, unsigned int PacketNomber);
+    
     /**
      * Эквивалент таблицы содержащей ключи авторизации пользователей
      * @param local_buf
@@ -331,7 +336,7 @@ protected:
     int sql_insert_into_pipes_messages(thread_data* local_buf, unsigned int PacketNomber);
     int sql_insert_into_users_in_pipes(thread_data* local_buf, unsigned int PacketNomber);
     int sql_insert_into_pipes(thread_data* local_buf, unsigned int PacketNomber);
-    int sql_insert_into_pipes_settings(thread_data* local_buf, unsigned int PacketNomber); 
+    int sql_insert_into_pipes_settings(thread_data* local_buf, unsigned int PacketNomber);
   
     int sql_delete_from_users_auth(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_users_data(thread_data* local_buf, unsigned int PacketNomber);
@@ -340,7 +345,7 @@ protected:
     int sql_delete_from_pipes_messages(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_users_in_pipes(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_pipes(thread_data* local_buf, unsigned int PacketNomber);
-    int sql_delete_from_pipes_settings(thread_data* local_buf, unsigned int PacketNomber); 
+    int sql_delete_from_pipes_settings(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_conference(thread_data* local_buf, unsigned int PacketNomber);
     int sql_delete_from_conference_members(thread_data* local_buf, unsigned int PacketNomber);
     

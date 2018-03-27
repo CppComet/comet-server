@@ -13,6 +13,7 @@ time_t user_index::start_time=time(0);
 
   
 #include "jwt/jwt_all.h"
+#include "mystring.h"
 using json = nlohmann::json;
 
 useritem::useritem()
@@ -311,8 +312,12 @@ bool useritem::getHash(thread_data* local_buf, char* out_hash)
 bool useritem::testToken(thread_data* local_buf, std::string token, int dev_id, int user_id)
 {  
     ExpValidator exp;
-    HS256Validator signer(appConf::instance()->get_chars("main", "password"));
- 
+     
+    std::string secret(appConf::instance()->get_chars("main", "password"));
+
+    secret.append(std::to_string(dev_id));
+    HS256Validator signer(secret);
+    
     // https://jwt.io/
     // Now let's use these validators to parse and verify the token we created
     // in the previous example
@@ -327,6 +332,7 @@ bool useritem::testToken(thread_data* local_buf, std::string token, int dev_id, 
         
         if(payload["user_id"] != user_id)
         { 
+            TagLoger::debug(Log_UserItem, 0, "Validation failed user_id error:jwt-user_id=%d, user_id=%d\n", (int)payload["user_id"], user_id);
             return false;
         }
          
@@ -334,16 +340,23 @@ bool useritem::testToken(thread_data* local_buf, std::string token, int dev_id, 
         if(local_buf->stm.revoked_tokens_select->fetch())
         { 
             // Токен не найден среди отозванных
+            TagLoger::debug(Log_UserItem, 0, "Validation ok:[secret=%s, token=%s]\n", secret.data(), token.data());
             local_buf->stm.revoked_tokens_select->free();
             return true;
         }
 
+        TagLoger::debug(Log_UserItem, 0, "Validation failed revoked_tokens:[secret=%s, token=%s]\n", secret.data(), token.data());
         local_buf->stm.revoked_tokens_select->free(); 
         return false;
         
     } catch (InvalidTokenError &tfe) {
         // An invalid token 
-        TagLoger::debug(Log_UserItem, 0, "Validation failed: %s\n", tfe.what());
+        TagLoger::debug(Log_UserItem, 0, "Validation failed: %s [secret=%s, token=%s]\n", tfe.what(), secret.data(), token.data());
+    }
+    catch(...)
+    { 
+        // handling for exceptions with any type
+        TagLoger::debug(Log_UserItem, 0, "Validation failed: secret=%s, token=%s\n", secret.data(), token.data());
     }
   
     return false;
@@ -377,7 +390,7 @@ bool useritem::testHash(thread_data* local_buf, std::string Hash)
  * @param local_buf
  * @param Hash
  * @param user_id
- * @param dev_id
+ * @param dev_id 
  * @return
  */
 bool useritem::testHash(thread_data* local_buf, std::string Hash, unsigned int user_id, int dev_id)
@@ -388,7 +401,18 @@ bool useritem::testHash(thread_data* local_buf, std::string Hash, unsigned int u
         // Если токен верен но хеша авторизации нет то установим значение токена в качестве хеша авторизации
         if(!getHash(local_buf, user_id, dev_id, NULL))
         {
-            local_buf->stm.users_auth_replace->execute(dev_id, user_id, Hash.data());
+            char uuidHash[38];
+            bzero(uuidHash, 38);
+            uuid37(uuidHash);
+            for(int i = 0; i<38; i++)
+            {
+                if(uuidHash[i] == '-')
+                {
+                    uuidHash[i] = '0';
+                }
+            }
+            
+            local_buf->stm.users_auth_replace->execute(dev_id, user_id, uuidHash);
         }
         return true;
     }
@@ -405,6 +429,7 @@ bool useritem::testHash(thread_data* local_buf, std::string Hash, unsigned int u
         local_buf->stm.users_auth_select->free();
         return true;
     }
+
 
     local_buf->stm.users_auth_select->free();
     return false;

@@ -1,11 +1,12 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-
+ 
 #include "sha1.h"
 #include "base64.h"
 #include "devManager.h"
  
+
 const char* devInfo::getDevUrl(int i) const
 {
     if(i < 0 || i > urls_count)
@@ -66,16 +67,24 @@ devInfo::devInfo(int dev_id)
     index = new user_index(dev_id);
     pthread_mutex_init(&pipe_index_mutex,NULL);
 }
- 
+
+
+
+
+
+
 devInfo::~devInfo()
 {
-    delete index; 
+    delete index;
 }
 
 bool devInfo::testDevKey(const char* devKey) const
-{ 
-    return memcmp(appConf::instance()->get_chars("main", "password"), devKey, DEV_KEY_LEN) == 0; 
+{
+                    return memcmp(appConf::instance()->get_chars("main", "password"), devKey, DEV_KEY_LEN) == 0;
+
+  
 }
+
 
 /**
  * Проверяет DevKey в соответсвии с механизмом авторизации Mysql
@@ -85,12 +94,13 @@ bool devInfo::testDevKey(const char* devKey) const
  * @return
  */
 bool devInfo::testDevKey(const char* random20bytes, const char* DevKeyHashStart)
-{ 
+{
+
     const char* devKeyPassword = appConf::instance()->get_chars("main", "password");
-    
+
     unsigned char sha1_password[20];
     bzero(sha1_password, 20);
-    sha1::calc(devKeyPassword, strlen(devKeyPassword) ,sha1_password);
+    sha1::calc(devKeyPassword, strlen(devKeyPassword), sha1_password);
 
     unsigned char sha1_password2[20];
     bzero(sha1_password2, 20);
@@ -140,14 +150,14 @@ devManager* devManager::instance()
 
 devManager::~devManager()
 {
-    if(dev_index_size > 0)
-    {
-        for(int i =0; i< dev_index_size; i++)
+        if(dev_index_size > 0)
         {
-            delete index[i];
+            for(int i =0; i< dev_index_size; i++)
+            {
+                delete index[i];
+            }
+            delete[] index;
         }
-        delete[] index;
-    }
 }
 
 /**
@@ -167,10 +177,9 @@ void devManager::setDevIndexSize(int size)
         /**
          * Инициализация первого devInfo
          * Он будет возвращатся во всех случаях кода getDevInfo(int dev_id) будет получать не валидный dev_id
-         */
-        index[0] = new devInfo(0);
+         */ 
+            index[0] = new devInfo(0);
     }
-    
     else if(dev_index_size > size)
     {
         dev_index_size = size;
@@ -187,7 +196,7 @@ devInfo* devManager::getDevInfo(int dev_id)
 
     if( index[dev_id] == NULL)
     {
-        index[dev_id] = new devInfo(dev_id); 
+        index[dev_id] = new devInfo(dev_id);
     }
 
     return index[dev_id];

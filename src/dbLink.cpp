@@ -346,6 +346,8 @@ bool dbLink::connect()
         return false;
     }
     
+    auto t = TagTimer::mtime();
+    
     isConnected = true;
 
     mysqlLink = mysql_init(mysqlLink);
@@ -368,6 +370,7 @@ bool dbLink::connect()
     {
         TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL connection not established\n%s\nip=%s:%d user=%s [errno=%d]\x1b[0m", mysql_error(mysqlLink),
                 db_host.data(), db_port, db_user.data(), mysql_errno(mysqlLink));
+        TagTimer::add("dbLink::connect", t); 
         return false;
     }
  
@@ -377,6 +380,7 @@ bool dbLink::connect()
     }
 
     TagLoger::log(Log_dbLink, 0, "\x1b[1;32mMySQL connection established\nip=%s:%d user=%s\x1b[0m", db_host.data(), db_port, db_user.data());
+    TagTimer::add("dbLink::connect", t); 
     return true;
 
     //return query("SET CHARACTER SET 'utf8' ");
@@ -385,6 +389,8 @@ bool dbLink::connect()
 
 bool dbLink::query(const char *q)
 {
+    auto t = TagTimer::mtime();
+    
     if(!isConnected)
     {
         connect();
@@ -393,6 +399,7 @@ bool dbLink::query(const char *q)
     TagLoger::log(Log_dbLink, 0, "\x1b[1;32mMySQL query[%d]=%s\x1b[0m", strlen(q), q);
     if(mysql_real_query(mysqlLink, q, strlen(q)) == 0)
     {
+        TagTimer::add("dbLink::query", t); 
         return true;
     }
 
@@ -407,6 +414,7 @@ bool dbLink::query(const char *q)
 
             if(mysql_real_query(mysqlLink, q, strlen(q)) == 0)
             {
+                TagTimer::add("dbLink::query", t); 
                 return true;
             }
 
@@ -417,6 +425,7 @@ bool dbLink::query(const char *q)
         {
             if(mysql_real_query(mysqlLink, q, strlen(q)) == 0)
             {
+                TagTimer::add("dbLink::query", t); 
                 return true;
             }
 
@@ -435,11 +444,13 @@ bool dbLink::query(const char *q)
         } 
     }
 
+    TagTimer::add("dbLink::query", t); 
     return false;
 }
 
 bool dbLink::query_format(const char *format, ...)
 {
+    auto t = TagTimer::mtime();
     if(!isConnected)
     {
         connect();
@@ -456,6 +467,7 @@ bool dbLink::query_format(const char *format, ...)
     if(mysql_real_query(mysqlLink, buf, strlen(buf)) == 0)
     {
         va_end(ap);
+        TagTimer::add("dbLink::query_format", t); 
         return true;
     }
 
@@ -470,6 +482,7 @@ bool dbLink::query_format(const char *format, ...)
 
             if(mysql_real_query(mysqlLink, buf, strlen(buf)) == 0)
             {
+                TagTimer::add("dbLink::query_format", t); 
                 return true;
             }
 
@@ -481,6 +494,7 @@ bool dbLink::query_format(const char *format, ...)
             if(mysql_real_query(mysqlLink, buf, strlen(buf)) == 0)
             {
                 va_end(ap);
+                TagTimer::add("dbLink::query_format", t); 
                 return true;
             }
 
@@ -500,6 +514,7 @@ bool dbLink::query_format(const char *format, ...)
     }
 
     va_end(ap);
+    TagTimer::add("dbLink::query_format", t); 
     return false;
 }
 
@@ -609,7 +624,10 @@ void stmMapper::init(dbLink *mysql)
         users_data_select = new stm_users_data_select(); 
     } 
     users_data_select->prepare(mysql);
- 
+
+    
+
+    
     if(pipes_settings_select == NULL)
     {
         pipes_settings_select = new stm_pipes_settings_select(); 

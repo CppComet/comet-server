@@ -70,6 +70,10 @@ bool fs_esl::init(std::string connectionString){
                 return false;
             } 
         }
+        else if(StreamServer.compare("StreamServer") == 0)
+        {
+            StreamServer = paramValue; 
+        } 
     }
     
     if(WShost.empty())

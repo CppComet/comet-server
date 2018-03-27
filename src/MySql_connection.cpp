@@ -25,7 +25,6 @@
 #include "Client_connection.h"
 #include "MySql_connection.h"
 #include "CometQLProxy_connection.h"
-#include "Freeswitch_connection.h"
 
 
 #include "CometQL.h"
@@ -37,7 +36,9 @@
 #include <iterator>
 #include <openssl/sha.h>
 
-#include "sha1.h" 
+#include "sha1.h"
+#include "Freeswitch_connection.h"
+#include "CometQLProxy_connection.h"
 
 #include "tinyxml2/tinyxml2.h"
 
@@ -129,6 +130,7 @@ MySql_connection::~MySql_connection()
  */
 int MySql_connection::request(int client, int len, thread_data* local_buf)
 {
+    auto t = TagTimer::mtime();
     /**
      * @fixme Тут нет проверок на то что покет мог прийти не полностью
      *
@@ -172,11 +174,11 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
     unsigned int PacketLen = 0;
     char* p = local_buf->buf.getData();
 
-    char* t = (char*)&PacketLen;
-    t[0] = p[0];
-    t[1] = p[1];
-    t[2] = p[2];
-    t[3] = 0;
+    char* pl = (char*)&PacketLen;
+    pl[0] = p[0];
+    pl[1] = p[1];
+    pl[2] = p[2];
+    pl[3] = 0;
     p+=3;
     TagLoger::log(Log_MySqlServer, 0, "PacketLen:%d\n", PacketLen); // @FixMe добавить проверку длины пакета и длины данных в обе стороны.
 
@@ -245,12 +247,18 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
             p+=23;
         }
 
-        isAuthUser = false; 
-        
+        isAuthUser = false;
+
         char* name = p;
         p+= strlen(name)+1;
         TagLoger::log(Log_MySqlServer, 0, "UserName:%s\n", name);
- 
+
+        long test_id = 0;                         
+        if(strcmp(name, "root") != 0 && strcmp(name, "0") != 0)            
+        {                                                                     
+            test_id = read_long(name, (char)0);                                
+        }                                                                       
+
         if(ClientFlags & MYSQL_CLIENT_SECURE_CONNECTION)
         {
             char authDataLen = *p;
@@ -261,7 +269,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
             if(authDataLen == 0)
             {
                 TagLoger::log(Log_MySqlServer, 0, "Authorization without password authDataLen=%d\n", authDataLen);
- 
+
                 // Здесь проверка для того можно ли пускать без пароля по имени пользователя
                 if(memcmp(name, "haproxy_check", strlen("haproxy_check")) != 0)
                 {
@@ -269,7 +277,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
                     Send_Err_Package(SQL_ERR_AUTHENTICATION,"Authentication failure, authDataLen!=20", PacketNomber+1, local_buf, this);
                     return -1;
                 }
- 
+
                 // Таки решили пустить без пароля
                 Send_OK_Package(PacketNomber+1, local_buf, this);
                 clientState = STATE_RECEIVED_HANDSHAKE;
@@ -291,14 +299,15 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
 
             if(devInfo::testDevKey(random20bytes, DevKeyHashStart))
             {
-                isAuthUser = true; 
+                isAuthUser = true;
+                dev_id = test_id;
                 TagLoger::debug(Log_MySqlServer, 0, "Authorization successful ok\n");
                 devManager::instance()->getDevInfo(dev_id)->incrBackendOnline();
                 devManager::instance()->getDevInfo(dev_id)->incrMessages();
             }
             else
             {
-                isAuthUser = false; 
+                isAuthUser = false;
                 TagLoger::error(Log_MySqlServer, 0, "Authorization failed");
                 Send_Err_Package(SQL_ERR_AUTHENTICATION,"Authentication failure", PacketNomber+1, local_buf, this);
                 return -1;
@@ -306,7 +315,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
         }
         else
         {
-            isAuthUser = false; 
+            isAuthUser = false;
 
             // string[NULL]    auth-response
             p++;
@@ -351,7 +360,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
             _countUerys++;
             TagLoger::warn(Log_MySqlServer, 0, "QUERY[%d, dev_id=%d, len=%d][BASE]:%s\n", _countUerys, dev_id, queryLen, startQuery);
 
-            if(isAuthUser)
+            if(isAuthUser)           
             {
                 // От имени root пользователя допустима работы репликации
                 // Сдвиг в тексте запроса, если к запросу прикреплены мета данные от систем репликации
@@ -391,8 +400,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
                     memcmp("set ", startQuery, strlen("set "))                                                          != 0 &&
                     memcmp("show ", startQuery, strlen("show "))                                                        != 0 &&
                     memcmp("SET ", startQuery, strlen("SET "))                                                          != 0 &&
-                    memcmp("SHOW ", startQuery, strlen("SHOW "))                                                        != 0 &&
-                    memcmp("select @@version_comment limit 1", startQuery, strlen("select @@version_comment limit 1"))  != 0  
+                    memcmp("SHOW ", startQuery, strlen("SHOW "))                                                        != 0 
                 )
                 {
                     // Пишем в лог запросов
@@ -573,14 +581,18 @@ int MySql_connection::query_router(thread_data* local_buf, int PacketNomber)
                 else if(local_buf->qInfo.tokCompare("pipes_settings",  local_buf->qInfo.tableName))
                 {
                     return sql_select_from_pipes_settings(local_buf,PacketNomber);
-                } 
+                }
                 else if(local_buf->qInfo.tokCompare("conference",  local_buf->qInfo.tableName))
                 {
                     return sql_select_from_conference(local_buf,PacketNomber);
                 }
                 else if(local_buf->qInfo.tokCompare("conference_members",  local_buf->qInfo.tableName))
                 {
-                    return sql_select_from_conference_members(local_buf,PacketNomber);
+                    return sql_select_from_conference_members(local_buf,PacketNomber); 
+                }                                                               
+                else if(local_buf->qInfo.tokCompare("profiler",  local_buf->qInfo.tableName))
+                {
+                    return sql_select_from_profiler(local_buf,PacketNomber);
                 }
                 else
                 {
@@ -632,7 +644,7 @@ int MySql_connection::query_router(thread_data* local_buf, int PacketNomber)
             else if(local_buf->qInfo.tokCompare("pipes_settings",  local_buf->qInfo.tableName))
             {
                 return sql_insert_into_pipes_settings(local_buf,PacketNomber);
-            } 
+            }
             else if(local_buf->qInfo.tokCompare("conference",  local_buf->qInfo.tableName))
             {
                 return sql_insert_into_conference(local_buf,PacketNomber);
@@ -690,7 +702,7 @@ int MySql_connection::query_router(thread_data* local_buf, int PacketNomber)
             else if(local_buf->qInfo.tokCompare("pipes_settings",  local_buf->qInfo.tableName))
             {
                 return sql_delete_from_pipes_settings(local_buf,PacketNomber);
-            } 
+            }
             else if(local_buf->qInfo.tokCompare("conference",  local_buf->qInfo.tableName))
             {
                 return sql_delete_from_conference(local_buf,PacketNomber);
@@ -723,19 +735,23 @@ int MySql_connection::query_router(thread_data* local_buf, int PacketNomber)
  */
 bool MySql_connection::test_api_version(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     TagLoger::log(Log_MySqlServer, 0, "api_version %d", api_version);
     if(api_version != -1)
     {
+        TagTimer::add("MySql_connection::test_api_version", t);
         return true;
     }
 
     // Указать нормальный код и текст ошибки.
     Send_Err_Package(SQL_ERR_NOT_EXIST, "Select database failure", PacketNomber+1, local_buf, this);
+    TagTimer::add("MySql_connection::test_api_version", t);
     return false;
 }
 
 bool MySql_connection::sql_use_db(char* db_name)
 { 
+    auto t = TagTimer::mtime();
     if(strcmp(db_name, "CometQL_v1") == 0)
     {
         TagLoger::log(Log_MySqlServer, 0, "OK set api_version `%d`", 1);
@@ -756,7 +772,7 @@ bool MySql_connection::sql_use_db(char* db_name)
             return false;
         }
     }
-
+ 
     TagLoger::log(Log_MySqlServer, 0, "Error: set api_version `%s`", db_name); 
     
     int conf_api_version = appConf::instance()->get_int("main", "api_version");
@@ -775,6 +791,7 @@ bool MySql_connection::sql_use_db(char* db_name)
 
 int MySql_connection::sql_set_value(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     Send_OK_Package(0, 0, PacketNomber+1, local_buf, this);
     return 0;
 }
@@ -789,6 +806,7 @@ int MySql_connection::sql_set_value(thread_data* local_buf, unsigned int PacketN
  */
 int MySql_connection::sql_show_databases(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     // Отправляем пакет описания 1 колонки
     local_buf->answer_buf.lock();
     char* answer = local_buf->answer_buf.getData();
@@ -810,6 +828,7 @@ int MySql_connection::sql_show_databases(thread_data* local_buf, unsigned int Pa
 
 int MySql_connection::sql_show_tables(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     // Отправляем пакет описания 1 колонки
     local_buf->answer_buf.lock();
     char* answer = local_buf->answer_buf.getData();
@@ -857,6 +876,7 @@ int MySql_connection::sql_show_tables(thread_data* local_buf, unsigned int Packe
  */
 int MySql_connection::sql_show_columns(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     // Field	Type	Null	Key	Default	Extra
 
     local_buf->answer_buf.lock();
@@ -905,6 +925,7 @@ int MySql_connection::sql_show_columns(thread_data* local_buf, unsigned int Pack
 
 int MySql_connection::sql_show_table_status(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     // Отправляем пакет описания 1 колонки
     local_buf->answer_buf.lock();
     char* answer = local_buf->answer_buf.getData();
@@ -969,7 +990,8 @@ int MySql_connection::sql_show_table_status(thread_data* local_buf, unsigned int
 
 int MySql_connection::sql_show_processlist(thread_data* local_buf, unsigned int PacketNomber)
 {
-    if(!isAuthUser)
+    auto t = TagTimer::mtime();
+    if(!isAuthUser)           
     {
         // Нет доступа не Root пользователям
         local_buf->qInfo.setError("Access denied", SQL_ERR_ACCESS_DENIED);
@@ -1034,6 +1056,7 @@ int MySql_connection::sql_show_processlist(thread_data* local_buf, unsigned int 
 
 int MySql_connection::sql_show_variables(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     // SHOW SESSION VARIABLES LIKE 'lower_case_table_names'
     // @todo simpleTask не доделан like и флаги SESSION и GLOBAL
     // @todo simpleTask показывать параметры ini файла
@@ -1073,12 +1096,14 @@ int MySql_connection::sql_show_variables(thread_data* local_buf, unsigned int Pa
 }
 
 int MySql_connection::sql_show_status(thread_data* local_buf, unsigned int PacketNomber)
-{
-    if( !isAuthUser && (
-            local_buf->qInfo.arg_show.flag == FLAG_GLOBAL ||
-            local_buf->qInfo.arg_show.flag == FLAG_FILESYSTEM ||
-            local_buf->qInfo.arg_show.flag == FLAG_RAM ||
-            local_buf->qInfo.arg_show.flag == FLAG_AVG ))
+{ 
+    auto t = TagTimer::mtime();
+    if(!isAuthUser)           
+    if(
+        local_buf->qInfo.arg_show.flag == FLAG_GLOBAL ||
+        local_buf->qInfo.arg_show.flag == FLAG_FILESYSTEM ||
+        local_buf->qInfo.arg_show.flag == FLAG_RAM ||
+        local_buf->qInfo.arg_show.flag == FLAG_AVG )
     {
         // Нет доступа не Root пользователям к флагу GLOBAL
         local_buf->qInfo.setError("Access denied", SQL_ERR_ACCESS_DENIED);
@@ -1344,7 +1369,8 @@ int MySql_connection::sql_show_status(thread_data* local_buf, unsigned int Packe
         snprintf(value[1].clear(), 255, "%.2f", (float)tcpServer <MySql_connection>::instance()->bm.getPsDeleteClient());
         delta = RowPackage(2, value, ++PacketNomber, answer);
         answer += delta;
- 
+
+
         value[0] = "network_events"; // Сетевые события только от авторизованных пользователей
         value[1] = devManager::instance()->getPsNetworkEvents();
         delta = RowPackage(2, value, ++PacketNomber, answer);
@@ -1414,6 +1440,7 @@ int MySql_connection::sql_show_status(thread_data* local_buf, unsigned int Packe
 
 int MySql_connection::sql_select_systemvarible(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     // Отправляем пакет описания 1 колонки
     local_buf->answer_buf.lock();
     char* answer = local_buf->answer_buf.getData();
@@ -1436,6 +1463,7 @@ int MySql_connection::sql_select_systemvarible(thread_data* local_buf, unsigned 
 
 int MySql_connection::sql_select_database_name(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     // Отправляем пакет описания 1 колонки
     local_buf->answer_buf.lock();
     char* answer = local_buf->answer_buf.getData();
@@ -1469,6 +1497,7 @@ int MySql_connection::sql_select_database_name(thread_data* local_buf, unsigned 
 // users_auth
 int MySql_connection::sql_select_from_users_auth(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "id",
         "hash"
@@ -1524,6 +1553,7 @@ int MySql_connection::sql_select_from_users_auth(thread_data* local_buf, unsigne
 
 int MySql_connection::sql_insert_into_users_auth(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     TagLoger::log(Log_MySqlServer, 0, " >MySql_connection::add_user_hash\n");
 
     const static char* columDef[MAX_COLUMNS_COUNT] = {
@@ -1588,6 +1618,7 @@ int MySql_connection::sql_insert_into_users_auth(thread_data* local_buf, unsigne
 
 int MySql_connection::sql_delete_from_users_auth(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "id",
         "hash"
@@ -1679,6 +1710,7 @@ int MySql_connection::sql_delete_from_users_auth(thread_data* local_buf, unsigne
  */
 int MySql_connection::sql_select_from_users_data(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "id",
         "data", // Можно записать только из cometQL
@@ -1731,6 +1763,7 @@ int MySql_connection::sql_select_from_users_data(thread_data* local_buf, unsigne
 
 int MySql_connection::sql_insert_into_users_data(thread_data* local_buf, unsigned int PacketNomber)
 { 
+    auto t = TagTimer::mtime();
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "id",
         "data"
@@ -1783,6 +1816,7 @@ int MySql_connection::sql_insert_into_users_data(thread_data* local_buf, unsigne
 
 int MySql_connection::sql_delete_from_users_data(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "id",
         "data"
@@ -1837,6 +1871,7 @@ int MySql_connection::sql_delete_from_users_data(thread_data* local_buf, unsigne
  */
 int MySql_connection::sql_select_from_revoked_tokens(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     const static char* columDef[MAX_COLUMNS_COUNT] = { 
         "token", 
     };
@@ -1885,6 +1920,7 @@ int MySql_connection::sql_select_from_revoked_tokens(thread_data* local_buf, uns
 
 int MySql_connection::sql_insert_into_revoked_tokens(thread_data* local_buf, unsigned int PacketNomber)
 { 
+    auto t = TagTimer::mtime();
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "token"
     };
@@ -1927,6 +1963,7 @@ int MySql_connection::sql_insert_into_revoked_tokens(thread_data* local_buf, uns
 
 int MySql_connection::sql_delete_from_revoked_tokens(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "token"
     };
@@ -1978,6 +2015,7 @@ int MySql_connection::sql_delete_from_revoked_tokens(thread_data* local_buf, uns
 // users_time
 int MySql_connection::sql_select_from_users_time(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "id",
         "time"
@@ -2026,12 +2064,14 @@ int MySql_connection::sql_select_from_users_time(thread_data* local_buf, unsigne
 
 int MySql_connection::sql_insert_into_users_time(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     Send_Err_Package(SQL_ERR_READ_ONLY, "Table `users_time` is read only", PacketNomber+1, local_buf, this);
     return 0;
 }
 
 int MySql_connection::sql_delete_from_users_time(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     Send_Err_Package(SQL_ERR_READ_ONLY, "Table `users_time` is read only", PacketNomber+1, local_buf, this);
     return 0;
 }
@@ -2042,6 +2082,7 @@ int MySql_connection::sql_delete_from_users_time(thread_data* local_buf, unsigne
 // users_messages
 int MySql_connection::sql_select_from_users_messages(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "id",
         "index",
@@ -2098,6 +2139,7 @@ int MySql_connection::sql_select_from_users_messages(thread_data* local_buf, uns
 
 int MySql_connection::sql_insert_into_users_messages(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     TagLoger::log(Log_MySqlServer, 0, " >MySQL_connection::insert_from_users_messages\n");
 
     const static char* columDef[MAX_COLUMNS_COUNT] = {
@@ -2186,6 +2228,7 @@ int MySql_connection::sql_insert_into_users_messages(thread_data* local_buf, uns
 
 int MySql_connection::sql_delete_from_users_messages(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "id",
         "index",
@@ -2237,6 +2280,7 @@ int MySql_connection::sql_delete_from_users_messages(thread_data* local_buf, uns
 // pipes_messages
 int MySql_connection::sql_select_from_pipes_messages(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "id",
         "time",
@@ -2299,6 +2343,7 @@ int MySql_connection::sql_select_from_pipes_messages(thread_data* local_buf, uns
 
 int MySql_connection::sql_insert_into_pipes_messages(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     TagLoger::log(Log_MySqlServer, 0, " >MySql_connection::insert_into_pipes_messages\n");
 
     const static char* columDef[MAX_COLUMNS_COUNT] = {
@@ -2398,6 +2443,7 @@ int MySql_connection::sql_insert_into_pipes_messages(thread_data* local_buf, uns
 
 int MySql_connection::sql_delete_from_pipes_messages(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "id",
         "time",
@@ -2480,6 +2526,7 @@ int MySql_connection::sql_delete_from_pipes_messages(thread_data* local_buf, uns
 // users_in_pipes
 int MySql_connection::sql_select_from_users_in_pipes(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "name",
         "user_id",
@@ -2570,12 +2617,14 @@ int MySql_connection::sql_select_from_users_in_pipes(thread_data* local_buf, uns
 
 int MySql_connection::sql_insert_into_users_in_pipes(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     Send_Err_Package(SQL_ERR_READ_ONLY, "Table `users_in_pipes` is read only", PacketNomber+1, local_buf, this);
     return 0;
 }
 
 int MySql_connection::sql_delete_from_users_in_pipes(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     Send_Err_Package(SQL_ERR_READ_ONLY, "Table `users_in_pipes` is read only", PacketNomber+1, local_buf, this);
     return 0;
 }
@@ -2584,6 +2633,7 @@ int MySql_connection::sql_delete_from_users_in_pipes(thread_data* local_buf, uns
 // pipes
 int MySql_connection::sql_select_from_pipes(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "name",
         "users"
@@ -2641,12 +2691,14 @@ int MySql_connection::sql_select_from_pipes(thread_data* local_buf, unsigned int
 
 int MySql_connection::sql_insert_into_pipes(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     Send_Err_Package(SQL_ERR_READ_ONLY, "Table `pipes` is read only", PacketNomber+1, local_buf, this);
     return 0;
 }
 
 int MySql_connection::sql_delete_from_pipes(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     Send_Err_Package(SQL_ERR_READ_ONLY, "Table `pipes` is read only", PacketNomber+1, local_buf, this);
     return 0;
 }
@@ -2656,6 +2708,7 @@ int MySql_connection::sql_delete_from_pipes(thread_data* local_buf, unsigned int
 // pipes_settings
 int MySql_connection::sql_select_from_pipes_settings(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "name",
         "length"
@@ -2715,6 +2768,7 @@ int MySql_connection::sql_select_from_pipes_settings(thread_data* local_buf, uns
 
 int MySql_connection::sql_insert_into_pipes_settings(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     TagLoger::log(Log_MySqlServer, 0, " >MySql_connection::insert_into_pipes_messages\n");
 
     const static char* columDef[MAX_COLUMNS_COUNT] = {
@@ -2725,12 +2779,14 @@ int MySql_connection::sql_insert_into_pipes_settings(thread_data* local_buf, uns
     if(!local_buf->sql.prepare_columns_for_insert(columDef, local_buf->qInfo))
     {
         Send_Err_Package(local_buf->qInfo.errorCode, local_buf->qInfo.errorText, PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_insert_into_pipes_settings", t);
         return 0;
     }
 
     if(local_buf->sql.columPositions[0] < 0)
     {
         Send_Err_Package(SQL_ERR_INVALID_DATA, "field `name` is required", PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_insert_into_pipes_settings", t);
         return 0;
     }
 
@@ -2739,18 +2795,21 @@ int MySql_connection::sql_insert_into_pipes_settings(thread_data* local_buf, uns
     if(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]].tokLen > PIPE_NAME_LEN)
     {
         Send_Err_Package(SQL_ERR_OVERFLOW, "Channel name is too long", PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_insert_into_pipes_settings", t);
         return 0;
     }
 
     if(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]].tokLen < 3)
     {
         Send_Err_Package(SQL_ERR_EMPTY, "Channel name is too short", PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_insert_into_pipes_settings", t);
         return 0;
     }
 
     if(!AZ09test(pipe_name, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]].tokLen))
     {
         Send_Err_Package(SQL_ERR_INVALID_DATA, "The channel name can contain only the characters A-Za-z0-9_-", PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_insert_into_pipes_settings", t);
         return 0;
     }
 
@@ -2764,16 +2823,18 @@ int MySql_connection::sql_insert_into_pipes_settings(thread_data* local_buf, uns
     if( pipe_settings.save(local_buf) < 0)
     {
         Send_Err_Package(SQL_ERR_INTERNAL_SERVER, "internal server error: sql_insert_into_pipes_settings", PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_insert_into_pipes_settings", t);
         return 0;
     }
 
-    Send_OK_Package(1, 0, PacketNomber+1, local_buf, this);
+    Send_OK_Package(1, 0, PacketNomber+1, local_buf, this); 
+    TagTimer::add("MySql_connection::sql_insert_into_pipes_settings", t);
     return 0;
 }
 
 int MySql_connection::sql_delete_from_pipes_settings(thread_data* local_buf, unsigned int PacketNomber)
 {
-
+    auto t = TagTimer::mtime();
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "name",
         "length"
@@ -2782,6 +2843,7 @@ int MySql_connection::sql_delete_from_pipes_settings(thread_data* local_buf, uns
     if(!local_buf->sql.prepare_where_expressions(columDef, local_buf->qInfo))
     {
         Send_Err_Package(local_buf->qInfo.errorCode, local_buf->qInfo.errorText, PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_delete_from_pipes_settings", t);
         return 0;
     }
 
@@ -2790,6 +2852,7 @@ int MySql_connection::sql_delete_from_pipes_settings(thread_data* local_buf, uns
     if(idExprPos == -1)
     {
         Send_Err_Package(SQL_ERR_WHERE_EXPRESSIONS, "Selection without transferring the requested values of the primary key is not supported", PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_delete_from_pipes_settings", t);
         return 0;
     }
 
@@ -2820,11 +2883,13 @@ int MySql_connection::sql_delete_from_pipes_settings(thread_data* local_buf, uns
      * Для операций удаления affectedRows возвращатся не будет в целях оптимизации.
      */
     Send_OK_Package(0, 0, PacketNomber+1, local_buf, this);
+    TagTimer::add("MySql_connection::sql_delete_from_pipes_settings", t);
     return 0;
 }
 
 int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     TagLoger::log(Log_MySqlServer, 0, " >MySql_connection::conference\n");
 
     // @todo заменить на более читаемый код на базе перечислений или чего то подобного
@@ -2834,7 +2899,8 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
         "caller_id",    // инициатор звонка
         "message",      // сообщение
         "profile",      // Режим  video_*, audio_* [!Проверить что будет если у конференции одно имя но разные режимы]
-        "stream"        // Не пусто и не 0 если активирован режим стриминга [это поле относится к пользователю а не конференции так как зависит от mode ]
+        "stream",        // Не пусто и не 0 если активирован режим стриминга [это поле относится к пользователю а не конференции так как зависит от mode ]
+        "node",         // нода для звонка
          
     };
     // Поле tabUUID передается или отслеживается через текст сообщения `message`
@@ -2842,18 +2908,21 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
     if(!local_buf->sql.prepare_columns_for_insert(columDef, local_buf->qInfo))
     {
         Send_Err_Package(local_buf->qInfo.errorCode, local_buf->qInfo.errorText, PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_insert_into_conference", t);
         return 0;
     }
 
     if(local_buf->sql.columPositions[0] < 0)
     {
         Send_Err_Package(SQL_ERR_INVALID_DATA, "field `name` is required", PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_insert_into_conference", t);
         return 0;
     }
 
     if(local_buf->sql.columPositions[1] < 0)
     {
         Send_Err_Package(SQL_ERR_INVALID_DATA, "field `user_id` is required", PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_insert_into_conference", t);
         return 0;
     }
 
@@ -2866,6 +2935,7 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
     if(local_buf->sql.columPositions[3] < 0)
     {
         Send_Err_Package(SQL_ERR_INVALID_DATA, "field `message` is required", PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_insert_into_conference", t);
         return 0;
     }
 
@@ -2873,6 +2943,7 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
     if(user_id < 0)
     {
         Send_Err_Package(SQL_ERR_INVALID_DATA, "The user_id field must be non-negative", PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_insert_into_conference", t);
         return 0;
     }
 
@@ -2895,6 +2966,7 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
     if(sipcluster.empty())
     {
         Send_Err_Package(SQL_ERR_INTERNAL_SERVER, "field in ini file not set option `host` in section `sip`", PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_insert_into_conference", t);
         return 0;
     }
 
@@ -2910,6 +2982,10 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
 
     TagLoger::log(Log_MySqlServer, 0, " >sipNumber=%s", sipNumber.data());
 
+    
+    /**
+     * @todo Если задан параметр с именем node то сервер берём не случайный а тот что передали нам в запросе
+     */
     int serverPort = 7443;
     std::string serverName;
 
@@ -2922,6 +2998,7 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
  
     serverName = sipcluster[serverIndex]->getWSHost();
     serverPort = sipcluster[serverIndex]->getWSPort();
+    auto streamServer = sipcluster[serverIndex]->getStreamServer();
       
     char callKey[37];
     bzero(callKey, 37);
@@ -2973,7 +3050,7 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
                                                 local_buf->answer_buf.getData(),
                                                 strlen(local_buf->answer_buf.getData()),
                                                 profile,
-                                                "",
+                                                streamServer.data(),
                                                 nodeId.data());
     /*
         $msg = json_encode(
@@ -3024,11 +3101,13 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
     local_buf->answer_buf.unlock();
 
     Send_OK_Package(1, 0, PacketNomber+1, local_buf, this);
+    TagTimer::add("MySql_connection::sql_insert_into_conference", t);
     return 0;
 }
 
 int MySql_connection::sql_select_from_conference(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     // @todo заменить на более читаемый код на базе перечислений или чего то подобного
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "name",         // имя конференции (только цифры)
@@ -3037,11 +3116,13 @@ int MySql_connection::sql_select_from_conference(thread_data* local_buf, unsigne
         "message",      // сообщение
         "profile",      // Режим  video_*, audio_*
         "stream",       // Не пусто и не 0 если активирован режим стриминга [это поле относится к пользователю а не конференции так как зависит от mode ]
+        "node",         // нода для звонка
     };
 
     if(!local_buf->sql.prepare_columns_for_select(columDef, local_buf->qInfo))
     {
         Send_Err_Package(local_buf->qInfo.errorCode, local_buf->qInfo.errorText, PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_select_from_conference", t);
         return 0;
     }
 
@@ -3050,6 +3131,7 @@ int MySql_connection::sql_select_from_conference(thread_data* local_buf, unsigne
     if(idExprPos == -1)
     {
         Send_Err_Package(SQL_ERR_WHERE_EXPRESSIONS, "Selection without transferring the requested values of the primary key is not supported", PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_select_from_conference", t);
         return 0;
     }
 
@@ -3095,17 +3177,20 @@ int MySql_connection::sql_select_from_conference(thread_data* local_buf, unsigne
             if(local_buf->sql.useColumn(3)) local_buf->sql.getValue(countRows, 3) = (const char*)local_buf->stm.conference_select->result_message;
             if(local_buf->sql.useColumn(4)) local_buf->sql.getValue(countRows, 4) = (const char*)local_buf->stm.conference_select->result_profile;
             if(local_buf->sql.useColumn(5)) local_buf->sql.getValue(countRows, 5) = (const char*)local_buf->stm.conference_select->result_stream;
+            if(local_buf->sql.useColumn(6)) local_buf->sql.getValue(countRows, 6) = (const char*)local_buf->stm.conference_select->result_node;
           
             countRows++;
         }
     }
 
     local_buf->sql.sendAllRowsAndHeaders(local_buf, PacketNomber, countRows, this);
+    TagTimer::add("MySql_connection::sql_select_from_conference", t);
     return 0;
 }
 
 int MySql_connection::sql_delete_from_conference(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     //Удаляет конференцию и всех участников.
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "name",         // имя конференции (только цифры)
@@ -3119,6 +3204,7 @@ int MySql_connection::sql_delete_from_conference(thread_data* local_buf, unsigne
     if(!local_buf->sql.prepare_where_expressions(columDef, local_buf->qInfo))
     {
         Send_Err_Package(local_buf->qInfo.errorCode, local_buf->qInfo.errorText, PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_delete_from_conference", t);
         return 0;
     }
 
@@ -3128,6 +3214,7 @@ int MySql_connection::sql_delete_from_conference(thread_data* local_buf, unsigne
     if(idExprPos == -1)
     {
         Send_Err_Package(SQL_ERR_WHERE_EXPRESSIONS, "Selection without transferring the requested values of the primary key is not supported", PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_delete_from_conference", t);
         return 0;
     }
 
@@ -3171,18 +3258,22 @@ int MySql_connection::sql_delete_from_conference(thread_data* local_buf, unsigne
      * Для операций удаления affectedRows возвращатся не будет в целях оптимизации.
      */
     Send_OK_Package(0, 0, PacketNomber+1, local_buf, this);
+    TagTimer::add("MySql_connection::sql_delete_from_conference", t);
     return 0; 
 }
 
 
 int MySql_connection::sql_insert_into_conference_members(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     Send_Err_Package(SQL_ERR_READ_ONLY, "insert into `conference_members` is not ready yet", PacketNomber+1, local_buf, this);
+    TagTimer::add("MySql_connection::sql_insert_into_conference_members", t);
     return 0;
 }
 
 int MySql_connection::sql_select_from_conference_members(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     // @todo заменить на более читаемый код на базе перечислений или чего то подобного
     const static char* columDef[MAX_COLUMNS_COUNT] = {
         "name",         // имя конференции (только цифры)
@@ -3245,6 +3336,7 @@ int MySql_connection::sql_select_from_conference_members(thread_data* local_buf,
     if(!local_buf->sql.prepare_columns_for_select(columDef, local_buf->qInfo))
     {
         Send_Err_Package(local_buf->qInfo.errorCode, local_buf->qInfo.errorText, PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_select_from_conference_members", t);
         return 0;
     }
 
@@ -3539,24 +3631,95 @@ int MySql_connection::sql_select_from_conference_members(thread_data* local_buf,
         }
     }
     local_buf->sql.sendAllRowsAndHeaders(local_buf, PacketNomber, countRows, this);
+    TagTimer::add("MySql_connection::sql_select_from_conference_members", t);
     return 0;
 }
 
 int MySql_connection::sql_delete_from_conference_members(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     Send_Err_Package(SQL_ERR_READ_ONLY, "delete from `conference_members` is not ready yet", PacketNomber+1, local_buf, this);
+    TagTimer::add("MySql_connection::sql_delete_from_conference_members", t);
     return 0;
 }
 
 
 int MySql_connection::sql_insert_into_dialogs(thread_data* local_buf, unsigned int PacketNomber)
 {
+    auto t = TagTimer::mtime();
     Send_Err_Package(SQL_ERR_READ_ONLY, "Table `dialogs` is not ready yet", PacketNomber+1, local_buf, this);
+    TagTimer::add("MySql_connection::sql_insert_into_dialogs", t);
     return 0;
 }
+
+
+int MySql_connection::sql_select_from_profiler(thread_data* local_buf, unsigned int PacketNomber)
+{
+    auto t = TagTimer::mtime();
+    
  
+    const static char* columDef[MAX_COLUMNS_COUNT] = {
+        "tag",       
+        "time",      
+        "calls",        
+        //"time_ps",       
+        //"calls_ps",     
+    };
+    
+    if(!local_buf->sql.prepare_columns_for_select(columDef, local_buf->qInfo))
+    {
+        Send_Err_Package(local_buf->qInfo.errorCode, local_buf->qInfo.errorText, PacketNomber+1, local_buf, this);
+        TagTimer::add("MySql_connection::sql_select_from_profiler", t);
+        return 0;
+    }
+
+    
+    int countRows = 0;
+    
+    auto dt = TagTimer::mtime() - TagTimer::lastReadTime;
+    //auto dt = (int)tcpServer <MySql_connection>::instance()->bm.get_uptime();
+    
+    TagTimer::lock();
+    auto m = TagTimer::get();
+    for(auto it = m.begin(); it != m.end(); ++it) 
+    {
+        if(local_buf->sql.useColumn(0)) local_buf->sql.getValue(countRows, 0) = it->first.data();
+        if(local_buf->sql.useColumn(1)) local_buf->sql.getValue(countRows, 1) = (float)(it->second.time/1000);
+        if(local_buf->sql.useColumn(2)) local_buf->sql.getValue(countRows, 2) = it->second.count;
+        //if(local_buf->sql.useColumn(2)) local_buf->sql.getValue(countRows, 2) = (float)(it->second.time/dt)/1000;
+        //if(local_buf->sql.useColumn(4)) local_buf->sql.getValue(countRows, 4) = (float)(it->second.count/(dt/1000));
+        
+        //it->second.count = 0;
+        //it->second.time = 0;
+        countRows++;
+    }
+    
+    TagTimer::unlock();
+    
+    TagTimer::lastReadTime = TagTimer::mtime();
+    
+    local_buf->sql.sendAllRowsAndHeaders(local_buf, PacketNomber, countRows, this);
+    TagTimer::add("MySql_connection::sql_select_from_profiler", t);
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 int MySql_connection::set_online(thread_data* local_buf)
 {
+    auto t = TagTimer::mtime();
     if(isOnLine)
     {
         return 0;
@@ -3639,8 +3802,8 @@ int MySql_connection::set_online(thread_data* local_buf)
     int dataLen = p - pakbuf;
     TagLoger::log(Log_MySqlServer, 0, "itit len:%d\n", dataLen);
 
-    int t = dataLen - 4;
-    memcpy(pakbuf,  &t, 3); //  Длина пакета
+    int dl = dataLen - 4;
+    memcpy(pakbuf,  &dl, 3); //  Длина пакета
 
     if(TagLoger::isLog(Log_MySqlServer, TAGLOG_DEBUG))
     {
@@ -3657,11 +3820,13 @@ int MySql_connection::set_online(thread_data* local_buf)
 
     clientState = STATE_SEND_HANDSHAKE;
     TagLoger::log(Log_MySqlServer, 0, "Connection will not be closed [4] [MySql_connection]\n");
+    TagTimer::add("MySql_connection::set_online", t);
     return web_write(pakbuf, dataLen);
 }
 
 int MySql_connection::set_offline(thread_data* local_buf)
 {
+    auto t = TagTimer::mtime();
     if(!isOnLine)
     {
         return web_close();
@@ -3674,10 +3839,11 @@ int MySql_connection::set_offline(thread_data* local_buf)
     api_version = 0;
     start_online_time = 0;
     cometqlcluster = 0;
-     
+    
     isAuthUser = false;
 
     isOnLine = false;
+    TagTimer::add("MySql_connection::set_offline", t);
     return web_close();
 }
 

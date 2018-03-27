@@ -3,7 +3,8 @@
 
 #include <mysql.h>
 
-#include "appConf.h"
+#include "appConf.h" 
+#include "TagTimer.h"
 
 #ifndef DBLINK_H
 #define	DBLINK_H
@@ -201,7 +202,9 @@ public:
     stm_log_query(){}
 
     int insert(int dev_id, const char* message, unsigned long message_length)
-    {
+    { 
+        auto t = TagTimer::mtime();
+        
         param_dev_id = dev_id;
         if(appConf::instance()->get_int("db", "buf_size") < message_length)
         {
@@ -210,7 +213,13 @@ public:
         
         memcpy(param_message, message, message_length);
         param_message_length = message_length;
-        return stmBase::insert();
+        
+        
+        int res =  stmBase::insert();
+        
+        TagTimer::add("dbLink::stm_log_query", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 
     int insert(int dev_id, const char* query)
@@ -305,6 +314,8 @@ public:
 
     int execute(const char* id, unsigned long time, unsigned long dev_id, unsigned long user_id, const char* event, const char* message, unsigned long message_length)
     {
+        auto t = TagTimer::mtime();
+        
         param_time = time;
         param_dev_id = dev_id;
         param_user_id = user_id;
@@ -335,7 +346,11 @@ public:
         param_message_length = message_length;
         
         
-        return stmBase::insert();
+        int res =  stmBase::insert();
+        
+        TagTimer::add("dbLink::stm_users_queue_insert", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 };
 
@@ -384,6 +399,8 @@ public:
 
     int execute(unsigned long dev_id, const char* name, unsigned long user_id)
     {
+        auto t = TagTimer::mtime();
+        
         param_dev_id = dev_id;
         param_user_id = user_id;
         
@@ -394,7 +411,12 @@ public:
         }
         strncpy(param_name, name, param_name_length);
          
-        return stmBase::insert();
+        
+        int res =  stmBase::insert();
+        
+        TagTimer::add("dbLink::stm_conference_delete", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 };
 
@@ -526,6 +548,8 @@ public:
             const char* stream,
             const char* node)
     { 
+        auto t = TagTimer::mtime();
+        
         param_time = time(NULL); 
         
         param_dev_id = dev_id;
@@ -572,7 +596,12 @@ public:
         memcpy(param_message, message, message_length);
         param_message_length = message_length;
         
-        return stmBase::insert();
+        
+        int res =  stmBase::insert();
+        
+        TagTimer::add("dbLink::stm_conference_insert", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 };
 
@@ -699,6 +728,8 @@ public:
 
     bool execute(unsigned long dev_id, const char* name)
     {
+        auto t = TagTimer::mtime();
+        
         param_dev_id = dev_id;
         
         param_name_length = strlen(name);
@@ -708,7 +739,11 @@ public:
         }
         strncpy(param_name, name, param_name_length);
         
-        return stmBase::select();
+        bool res =  stmBase::select();
+        
+        TagTimer::add("dbLink::stm_conference_select", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 
     /**
@@ -805,6 +840,8 @@ public:
 
     bool execute(unsigned long dev_id, const char* name)
     {
+        auto t = TagTimer::mtime();
+        
         param_dev_id = dev_id;
         
         param_name_length = strlen(name);
@@ -814,7 +851,11 @@ public:
         }
         strncpy(param_name, name, param_name_length);
         
-        return stmBase::select();
+        bool res =  stmBase::select();
+        
+        TagTimer::add("dbLink::stm_conference_select_nodes_for_room", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 
     /**
@@ -955,12 +996,18 @@ public:
 
     bool execute(unsigned long dev_id, unsigned long user_id, unsigned long limit)
     {
+        auto t = TagTimer::mtime();
+        
         // https://docs.oracle.com/cd/E17952_01/mysql-5.5-en/mysql-stmt-fetch.html
         param_dev_id = dev_id;
         param_user_id = user_id;
         param_limit = limit;
 
-        return stmBase::select();
+        bool res =  stmBase::select();
+        
+        TagTimer::add("dbLink::stm_users_queue_select", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 
     /**
@@ -1035,11 +1082,18 @@ public:
 
     int execute(unsigned long time, unsigned long dev_id, unsigned long user_id)
     {
+        auto t = TagTimer::mtime();
+        
         param_time = time;
         param_dev_id = dev_id;
         param_user_id = user_id;
 
-        return stmBase::insert();
+        
+        int res =  stmBase::insert();
+        
+        TagTimer::add("dbLink::stm_users_queue_delete", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 };
 
@@ -1139,6 +1193,8 @@ public:
 
     int execute(const char* id, unsigned long time, unsigned long dev_id, const char* pipe_name, const char* event, const char* message, unsigned long message_length, unsigned long user_id)
     {
+        auto t = TagTimer::mtime();
+        
         param_time = time;
         param_dev_id = dev_id;
         param_user_id = user_id;
@@ -1179,7 +1235,12 @@ public:
         
         memcpy(param_message, message, message_length);
         param_message_length = message_length;
-        return stmBase::insert();
+        
+        int res =  stmBase::insert();
+        
+        TagTimer::add("dbLink::stm_pipe_messages_insert", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 };
 
@@ -1297,6 +1358,8 @@ public:
 
     bool execute(unsigned long dev_id, const char* pipe_name, unsigned long limit)
     {
+        auto t = TagTimer::mtime();
+        
         // https://docs.oracle.com/cd/E17952_01/mysql-5.5-en/mysql-stmt-fetch.html
         param_dev_id = dev_id;
         param_limit = limit;
@@ -1310,7 +1373,11 @@ public:
         bzero(param_pipe_name, PIPE_NAME_LEN);
         memcpy(param_pipe_name, pipe_name, param_pipe_name_length);
 
-        return stmBase::select();
+        bool res =  stmBase::select();
+        
+        TagTimer::add("dbLink::stm_pipe_messages_select", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 
     /**
@@ -1390,6 +1457,8 @@ public:
 
     int execute(unsigned long time, unsigned long dev_id, const char* pipe_name)
     {
+        auto t = TagTimer::mtime();
+        
         param_time = time;
         param_dev_id = dev_id;
 
@@ -1401,7 +1470,12 @@ public:
         bzero(param_pipe_name, PIPE_NAME_LEN);
         memcpy(param_pipe_name, pipe_name, param_pipe_name_length);
 
-        return stmBase::insert();
+        
+        int res =  stmBase::insert();
+        
+        TagTimer::add("dbLink::stm_pipe_messages_delete", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 };
 
@@ -1445,11 +1519,18 @@ public:
 
     int execute(const char* id, unsigned long dev_id)
     {
+        auto t = TagTimer::mtime();
+        
         bzero(param_id, MYSQL_UUID_LEN);
         strncpy(param_id, id, MYSQL_UUID_LEN); 
          
         param_dev_id = dev_id;
-        return stmBase::insert();
+        
+        int res =  stmBase::insert();
+        
+        TagTimer::add("dbLink::stm_pipe_messages_delete_by_message_id", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 };
 
@@ -1502,6 +1583,8 @@ public:
 
     int execute(unsigned long dev_id, unsigned long user_id, const char* hash)
     {
+        auto t = TagTimer::mtime();
+        
         param_dev_id = dev_id;
         param_user_id = user_id;
 
@@ -1512,7 +1595,12 @@ public:
         }
         bzero(param_hash, USER_HASH_LEN);
         memcpy(param_hash, hash, param_hash_length);
-        return stmBase::insert();
+        
+        int res =  stmBase::insert();
+        
+        TagTimer::add("dbLink::stm_users_auth_replace", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 };
 
@@ -1551,10 +1639,17 @@ public:
 
     int execute(unsigned long dev_id, unsigned long user_id)
     {
+        auto t = TagTimer::mtime();
+        
         param_dev_id = dev_id;
         param_user_id = user_id;
 
-        return stmBase::insert();
+        
+        int res =  stmBase::insert();
+        
+        TagTimer::add("dbLink::stm_users_auth_delete", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 };
 
@@ -1614,11 +1709,17 @@ public:
 
     bool execute(unsigned long dev_id, unsigned long user_id)
     {
+        auto t = TagTimer::mtime();
+        
         // https://docs.oracle.com/cd/E17952_01/mysql-5.5-en/mysql-stmt-fetch.html
         param_dev_id = dev_id;
         param_user_id = user_id;
 
-        return stmBase::select();
+        bool res =  stmBase::select();
+        
+        TagTimer::add("dbLink::stm_users_auth_select", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 
     /**
@@ -1713,6 +1814,8 @@ public:
 
     int execute(unsigned long dev_id, unsigned long user_id, const char* data, int data_length)
     {
+        auto t = TagTimer::mtime();
+        
         param_dev_id = dev_id;
         param_user_id = user_id;
         
@@ -1729,7 +1832,12 @@ public:
         printf("param_data_length=%ld", param_data_length);
         printf("param_dev_id=%ld", param_dev_id);
         
-        return stmBase::insert();
+        
+        int res =  stmBase::insert();
+        
+        TagTimer::add("dbLink::stm_users_data_replace", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 };
 
@@ -1768,10 +1876,17 @@ public:
 
     int execute(unsigned long dev_id, unsigned long user_id)
     {
+        auto t = TagTimer::mtime();
+        
         param_dev_id = dev_id;
         param_user_id = user_id;
 
-        return stmBase::insert();
+        
+        int res =  stmBase::insert();
+        
+        TagTimer::add("dbLink::stm_users_data_delete", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 };
 
@@ -1839,12 +1954,18 @@ public:
 
     bool execute(unsigned long dev_id, unsigned long user_id)
     {
+        auto t = TagTimer::mtime();
+        
         // https://docs.oracle.com/cd/E17952_01/mysql-5.5-en/mysql-stmt-fetch.html
         param_dev_id = dev_id;
         param_user_id = user_id;
 
         
-        return stmBase::select();
+        bool res =  stmBase::select();
+        
+        TagTimer::add("dbLink::stm_users_data_select", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 
     /**
@@ -1938,6 +2059,8 @@ public:
 
     int execute(unsigned long dev_id, const char* token)
     {
+        auto t = TagTimer::mtime();
+        
         param_dev_id = dev_id;
         param_time = 9999999999;
         
@@ -1954,7 +2077,12 @@ public:
         printf("param_token_length=%ld", param_token_length);
         printf("param_dev_id=%ld", param_dev_id);
         
-        return stmBase::insert();
+        
+        int res =  stmBase::insert();
+        
+        TagTimer::add("dbLink::stm_revoked_tokens_replace", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 };
 
@@ -2000,6 +2128,8 @@ public:
 
     int execute(unsigned long dev_id, const char* token)
     {
+        auto t = TagTimer::mtime();
+        
         param_dev_id = dev_id;
          
         param_token_length = strlen(token);
@@ -2010,7 +2140,12 @@ public:
         bzero(param_token, MAX_JWT_LEN);
         memcpy(param_token, token, param_token_length);
          
-        return stmBase::insert();
+        
+        int res =  stmBase::insert();
+        
+        TagTimer::add("dbLink::stm_revoked_tokens_delete", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 };
 
@@ -2077,6 +2212,8 @@ public:
 
     bool execute(unsigned long dev_id, const char* token)
     {
+        auto t = TagTimer::mtime();
+        
         // https://docs.oracle.com/cd/E17952_01/mysql-5.5-en/mysql-stmt-fetch.html
         param_dev_id = dev_id;
         
@@ -2088,7 +2225,12 @@ public:
         bzero(param_token, MAX_JWT_LEN);
         memcpy(param_token, token, param_token_length);
 
-        return stmBase::select();
+        
+        bool res =  stmBase::select();
+        
+        TagTimer::add("dbLink::stm_revoked_tokens_select", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 
     /**
@@ -2141,7 +2283,23 @@ public:
         return stmBase::free();
     }
 };
- 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class stm_pipes_settings_select: public stmBase{
 
     friend stmMapper;
@@ -2198,6 +2356,7 @@ public:
 
     bool execute(unsigned long dev_id, const char* pipe_name)
     {
+        auto t = TagTimer::mtime();
         // https://docs.oracle.com/cd/E17952_01/mysql-5.5-en/mysql-stmt-fetch.html
         param_dev_id = dev_id;
 
@@ -2209,7 +2368,11 @@ public:
         bzero(param_pipe_name, PIPE_NAME_LEN);
         memcpy(param_pipe_name, pipe_name, param_pipe_name_length);
 
-        return stmBase::select();
+        bool res =  stmBase::select();
+        
+        TagTimer::add("dbLink::stm_pipes_settings_select", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 
     /**
@@ -2304,10 +2467,15 @@ public:
 
     bool execute(unsigned long dev_id, unsigned long user_id)
     {
+        auto t = TagTimer::mtime();
         // https://docs.oracle.com/cd/E17952_01/mysql-5.5-en/mysql-stmt-fetch.html
         param_dev_id = dev_id;
         param_user_id = user_id; 
-        return stmBase::select();
+        bool res =  stmBase::select();
+        
+        TagTimer::add("dbLink::stm_users_time_select", t);
+        TagTimer::add("dbLink::mysql_query", t); 
+        return res;
     }
 
     /**
@@ -2368,7 +2536,8 @@ public:
     stm_users_data_replace *users_data_replace = NULL;
     stm_users_data_delete *users_data_delete = NULL;
     stm_users_data_select *users_data_select = NULL;
-     
+    
+    
     stm_users_time_select *users_time_select = NULL;
     stm_pipes_settings_select *pipes_settings_select = NULL; 
     

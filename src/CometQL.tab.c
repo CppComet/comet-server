@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.2.  */
+/* A Bison parser, made by GNU Bison 3.0.4.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "3.0.2"
+#define YYBISON_VERSION "3.0.4"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -259,7 +259,7 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE YYSTYPE;
+
 union YYSTYPE
 {
 #line 115 "src/CometQL.y" /* yacc.c:355  */
@@ -272,6 +272,8 @@ union YYSTYPE
 
 #line 274 "CometQL.tab.c" /* yacc.c:355  */
 };
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
@@ -285,7 +287,7 @@ int yyparse (void* qInfo);
 
 /* Copy the second part of user declarations.  */
 
-#line 289 "CometQL.tab.c" /* yacc.c:358  */
+#line 291 "CometQL.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -1464,7 +1466,7 @@ yyreduce:
                 setTokValue(qData, qData->arg_set.value, (yyvsp[0].tokStruct));  
                 //printf("\tСписок баз данных\n");
         }
-#line 1468 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1470 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
@@ -1475,7 +1477,7 @@ yyreduce:
                 setTokValue(qData, qData->arg_set.varible, (yyvsp[-1].tokStruct));  
                 setTokValue(qData, qData->arg_set.value, (yyvsp[0].tokStruct));   
         }
-#line 1479 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1481 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
@@ -1487,7 +1489,7 @@ yyreduce:
                 setTokValue(qData, qData->arg_set.varible, (yyvsp[-1].tokStruct));  
                 setTokValue(qData, qData->arg_set.value, (yyvsp[0].tokStruct));  
         }
-#line 1491 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1493 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
@@ -1498,7 +1500,7 @@ yyreduce:
                 qData->arg_show.command = TOK_DATABASES; 
                 //printf("\tСписок баз данных\n");
         }
-#line 1502 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1504 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
@@ -1509,7 +1511,7 @@ yyreduce:
                 qData->arg_show.command = TOK_PROCESSLIST; 
                 //printf("\tСписок потоков\n");
         }
-#line 1513 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1515 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
@@ -1520,7 +1522,7 @@ yyreduce:
                 qData->arg_show.command = TOK_TABLES; 
                 //printf("\tСписок таблиц\n");
         }
-#line 1524 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1526 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
@@ -1532,7 +1534,7 @@ yyreduce:
                 
                 //printf("\tСписок таблиц\n");
         }
-#line 1536 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1538 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
@@ -1543,7 +1545,7 @@ yyreduce:
                 qData->arg_show.command = TOK_STATUS; 
                 //printf("\tСтатус системы\n");
         }
-#line 1547 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1549 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
@@ -1555,7 +1557,7 @@ yyreduce:
                 qData->arg_show.command = TOK_COLUMNS;  
                 //printf("\tСписок колонок\n");
         }
-#line 1559 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1561 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
@@ -1567,7 +1569,7 @@ yyreduce:
                 qData->arg_show.command = TOK_COLUMNS;  
                 //printf("\tСписок колонок\n");
         }
-#line 1571 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1573 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
@@ -1580,7 +1582,7 @@ yyreduce:
                 setTokValue(qData, qData->arg_show.like, (yyvsp[0].tokStruct)); 
                 //printf("\tПоказать переменные\n");
         }
-#line 1584 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1586 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 23:
@@ -1589,7 +1591,7 @@ yyreduce:
                 setQData;
                 qData->arg_show.flag = FLAG_GLOBAL;
         }
-#line 1593 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1595 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 24:
@@ -1598,7 +1600,7 @@ yyreduce:
                 setQData;
                 qData->arg_show.flag = FLAG_SESSION;
         }
-#line 1602 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1604 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
@@ -1607,7 +1609,7 @@ yyreduce:
                 setQData;
                 qData->arg_show.flag = FLAG_FILESYSTEM;
         }
-#line 1611 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1613 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 26:
@@ -1616,7 +1618,7 @@ yyreduce:
                 setQData;
                 qData->arg_show.flag = FLAG_RAM;
         }
-#line 1620 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1622 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 27:
@@ -1625,7 +1627,7 @@ yyreduce:
                 setQData;
                 qData->arg_show.flag = FLAG_AVG;
         }
-#line 1629 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1631 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 28:
@@ -1634,7 +1636,7 @@ yyreduce:
                 setQData;
                 qData->arg_show.flag = FLAG_UPTIME;
         }
-#line 1638 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1640 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 30:
@@ -1643,7 +1645,7 @@ yyreduce:
                 setQData;
                 qData->arg_show.flag = FLAG_FULL;
         }
-#line 1647 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1649 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 31:
@@ -1656,7 +1658,7 @@ yyreduce:
                 
                 //printf("\tВыборка %s\n", $2.text);
         }
-#line 1660 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1662 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 32:
@@ -1667,7 +1669,7 @@ yyreduce:
                 qData->arg_select.command = TOK_DATABASE;  
                 //printf("\tВыборка DATABASE\n");
         }
-#line 1671 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1673 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 33:
@@ -1677,7 +1679,7 @@ yyreduce:
                 qData->command = TOK_SELECT;
                 qData->arg_select.command = TOK_FROM;  
         }
-#line 1681 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1683 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 36:
@@ -1692,7 +1694,7 @@ yyreduce:
                 qData->where.whereExprValueCount = 0;
                 qData->where.whereExprCount++;
         }
-#line 1696 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1698 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 37:
@@ -1711,7 +1713,7 @@ yyreduce:
                 qData->where.whereExprCount++;
                 qData->where.whereExprValueCount = 0;
         }
-#line 1715 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1717 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 38:
@@ -1730,7 +1732,7 @@ yyreduce:
                 qData->where.whereExprCount++;
                 qData->where.whereExprValueCount = 0;
         }
-#line 1734 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1736 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 39:
@@ -1739,7 +1741,7 @@ yyreduce:
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = TOK_LIKE;
         }
-#line 1743 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1745 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 40:
@@ -1748,7 +1750,7 @@ yyreduce:
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = MORE;
         }
-#line 1752 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1754 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 41:
@@ -1757,7 +1759,7 @@ yyreduce:
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = LESS;
         }
-#line 1761 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1763 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 42:
@@ -1766,7 +1768,7 @@ yyreduce:
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = EQUALLY;
         }
-#line 1770 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1772 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 43:
@@ -1775,7 +1777,7 @@ yyreduce:
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = TOK_IN;
         }
-#line 1779 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1781 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 46:
@@ -1785,7 +1787,7 @@ yyreduce:
                 setTokValue(qData, qData->where.whereExprColum[qData->where.whereExprCount], (yyvsp[0].tokStruct));   
                 //printf("\texpr_Name %d[%.3s...]\n", qData->where.whereExprCount, $1.text);
         }
-#line 1789 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1791 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 47:
@@ -1804,7 +1806,7 @@ yyreduce:
                     //printf("\texpr_Value %d[%.3s...]\n", qData->where.whereExprValueCount, $1.text);
                 }
         }
-#line 1808 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1810 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 49:
@@ -1814,7 +1816,7 @@ yyreduce:
                 setTokValue(qData, qData->orderBy.name, (yyvsp[-1].tokStruct));   
                 qData->orderBy.type = TOK_ASC;
         }
-#line 1818 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1820 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 50:
@@ -1824,7 +1826,7 @@ yyreduce:
                 setTokValue(qData, qData->orderBy.name, (yyvsp[-1].tokStruct));  
                 qData->orderBy.type = TOK_ASC;
         }
-#line 1828 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1830 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 51:
@@ -1834,7 +1836,7 @@ yyreduce:
                 setTokValue(qData, qData->orderBy.name, (yyvsp[-1].tokStruct));   
                 qData->orderBy.type = TOK_DESC;
         }
-#line 1838 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1840 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 53:
@@ -1845,7 +1847,7 @@ yyreduce:
                 
                 //printf("\tВыборка limit %d\n", qData->limit.rows);
         }
-#line 1849 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1851 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 54:
@@ -1857,7 +1859,7 @@ yyreduce:
                 
                 //printf("\tВыборка limit_start %d, limit %d\n", qData->limit.start, qData->limit.rows);
         }
-#line 1861 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1863 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 55:
@@ -1866,7 +1868,7 @@ yyreduce:
                 setQData; 
                 qData->arg_select.selectedColumnsCount=0;
         }
-#line 1870 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1872 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 59:
@@ -1885,7 +1887,7 @@ yyreduce:
                     //printf("\tQUOTED_Name %d[%.3s...]\n", qData->arg_select.selectedColumnsCount, $1.text);
                 }
         }
-#line 1889 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1891 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 60:
@@ -1895,7 +1897,7 @@ yyreduce:
                 qData->command = TOK_INSERT;  
                 //printf("\tВставка\n");
         }
-#line 1899 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1901 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 61:
@@ -1905,7 +1907,7 @@ yyreduce:
                 qData->command = TOK_INSERT;         
                 //printf("\tВставка\n"); 
         }
-#line 1909 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1911 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 66:
@@ -1924,7 +1926,7 @@ yyreduce:
                     //printf("\tQUOTED_Name %d[%.3s...]\n", qData->arg_insert.namesCount, $1.text);
                 }
         }
-#line 1928 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1930 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 67:
@@ -1943,7 +1945,7 @@ yyreduce:
                     //printf("\tQUOTED_Value %d[%.3s...%d]\n", qData->arg_insert.valuesCount, $1.text, $1.len);
                 }
         }
-#line 1947 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1949 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 68:
@@ -1953,7 +1955,7 @@ yyreduce:
                 qData->command = TOK_DELETE;  
                 //printf("\tУдаление\n");
         }
-#line 1957 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1959 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
   case 69:
@@ -1963,11 +1965,11 @@ yyreduce:
                 setTokValue(qData, qData->tableName, (yyvsp[0].tokStruct));   
                 //printf("\tTable_Name [%.3s...%d]\n", $1.text, $1.len);
         }
-#line 1967 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1969 "CometQL.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1971 "CometQL.tab.c" /* yacc.c:1646  */
+#line 1973 "CometQL.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires

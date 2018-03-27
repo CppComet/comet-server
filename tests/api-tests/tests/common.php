@@ -46,9 +46,9 @@ class test_common extends testClass{
         
          
         $bigArr = [];
-        for($j = 0; $j < 10; $j++)
+        for($j = 0; $j < 2; $j++)
         {
-            for($i = 0; $i < 1000; $i++)
+            for($i = 0; $i < 100; $i++)
             {
                 $bigArr[] = $j*$i;
             }
