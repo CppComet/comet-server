@@ -682,19 +682,24 @@ int tcpServer<connectionType>::epoll_detached(int fd, int epfd)
 template< class connectionType >
 void tcpServer<connectionType>::deleteClientFromMap(CP<connectionType> clientObj)
 {
-    TagLoger::log(Log_tcpServer, 0, "S%d:tcpServer::delete-Client Epfd=%d, fd=%d\n",this->id, clientObj->getEpfd(), clientObj->getfd());
-
     int client_id = clientObj->getfd();
+    TagLoger::log(Log_tcpServer, 0, "S%d:tcpServer::delete-Client Epfd=%d, fd=%d\n",this->id, clientObj->getEpfd(), client_id);
+
+    
+    if(client_id <= 0)
+    {
+        return;
+    }
     map_index_lock(client_id);
 
-    auto it = getMapToUserId(clientObj->getfd()).find(clientObj->getfd());
-    if( it != getMapToUserId(clientObj->getfd()).end() )
+    auto it = getMapToUserId(client_id).find(client_id);
+    if( it != getMapToUserId(client_id).end() )
     {
-        getMapToUserId(clientObj->getfd()).erase(it);
+        getMapToUserId(client_id).erase(it);
     }
     else
     {
-        TagLoger::error(Log_tcpServer, 0, "\x1b[31mS%d:Could not find user %d in map_index\x1b[0m\n",this->id, clientObj->getfd());
+        TagLoger::error(Log_tcpServer, 0, "\x1b[31mS%d:Could not find user %d in map_index\x1b[0m\n",this->id, client_id);
     }
 
     map_index_unlock(client_id);
@@ -708,16 +713,22 @@ void tcpServer<connectionType>::deleteClientFromMap(CP<connectionType> clientObj
 template< class connectionType >
 void tcpServer<connectionType>::closeClientConnection(CP<connectionType> clientObj, thread_data* local_buf)
 {
-    TagLoger::log(Log_tcpServer, 0, "S%d:tcpServer::closeClientConnection Epfd=%d, fd=%d\n",this->id, clientObj->getEpfd(), clientObj->getfd());
+    int client_id = clientObj->getfd();
+    TagLoger::log(Log_tcpServer, 0, "S%d:tcpServer::closeClientConnection Epfd=%d, fd=%d\n",this->id, clientObj->getEpfd(), client_id);
+    
+    if(client_id <= 0)
+    {
+        return;
+    }
     /**
      * Если не ошибаюсь, то после этой строчки событий от клиента в epoll не будет.
      * И поэтому будет можно безопасно удалить память на которую указывает events[i].data.ptr в событиях epoll
      */
-    epoll_detached(clientObj->getfd(), clientObj->getEpfd());
+    epoll_detached(client_id, clientObj->getEpfd());
  
     if(clientObj->set_offline(local_buf) < 0 )
     {
-        TagLoger::error(Log_tcpServer, 0, "\x1b[31mS%d:Failed to disconnect client %d\x1b[0m\n",this->id, clientObj->getfd());
+        TagLoger::error(Log_tcpServer, 0, "\x1b[31mS%d:Failed to disconnect client %d\x1b[0m\n",this->id, client_id);
     }
     else
     {
@@ -763,6 +774,10 @@ void tcpServer<connectionType>::deleteClient(CP<connectionType> clientObj, threa
 template< class connectionType >
 void tcpServer<connectionType>::deleteClient(int client_id, thread_data* local_buf)
 {
+    if(client_id <= 0)
+    {
+        return;
+    }
     local_buf->setThreadStatus('4');
 
     map_index_lock(client_id);
@@ -799,6 +814,12 @@ template< class connectionType >
         local_buf->unlockAll();
         int client = clientObj->getfd();
 
+        if(client <= 0)
+        {
+            deleteClient(clientObj, local_buf);
+            return -1;
+        }
+        
         bm.set_th_status(thread_id, 'R');
 
 

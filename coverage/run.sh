@@ -5,5 +5,5 @@ cmake .
 make
 
 # Запуск под valgrind
-./cppcomet_coverage --conf ./cometN1.ini
+valgrind ./cppcomet_coverage --conf ./cometN1.ini
 

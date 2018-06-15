@@ -22,6 +22,7 @@ cat ./test/*.js  >> ./test-cov.js
 # Завершение теста через 10 секунд
 printf """\n \
 setTimeout(function(){\n \
+     console.log(\"[js-test] [js-test-done-ok] \x1b[1;32m all tests done in js test \x1b[0m\");\
     process.exit()\n \
 }, 30000)\n  """ >> ./test-cov.js
 

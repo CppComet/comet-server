@@ -181,7 +181,7 @@ function test_2_users_messages()
 
                                             if(result.length != 0)
                                             {
-                                                throw new Error(JSON.stringify({test:"[js-test] Error (result.length != 0) in query:"+query, error:error, result:result, fields:fields }));
+                                                throw new Error(JSON.stringify({test:"[js-test] Error[2] (result.length != 0) in query:"+query, error:error, result:result, fields:fields }));
                                             }
                                         }
                                     );
