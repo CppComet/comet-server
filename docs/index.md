@@ -1,8 +1,8 @@
 
 # CppComet Documentation
  
- * [Russian](http://comet-server.org/doku.php/ru) language
- * English language on [project site](http://comet-server.org/doku.php/en) or in [readthedocs](http://cppcomet.readthedocs.io/en/latest/)
+ * [Russian](http://comet-server.com/doku.php/ru) language
+ * English language on [project site](http://comet-server.com/doku.php/en) or in [readthedocs](http://cppcomet.readthedocs.io/en/latest/)
 
 # CppComet community
  

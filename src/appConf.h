@@ -29,6 +29,7 @@ class appConf: public ini_parser
     static appConf* inst;
 public:
     bool isHelp = false;
+    bool useCLI = false;
     
     /**
      * Данные для кластера высокой нагрузки

@@ -144,7 +144,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 115 "src/CometQL.y" /* yacc.c:1909  */
+#line 115 "../src/CometQL.y" /* yacc.c:1909  */
 
    struct TokStruct {
       char* text;
@@ -152,7 +152,7 @@ union YYSTYPE
       char quote;
    } tokStruct;
 
-#line 156 "src/CometQL.hh" /* yacc.c:1909  */
+#line 156 "../src/CometQL.hh" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

@@ -1,14 +1,14 @@
 #!/bin/bash
  
 
-mkdir cov
+mkdir cov -p
 cd cov
 
 # Определение coverage
 # find ./ -type f -iname '*.gcno' | grep "main" | sed -e 's/main.cpp/*/g'
 files=`find ../ -type f -iname '*.gcno' | grep "main" | sed -e 's/main.cpp/*/g'`
 
-print "nnn - $files"
+#print "nnn - $files"
 
 lcov --directory .. --capture --output-file cov.tmp1
 gcov -b $files
@@ -16,7 +16,7 @@ gcov -b $files
 
 
 # Генерация отчёта
-mkdir cov
+mkdir cov -p
 
 nstart1=`cat cov.tmp1 | grep -n "\.cc" | grep -E -o "^[0-9]+"`
 print "nnn - $nstart1"
@@ -30,6 +30,6 @@ genhtml -o ./cov cov.info
 
 
 
-
+echo "See result in \"`pwd`/cov/index.html\""
 
 

@@ -1,7 +1,7 @@
 <?php
-// More info about CppComet http://comet-server.org/doku.php/en
-// More info about CometQL http://comet-server.org/doku.php/en:comet:cometql
-// More info about auth in CppComet http://comet-server.org/doku.php/en:comet:authentication
+// More info about CppComet http://comet-server.com/doku.php/en
+// More info about CometQL http://comet-server.com/doku.php/en:comet:cometql
+// More info about auth in CppComet http://comet-server.com/doku.php/en:comet:authentication
 
 header('Content-Type: text/html; charset=utf-8');
 header("Access-Control-Allow-Origin: *");

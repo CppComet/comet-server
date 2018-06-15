@@ -9,8 +9,8 @@ Comet server is written in C++, for storing data using MySQL.
 
 Comet technology – allows sending arbitrary messages to client through server initiative
 
-* Api for more then 9 languages. [CometQL API](http://comet-server.org/doku.php/en:comet:cometql) allows you connect to server by mysql protocol.
-* Good documentation in [Russian](http://comet-server.org/doku.php/ru) and [English](http://comet-server.org/doku.php/en) languages
+* Api for more then 9 languages. [CometQL API](http://comet-server.com/doku.php/en:comet:cometql) allows you connect to server by mysql protocol.
+* Good documentation in [Russian](http://comet-server.com/doku.php/ru) and [English](http://comet-server.com/doku.php/en) languages
 * [Supports users authenticating on the server](https://comet-server.com/wiki/doku.php/en:comet:authentication#users_authorization_on_the_cometserver)
 * [Allow sending a private message to users](https://comet-server.com/wiki/doku.php/en:comet:cometql#table_users_messages)
 * [Allows you to send public messages to users via channels](https://comet-server.com/wiki/doku.php/en:comet:cometql#table_pipes_messages)
@@ -29,11 +29,11 @@ Comet technology – allows sending arbitrary messages to client through server 
 
 # Documentation and examples
 
-Documentation in [Russian](http://comet-server.org/doku.php/ru) and [English](http://comet-server.org/doku.php/en) languages
+Documentation in [Russian](http://comet-server.com/doku.php/ru) and [English](http://comet-server.com/doku.php/en) languages
  
- * How to build and run [EN](http://comet-server.org/doku.php/en:comet:building-from-source) or [RU](http://comet-server.org/doku.php/comet:building-from-source)
- * CometQL API documentation [EN](http://comet-server.org/doku.php/en:comet:cometql) or [RU](http://comet-server.org/doku.php/comet:cometql) (To connect to the comet server api from any server-side language is used CometQL)
- * JavaScript API documentation [EN](http://comet-server.org/doku.php/en:comet:javascript_api) or [RU](http://comet-server.org/doku.php/comet:javascript_api) (To connect to the server from JavaScript API use file from [api/CometServerApi.js](https://github.com/CppComet/comet-server/tree/master/api) )
+ * How to build and run [EN](http://comet-server.com/doku.php/en:comet:building-from-source) or [RU](http://comet-server.com/doku.php/comet:building-from-source)
+ * CometQL API documentation [EN](http://comet-server.com/doku.php/en:comet:cometql) or [RU](http://comet-server.com/doku.php/comet:cometql) (To connect to the comet server api from any server-side language is used CometQL)
+ * JavaScript API documentation [EN](http://comet-server.com/doku.php/en:comet:javascript_api) or [RU](http://comet-server.com/doku.php/comet:javascript_api) (To connect to the server from JavaScript API use file from [api/CometServerApi.js](https://github.com/CppComet/comet-server/tree/master/api) )
 
 # Demo
  
@@ -54,7 +54,7 @@ Password:lPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8
 Host: app.comet-server.ru
 ```
 
-Example of connecting to [cometQL api](http://comet-server.org/doku.php/en:comet:cometql) from console using mysql-client:
+Example of connecting to [cometQL api](http://comet-server.com/doku.php/en:comet:cometql) from console using mysql-client:
 ```
 mysql -h app.comet-server.ru -u15 -plPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgLHxT6z55e20ozojvMRvB8 -DCometQL_v1 --skip-ssl
 ```
@@ -65,7 +65,7 @@ mysql -h app.comet-server.ru -u15 -plPXBFPqNg3f661JcegBY0N0dPXqUBdHXqj2cHf04PZgL
 
 On this gif animation you see how send message to [web chat](http://comet-server.com/doc/CometQL/MainPageChat/index.php) from CppComet api.
 
-We connect to CppComet by mysql protocol and send [CometQL query](http://comet-server.org/doku.php/en:comet:cometql).
+We connect to CppComet by mysql protocol and send [CometQL query](http://comet-server.com/doku.php/en:comet:cometql).
 
 For connect to demo server use this command:
 ```

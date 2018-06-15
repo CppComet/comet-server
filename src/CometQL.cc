@@ -62,7 +62,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "src/CometQL.y" /* yacc.c:339  */
+#line 1 "../src/CometQL.y" /* yacc.c:339  */
 
 #include <stdio.h>
 #include <string.h>
@@ -174,7 +174,7 @@ int strToInt(const char* buffer, int len)
                     place.quote = tok.quote;\
                     
 
-#line 178 "src/CometQL.cc" /* yacc.c:339  */
+#line 178 "../src/CometQL.cc" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -308,7 +308,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 115 "src/CometQL.y" /* yacc.c:355  */
+#line 115 "../src/CometQL.y" /* yacc.c:355  */
 
    struct TokStruct {
       char* text;
@@ -316,7 +316,7 @@ union YYSTYPE
       char quote;
    } tokStruct;
 
-#line 320 "src/CometQL.cc" /* yacc.c:355  */
+#line 320 "../src/CometQL.cc" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -333,7 +333,7 @@ int yyparse (void* qInfo);
 
 /* Copy the second part of user declarations.  */
 
-#line 337 "src/CometQL.cc" /* yacc.c:358  */
+#line 337 "../src/CometQL.cc" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -1504,7 +1504,7 @@ yyreduce:
   switch (yyn)
     {
         case 9:
-#line 202 "src/CometQL.y" /* yacc.c:1646  */
+#line 202 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_SET;
@@ -1512,22 +1512,22 @@ yyreduce:
                 setTokValue(qData, qData->arg_set.value, (yyvsp[0].tokStruct));  
                 //printf("\tСписок баз данных\n");
         }
-#line 1516 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1516 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 211 "src/CometQL.y" /* yacc.c:1646  */
+#line 211 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_SET; 
                 setTokValue(qData, qData->arg_set.varible, (yyvsp[-1].tokStruct));  
                 setTokValue(qData, qData->arg_set.value, (yyvsp[0].tokStruct));   
         }
-#line 1527 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1527 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 219 "src/CometQL.y" /* yacc.c:1646  */
+#line 219 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_SET;   
@@ -1535,44 +1535,44 @@ yyreduce:
                 setTokValue(qData, qData->arg_set.varible, (yyvsp[-1].tokStruct));  
                 setTokValue(qData, qData->arg_set.value, (yyvsp[0].tokStruct));  
         }
-#line 1539 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1539 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 232 "src/CometQL.y" /* yacc.c:1646  */
+#line 232 "../src/CometQL.y" /* yacc.c:1646  */
     { 
                 setQData;
                 qData->command = TOK_SHOW;
                 qData->arg_show.command = TOK_DATABASES; 
                 //printf("\tСписок баз данных\n");
         }
-#line 1550 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1550 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 240 "src/CometQL.y" /* yacc.c:1646  */
+#line 240 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_SHOW;
                 qData->arg_show.command = TOK_PROCESSLIST; 
                 //printf("\tСписок потоков\n");
         }
-#line 1561 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1561 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 248 "src/CometQL.y" /* yacc.c:1646  */
+#line 248 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_SHOW;
                 qData->arg_show.command = TOK_TABLES; 
                 //printf("\tСписок таблиц\n");
         }
-#line 1572 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1572 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 256 "src/CometQL.y" /* yacc.c:1646  */
+#line 256 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_SHOW;
@@ -1580,22 +1580,22 @@ yyreduce:
                 
                 //printf("\tСписок таблиц\n");
         }
-#line 1584 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1584 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 265 "src/CometQL.y" /* yacc.c:1646  */
+#line 265 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_SHOW;
                 qData->arg_show.command = TOK_STATUS; 
                 //printf("\tСтатус системы\n");
         }
-#line 1595 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1595 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 273 "src/CometQL.y" /* yacc.c:1646  */
+#line 273 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 // Тоже самое что и TOK_DESCRIBE VAL_NAME 
                 setQData;
@@ -1603,11 +1603,11 @@ yyreduce:
                 qData->arg_show.command = TOK_COLUMNS;  
                 //printf("\tСписок колонок\n");
         }
-#line 1607 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1607 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 282 "src/CometQL.y" /* yacc.c:1646  */
+#line 282 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 // Тоже самое что и TOK_SHOW opt_for_show_columns TOK_COLUMNS TOK_FROM VAL_NAME 
                 setQData;
@@ -1615,11 +1615,11 @@ yyreduce:
                 qData->arg_show.command = TOK_COLUMNS;  
                 //printf("\tСписок колонок\n");
         }
-#line 1619 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1619 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 291 "src/CometQL.y" /* yacc.c:1646  */
+#line 291 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_SHOW;
@@ -1628,74 +1628,74 @@ yyreduce:
                 setTokValue(qData, qData->arg_show.like, (yyvsp[0].tokStruct)); 
                 //printf("\tПоказать переменные\n");
         }
-#line 1632 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1632 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 311 "src/CometQL.y" /* yacc.c:1646  */
+#line 311 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->arg_show.flag = FLAG_GLOBAL;
         }
-#line 1641 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1641 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 317 "src/CometQL.y" /* yacc.c:1646  */
+#line 317 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->arg_show.flag = FLAG_SESSION;
         }
-#line 1650 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1650 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 323 "src/CometQL.y" /* yacc.c:1646  */
+#line 323 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->arg_show.flag = FLAG_FILESYSTEM;
         }
-#line 1659 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1659 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 329 "src/CometQL.y" /* yacc.c:1646  */
+#line 329 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->arg_show.flag = FLAG_RAM;
         }
-#line 1668 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1668 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 335 "src/CometQL.y" /* yacc.c:1646  */
+#line 335 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->arg_show.flag = FLAG_AVG;
         }
-#line 1677 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1677 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 341 "src/CometQL.y" /* yacc.c:1646  */
+#line 341 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->arg_show.flag = FLAG_UPTIME;
         }
-#line 1686 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1686 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 351 "src/CometQL.y" /* yacc.c:1646  */
+#line 351 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->arg_show.flag = FLAG_FULL;
         }
-#line 1695 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1695 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 362 "src/CometQL.y" /* yacc.c:1646  */
+#line 362 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_SELECT;
@@ -1704,32 +1704,32 @@ yyreduce:
                 
                 //printf("\tВыборка %s\n", $2.text);
         }
-#line 1708 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1708 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 372 "src/CometQL.y" /* yacc.c:1646  */
+#line 372 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_SELECT;
                 qData->arg_select.command = TOK_DATABASE;  
                 //printf("\tВыборка DATABASE\n");
         }
-#line 1719 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1719 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 380 "src/CometQL.y" /* yacc.c:1646  */
+#line 380 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 qData->command = TOK_SELECT;
                 qData->arg_select.command = TOK_FROM;  
         }
-#line 1729 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1729 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 395 "src/CometQL.y" /* yacc.c:1646  */
+#line 395 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 if(qData->where.whereExprCount >= MAX_EXPRESSIONS_COUNT)
@@ -1740,11 +1740,11 @@ yyreduce:
                 qData->where.whereExprValueCount = 0;
                 qData->where.whereExprCount++;
         }
-#line 1744 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1744 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 37:
-#line 407 "src/CometQL.y" /* yacc.c:1646  */
+#line 407 "../src/CometQL.y" /* yacc.c:1646  */
     {
             /** 
              * нет скобочек для порядка выполнения
@@ -1759,11 +1759,11 @@ yyreduce:
                 qData->where.whereExprCount++;
                 qData->where.whereExprValueCount = 0;
         }
-#line 1763 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1763 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 38:
-#line 423 "src/CometQL.y" /* yacc.c:1646  */
+#line 423 "../src/CometQL.y" /* yacc.c:1646  */
     {
             /** 
              * нет скобочек для порядка выполнения
@@ -1778,66 +1778,66 @@ yyreduce:
                 qData->where.whereExprCount++;
                 qData->where.whereExprValueCount = 0;
         }
-#line 1782 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1782 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 39:
-#line 442 "src/CometQL.y" /* yacc.c:1646  */
+#line 442 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = TOK_LIKE;
         }
-#line 1791 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1791 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 40:
-#line 448 "src/CometQL.y" /* yacc.c:1646  */
+#line 448 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = MORE;
         }
-#line 1800 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1800 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 41:
-#line 454 "src/CometQL.y" /* yacc.c:1646  */
+#line 454 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = LESS;
         }
-#line 1809 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1809 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 42:
-#line 460 "src/CometQL.y" /* yacc.c:1646  */
+#line 460 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = EQUALLY;
         }
-#line 1818 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1818 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 466 "src/CometQL.y" /* yacc.c:1646  */
+#line 466 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 qData->where.whereExprCondition[qData->where.whereExprCount] = TOK_IN;
         }
-#line 1827 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1827 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 480 "src/CometQL.y" /* yacc.c:1646  */
+#line 480 "../src/CometQL.y" /* yacc.c:1646  */
     { 
                 setQData;  
                 setTokValue(qData, qData->where.whereExprColum[qData->where.whereExprCount], (yyvsp[0].tokStruct));   
                 //printf("\texpr_Name %d[%.3s...]\n", qData->where.whereExprCount, $1.text);
         }
-#line 1837 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1837 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 489 "src/CometQL.y" /* yacc.c:1646  */
+#line 489 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 if(qData->where.whereExprValueCount >= MAX_EXPRESSIONS_VALUES)
@@ -1852,52 +1852,52 @@ yyreduce:
                     //printf("\texpr_Value %d[%.3s...]\n", qData->where.whereExprValueCount, $1.text);
                 }
         }
-#line 1856 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1856 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 49:
-#line 509 "src/CometQL.y" /* yacc.c:1646  */
+#line 509 "../src/CometQL.y" /* yacc.c:1646  */
     { 
                 setQData; 
                 setTokValue(qData, qData->orderBy.name, (yyvsp[-1].tokStruct));   
                 qData->orderBy.type = TOK_ASC;
         }
-#line 1866 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1866 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 50:
-#line 516 "src/CometQL.y" /* yacc.c:1646  */
+#line 516 "../src/CometQL.y" /* yacc.c:1646  */
     { 
                 setQData; 
                 setTokValue(qData, qData->orderBy.name, (yyvsp[-1].tokStruct));  
                 qData->orderBy.type = TOK_ASC;
         }
-#line 1876 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1876 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 523 "src/CometQL.y" /* yacc.c:1646  */
+#line 523 "../src/CometQL.y" /* yacc.c:1646  */
     { 
                 setQData; 
                 setTokValue(qData, qData->orderBy.name, (yyvsp[-1].tokStruct));   
                 qData->orderBy.type = TOK_DESC;
         }
-#line 1886 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1886 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 534 "src/CometQL.y" /* yacc.c:1646  */
+#line 534 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->limit.rows = strToInt((yyvsp[0].tokStruct).text, (yyvsp[0].tokStruct).len);
                 
                 //printf("\tВыборка limit %d\n", qData->limit.rows);
         }
-#line 1897 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1897 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 54:
-#line 542 "src/CometQL.y" /* yacc.c:1646  */
+#line 542 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->limit.setStart(strToInt((yyvsp[0].tokStruct).text, (yyvsp[0].tokStruct).len));
@@ -1905,20 +1905,20 @@ yyreduce:
                 
                 //printf("\tВыборка limit_start %d, limit %d\n", qData->limit.start, qData->limit.rows);
         }
-#line 1909 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1909 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 553 "src/CometQL.y" /* yacc.c:1646  */
+#line 553 "../src/CometQL.y" /* yacc.c:1646  */
     { 
                 setQData; 
                 qData->arg_select.selectedColumnsCount=0;
         }
-#line 1918 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1918 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 59:
-#line 569 "src/CometQL.y" /* yacc.c:1646  */
+#line 569 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 if(qData->arg_select.selectedColumnsCount >= MAX_COLUMNS_COUNT)
@@ -1933,31 +1933,31 @@ yyreduce:
                     //printf("\tQUOTED_Name %d[%.3s...]\n", qData->arg_select.selectedColumnsCount, $1.text);
                 }
         }
-#line 1937 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1937 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 60:
-#line 590 "src/CometQL.y" /* yacc.c:1646  */
+#line 590 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_INSERT;  
                 //printf("\tВставка\n");
         }
-#line 1947 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1947 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 61:
-#line 597 "src/CometQL.y" /* yacc.c:1646  */
+#line 597 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_INSERT;         
                 //printf("\tВставка\n"); 
         }
-#line 1957 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1957 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 66:
-#line 618 "src/CometQL.y" /* yacc.c:1646  */
+#line 618 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData; 
                 if(qData->arg_insert.namesCount >= MAX_COLUMNS_COUNT)
@@ -1972,11 +1972,11 @@ yyreduce:
                     //printf("\tQUOTED_Name %d[%.3s...]\n", qData->arg_insert.namesCount, $1.text);
                 }
         }
-#line 1976 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1976 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 67:
-#line 636 "src/CometQL.y" /* yacc.c:1646  */
+#line 636 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 if(qData->arg_insert.valuesCount >= MAX_EXPRESSIONS_VALUES)
@@ -1991,31 +1991,31 @@ yyreduce:
                     //printf("\tQUOTED_Value %d[%.3s...%d]\n", qData->arg_insert.valuesCount, $1.text, $1.len);
                 }
         }
-#line 1995 "src/CometQL.cc" /* yacc.c:1646  */
+#line 1995 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 68:
-#line 654 "src/CometQL.y" /* yacc.c:1646  */
+#line 654 "../src/CometQL.y" /* yacc.c:1646  */
     {
                 setQData;
                 qData->command = TOK_DELETE;  
                 //printf("\tУдаление\n");
         }
-#line 2005 "src/CometQL.cc" /* yacc.c:1646  */
+#line 2005 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
   case 69:
-#line 671 "src/CometQL.y" /* yacc.c:1646  */
+#line 671 "../src/CometQL.y" /* yacc.c:1646  */
     { 
                 setQData;
                 setTokValue(qData, qData->tableName, (yyvsp[0].tokStruct));   
                 //printf("\tTable_Name [%.3s...%d]\n", $1.text, $1.len);
         }
-#line 2015 "src/CometQL.cc" /* yacc.c:1646  */
+#line 2015 "../src/CometQL.cc" /* yacc.c:1646  */
     break;
 
 
-#line 2019 "src/CometQL.cc" /* yacc.c:1646  */
+#line 2019 "../src/CometQL.cc" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2243,7 +2243,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 688 "src/CometQL.y" /* yacc.c:1906  */
+#line 688 "../src/CometQL.y" /* yacc.c:1906  */
 
         
         

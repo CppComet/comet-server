@@ -1,4 +1,4 @@
-project(ccommet)
+project(cppcomet_coverage)
 cmake_minimum_required(VERSION 2.6)
 
 message(STATUS "System: " ${CMAKE_SYSTEM_NAME} " " ${CMAKE_SYSTEM_VERSION})
@@ -14,17 +14,17 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     endif()
 endif()
 
-
-
-SET(CMAKE_CXX_FLAGS "-std=c++11 -g3")
-
+#SET(CMAKE_CXX_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage")
+SET(CMAKE_C_FLAGS "-fprofile-arcs -ftest-coverage")
+SET(CMAKE_CXX_FLAGS "-std=c++11 -g3 -fprofile-arcs -ftest-coverage")
+ 
 #add_definitions(-DMY_PROJECT)
 add_definitions(-DCMAKE_BUILD_TYPE=debug)
 
 # Поиск библиотеки pthreads
 find_package(Threads REQUIRED)
 if(NOT Threads_FOUND)
-    message(SEND_ERROR "Threads Not found.")
+    message(SEND_ERROR "Threads - Not Found")
     return()
 else()
     include_directories(${Threads_INCLUDE_DIRS})
@@ -54,7 +54,8 @@ ENDIF (MYSQL_INCLUDE_DIR)
 
 FIND_PATH(MYSQL_INCLUDE_DIR mysql.h
   /usr/local/include/mysql
-  /usr/include/mysql
+  /usr/include/mysql 
+  /usr/include/mariadb
 )
 
 SET(MYSQL_NAMES mysqlclient mysqlclient_r)
@@ -99,39 +100,40 @@ else()
 endif() 
 
 
-include_directories(${MYSQL_INCLUDE_DIR} ../dependencies ../dependencies/freeswitch-esl/include ../dependencies/jwt-cpp/src/include)
+include_directories(${MYSQL_INCLUDE_DIR}
+ ../dependencies
+ ../dependencies/freeswitch-esl/include
+ ../dependencies/jwt-cpp/src/include)
  
 
-# Расположение заголовочных файлов
-#include_directories(foo)	
-		
+# Расположение заголовочных файлов  
 execute_process( COMMAND flex -i ../src/CometQL.l)
 execute_process( COMMAND bison -d ../src/CometQL.y)
 execute_process( COMMAND yacc -d ../src/CometQL.y)
 execute_process( COMMAND bison -d --verbose --debug ../src/CometQL.y -o ../src/CometQL.cc)
 execute_process( COMMAND yacc -d --verbose --debug ../src/CometQL.y -o ../src/CometQL.cc)
 execute_process( COMMAND cc -c ../src/lex.yy.c -o ../src/lex.yy.o)
-
+ 
 execute_process( COMMAND mv ../CometQL.tab.c ../src/CometQL.tab.c) 
 execute_process( COMMAND mv ../CometQL.tab.h ../src/CometQL.tab.h)
 execute_process( COMMAND mv ../lex.yy.c ../src/lex.yy.c)
 execute_process( COMMAND mv ../y.tab.c ../src/y.tab.c)
 execute_process( COMMAND mv ../y.tab.h ../src/y.tab.h)
- 
+
 add_definitions(-DUSE_COVERAGE=1) 
- 
+
 MESSAGE(STATUS "Build dependencies")
 execute_process( COMMAND cd .. && sh ./dependencies/build.sh)
  
 set(ESL_EXE 
-    ../src/freeswitch-esl/cJSON.c
-    ../src/freeswitch-esl/cJSON_Utils.c
-    ../src/freeswitch-esl/esl.c
-    ../src/freeswitch-esl/esl_buffer.c
-    ../src/freeswitch-esl/esl_config.c
-    ../src/freeswitch-esl/esl_event.c
-    ../src/freeswitch-esl/esl_json.c
-    ../src/freeswitch-esl/esl_threadmutex.c) 
+    ../dependencies/freeswitch-esl/cJSON.c
+    ../dependencies/freeswitch-esl/cJSON_Utils.c
+    ../dependencies/freeswitch-esl/esl.c
+    ../dependencies/freeswitch-esl/esl_buffer.c
+    ../dependencies/freeswitch-esl/esl_config.c
+    ../dependencies/freeswitch-esl/esl_event.c
+    ../dependencies/freeswitch-esl/esl_json.c
+    ../dependencies/freeswitch-esl/esl_threadmutex.c) 
 
 set(TINYXML2_EXE 
     ../dependencies/tinyxml2/tinyxml2.cpp) 
@@ -176,12 +178,35 @@ set_property(TARGET libjwta PROPERTY
 
 
 # Создает исполняемый файл с именем cpp_comet из исходников
-add_executable(cpp_comet_coverage ${HASHLIB2PLUS_EXE} ${SOURCE_EXE} ${TINYXML2_EXE} ${ESL_EXE} )
+add_executable(cppcomet_coverage ${HASHLIB2PLUS_EXE} ${SOURCE_EXE} ${TINYXML2_EXE} ${ESL_EXE} )
 
 # Подключение библиотеки pthreads
-target_link_libraries (cpp_comet_coverage ${CMAKE_THREAD_LIBS_INIT}  ${MYSQL_LIBRARIES} ${OPENSSL_LIBRARIES} crypt uuid libjwta)
+target_link_libraries (cppcomet_coverage ${CMAKE_THREAD_LIBS_INIT}  ${MYSQL_LIBRARIES} ${OPENSSL_LIBRARIES} crypt uuid libjwta)
 
 
 #cmake ./ && make
 
+#INSTALL( DIRECTORY <directory> DESTINATION usr/myproject )
 
+#mkdir /etc/comet-server
+#cp ./comet-service.sh /etc/comet-server/comet-service.sh
+#cp ./comet.ini /etc/comet-server/comet.ini
+#cp ./cpp_comet /etc/comet-server/cpp_comet
+# https://mirkokiefer.com/cmake-by-example-f95eb47d45b1
+
+set(INSTALL_CONF_DIR
+    /etc/comet-server) 
+
+set(INSTALL_BIN_DIR
+    /usr/bin) 
+
+set(INSTALL_SYSTEMD_DIR
+    /etc/systemd/system) 
+
+install(FILES comet.service         DESTINATION ${INSTALL_SYSTEMD_DIR})
+install(FILES comet.ini             DESTINATION ${INSTALL_CONF_DIR})
+install(FILES comet-service.sh      DESTINATION ${INSTALL_CONF_DIR})
+install(TARGETS cppcomet_coverage   DESTINATION ${INSTALL_BIN_DIR})
+
+# https://cmake.org/pipermail/cmake/2009-September/031887.html
+# INSTALL(SCRIPT CopyIfNotExists.cmake)

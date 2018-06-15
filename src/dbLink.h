@@ -9,27 +9,6 @@
 #ifndef DBLINK_H
 #define	DBLINK_H
 
-/**
- * https://dev.mysql.com/doc/refman/5.7/en/error-messages-client.html#error_cr_commands_out_of_sync
- */
-#define	CR_COMMANDS_OUT_OF_SYNC 2014
-
-/** 
- * https://dev.mysql.com/doc/refman/5.5/en/error-messages-client.html#error_cr_server_lost
- */
-#define	CR_SERVER_LOST 2013
-
-/** 
- * https://dev.mysql.com/doc/refman/5.5/en/error-messages-server.html#error_er_unknown_stmt_handler
- */
-#define	ER_UNKNOWN_STMT_HANDLER 1243
-
-
-/** 
- * https://dev.mysql.com/doc/refman/5.5/en/error-messages-server.html#error_er_server_shutdown
- */
-#define	ER_SERVER_SHUTDOWN 1053
-
 
 class stmMapper;
 class dbLink;
@@ -314,6 +293,11 @@ public:
 
     int execute(const char* id, unsigned long time, unsigned long dev_id, unsigned long user_id, const char* event, const char* message, unsigned long message_length)
     {
+        if(message_length <= 0)
+        {
+            message_length = strlen(message);
+        }
+        
         auto t = TagTimer::mtime();
         
         param_time = time;

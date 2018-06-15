@@ -1,0 +1,34 @@
+---
+- hosts: all  
+  vars:
+#    git_repo_url: "https://*******:******@gitlab.com/Levhav/star-comet" 
+    git_branch: master
+    project_name: CppComet-EE-tests 
+  remote_user: root
+  
+  # Запускать тесты в докере на разных ос
+  # Проверять кластер
+  # Выплёвывать .deb и .rpm файлы на выходе
+  # Выплёвывать данные покрытия тестами в лог через grep и в веб перекладывая статику в доступное для nginx место
+  
+  tasks: 
+    - name: Git clone
+      git:
+        repo: {{git_repo_url}}
+        dest: /tmp/{{project_name}}
+        version: "{{git_branch}}"
+        force: yes
+
+    - name: Add +x
+      raw: chmod +x /tmp/{{project_name}}/coverage/fulltests.sh
+
+    - name: Run tests
+      raw: /tmp/{{project_name}}/coverage/fulltests.sh > /tmp/test.log
+      
+    - name: cat tests log
+      cat: /tmp/test.log
+  
+  
+  # docker rm $(docker ps -q -f status=exited) удалить все контенеры которые завершены 
+  # docker volume prune -f удалить не используемые вольюмы
+  # docker rmi -f $(docker images -f 'dangling=true' -a -q) удалить все контенеры с тегом none

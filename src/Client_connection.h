@@ -25,6 +25,7 @@
 
 class Client_connection;
    #include "user_index.h"
+   #include "jwt/jwt_all.h"
 
 
 #define	REQUEST_NULL            0
@@ -244,25 +245,6 @@ class Client_connection:public connection
     virtual ~Client_connection();
      
     int request(int client, int len, thread_data* local_buf);
-    int message(thread_data* local_buf, const char* msg); 
-    int message(thread_data* local_buf, const char* msg, const char* name);
-    int message(thread_data* local_buf, const char* msg, const char* name, const char message_type, const char* server_data);
-    
-    /**
-     * Отправляет короткие до 127 символов сообщения по вебсокету
-     * @param local_buf
-     * @param text Текст сообщения
-     */
-    int short_ws_message(thread_data* local_buf, const char* text);
-    
-    /**
-     * Отправляет короткие до 127 символов сообщения по вебсокету
-     * @param local_buf
-     * @param text Текст сообщения
-     * @param msg_type Тип сообщения 
-     */
-    int short_ws_message(thread_data* local_buf, const char* text,int msg_type);
-    
     
     /**
      * Устанавливает ствтус соединения
@@ -270,6 +252,36 @@ class Client_connection:public connection
     int set_online(thread_data* local_buf );
     int set_offline(thread_data* local_buf );
      
+
+    /**
+     * Новый стиль, отправка данных в json
+     */
+    int message(thread_data* local_buf, nlohmann::json message); 
+   
+    /**
+     * Отправляет короткие до 127 символов сообщения по вебсокету
+     * @param local_buf
+     * @param text Текст сообщения
+     */
+    //int short_ws_message(thread_data* local_buf, const char* text);
+    
+    /**
+     * Отправляет короткие до 127 символов сообщения по вебсокету
+     * @param local_buf
+     * @param text Текст сообщения
+     * @param msg_type Тип сообщения 
+     */
+    int short_ws_message(thread_data* local_buf, const char* text, int length ,int msg_type);
+protected:
+    /**
+     * @deprecated старый код убрать потом.
+     */
+    int message(thread_data* local_buf, const char* msg, const char* name, const char message_type, const char* server_data);
+   /**
+     * Новый стиль, отправка сырых данных текстом
+     */
+    int message(thread_data* local_buf, const char* msg, int msg_length, const char message_type);
+   
 };
 
 

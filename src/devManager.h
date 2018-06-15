@@ -80,9 +80,8 @@ public:
             item->next = first;
         }
         first = item;
-        pthread_mutex_unlock(&mutex);
-        
         list_size++;
+        pthread_mutex_unlock(&mutex);
     }
  
     bool remove(dataType data)
@@ -104,8 +103,8 @@ public:
                 {
                     first = first->next;
                 }
-                pthread_mutex_unlock(&mutex);
                 list_size--;
+                pthread_mutex_unlock(&mutex);
                 return true;
             }
 

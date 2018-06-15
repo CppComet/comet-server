@@ -150,10 +150,6 @@ bool appConf::initFromFile(const char *fileName)
         sections["main"]["password"] = MAIN_PASSWORD;  
     }
      
-    if(!is_property_exists("main", "mono_password"))
-    {
-        sections["main"]["mono_password"] = MAIN_PASSWORD;  
-    }
     
     if(!is_property_exists("main", "node_name"))
     {
@@ -278,18 +274,23 @@ bool appConf::init(int argc, char *argv[])
                         return false;
                     }
             }
+            
+            if(strcmp(argv[i],"--cli") == 0)
+            {  
+                useCLI = true;
+            }
         }
     }
      
-    if(conf_path == -1 && file_exists("comet.ini"))
-    {
-        printf("Config file: ./comet.ini\n"); 
-        return initFromFile("comet.ini"); 
-    }
-    else if(conf_path == -1 && file_exists("/etc/comet-server/comet.ini"))
+    if(conf_path == -1 && file_exists("/etc/comet-server/comet.ini"))
     {
         printf("Config file: /etc/comet-server/comet.ini\n"); 
         return initFromFile("/etc/comet-server/comet.ini"); 
+    }
+    else if(conf_path == -1 && file_exists("./comet.ini"))
+    {
+        printf("Config file: ./comet.ini\n"); 
+        return initFromFile("comet.ini"); 
     }
     
     printf("Config file: %s\n", argv[conf_path]); 

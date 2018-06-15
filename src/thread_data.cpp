@@ -196,6 +196,7 @@ thread_data::thread_data( appConf* app):buf(app->get_int("main", "buf_size")), m
             {
                 TagLoger::error(Log_Any, LogColorRed, "Error, Proxy-CometQL connection %s does not establish", it->data());
             }
+            //link->connect();
 
             it++;
         }
