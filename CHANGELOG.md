@@ -5,6 +5,14 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v4.0
+BUG FIXES:
+ * Fix 2 critical bugs
+IMPROVEMENTS:
+ * Add support for JWT tokens
+ * Add support multi databases and query like `use db_2ё
+ * Add tests in Node JS
+  
 ## v3.38
 BUG FIXES:
  * add make install instruction
