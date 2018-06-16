@@ -38,8 +38,7 @@
  
     - name: Run tests
       raw: cd /tmp/CppComet-tests/coverage &&  ./fulltests.sh > /tmp/test.log
-      
-    # @todo добавить проверку что тесты не упали.
+       
     - name: cat tests log
-      raw: cat /tmp/test.log
+      raw: cat /tmp/test.log | grep -A 8 "Coverage summary" 
      
