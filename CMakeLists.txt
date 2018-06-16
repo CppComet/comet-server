@@ -55,6 +55,7 @@ ENDIF (MYSQL_INCLUDE_DIR)
 FIND_PATH(MYSQL_INCLUDE_DIR mysql.h
   /usr/local/include/mysql
   /usr/include/mysql
+  /usr/include/mariadb
 )
 
 SET(MYSQL_NAMES mysqlclient mysqlclient_r)
@@ -200,10 +201,10 @@ set(INSTALL_BIN_DIR
 set(INSTALL_SYSTEMD_DIR
     /etc/systemd/system) 
 
-install(FILES comet.service         DESTINATION ${INSTALL_SYSTEMD_DIR})
-install(FILES comet.ini             DESTINATION ${INSTALL_CONF_DIR})
-install(FILES comet-service.sh      DESTINATION ${INSTALL_CONF_DIR})
-install(TARGETS cppcomet              DESTINATION ${INSTALL_BIN_DIR})
+install(FILES comet.service         DESTINATION ${INSTALL_SYSTEMD_DIR} PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+install(FILES comet.ini             DESTINATION ${INSTALL_CONF_DIR} PERMISSIONS OWNER_READ GROUP_READ )
+install(PROGRAMS comet-service.sh   DESTINATION ${INSTALL_CONF_DIR} PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
+install(TARGETS cppcomet            DESTINATION ${INSTALL_BIN_DIR} PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
 
 # https://cmake.org/pipermail/cmake/2009-September/031887.html
 # INSTALL(SCRIPT CopyIfNotExists.cmake)

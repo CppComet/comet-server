@@ -11,10 +11,9 @@ time_t user_index::start_time=time(0);
 
 #include "devManager.h"
 
-  
+
 #include "jwt/jwt_all.h"
 #include "mystring.h"
-using json = nlohmann::json;
 
 useritem::useritem()
 {
@@ -33,7 +32,7 @@ useritem::useritem(thread_data* local_buf, int Dev_Id, unsigned int User_id,std:
 {
     dev_id = Dev_Id;
     user_id = User_id;
- 
+
     hash = Hash;
 
     TagLoger::log(Log_UserItem, 0, "auth_hash_test:%s\n", hash.data());
@@ -136,7 +135,7 @@ long useritem::getLast_online_time(thread_data* local_buf)
 {
     if(last_online_time == -1)
     {
-        local_buf->stm.users_time_select->execute(dev_id, user_id); 
+        local_buf->stm.users_time_select->execute(dev_id, user_id);
         if(local_buf->stm.users_time_select->fetch())
         {
             local_buf->stm.users_time_select->free();
@@ -190,7 +189,7 @@ long useritem::getLast_online_time(thread_data* local_buf, unsigned int user_id,
 bool useritem::setHash(thread_data* local_buf, std::string Hash)
 {
     hash = Hash;
- 
+
     TagLoger::log(Log_UserItem, 0, "auth_hash_test:%s\n", hash.data());
     local_buf->stm.users_auth_replace->execute(dev_id, user_id, hash.data());
     return true;
@@ -236,7 +235,7 @@ bool useritem::getHash(thread_data* local_buf, unsigned int user_id, int dev_id,
         bzero(out_hash, USER_HASH_LEN);
         memcpy(out_hash, local_buf->stm.users_auth_select->result_hash, USER_HASH_LEN);
     }
-    
+
     TagLoger::log(Log_UserItem, 0, "[5]Hash dev_id=%d, user_id=%d is %s\n", dev_id, user_id, local_buf->stm.users_auth_select->result_hash);
     local_buf->stm.users_auth_select->free();
     return true;
@@ -259,7 +258,7 @@ bool useritem::getHash(thread_data* local_buf, char* out_hash)
 {
     if(hash.empty())
     {
-        local_buf->stm.users_auth_select->execute(dev_id, user_id); 
+        local_buf->stm.users_auth_select->execute(dev_id, user_id);
         if(local_buf->stm.users_auth_select->fetch())
         {
             local_buf->stm.users_auth_select->free();
@@ -268,7 +267,7 @@ bool useritem::getHash(thread_data* local_buf, char* out_hash)
         }
 
         hash = local_buf->stm.users_auth_select->result_hash;
- 
+
         local_buf->stm.users_auth_select->free();
         TagLoger::log(Log_UserItem, 0, "[1]Hash dev_id=%d, user_id=%d is %s\n", dev_id, user_id, hash.data());
     }
@@ -286,59 +285,59 @@ bool useritem::getHash(thread_data* local_buf, char* out_hash)
 }
 
 /**
- * 
+ *
  * @param local_buf
  * @param token строка из 32 символов
- * @return 
- * 
+ * @return
+ *
  * http://redmine.comet-server.com/issues/65
  * http://redmine.comet-server.com/issues/67
  * http://redmine.comet-server.com/issues/68
- * 
+ *
  * http://hashlib2plus.sourceforge.net/example.html
- * https://learn.javascript.ru/csrf 
- * 
+ * https://learn.javascript.ru/csrf
+ *
  * Hash вида
  * token = salt + MD5(salt + dev_key + dev_id + user_id )
- * salt - всегда 10 символов 
- * 
- * 
- * 
+ * salt - всегда 10 символов
+ *
+ *
+ *
  * JWT
- * 
- * 
- * 
+ *
+ *
+ *
  */
 bool useritem::testToken(thread_data* local_buf, std::string token, int dev_id, int user_id)
-{  
+{
     ExpValidator exp;
-     
+
     std::string secret(appConf::instance()->get_chars("main", "password"));
 
     secret.append(std::to_string(dev_id));
     HS256Validator signer(secret);
-    
+
     // https://jwt.io/
     // Now let's use these validators to parse and verify the token we created
     // in the previous example
-  
+
     try {
         // Decode and validate the token
-        ::json header, payload;
+        nlohmann::json header, payload;
 
         std::tie(header, payload) = JWT::Decode(token, &signer, &exp);
         //std::cout << "Header: " << header << std::endl;
         //std::cout << "Payload: " << payload << std::endl;
-        
+
         if(payload["user_id"] != user_id)
-        { 
+        {
             TagLoger::debug(Log_UserItem, 0, "Validation failed user_id error:jwt-user_id=%d, user_id=%d\n", (int)payload["user_id"], user_id);
             return false;
         }
-         
+
         local_buf->stm.revoked_tokens_select->execute(dev_id, token.data());
         if(local_buf->stm.revoked_tokens_select->fetch())
-        { 
+        {
             // Токен не найден среди отозванных
             TagLoger::debug(Log_UserItem, 0, "Validation ok:[secret=%s, token=%s]\n", secret.data(), token.data());
             local_buf->stm.revoked_tokens_select->free();
@@ -346,22 +345,22 @@ bool useritem::testToken(thread_data* local_buf, std::string token, int dev_id, 
         }
 
         TagLoger::debug(Log_UserItem, 0, "Validation failed revoked_tokens:[secret=%s, token=%s]\n", secret.data(), token.data());
-        local_buf->stm.revoked_tokens_select->free(); 
+        local_buf->stm.revoked_tokens_select->free();
         return false;
-        
+
     } catch (InvalidTokenError &tfe) {
-        // An invalid token 
+        // An invalid token
         TagLoger::debug(Log_UserItem, 0, "Validation failed: %s [secret=%s, token=%s]\n", tfe.what(), secret.data(), token.data());
     }
     catch(...)
-    { 
+    {
         // handling for exceptions with any type
         TagLoger::debug(Log_UserItem, 0, "Validation failed: secret=%s, token=%s\n", secret.data(), token.data());
     }
-  
+
     return false;
 }
-  
+
 bool useritem::testHash(thread_data* local_buf, std::string Hash)
 {
     // Если в друг нам пришёл не хеш авторизации а токен то проверим его как токен
@@ -379,9 +378,9 @@ bool useritem::testHash(thread_data* local_buf, std::string Hash)
     {
         return false;
     }
- 
+
     TagLoger::log(Log_UserItem, 0, "testHash: %s = %s\n", hash.data(), Hash.data());
-   
+
     return Hash == hash;
 }
 
@@ -390,7 +389,7 @@ bool useritem::testHash(thread_data* local_buf, std::string Hash)
  * @param local_buf
  * @param Hash
  * @param user_id
- * @param dev_id 
+ * @param dev_id
  * @return
  */
 bool useritem::testHash(thread_data* local_buf, std::string Hash, unsigned int user_id, int dev_id)
@@ -411,7 +410,7 @@ bool useritem::testHash(thread_data* local_buf, std::string Hash, unsigned int u
                     uuidHash[i] = '0';
                 }
             }
-            
+
             local_buf->stm.users_auth_replace->execute(dev_id, user_id, uuidHash);
         }
         return true;
@@ -438,7 +437,7 @@ bool useritem::testHash(thread_data* local_buf, std::string Hash, unsigned int u
 
 /**
  * Запоминает время ухода пользователя и сохраняет эту информацию в редис
- * Отправляет сообщение в канал user_status_{user_id} о том что человек offline 
+ * Отправляет сообщение в канал user_status_{user_id} о том что человек offline
  */
 void useritem::setOffline_time(thread_data* local_buf)
 {
@@ -447,20 +446,27 @@ void useritem::setOffline_time(thread_data* local_buf)
     {
         if(appConf::instance()->get_bool("main", "save_users_last_online_time"))
         {
-            local_buf->db.query_format("replace into `users_time` (`dev_id`, `user_id`, `time`) VALUES ('%d', '%d', '%d')", dev_id, user_id, last_online_time); 
+            local_buf->db.query_format("replace into `users_time` (`dev_id`, `user_id`, `time`) VALUES ('%d', '%d', '%d')", dev_id, user_id, last_online_time);
         }
         if(appConf::instance()->get_bool("main", "send_user_offline_events"))
         {
             char pipe_name[100];
             snprintf(pipe_name, 100,"user_status_%d", user_id);
-            internalApi::send_event_to_pipe(local_buf, pipe_name, "{\\\"data\\\":\\\"offline\\\",\\\"event_name\\\":\\\"offline\\\"}", dev_id, NULL);
+
+            nlohmann::json jmessage = {
+                {"data", "offline"},
+                {"event", "offline"},
+                {"pipe", pipe_name}
+            };
+
+            internalApi::send_event_to_pipe(local_buf, dev_id, jmessage);
 
             if(local_buf->isWSClusterActive())
             {
                 auto it = local_buf->wsCluster.begin();
                 while(it != local_buf->wsCluster.end())
                 {
-                    auto link = *it; 
+                    auto link = *it;
                     link->query_format("cometqlcluster_v1 set dev_id=%d; INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'offline', 'offline');", dev_id, pipe_name);
                     it++;
                 }
@@ -471,7 +477,7 @@ void useritem::setOffline_time(thread_data* local_buf)
 
 /**
  * Устанавливает пользователю статус online и сохраняет эту информацию
- * Отправляет сообщение в канал user_status_{user_id} о том что человек online 
+ * Отправляет сообщение в канал user_status_{user_id} о том что человек online
  */
 void useritem::setOnline_time(thread_data* local_buf)
 {
@@ -481,22 +487,28 @@ void useritem::setOnline_time(thread_data* local_buf)
         if(appConf::instance()->get_bool("main", "save_users_last_online_time") && !local_buf->isWSClusterActive())
         {
             // В не кластерной работы точно нет необходимости в этом запросе
-            local_buf->db.query_format("replace into `users_time` (`dev_id`, `user_id`, `time`) VALUES ('%d', '%d', 0)", dev_id, user_id); 
+            local_buf->db.query_format("replace into `users_time` (`dev_id`, `user_id`, `time`) VALUES ('%d', '%d', 0)", dev_id, user_id);
         }
 
         if(appConf::instance()->get_bool("main", "send_user_online_events"))
         {
             char pipe_name[100];
             snprintf(pipe_name, 100, "user_status_%d", user_id);
-            internalApi::send_event_to_pipe(local_buf, pipe_name, "{\\\"data\\\":\\\"online\\\",\\\"event_name\\\":\\\"online\\\"}", dev_id, NULL);
+
+            nlohmann::json jmessage = {
+                {"data", "online"},
+                {"event", "online"},
+                {"pipe", pipe_name}
+            };
 
 
+            internalApi::send_event_to_pipe(local_buf, dev_id, jmessage);
             if(local_buf->isWSClusterActive())
             {
                 auto it = local_buf->wsCluster.begin();
                 while(it != local_buf->wsCluster.end())
                 {
-                    auto link = *it; 
+                    auto link = *it;
                     link->query_format("cometqlcluster_v1 set dev_id=%d; INSERT INTO pipes_messages (name, event, message)VALUES('%s', 'online', 'online');", dev_id, pipe_name);
                     it++;
                 }

@@ -216,7 +216,7 @@ void posix_ignor_signal(int signum)
 
     signal(signum, SIG_IGN); // перепосылка сигнала
 }
-
+ 
 #define NAMEDPIPE_NAME "/tmp/cpp.comet"
 #define BUFSIZE        150
 
@@ -305,7 +305,7 @@ void command_line_fork()
         else if( strncmp(buf,"version", strlen("version") ) == 0 )
         {
             printf("\x1b[31m%s\x1b[0m\n", MYSQL_SYSTEMVARIBLE);
-        }
+        } 
         else if(memcmp(buf, "TagLog", strlen("TagLog")) == 0)
         {
             int tag = 0;
@@ -336,6 +336,80 @@ void command_line_fork()
     } while ( 1 );
 }
 
+void cli_fork()
+{ 
+    char buf[BUFSIZE];
+
+    do {
+        memset(buf, '\0', BUFSIZE);
+        int len = scanf("%32s", buf);
+
+        if( len <= 0 )
+        {
+            continue;
+        }
+
+        TagLoger::log(Log_pipeCommands, 0, "\x1b[32mIncoming message from pipe(%d): %s\x1b[0m\n", len, buf);
+
+        if( strncmp(buf,"sleep", strlen("sleep") ) == 0 )
+        {
+            printf("\x1b[31mSleep 1 command received\x1b[0m\n");
+            sleep(1);
+        }
+        else if( strncmp(buf,"exit", strlen("exit") ) == 0 )
+        { 
+            printf("\x1b[31mExit command received\x1b[0m\n");
+            //kill(getppid(), SIGTERM); 
+            remove(NAMEDPIPE_NAME);
+            exit(0);
+            return;
+        }
+        else if( strncmp(buf,"restart", strlen("restart") ) == 0 )
+        {
+            if(tcpServer <MySql_connection>::instance()->bm.get_uptime() < 60)
+            {
+                printf("\x1b[31mRestart command ignore\x1b[0m\n");
+                continue;
+            }
+            printf("\x1b[31mRestart command received\x1b[0m\n"); 
+            exit(9);
+            return;
+        }
+        else if( strncmp(buf,"version", strlen("version") ) == 0 )
+        {
+            printf("\x1b[31m%s\x1b[0m\n", MYSQL_SYSTEMVARIBLE);
+        } 
+        else if(memcmp(buf, "TagLog", strlen("TagLog")) == 0)
+        {
+            int tag = 0;
+            int level = 0;
+            sscanf(buf, "TagLog %4d %4d",&tag, &level);
+            TagLoger::setTagLevel(tag, level);
+            TagLoger::log(Log_pipeCommands, 0, "set TagLevel %d to tag %d\n", level, tag);
+        }
+        else if(memcmp(buf, "LogLevel", strlen("LogLevel")) == 0)
+        {
+            int level = 0;
+            sscanf(buf, "LogLevel %4d", &level);
+            TagLoger::setLogLevel(level);
+            TagLoger::log(Log_pipeCommands, 0, "set LogLevel %d\n", level);
+        }
+        else if(memcmp(buf, "useQueryLoger", strlen("useQueryLoger")) == 0)
+        {
+            int val = 0;
+            sscanf(buf, "useQueryLoger %2d",&val);
+            appConf::instance()->set_value("main", "useQueryLoger", val);
+            TagLoger::log(Log_pipeCommands, 0, "set useQueryLoger %d\n", val);
+        }
+        else
+        {
+            TagLoger::error(Log_pipeCommands, 0, "\x1b[31mUnknown command:%s\x1b[0m\n", buf);
+        }
+
+    } while ( 1 );
+}
+
+
 #include <iostream>
 
 #include "jwt/jwt_all.h"
@@ -353,34 +427,9 @@ using json = nlohmann::json;
  */
 int main(int argc, char *argv[])
 {   
-    //    
-    //secret=OTRpassfs4V9b5ptNtOTKIH93lED05es41,
-    //token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNjM0NTY3ODkwIiwidXNlcl9pZCI6NX0.B4P8ONwZZPtb4Zb9zNmV9fdF0WjqxfQy19l4LjK_qtU
-/*
-    ExpValidator exp;
-    HS256Validator signer("OTRpassfs4V9b5ptNtOTKIH93lED05es41");
-
-    // Now let's use these validators to parse and verify the token we created
-    // in the previous example
-    std::string str_token =
-        "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiNSIsImV4cCI6MTY4MzIyODgwMH0.xYfZWh6HmBs88Bb07QxdaM4r59IgqNjPJjr_BJx0U2k";
-    try {
-        // Decode and validate the token
-        ::json header, payload;
-
-        std::tie(header, payload) = JWT::Decode(str_token, &signer, &exp);
-        std::cout << "Header: " << header << std::endl;
-        std::cout << "Payload: " << payload << std::endl;
-    } catch (InvalidTokenError &tfe) {
-        // An invalid token
-        std::cout << "Validation failed: " << tfe.what() << std::endl;
-    }
-    return 0;*/
-    
     // @todo добавить автоматическое создание бд и таблиц если их нет в базе от которой получили логин и пароль.
     // @todo добавить параметр для того чтоб можно было включать/отключать перехват и игнорирование сигнала отрыва от терминала.
-    
-    
+     
     // Назначает обработчик на сигнал смерти
     signal(SIGSEGV, posix_death_signal);
 
@@ -551,8 +600,14 @@ int main(int argc, char *argv[])
     th_startServer<Freeswitch_connection>(3, "freeswitch");
     th_startServer<CometQLProxy_connection>(4, "cometqlproxy");
 
-    command_line_fork();
-
+    if(!appConf::instance()->useCLI)
+    {
+        command_line_fork();
+    }
+    else
+    {
+        cli_fork();
+    }
     pthread_exit(NULL);
 
   return 0;

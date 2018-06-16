@@ -4,6 +4,27 @@
 #include "dbLink.h"
 #include "CometQL.h"
 
+/**
+ * https://dev.mysql.com/doc/refman/5.7/en/error-messages-client.html#error_cr_commands_out_of_sync
+ */
+#define	CR_COMMANDS_OUT_OF_SYNC 2014
+
+/** 
+ * https://dev.mysql.com/doc/refman/5.5/en/error-messages-client.html#error_cr_server_lost
+ */
+#define	CR_SERVER_LOST 2013
+
+/** 
+ * https://dev.mysql.com/doc/refman/5.5/en/error-messages-server.html#error_er_unknown_stmt_handler
+ */
+#define	ER_UNKNOWN_STMT_HANDLER 1243
+
+
+/** 
+ * https://dev.mysql.com/doc/refman/5.5/en/error-messages-server.html#error_er_server_shutdown
+ */
+#define	ER_SERVER_SHUTDOWN 1053
+
 void stmBase::setParamsCount(int size)
 {
     if(param != NULL)
@@ -361,7 +382,9 @@ bool dbLink::connect()
     // MYSQL_OPT_CONNECT_TIMEOUT
     // MYSQL_OPT_READ_TIMEOUT
     // MYSQL_OPT_WRITE_TIMEOUT
-    //mysql_options(&mysql,MYSQL_OPT_COMPRESS,0);
+    //bool ssl = false;
+    //mysql_options(mysqlLink,MYSQL_OPT_COMPRESS, &ssl);
+    //mysql_options(mysqlLink,MYSQL_OPT_SSL_MODE, &ssl);
 
     TagLoger::debug(Log_dbLink, 0, "\x1b[1;32mmysql_real_connect %s:%d user=%s\x1b[0m", db_host.data(), db_port, db_user.data());
     mysql_real_connect(mysqlLink, db_host.data(), db_user.data(), db_pw.data(), db_name.data(), db_port, NULL, 0);

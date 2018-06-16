@@ -228,6 +228,8 @@ protected:
      */
     bufferController fragment_buf;
     
+    inline bool isFromQLCluster(){ return cometqlcluster != 0; }
+    
   public:
       
     /*
@@ -254,6 +256,7 @@ protected:
     virtual ~MySql_connection();
 
     int request(int client, int len, thread_data* local_buf);
+    int one_query(int client, int len, thread_data* local_buf, char* data);
 
     int set_online(thread_data* local_buf);
     int set_offline(thread_data* local_buf);

@@ -1,0 +1,19 @@
+{
+  "name": "cppcomettests",
+  "version": "1.0.0",
+  "description": "Scripts for calculate coverage in tests",
+  "main": "test.js",
+  "scripts": {
+    "test": "istanbul cover test.js"
+  },
+  "author": "Trapenok Victor",
+  "license": "AGPL-3.0",
+  "dependencies": {
+    "mysql": "^2.15.0",
+    "websocket": "^1.0.26"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^3.0.5",
+    "utf-8-validate": "^4.0.2"
+  }
+}

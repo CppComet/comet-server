@@ -1,0 +1,404 @@
+
+
+var mysql = require('mysql');
+
+var host1 = "172.17.0.2";
+var host2 = "192.168.0.101";
+
+var host1 = "127.0.0.0.1";
+var host2 = "127.0.0.0.1";
+
+var port1 = "3311";
+var port2 = "3321"; 
+var portws1 = "8087";
+var portws2 = "8088"; 
+ 
+
+// mysql -h127.0.0.1 -uroot -pCometQLPassword -DCometQL_v1 -P3311 --skip-ssl 
+var connection1 = mysql.createConnection({ 
+  host     : host1,
+  port     : port1,
+  user     : 'root',
+  password : 'CometQLPassword',
+  database : 'CometQL_v1' 
+});
+connection1.connect();
+ 
+var connection2 = mysql.createConnection({
+  host     : host2,
+  port     : port2,
+  user     : 'root',
+  password : 'CometQLPassword',
+  database : 'CometQL_v1' 
+});
+connection2.connect();
+  
+var apiTest1 = new cometServerApi();
+apiTest1.setLogLevel(9)
+apiTest1.start({dev_id:0, user_id:1, user_key:"not00000valid00000userHash", node:[host1 + ":" + portws1, host2 + ":" + portws2]})
+
+var apiTest2 = new cometServerApi();
+apiTest2.setLogLevel(9)
+apiTest2.start({dev_id:0, user_id:2, user_key:"not00000valid00000userHash", node:[host1 + ":" + portws1, host2 + ":" + portws2]})
+
+/*var apiTest3 = new cometServerApi();
+apiTest3.setLogLevel(9)
+apiTest3.start({dev_id:0, user_id:1, user_key:"not00000valid00000userHash", node:["localhost:8087"]})
+
+var apiTest4 = new cometServerApi();
+apiTest4.setLogLevel(9)
+apiTest4.start({dev_id:0, user_id:2, user_key:"not00000valid00000userHash", node:["localhost:8088"]})
+*/
+
+if(apiTest1.getLogLevel() != 9)
+{
+    throw new Error("[js-test] Error in getLogLevel/setLogLevel");
+}
+
+if(apiTest1.getTabUUID() != apiTest1.getTabUUID())
+{
+    throw new Error("[js-test] Error: getTabUUID return differents values");
+}
+
+
+
+if(apiTest1.getUserId() != 1)
+{
+    throw new Error("[js-test] Error in getUserId is `"+apiTest1.getUserId() +"`");
+}
+
+if(apiTest1.getUserKey() != 'not00000valid00000userHash')
+{
+    throw new Error("[js-test] Error in getUserKey is not `not00000valid00000userHash`");
+}
+
+if(apiTest1.getDevId() != 0)
+{
+    throw new Error("[js-test] Error in getDevId is not `0`");
+}
+
+if(apiTest1.UseWss() != '')
+{
+    throw new Error("[js-test] Error in UseWss is not empty");
+}
+
+if(apiTest1.isUseWss())
+{
+    throw new Error("[js-test] Error in isUseWss is not false");
+}
+
+apiTest1.subscription("msg.test1", function(){})
+
+function test_realUserKey()
+{
+    if(!apiTest1.setRealUserKey("abc"))
+    {
+        throw new Error("[js-test] Error in setRealUserKey is not true");
+    }
+
+    if(apiTest1.getRealUserKey() != "abc")
+    {
+        throw new Error("[js-test] Error in getRealUserKey is not `abc`");
+    }
+    console.log("[js-test] \x1b[1;32m getRealUserKey/setRealUserKey ok\x1b[0m");
+}
+
+function test_onAuth()
+{
+    var isTestDone = false;
+    apiTest1.onAuthSuccess(function()
+    {
+        console.log("[js-test] onAuthSuccess");
+
+        if(apiTest1.isAuthorized())
+        {
+            console.log("[js-test] isAuthorized true");
+        }
+
+        throw new Error("[js-test] Error onAuthSuccess()");
+    })
+
+    apiTest1.onAuthFalill(function()
+    {
+        console.log("[js-test] onAuthFalill");
+        if(!apiTest1.isAuthorized())
+        {
+            console.log("[js-test] isAuthorized false");
+        }
+
+        if(!apiTest1.UseWebSocket())
+        {
+            throw new Error("[js-test] Error UseWebSocket()");
+        }
+
+        if(!apiTest1.isMaster())
+        {
+            throw new Error("[js-test] Error isMaster()");
+        }
+
+        console.log("[js-test] \x1b[1;32m test_onAuth ok\x1b[0m");
+        isTestDone = true;
+    })
+
+
+    setTimeout(function()
+    {
+        if(!isTestDone)
+        {
+            throw new Error("[js-test] Error test_onAuth not done");
+        }
+    }, 5000)
+}
+
+function test_getTrackPipeUsers()
+{
+    var isTestDone = false;
+
+    if(apiTest1.getTrackPipeUsers("test1", function(){}))
+    {
+        throw new Error("[js-test] Error getTrackPipeUsers allow track for pipe `test1`");
+    }
+
+    apiTest1.getTrackPipeUsers("track_test1", function(event)
+    {
+        if(!Array.isArray(event.data))
+        {
+            throw new Error("[js-test] Error getTrackPipeUsers filed `data` not array");
+        }
+
+        if(!event.data)
+        {
+            throw new Error("[js-test] Error getTrackPipeUsers filed `data` not empty");
+        }
+
+        if(!event.server_info)
+        {
+            throw new Error("[js-test] Error getTrackPipeUsers filed `server_info` is empty");
+        }
+
+        console.log("[js-test] \x1b[1;32m test_getTrackPipeUsers ok\x1b[0m");
+        isTestDone = true;
+
+    })
+
+    setTimeout(function()
+    {
+        if(!isTestDone)
+        {
+            throw new Error("[js-test] Error getTrackPipeUsers not done");
+        }
+    }, 5000)
+}
+
+function test_getUserData()
+{
+    var isTestDone = false;
+    apiTest1.getUserData(99999-1, function(event)
+    {
+        if(Array.isArray(event.data) || typeof event.data != "object" )
+        {
+            throw new Error("[js-test] Error getUserData filed `data` is not object");
+        }
+
+        if(event.data.user_data)
+        {
+            throw new Error("[js-test] Error getUserData filed `user_data` not empty");
+        }
+
+        if(!event.data.user_id)
+        {
+            throw new Error("[js-test] Error getUserData filed `user_id` not "+99999-1);
+        }
+
+        if(!event.server_info)
+        {
+            throw new Error("[js-test] Error getUserData filed `server_info` is empty");
+        }
+
+        isTestDone = true;
+        console.log("[js-test] \x1b[1;32m test_getUserData ok\x1b[0m");
+
+    })
+
+    setTimeout(function()
+    {
+        if(!isTestDone)
+        {
+            throw new Error("[js-test] Error test_getUserData not done");
+        }
+    }, 5000)
+}
+
+function test_setUserData()
+{
+    var isTestDone = 0;
+    
+    
+    var juserdata = {
+        rand:Math.random()
+    }
+    var user_id = 99999-2
+    var query = 'insert into users_data(id, data)VALUES("'+user_id+'", \''+JSON.stringify(juserdata)+'\');';
+    connection1.query(query,
+        function(error, result, fields)
+        {
+            if(error)
+            {
+                throw new Error({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }); 
+            }
+            
+            var query = 'select * from  users_data where id = '+user_id;
+            connection2.query(query,
+                function(error, result, fields)
+                {
+                    if(error)
+                    {
+                        throw new Error("[js-test] Error in query:"+query); 
+                    }
+                    
+                    if(result.length != 1)
+                    {
+                        console.log("Error in query:"+query, error, result, fields); 
+                        throw new Error("[js-test] Error in query:"+query+", result.length = " + result.length); 
+                    }
+                    
+                    if(result[0].id != user_id)
+                    { 
+                        console.log("Error in query:"+query, error, result, fields); 
+                        throw new Error("[js-test] Error in query:"+query+", result[0].id != user_id"); 
+                    }
+                    
+                    if(!result[0].data)
+                    {
+                        console.log("Error in query:"+query, error, result, fields); 
+                        throw new Error("[js-test] Error in query:"+query+", !result[0].data"); 
+                    }
+                    
+                    var data = JSON.parse(result[0].data)
+                    if(data.rand != juserdata.rand)
+                    {
+                        console.log("Error in query:"+query, error, result, fields); 
+                        throw new Error("[js-test] Error in query:"+query+", data.rand != juserdata.rand"); 
+                    }
+
+                    //console.log("connection2 query", error, result, fields); 
+                     
+                    apiTest1.getUserData(user_id, function(event)
+                    {
+                        if(Array.isArray(event.data) || typeof event.data != "object" )
+                        {
+                            throw new Error("[js-test] Error getUserData filed `data` is not object");
+                        }
+
+                        if(!event.data.user_data)
+                        {
+                            throw new Error("[js-test] Error getUserData filed `user_data` is empty");
+                        }
+
+                        if(event.data.user_id != user_id)
+                        {
+                            throw new Error("[js-test] Error getUserData filed `user_id` not "+user_id);
+                        }
+
+                        if(event.user_data != '{"rand":'+juserdata.rand+'}')
+                        {
+                            throw new Error("[js-test] Error getUserData filed `server_info` is empty");
+                        }
+
+                        isTestDone = 1;
+                        console.log("[js-test] \x1b[1;32m test_getUserData ok\x1b[0m");
+
+                    }) 
+                }
+            ); 
+    
+        }
+    );
+    
+    setTimeout(function()
+    {
+        if(isTestDone != 1)
+        {
+            throw new Error("[js-test] Error test_getUserData not done");
+        }
+    }, 10000)
+}
+
+function test_web_pipe_send()
+{
+    //setTimeout(function()
+    //{
+        var send = 20;
+        var isTestDone = 0;
+        var rand = Math.floor(Math.random()*999999999);
+
+        // Не проходит тест так как у сигналов нет префикса для того чтоб не смешивать сигналы одного конекта с другим.
+        // apiTest1.subscription("web_test.t1_"+rand, function(event){
+        //     throw new Error("[js-test] Error `web_pipe_send` receive self send event");
+        // })
+
+        apiTest2.subscription("web_test.t1"+rand, function(event){
+            isTestDone += 1;
+            console.log("[js-test] \x1b[1;32m test_web_pipe_send ok\x1b[0m");
+        })
+
+        apiTest2.subscription("web_test."+rand, function(event){
+            isTestDone += 1;
+            console.log("[js-test] \x1b[1;32m test_web_pipe_send ok\x1b[0m");
+        })
+
+        setTimeout(function()
+        {
+            // apiTest1.web_pipe_send("web_test."+rand, "test1", rand) // Ломает тест. Выяснить от чего.
+            apiTest1.web_pipe_send("web_test.t1"+rand, rand)
+
+            for(var i = 0; i< send; i++)
+            {
+                apiTest1.web_pipe_send("web_test."+rand, rand)
+            }
+
+            if(apiTest1.web_pipe_send("test1."+rand, rand))
+            {
+                throw new Error("[js-test] Error web_pipe_send allow send to pipe `test1`");
+            }
+        }, 1000)
+
+        setTimeout(function()
+        {
+            if(isTestDone == send + 1)
+            {
+                throw new Error("[js-test] Error test_web_pipe_send not done");
+            }
+        }, 5000)
+
+    //}, 6000)
+}
+
+test_setUserData()
+//test_onAuth()
+//test_web_pipe_send()
+//test_getTrackPipeUsers()
+//test_getUserData()
+//test_realUserKey()
+
+
+// _cometServerApi.prototype.stop
+// restart
+//
+// socketArray чтоб много нод было
+//
+//
+//
+// multi_web_pipe_send
+//
+//
+// get_pipe_log
+// count_users_in_pipe + subscription
+// getTrackPipeUsers  + subscription
+//
+// + cometQL + subscription
+// + fs
+// + cluster
+//
+//
+ 
