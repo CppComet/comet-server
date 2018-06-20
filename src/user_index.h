@@ -460,11 +460,11 @@ public:
             pthread_mutex_unlock(&request_mutex[user_id%map_index_size]);
             if( it->second->testHash(local_buf, hash) )
             {
-                TagLoger::log(Log_UserIndex, 0, "\x1b[34m[get_link]User's hashes of %d match\x1b[0m\n",user_id);
+                TagLoger::log(Log_UserIndex, 0, "\x1b[34m[get_link]User's hashes of %d-%d match\x1b[0m\n", devid, user_id);
                 return true;
             }
 
-            TagLoger::log(Log_UserIndex, 0, "\x1b[35m[get_link]User's hashes of %d not match\x1b[0m\n",user_id);
+            TagLoger::log(Log_UserIndex, 0, "\x1b[35m[get_link]User's hashes of %d-%d not match\x1b[0m\n", devid, user_id);
             return false;
         }
         else
@@ -473,11 +473,11 @@ public:
 
             if(useritem::testHash(local_buf, hash,  user_id,  devid))
             {
-                TagLoger::log(Log_UserIndex, 0, "\x1b[34m[get_link][static]User's hashes of %d match\x1b[0m\n",user_id);
+                TagLoger::log(Log_UserIndex, 0, "\x1b[34m[get_link][static]User's hashes of %d-%d match\x1b[0m\n", devid, user_id);
                 return true;
             }
 
-            TagLoger::log(Log_UserIndex, 0, "\x1b[35m[get_link][static]User's hashes of %d not match\x1b[0m\n",user_id);
+            TagLoger::log(Log_UserIndex, 0, "\x1b[35m[get_link][static]User's hashes of %d-%d not match\x1b[0m\n", devid, user_id);
             return false;
         }
     }

@@ -160,8 +160,9 @@ protected:
             if(param_message == NULL)
             {
                 param_message_length = appConf::instance()->get_int("db", "buf_size");
-                param_message = new char[param_message_length];
+                param_message = new char[param_message_length+1];
             }
+                bzero(param_message, param_message_length+1 );
             param[0].buffer_type    = MYSQL_TYPE_LONG;
             param[0].buffer         = (void *) &param_dev_id;
             param[0].is_unsigned    = 0;
@@ -212,14 +213,14 @@ public:
 class stm_users_queue_insert: public stmBase{
 
     friend stmMapper;
-    char          param_id[MYSQL_UUID_LEN];
+    char          param_id[MYSQL_UUID_LEN + 1];
     unsigned long param_id_length = MYSQL_UUID_LEN;
 
     unsigned long param_time = 0;
     unsigned long param_dev_id = 0;
     unsigned long param_user_id = 0;
 
-    char          param_event[EVENT_NAME_LEN];
+    char          param_event[EVENT_NAME_LEN + 1];
     unsigned long param_event_length = EVENT_NAME_LEN;
 
     char*          param_message = NULL;
@@ -235,9 +236,10 @@ public:
 
             if(param_message == NULL) 
             {
-                param_message = new char[appConf::instance()->get_int("db", "buf_size")];
+                param_message = new char[appConf::instance()->get_int("db", "buf_size")+1];
                 param_message_length = appConf::instance()->get_int("db", "buf_size");
             }
+                bzero(param_message, param_message_length+1);
 
 
             int i = 0;
@@ -287,8 +289,8 @@ public:
 
     stm_users_queue_insert()
     {
-        bzero(param_id, MYSQL_UUID_LEN);
-        bzero(param_event, EVENT_NAME_LEN);
+        bzero(param_id, MYSQL_UUID_LEN + 1);
+        bzero(param_event, EVENT_NAME_LEN + 1);
     }
 
     int execute(const char* id, unsigned long time, unsigned long dev_id, unsigned long user_id, const char* event, const char* message, unsigned long message_length)
@@ -304,8 +306,8 @@ public:
         param_dev_id = dev_id;
         param_user_id = user_id;
 
-        bzero(param_id, MYSQL_UUID_LEN);
-        bzero(param_event, EVENT_NAME_LEN); 
+        bzero(param_id, MYSQL_UUID_LEN + 1);
+        bzero(param_event, EVENT_NAME_LEN + 1); 
         
         param_id_length = strlen(id);
         if(param_id_length > MYSQL_UUID_LEN)
@@ -344,7 +346,7 @@ class stm_conference_delete: public stmBase{
     unsigned long param_dev_id = 0;
     unsigned long param_user_id = 0;
     
-    char          param_name[EVENT_NAME_LEN];
+    char          param_name[EVENT_NAME_LEN + 1];
     unsigned long param_name_length = EVENT_NAME_LEN;
 
 public:
@@ -384,7 +386,7 @@ public:
     int execute(unsigned long dev_id, const char* name, unsigned long user_id)
     {
         auto t = TagTimer::mtime();
-        
+        bzero(param_name,  param_name_length + 1);
         param_dev_id = dev_id;
         param_user_id = user_id;
         
@@ -414,16 +416,16 @@ class stm_conference_insert: public stmBase{
     unsigned long param_user_id = 0;
     unsigned long param_caller_id = 0;
 
-    char          param_name[EVENT_NAME_LEN];
+    char          param_name[EVENT_NAME_LEN+ 1];
     unsigned long param_name_length = EVENT_NAME_LEN;
 
-    char          param_profile[EVENT_NAME_LEN];
+    char          param_profile[EVENT_NAME_LEN+ 1];
     unsigned long param_profile_length = EVENT_NAME_LEN;
 
-    char          param_stream[EVENT_NAME_LEN];
+    char          param_stream[EVENT_NAME_LEN+ 1];
     unsigned long param_stream_length = EVENT_NAME_LEN;
 
-    char          param_node[EVENT_NAME_LEN];
+    char          param_node[EVENT_NAME_LEN+ 1];
     unsigned long param_node_length = EVENT_NAME_LEN;
 
     char*          param_message = NULL;
@@ -439,9 +441,10 @@ public:
 
             if(param_message == NULL) 
             {
-                param_message = new char[appConf::instance()->get_int("db", "buf_size")];
+                param_message = new char[appConf::instance()->get_int("db", "buf_size")+ 1];
                 param_message_length = appConf::instance()->get_int("db", "buf_size");
             }
+                bzero(param_message, param_message_length + 1);
 
 
             int i = 0; 
@@ -515,10 +518,10 @@ public:
 
     stm_conference_insert()
     { 
-        bzero(param_node, EVENT_NAME_LEN);
-        bzero(param_stream, EVENT_NAME_LEN);
-        bzero(param_profile, EVENT_NAME_LEN);
-        bzero(param_name, EVENT_NAME_LEN); 
+        bzero(param_node, EVENT_NAME_LEN+ 1);
+        bzero(param_stream, EVENT_NAME_LEN+ 1);
+        bzero(param_profile, EVENT_NAME_LEN+ 1);
+        bzero(param_name, EVENT_NAME_LEN+ 1); 
     }
 
     int execute(
@@ -542,7 +545,10 @@ public:
 
         param_message_length = message_length;
  
-        bzero(param_name, EVENT_NAME_LEN); 
+        bzero(param_node, EVENT_NAME_LEN+ 1);
+        bzero(param_stream, EVENT_NAME_LEN+ 1);
+        bzero(param_profile, EVENT_NAME_LEN+ 1);
+        bzero(param_name, EVENT_NAME_LEN+ 1); 
 
         param_name_length = strlen(name);
         if(param_name_length > EVENT_NAME_LEN)
@@ -594,7 +600,7 @@ class stm_conference_select: public stmBase{
     friend stmMapper; 
     unsigned long param_dev_id = 0;
     
-    char          param_name[EVENT_NAME_LEN];
+    char          param_name[EVENT_NAME_LEN+1];
     unsigned long param_name_length = EVENT_NAME_LEN;
 
 public:
@@ -602,13 +608,13 @@ public:
     unsigned long result_user_id = 0;
     unsigned long result_caller_id = 0;
 
-    char          result_node[EVENT_NAME_LEN];
+    char          result_node[EVENT_NAME_LEN+1];
     unsigned long result_node_length = EVENT_NAME_LEN;
 
-    char          result_profile[EVENT_NAME_LEN];
+    char          result_profile[EVENT_NAME_LEN+1];
     unsigned long result_profile_length = EVENT_NAME_LEN;
 
-    char          result_stream[EVENT_NAME_LEN];
+    char          result_stream[EVENT_NAME_LEN+1];
     unsigned long result_stream_length = EVENT_NAME_LEN;
 
     char*          result_message = NULL;
@@ -624,10 +630,10 @@ public:
         bzero(error, 6);
         bzero(length, 6);
 
-        bzero(result_node, EVENT_NAME_LEN);
-        bzero(result_stream, EVENT_NAME_LEN);
-        bzero(result_profile, EVENT_NAME_LEN);
-        bzero(param_name, EVENT_NAME_LEN); 
+        bzero(result_node, EVENT_NAME_LEN+1);
+        bzero(result_stream, EVENT_NAME_LEN+1);
+        bzero(result_profile, EVENT_NAME_LEN+1);
+        bzero(param_name, EVENT_NAME_LEN+1); 
     }
 
     bool virtual prepare(dbLink *mysql)
@@ -637,9 +643,10 @@ public:
             isInited = true;
             if(result_message == NULL) 
             {
-                result_message = new char[appConf::instance()->get_int("db", "buf_size")];
-                result_message_length = appConf::instance()->get_int("db", "buf_size"); 
-            }
+                result_message = new char[appConf::instance()->get_int("db", "buf_size")+1];
+                result_message_length = appConf::instance()->get_int("db", "buf_size");
+            } 
+                bzero(result_message, result_message_length+1); 
 
             setParamsCount(2);
 
@@ -714,6 +721,11 @@ public:
     {
         auto t = TagTimer::mtime();
         
+        bzero(result_node, EVENT_NAME_LEN+1);
+        bzero(result_stream, EVENT_NAME_LEN+1);
+        bzero(result_profile, EVENT_NAME_LEN+1);
+        bzero(param_name, EVENT_NAME_LEN+1); 
+        
         param_dev_id = dev_id;
         
         param_name_length = strlen(name);
@@ -765,12 +777,12 @@ class stm_conference_select_nodes_for_room: public stmBase{
     friend stmMapper; 
     unsigned long param_dev_id = 0;
     
-    char          param_name[EVENT_NAME_LEN];
+    char          param_name[EVENT_NAME_LEN+1];
     unsigned long param_name_length = EVENT_NAME_LEN;
 
 public:
     
-    char          result_node[EVENT_NAME_LEN];
+    char          result_node[EVENT_NAME_LEN+1];
     unsigned long result_node_length = EVENT_NAME_LEN;
  
     my_bool       is_null[1];
@@ -782,7 +794,8 @@ public:
         bzero(is_null, 1);
         bzero(error, 1);
         bzero(length, 1); 
-        bzero(result_node, EVENT_NAME_LEN); 
+        bzero(result_node, EVENT_NAME_LEN+1); 
+        bzero(param_name, EVENT_NAME_LEN+1); 
     }
 
     bool virtual prepare(dbLink *mysql)
@@ -825,6 +838,9 @@ public:
     bool execute(unsigned long dev_id, const char* name)
     {
         auto t = TagTimer::mtime();
+        
+        bzero(result_node, EVENT_NAME_LEN+1); 
+        bzero(param_name, EVENT_NAME_LEN+1); 
         
         param_dev_id = dev_id;
         
@@ -880,13 +896,13 @@ class stm_users_queue_select: public stmBase{
     unsigned long param_user_id = 0;
 
 public:
-    char          result_id[PIPE_NAME_LEN];
+    char          result_id[PIPE_NAME_LEN+1];
     unsigned long result_id_length = PIPE_NAME_LEN;
 
 
     unsigned long result_time = 0;
 
-    char          result_event[EVENT_NAME_LEN];
+    char          result_event[EVENT_NAME_LEN+1];
     unsigned long result_event_length = EVENT_NAME_LEN;
 
     char*          result_message = NULL;
@@ -898,8 +914,8 @@ public:
 
     stm_users_queue_select()
     {
-        bzero(result_id, PIPE_NAME_LEN);
-        bzero(result_event, EVENT_NAME_LEN);
+        bzero(result_id, PIPE_NAME_LEN+1);
+        bzero(result_event, EVENT_NAME_LEN+1);
 
         bzero(is_null, 4);
         bzero(error, 4);
@@ -914,9 +930,10 @@ public:
             isInited = true;
             if(result_message == NULL) 
             {
-                result_message = new char[appConf::instance()->get_int("db", "buf_size")];
+                result_message = new char[appConf::instance()->get_int("db", "buf_size")+1];
                 result_message_length = appConf::instance()->get_int("db", "buf_size");
             }
+                bzero(result_message, result_message_length+1); 
 
             setParamsCount(3);
 
@@ -981,6 +998,9 @@ public:
     bool execute(unsigned long dev_id, unsigned long user_id, unsigned long limit)
     {
         auto t = TagTimer::mtime();
+        
+        bzero(result_id, PIPE_NAME_LEN+1);
+        bzero(result_event, EVENT_NAME_LEN+1);
         
         // https://docs.oracle.com/cd/E17952_01/mysql-5.5-en/mysql-stmt-fetch.html
         param_dev_id = dev_id;
@@ -1085,17 +1105,17 @@ public:
 class stm_pipe_messages_insert: public stmBase{
 
     friend stmMapper;
-    char          param_id[MYSQL_UUID_LEN];
+    char          param_id[MYSQL_UUID_LEN+1];
     unsigned long param_id_length = MYSQL_UUID_LEN;
 
     unsigned long param_time = 0;
     unsigned long param_dev_id = 0;
     unsigned long param_user_id = 0; // Отправитель
 
-    char          param_pipe_name[PIPE_NAME_LEN];
+    char          param_pipe_name[PIPE_NAME_LEN+1];
     unsigned long param_pipe_name_length = PIPE_NAME_LEN;
 
-    char          param_event[EVENT_NAME_LEN];
+    char          param_event[EVENT_NAME_LEN+1];
     unsigned long param_event_length = EVENT_NAME_LEN;
 
     char*          param_message = NULL;
@@ -1111,9 +1131,10 @@ public:
 
             if(param_message == NULL)
             {
-                param_message = new char[appConf::instance()->get_int("db", "buf_size")];
+                param_message = new char[appConf::instance()->get_int("db", "buf_size")+1];
                 param_message_length = appConf::instance()->get_int("db", "buf_size");
             }
+                bzero(param_message, param_message_length+1);
 
 
             int i = 0;
@@ -1170,9 +1191,9 @@ public:
 
     stm_pipe_messages_insert()
     {
-        bzero(param_id, MYSQL_UUID_LEN);
-        bzero(param_event, EVENT_NAME_LEN);
-        bzero(param_pipe_name, PIPE_NAME_LEN);
+        bzero(param_id, MYSQL_UUID_LEN+1);
+        bzero(param_event, EVENT_NAME_LEN+1);
+        bzero(param_pipe_name, PIPE_NAME_LEN+1);
     }
 
     int execute(const char* id, unsigned long time, unsigned long dev_id, const char* pipe_name, const char* event, const char* message, unsigned long message_length, unsigned long user_id)
@@ -1185,9 +1206,9 @@ public:
 
         param_message_length = message_length;
 
-        bzero(param_id, MYSQL_UUID_LEN);
-        bzero(param_event, EVENT_NAME_LEN);
-        bzero(param_pipe_name, PIPE_NAME_LEN);
+        bzero(param_id, MYSQL_UUID_LEN+1);
+        bzero(param_event, EVENT_NAME_LEN+1);
+        bzero(param_pipe_name, PIPE_NAME_LEN+1);
        
         param_id_length = strlen(id);
         if(param_id_length > MYSQL_UUID_LEN)
@@ -1234,17 +1255,17 @@ class stm_pipe_messages_select: public stmBase{
     unsigned long param_limit = 10;
     unsigned long param_dev_id = 0;
 
-    char          param_pipe_name[PIPE_NAME_LEN];
+    char          param_pipe_name[PIPE_NAME_LEN+1];
     unsigned long param_pipe_name_length = PIPE_NAME_LEN;
 
 public:
-    char          result_id[PIPE_NAME_LEN];
+    char          result_id[PIPE_NAME_LEN+1];
     unsigned long result_id_length = PIPE_NAME_LEN;
 
     unsigned long result_user_id = 0;
     unsigned long result_time = 0;
 
-    char          result_event[EVENT_NAME_LEN];
+    char          result_event[EVENT_NAME_LEN+1];
     unsigned long result_event_length = EVENT_NAME_LEN;
 
     char*          result_message = NULL;
@@ -1261,10 +1282,10 @@ public:
             isInited = true;
             if(result_message == NULL)
             {
-                result_message = new char[appConf::instance()->get_int("db", "buf_size")];
+                result_message = new char[appConf::instance()->get_int("db", "buf_size")+1];
                 result_message_length = appConf::instance()->get_int("db", "buf_size");
             }
-            bzero(result_message, result_message_length);
+            bzero(result_message, result_message_length+1);
 
             setParamsCount(3);
 
@@ -1335,15 +1356,19 @@ public:
 
 public:
     stm_pipe_messages_select()
-    {
-        bzero(result_id, PIPE_NAME_LEN);
-        bzero(result_event, EVENT_NAME_LEN);
+    { 
+        bzero(result_id, PIPE_NAME_LEN+1);
+        bzero(result_event, EVENT_NAME_LEN+1);
+        bzero(param_pipe_name, PIPE_NAME_LEN+1);
     }
 
     bool execute(unsigned long dev_id, const char* pipe_name, unsigned long limit)
     {
         auto t = TagTimer::mtime();
         
+        bzero(result_id, PIPE_NAME_LEN+1);
+        bzero(result_event, EVENT_NAME_LEN+1);
+        bzero(param_pipe_name, PIPE_NAME_LEN+1);
         // https://docs.oracle.com/cd/E17952_01/mysql-5.5-en/mysql-stmt-fetch.html
         param_dev_id = dev_id;
         param_limit = limit;
@@ -1354,7 +1379,7 @@ public:
         {
             param_pipe_name_length = PIPE_NAME_LEN;
         }
-        bzero(param_pipe_name, PIPE_NAME_LEN);
+        
         memcpy(param_pipe_name, pipe_name, param_pipe_name_length);
 
         bool res =  stmBase::select();
@@ -1399,7 +1424,7 @@ class stm_pipe_messages_delete: public stmBase{
     unsigned long param_time = 0;
     unsigned long param_dev_id = 0;
 
-    char          param_pipe_name[PIPE_NAME_LEN];
+    char          param_pipe_name[PIPE_NAME_LEN+1];
     unsigned long param_pipe_name_length = PIPE_NAME_LEN;
 
 public:
@@ -1436,7 +1461,7 @@ public:
 
     stm_pipe_messages_delete()
     { 
-        bzero(param_pipe_name, PIPE_NAME_LEN);
+        bzero(param_pipe_name, PIPE_NAME_LEN+1);
     }
 
     int execute(unsigned long time, unsigned long dev_id, const char* pipe_name)
@@ -1451,7 +1476,7 @@ public:
         {
             param_pipe_name_length = PIPE_NAME_LEN;
         }
-        bzero(param_pipe_name, PIPE_NAME_LEN);
+        bzero(param_pipe_name, PIPE_NAME_LEN+1);
         memcpy(param_pipe_name, pipe_name, param_pipe_name_length);
 
         
@@ -1466,7 +1491,7 @@ public:
 class stm_pipe_messages_delete_by_message_id: public stmBase{
 
     friend stmMapper;
-    char param_id[MYSQL_UUID_LEN];
+    char param_id[MYSQL_UUID_LEN+1];
     unsigned long param_id_length = MYSQL_UUID_LEN;
     
     unsigned long param_dev_id = 0;
@@ -1498,14 +1523,14 @@ public:
 
     stm_pipe_messages_delete_by_message_id()
     { 
-        bzero(param_id, MYSQL_UUID_LEN);
+        bzero(param_id, MYSQL_UUID_LEN+1);
     }
 
     int execute(const char* id, unsigned long dev_id)
     {
         auto t = TagTimer::mtime();
         
-        bzero(param_id, MYSQL_UUID_LEN);
+        bzero(param_id, MYSQL_UUID_LEN+1);
         strncpy(param_id, id, MYSQL_UUID_LEN); 
          
         param_dev_id = dev_id;
@@ -1525,7 +1550,7 @@ class stm_users_auth_replace: public stmBase{
     unsigned long param_dev_id = 0;
     unsigned long param_user_id = 0;
 
-    char          param_hash[USER_HASH_LEN];
+    char          param_hash[USER_HASH_LEN+1];
     unsigned long param_hash_length = USER_HASH_LEN;
 
 public:
@@ -1562,7 +1587,7 @@ public:
 
     stm_users_auth_replace()
     {
-        bzero(param_hash, USER_HASH_LEN);
+        bzero(param_hash, USER_HASH_LEN+1);
     }
 
     int execute(unsigned long dev_id, unsigned long user_id, const char* hash)
@@ -1577,7 +1602,7 @@ public:
         {
             param_hash_length = USER_HASH_LEN;
         }
-        bzero(param_hash, USER_HASH_LEN);
+        bzero(param_hash, USER_HASH_LEN+1);
         memcpy(param_hash, hash, param_hash_length);
         
         int res =  stmBase::insert();
@@ -1644,7 +1669,7 @@ class stm_users_auth_select: public stmBase{
     unsigned long param_user_id = 0;
 
 public:
-    char          result_hash[USER_HASH_LEN];
+    char          result_hash[USER_HASH_LEN+1];
     unsigned long result_hash_length = USER_HASH_LEN;
 
     my_bool       is_null[3];
@@ -1680,7 +1705,7 @@ public:
             result[i].is_null        = &is_null[i];
             result[i].error          = &error[i];
             result[i].length         = &length[i];
-            result[i].buffer_length  = USER_HASH_LEN;
+            result[i].buffer_length  = result_hash_length;
         }
         return init(mysql, "SELECT `hash` FROM `users_auth` WHERE dev_id = ? and user_id = ? ");
     }
@@ -1688,13 +1713,13 @@ public:
 public:
     stm_users_auth_select()
     {
-        bzero(result_hash, USER_HASH_LEN);
     }
 
     bool execute(unsigned long dev_id, unsigned long user_id)
     {
         auto t = TagTimer::mtime();
         
+        bzero(result_hash, USER_HASH_LEN+1);
         // https://docs.oracle.com/cd/E17952_01/mysql-5.5-en/mysql-stmt-fetch.html
         param_dev_id = dev_id;
         param_user_id = user_id;
@@ -1764,9 +1789,10 @@ public:
 
             if(param_data == NULL)
             {
-                param_data = new char[appConf::instance()->get_int("db", "buf_size")];
+                param_data = new char[appConf::instance()->get_int("db", "buf_size")+1];
                 param_data_length = appConf::instance()->get_int("db", "buf_size");
             }
+            bzero(param_data, param_data_length+1);
             
             int i = 0;
             param[i].buffer_type    = MYSQL_TYPE_LONG;
@@ -1897,10 +1923,10 @@ public:
             
             if(result_data == NULL)
             {
-                result_data = new char[appConf::instance()->get_int("db", "buf_size")];
+                result_data = new char[appConf::instance()->get_int("db", "buf_size")+1];
                 result_data_length = appConf::instance()->get_int("db", "buf_size");
-                bzero(result_data, result_data_length);
             }
+                bzero(result_data, result_data_length+1);
             
             setParamsCount(2);
 
@@ -2002,7 +2028,7 @@ class stm_revoked_tokens_replace: public stmBase{
     unsigned long param_dev_id = 0;
     unsigned long param_time = 0;
     
-    char           param_token[MAX_JWT_LEN];
+    char           param_token[MAX_JWT_LEN+1];
     unsigned long  param_token_length = MAX_JWT_LEN;
   
 public:
@@ -2054,7 +2080,7 @@ public:
         {
             param_token_length = MAX_JWT_LEN - 1;
         }
-        bzero(param_token, MAX_JWT_LEN);
+        bzero(param_token, MAX_JWT_LEN+1);
         memcpy(param_token, token, param_token_length);
          
         printf("param_token=%s", param_token);
@@ -2080,7 +2106,7 @@ class stm_revoked_tokens_delete: public stmBase{
     friend stmMapper;
     unsigned long param_dev_id = 0;
     
-    char           param_token[MAX_JWT_LEN];
+    char           param_token[MAX_JWT_LEN+1];
     unsigned long  param_token_length = MAX_JWT_LEN;
 
 public:
@@ -2121,7 +2147,7 @@ public:
         {
             param_token_length = MAX_JWT_LEN;
         }
-        bzero(param_token, MAX_JWT_LEN);
+        bzero(param_token, MAX_JWT_LEN+1);
         memcpy(param_token, token, param_token_length);
          
         
@@ -2143,7 +2169,7 @@ class stm_revoked_tokens_select: public stmBase{
     friend stmMapper;
     unsigned long param_dev_id = 0;
     
-    char          param_token[MAX_JWT_LEN]; 
+    char          param_token[MAX_JWT_LEN+1]; 
     unsigned long param_token_length = MAX_JWT_LEN;
     
 public:
@@ -2206,7 +2232,7 @@ public:
         {
             param_token_length = MAX_JWT_LEN;
         }
-        bzero(param_token, MAX_JWT_LEN);
+        bzero(param_token, MAX_JWT_LEN+1);
         memcpy(param_token, token, param_token_length);
 
         
@@ -2289,7 +2315,7 @@ class stm_pipes_settings_select: public stmBase{
     friend stmMapper;
     unsigned long param_dev_id = 0; 
 
-    char          param_pipe_name[PIPE_NAME_LEN];
+    char          param_pipe_name[PIPE_NAME_LEN+1];
     unsigned long param_pipe_name_length = PIPE_NAME_LEN;
     
 public: 
@@ -2335,7 +2361,7 @@ public:
 public:
     stm_pipes_settings_select()
     { 
-        bzero(param_pipe_name, PIPE_NAME_LEN);
+        bzero(param_pipe_name, PIPE_NAME_LEN+1);
     }
 
     bool execute(unsigned long dev_id, const char* pipe_name)
@@ -2349,7 +2375,7 @@ public:
         {
             param_pipe_name_length = PIPE_NAME_LEN;
         }
-        bzero(param_pipe_name, PIPE_NAME_LEN);
+        bzero(param_pipe_name, PIPE_NAME_LEN+1);
         memcpy(param_pipe_name, pipe_name, param_pipe_name_length);
 
         bool res =  stmBase::select();

@@ -416,19 +416,24 @@ bool useritem::testHash(thread_data* local_buf, std::string Hash, unsigned int u
         return true;
     }
 
+    TagLoger::log(Log_UserItem, 0, "testHash by token fail user:%d-%d hash:%s\n", dev_id, user_id, Hash.data());
+    
+    
     local_buf->stm.users_auth_select->execute(dev_id, user_id);
     if(local_buf->stm.users_auth_select->fetch())
     {
         local_buf->stm.users_auth_select->free();
+        TagLoger::log(Log_UserItem, 0, "testHash by token fail user:%d-%d hash:%s\n", dev_id, user_id, Hash.data());
         return false;
     }
 
-    if(Hash == local_buf->stm.users_auth_select->result_hash)
+    if( strcmp(Hash.data(), local_buf->stm.users_auth_select->result_hash) == 0)
     {
         local_buf->stm.users_auth_select->free();
         return true;
     }
 
+    TagLoger::log(Log_UserItem, 0, "testHash by string fail user:%d-%d hash:`%s` hash:`%s` strcmp=%d\n", dev_id, user_id, Hash.data(), local_buf->stm.users_auth_select->result_hash, strcmp(Hash.data(), local_buf->stm.users_auth_select->result_hash));
 
     local_buf->stm.users_auth_select->free();
     return false;
