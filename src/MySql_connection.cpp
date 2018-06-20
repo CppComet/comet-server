@@ -2211,9 +2211,9 @@ int MySql_connection::sql_insert_into_users_messages(thread_data* local_buf, uns
     message[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen] = 0;
     //char messageQuote = local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].quote;
 
-    local_buf->answer_buf.lock();
+    //local_buf->answer_buf.lock();
     //json_escape_string(message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen, local_buf->answer_buf.getData());
-    mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen);
+    //mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen);
 
     char* pipe_event = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[2]]);
     pipe_event[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[2]].tokLen] = 0;
@@ -2235,7 +2235,7 @@ int MySql_connection::sql_insert_into_users_messages(thread_data* local_buf, uns
 
     nlohmann::json jmessage = {
         {
-            "data", local_buf->answer_buf.getData()
+            "data", message
         },
         {"pipe", "msg"},
         {"event", pipe_event}
@@ -2251,7 +2251,7 @@ int MySql_connection::sql_insert_into_users_messages(thread_data* local_buf, uns
     }
     TagLoger::log(Log_MySqlServer, 0, "cometqlcluster=%d, affectedRows=%d dev_id=%d, user_id=%d\n", isFromQLCluster(), affectedRows, dev_id, user_id);
 
-    local_buf->answer_buf.unlock();
+    //local_buf->answer_buf.unlock();
     /**
      * Если affectedRows == 0 то сообщение не доставлено и не может быть помещено в очередь для доставки позже из за переполненения очереди сообщений.
      * Если affectedRows == 1 то сообщение либо доставлено сразу либо помещено в очередь для доставки потом.
@@ -2454,9 +2454,9 @@ int MySql_connection::sql_insert_into_pipes_messages(thread_data* local_buf, uns
     char* message = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[5]]);
     message[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[5]].tokLen] = 0;
 
-    local_buf->answer_buf.lock();
+    //local_buf->answer_buf.lock();
     //json_escape_string(message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[5]].tokLen, local_buf->answer_buf.getData());
-    mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[5]].tokLen);
+    //mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[5]].tokLen);
 
 
     nlohmann::json jmessage = {
@@ -2467,12 +2467,12 @@ int MySql_connection::sql_insert_into_pipes_messages(thread_data* local_buf, uns
         {"pipe", pipe_name}
     };
 
-    TagLoger::log(Log_MySqlServer, 0, "message:%s\n", local_buf->answer_buf.getData());
+    TagLoger::log(Log_MySqlServer, 0, "message:%s\n", message);
 
     PipeLog::addToLog(local_buf, dev_id, pipe_name, pipe_event, 0, message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[5]].tokLen);
     internalApi::send_event_to_pipe(local_buf, dev_id, jmessage);
 
-    local_buf->answer_buf.unlock();
+    //local_buf->answer_buf.unlock();
 
     /**
      * Точные данные по affectedRows не доступны в режиме кластера
@@ -3071,8 +3071,8 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
     char* message = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]]);
     message[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen] = 0;
 
-    local_buf->answer_buf.lock();
-    mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen);
+    //local_buf->answer_buf.lock();
+    //mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), message, local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[3]].tokLen);
 
     std::string nodeId;
     nodeId.append(serverName);
@@ -3088,8 +3088,8 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
                                                 name,
                                                 user_id,
                                                 caller_id,
-                                                local_buf->answer_buf.getData(),
-                                                strlen(local_buf->answer_buf.getData()),
+                                                message,
+                                                strlen(message),
                                                 profile,
                                                 streamServer.data(),
                                                 nodeId.data());
@@ -3115,7 +3115,7 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
         );
     */
 
-    char* msgData = new char[appConf::instance()->get_int("main", "buf_size")]; // @fixme Проверить насколько правильно расчитан объём выделяемой памяти на случай пакета длинее "main"->"buf_size"
+    /*char* msgData = new char[appConf::instance()->get_int("main", "buf_size")]; // @fixme Проверить насколько правильно расчитан объём выделяемой памяти на случай пакета длинее "main"->"buf_size"
     bzero(msgData, appConf::instance()->get_int("main", "buf_size"));
 
     snprintf(msgData, appConf::instance()->get_int("main", "buf_size"),
@@ -3129,25 +3129,39 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
             caller_id,
             profile,
             name,
-            stream);
+            stream);*/
 
-    local_buf->answer_buf.unlock();
+    //local_buf->answer_buf.unlock();
 
-    local_buf->answer_buf.lock();
-    mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), msgData, strlen(msgData));
+    //local_buf->answer_buf.lock();
+    //mysql_real_escape_string(local_buf->db.getLink(), local_buf->answer_buf.getData(), msgData, strlen(msgData));
 
     nlohmann::json jmessage = {
         {
-            "data", local_buf->answer_buf.getData()
+            "data", {
+                        {"message", message},
+                        {"sys", {
+                                    {"conference", "true"},
+                                    {"serverName", serverName.data()},
+                                    {"serverPort", serverPort},
+                                    {"callKey", callKey},
+                                    {"callPipe", callPipe},
+                                    {"sipNumber", sipNumber.data()},
+                                    {"caller_id", caller_id},
+                                    {"mode", profile},
+                                    {"conference_name", name},
+                                    {"stream", stream},
+                                }},
+                    }
         },
         {"event", "sys_sipCall"},
         {"pipe", "msg"}
     };
 
-    TagLoger::error(Log_MySqlServer, 0, " >conference answer=%s", local_buf->answer_buf.getData());
+    TagLoger::error(Log_MySqlServer, 0, " >conference answer=%s", jmessage.dump());
     internalApi::cluster_send_to_user(local_buf, dev_id, user_id, jmessage);
 
-    local_buf->answer_buf.unlock();
+    //local_buf->answer_buf.unlock();
 
     Send_OK_Package(1, 0, PacketNomber+1, local_buf, this);
     TagTimer::add("MySql_connection::sql_insert_into_conference", t);

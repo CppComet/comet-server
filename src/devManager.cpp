@@ -190,7 +190,11 @@ devInfo* devManager::getDevInfo(int dev_id)
 {
     if(dev_id < 0 || dev_id >= dev_index_size)
     {
-        TagLoger::error(Log_devManager, 0, "Запрвшивается не доступный devInfo с dev_id=%d, dev_index_size = %d\n",dev_id, dev_index_size);
+        if(dev_id > 0 )
+        {
+            TagLoger::error(Log_devManager, 0, "Запрвшивается не доступный devInfo с dev_id=%d, dev_index_size = %d\n",dev_id, dev_index_size);
+        }
+        //print_backtrace("Запрвшивается не доступный devInfo");
         return index[0];
     }
 

@@ -2262,7 +2262,10 @@ int Client_connection::request(int client, int len, thread_data* local_buf)
  */
 bool Client_connection::online_incr(thread_data* local_buf)
 {
-    devManager::instance()->getDevInfo(web_user_dev_id)->incrFrontendOnline();
+    if(web_user_dev_id >= 0)
+    {
+        devManager::instance()->getDevInfo(web_user_dev_id)->incrFrontendOnline();
+    }
     return true;
 }
 
@@ -2271,7 +2274,10 @@ bool Client_connection::online_incr(thread_data* local_buf)
  */
 bool Client_connection::online_decr(thread_data* local_buf)
 {
-    devManager::instance()->getDevInfo(web_user_dev_id)->decrFrontendOnline();
+    if(web_user_dev_id >= 0)
+    {
+        devManager::instance()->getDevInfo(web_user_dev_id)->decrFrontendOnline();
+    }
     return true;
 }
 
@@ -2310,8 +2316,11 @@ int Client_connection::set_offline(thread_data* local_buf)
     //pthread_mutex_lock(&request_mutex);
     isOnLine = false;
     isAuthUser = false;
-    devManager::instance()->getDevInfo(web_user_dev_id)->index->un_link(local_buf, web_user_id, fd);
-
+    
+    if(web_user_dev_id >= 0)
+    {
+        devManager::instance()->getDevInfo(web_user_dev_id)->index->un_link(local_buf, web_user_id, fd);
+    }
     un_subscription(local_buf);
     int close = web_close();
     connection_type = REQUEST_NULL;
@@ -2516,14 +2525,19 @@ int Client_connection::message(thread_data* local_buf, nlohmann::json jmessage)
 {
     if(client_major_version < 4)
     {
+        std::string msg_old = jmessage.dump(); 
         jmessage["event_name"] = jmessage["event"]; 
-        // jmessage["jscode"] = "";
-        
-        if(jmessage["data"].is_object() || jmessage["data"].is_array())
+        jmessage["api_data"] = "for major_version < 4"; 
+         
+        std::string pipe = jmessage["pipe"].get<std::string>();
+         
+        if(!jmessage["data"].is_string() && !jmessage["data"].is_number() && pipe.compare("msg") != 0)
         {
             std::string datastring = jmessage["data"].dump(); 
-            jmessage["data"] = datastring;
+            jmessage["data"] = datastring; 
         }
+        
+        std::string msg_new = jmessage.dump(); 
     }
     
     std::string msg = jmessage.dump();
