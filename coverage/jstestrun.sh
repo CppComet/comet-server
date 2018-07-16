@@ -1,6 +1,11 @@
 #!/bin/bash
 
 printf """\n \
+\n \
+setInterval(function (){\n \
+    console.log('[1s spend]');\n \
+}, 1000)\n \
+\n \
 setTimeout(function(){ \n \
 """ > ./test-cov.js
 

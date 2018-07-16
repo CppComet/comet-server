@@ -151,13 +151,12 @@ css = text/css
 
 # Section [log]
 Setting the Logging Level The higher the number the more logs are added.
-
-  *   0 - do not output
-  *   100 - Critical Errors
-  *   200 errors
-  *   300 - Warnings
-  *   400 - log
-  *   500 - debugging mode
+  * 0 - do not output
+  * 100 - Critical Errors
+  * 200 errors
+  * 300 - Warnings
+  * 400 - log
+  * 500 - debugging mode
 
 The parameter sets the maximum level of logging common for all subsystems
 

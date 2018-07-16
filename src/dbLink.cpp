@@ -391,8 +391,15 @@ bool dbLink::connect()
 
     if(mysql_errno(mysqlLink))
     {
-        TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL connection not established\n%s\nip=%s:%d user=%s [errno=%d]\x1b[0m", mysql_error(mysqlLink),
-                db_host.data(), db_port, db_user.data(), mysql_errno(mysqlLink));
+        TagLoger::error(Log_dbLink, 0, "\x1b[1;31mMySQL connection not established\n%s\nip=%s:%d user=%s password=%s db_name=%s [errno=%d]\x1b[0m",
+                mysql_error(mysqlLink),
+                db_host.data(),
+                db_port,
+                db_user.data(),
+                db_pw.data(),
+                db_name.data(),
+                mysql_errno(mysqlLink)
+        );
         TagTimer::add("dbLink::connect", t); 
         return false;
     }

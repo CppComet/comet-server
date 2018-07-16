@@ -46,7 +46,7 @@ cometApi.start({node:"app.comet-server.ru", dev_id:15})
 * parameter dev_id - use only if you use saas service comet-server.com
 
 
-# Step 2. Send message to server
+# Step 2. send message to server
 
 * Send ajax query to php back-end
 * Send CometQL query for comet server
@@ -77,9 +77,9 @@ mysqli_query($comet, $query);
 
 
 
-# Step 3. Receive message from comet server
+# Step 3. receive message from comet server
 
-Subscription code to the pipe on comet server. This callback will be called when somebody sends message into channel `simplechat`
+subscription Code to the pipe on comet server. This callback will be called when somebody send message into channel `simplechat`
 
 
 ```

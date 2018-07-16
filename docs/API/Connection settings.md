@@ -2,7 +2,7 @@
 # Public identifier Developer
 
 In the examples are usually referred as dev_id. Used only when connecting to [SaaS version of CppComet](https://comet-server.com).
-  * When you connect to the [open source version](https://github.com/CppComet/comet-server) from the JavaScript API may not be specified or be set to 0. [Read more here](https://comet-server.com/wiki/doku.php/en:comet:saas)
+  * When you connecting to the [open source version](https://github.com/CppComet/comet-server) from the JavaScript API may not be specified or be set to 0. [Read more here](https://comet-server.com/wiki/doku.php/en:comet:saas)
   * When connecting to the open source version from CometQL, the dev_id should be replaced with the string "root" [Read more here](https://comet-server.com/wiki/doku.php/en:comet:saas)
 
 # Secret developer key

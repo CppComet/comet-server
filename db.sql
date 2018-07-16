@@ -1,26 +1,8 @@
 -- phpMyAdmin SQL Dump
--- version 3.4.11.1deb2+deb7u8
--- http://www.phpmyadmin.net
---
--- Хост: db-n1.comet.su:3306
--- Время создания: Янв 09 2018 г., 02:24
--- Версия сервера: 5.5.58
--- Версия PHP: 5.6.31-1~dotdeb+7.1
-
-SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
-SET time_zone = "+00:00";
-
---
--- База данных: `comet_db`
---
 
 -- --------------------------------------------------------
 
---
--- Структура таблицы `conference`
---
-
-CREATE TABLE IF NOT EXISTS `conference` (
+CREATE TABLE `conference` (
   `dev_id` int(11) NOT NULL,
   `name` varchar(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `user_id` int(11) NOT NULL,
@@ -29,158 +11,143 @@ CREATE TABLE IF NOT EXISTS `conference` (
   `profile` varchar(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '',
   `stream` varchar(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '',
   `node` varchar(64) NOT NULL DEFAULT '0',
-  `time` int(13) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`dev_id`,`name`,`user_id`)
+  `time` int(13) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Кому и к какой конференции дан доступ';
 
 -- --------------------------------------------------------
 
---
--- Структура таблицы `dev_config`
---
-
-CREATE TABLE IF NOT EXISTS `dev_config` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `dev_config` (
+  `id` int(11) NOT NULL,
   `key` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `url` char(255) CHARACTER SET ascii NOT NULL DEFAULT '*',
-  `active_time` int(11) NOT NULL DEFAULT '0' COMMENT 'Время последней активности',
-  PRIMARY KEY (`id`),
-  KEY `key` (`key`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=500001 ;
-
--- --------------------------------------------------------
-
---
--- Структура таблицы `log_event`
---
-
-CREATE TABLE IF NOT EXISTS `log_event` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `text` varchar(250) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1637 ;
-
--- --------------------------------------------------------
-
---
--- Структура таблицы `log_query`
---
-
-CREATE TABLE IF NOT EXISTS `log_query` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `dev_id` int(11) NOT NULL,
-  `query` text NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Структура таблицы `pipes_settings`
---
-
-CREATE TABLE IF NOT EXISTS `pipes_settings` (
-  `dev_id` int(11) NOT NULL,
-  `name` char(128) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  `type` char(1) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  `length` int(6) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`dev_id`,`name`),
-  KEY `name` (`name`),
-  KEY `dev_id` (`dev_id`)
+  `active_time` int(11) NOT NULL DEFAULT 0 COMMENT 'Время последней активности'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
---
--- Структура таблицы `pipe_messages`
---
+CREATE TABLE `log_event` (
+  `id` int(11) NOT NULL,
+  `text` varchar(250) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `pipe_messages` (
-  `id` char(20) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+-- --------------------------------------------------------
+
+CREATE TABLE `log_query` (
+  `id` int(11) NOT NULL,
+  `dev_id` int(11) NOT NULL,
+  `query` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+CREATE TABLE `pipes_settings` (
+  `dev_id` int(11) NOT NULL,
+  `name` char(128) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `type` char(1) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `length` int(6) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+CREATE TABLE `pipe_messages` (
+  `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `time` int(11) NOT NULL,
   `dev_id` int(11) NOT NULL,
   `pipe_name` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `event` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '',
-  `message` text CHARACTER SET utf8 COLLATE utf8_bin,
-  `user_id` int(9) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `time` (`time`),
-  KEY `pipe_name` (`pipe_name`),
-  KEY `dev_id` (`dev_id`)
+  `message` text CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `user_id` int(9) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
---
--- Структура таблицы `users_auth`
---
+CREATE TABLE `revoked_tokens` (
+  `dev_id` int(11) NOT NULL,
+  `token` varbinary(600) NOT NULL,
+  `time` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=ascii COLLATE=ascii_bin;
 
-CREATE TABLE IF NOT EXISTS `users_auth` (
+-- --------------------------------------------------------
+
+CREATE TABLE `users_auth` (
   `dev_id` int(9) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `hash` char(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '',
-  PRIMARY KEY (`dev_id`,`user_id`),
-  KEY `dev_id` (`dev_id`),
-  KEY `user_id` (`user_id`)
+  `hash` char(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
---
--- Структура таблицы `users_data`
---
-
-CREATE TABLE IF NOT EXISTS `users_data` (
+CREATE TABLE `users_data` (
   `dev_id` int(9) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `data` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-  PRIMARY KEY (`dev_id`,`user_id`),
-  KEY `dev_id` (`dev_id`),
-  KEY `user_id` (`user_id`)
+  `data` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
---
--- Структура таблицы `users_messages`
---
-
-CREATE TABLE IF NOT EXISTS `users_messages` (
+CREATE TABLE `users_messages` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `time` int(11) NOT NULL,
   `dev_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `event` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '',
-  `message` text CHARACTER SET utf8 COLLATE utf8_bin,
-  PRIMARY KEY (`id`),
-  KEY `dev_id` (`dev_id`),
-  KEY `user_id` (`user_id`),
-  KEY `dev_id_2` (`dev_id`,`user_id`),
-  KEY `time` (`time`)
+  `message` text CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
---
--- Структура таблицы `users_time`
---
-
-CREATE TABLE IF NOT EXISTS `users_time` (
+CREATE TABLE `users_time` (
   `dev_id` int(9) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `time` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`dev_id`,`user_id`),
-  KEY `dev_id` (`dev_id`),
-  KEY `user_id` (`user_id`)
+  `time` int(11) NOT NULL DEFAULT 0
 ) ENGINE=MEMORY DEFAULT CHARSET=utf8;
 
---
--- Структура таблицы `revoked_tokens`
---
 
-CREATE TABLE IF NOT EXISTS `revoked_tokens` (
-  `dev_id` int(11) NOT NULL,
-  `token` varbinary(600) NOT NULL,
-  `time` int(11) NOT NULL,
-  PRIMARY KEY (`dev_id`,`token`)
-) ENGINE=InnoDB DEFAULT CHARSET=ascii COLLATE=ascii_bin;
+ALTER TABLE `conference`
+  ADD PRIMARY KEY (`dev_id`,`name`,`user_id`);
+
+ALTER TABLE `dev_config`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `key` (`key`);
+
+ALTER TABLE `log_event`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `log_query`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `pipes_settings`
+  ADD PRIMARY KEY (`dev_id`,`name`),
+  ADD KEY `name` (`name`),
+  ADD KEY `dev_id` (`dev_id`);
+
+ALTER TABLE `pipe_messages`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `time` (`time`),
+  ADD KEY `pipe_name` (`pipe_name`),
+  ADD KEY `dev_id` (`dev_id`);
+
+ALTER TABLE `revoked_tokens`
+  ADD PRIMARY KEY (`dev_id`,`token`);
+
+ALTER TABLE `users_auth`
+  ADD PRIMARY KEY (`dev_id`,`user_id`),
+  ADD KEY `dev_id` (`dev_id`),
+  ADD KEY `user_id` (`user_id`);
+
+ALTER TABLE `users_data`
+  ADD PRIMARY KEY (`dev_id`,`user_id`),
+  ADD KEY `dev_id` (`dev_id`),
+  ADD KEY `user_id` (`user_id`);
+
+ALTER TABLE `users_messages`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `dev_id` (`dev_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `dev_id_2` (`dev_id`,`user_id`),
+  ADD KEY `time` (`time`);
+
+ALTER TABLE `users_time`
+  ADD PRIMARY KEY (`dev_id`,`user_id`),
+  ADD KEY `dev_id` (`dev_id`),
+  ADD KEY `user_id` (`user_id`);

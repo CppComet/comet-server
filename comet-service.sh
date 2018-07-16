@@ -8,7 +8,7 @@ EXTRAOPTS=
 PIDFILE=/var/run/cppcomet.pid
 
 
-cd ${RUNDIR}
+cd ${RUNDIR} 
 
 case "$1" in
     start)  
@@ -17,6 +17,7 @@ case "$1" in
             echo "CppComet already run"
         else
             echo "Starting CppComet"
+            ulimit -n 100000
             /usr/bin/cppcomet --conf /etc/comet-server/comet.ini > /var/log/cpp_comet.log 2>/var/log/cpp_comet.log &
         fi
         ;;
@@ -46,6 +47,7 @@ case "$1" in
         fi
         echo "Starting CppComet"
 	sleep 15
+        ulimit -n 100000
         /usr/bin/cppcomet --conf /etc/comet-server/comet.ini > /var/log/cpp_comet.log 2>/var/log/cpp_comet.log &
         ;;
 esac

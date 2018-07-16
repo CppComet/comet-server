@@ -1,7 +1,7 @@
 
 # Introduction
 
-Comet technology — allows sending arbitrary messages to client through server initiative — it’s a push notifications. You can use push technology to delivering messages. For the correct work of push notification always use a push service. You can perform these tasks because of permanent connection between browser and Comet server.  Here used websocket technology. For those browsers whose don’t support websocket technology always used long polling AJAX query mechanism.
+Comet technology – allows sending arbitrary messages to client through server initiative – it’s a push notifications. You can use push technology to delivering messages. For the correct work of push notification always use a push service. You can perform these tasks because of permanent connection between browser and Comet server.  Here used websocket technology. For those browsers whose don’t support websocket technology always used long polling AJAX query mechanism.
 
 # How push notification works
 
@@ -10,7 +10,7 @@ On this scheme you can see field of using Comet server in working process. We ca
   - Browser opens page of your site.
   - After loading this page, JavaScript establishes permanent connection with Comet server.
   - While page is open, your server can send random message to client. It appeals via PHP API to server and transfer message for browser.
-  - Comet server users open connection with browser. Than server delivers message to browser.
+  - Comet server uses open connection with browser. Than server delivers message to browser.
   - JavaScript API delivers this message to your callback.
 
 ![](https://comet-server.com/wiki/lib/exe/fetch.php/:scheme-of-comet-using.gif )
@@ -20,7 +20,7 @@ Comet server permanently maintain opened connections and this let to unlade (unl
 
 # Why PHP is not available in this case?
 
-Push notifications can be implemented by PHP, but PHP need to use more memory consumption and time rate, so server will be overloaded. Therefore, we recommend using specified tools.
+Push notifications can be implemented by PHP, but PHP need to use more memory consumption and time rate, so server will be overload. Therefore, we recommend using specified tools.
 
 # Practical use of push notifications
 
@@ -32,7 +32,7 @@ Push notifications can be implemented by PHP, but PHP need to use more memory co
   * Opportunities list of Comet server;
   * Sending messages from server to specific user (by id);
   * Sending messages from server to all subscribers;
-  * Determination all of online users (who are active at this moment);
+  * Determination all of online users (who active at this moment);
   * Getting statistics by real-time about summary amount of online users.
 
  

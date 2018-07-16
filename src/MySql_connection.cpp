@@ -3416,7 +3416,7 @@ int MySql_connection::sql_select_from_conference_members(thread_data* local_buf,
         {
             link = *it;
 
-            TagLoger::warn(Log_MySqlServer, 0, "compare for room_name=ALL node=%s and node=%s\n", link->getId().data(), local_buf->stm.conference_select->result_node);
+            TagLoger::warn(Log_MySqlServer, 0, "compare for room_name=ALL node=%s\n", link->getId().data());
 
             link->exec("api conference xml_list\n\n");
             if (link->getHandle().last_sr_event && link->getHandle().last_sr_event->body)

@@ -115,6 +115,35 @@ cometVideoApi.start = function(opt)
  */
 cometVideoApi._callPipes = {}
 
+/**
+ * Устанавливает Bandwidth видео и аудио
+ * Чем больше значение тем выше требования к каналу и тем лучше качество.
+ * Устанавливать надо до начала звонка
+ * Значение 0 означает значение по умолчанию (как правило это хорошее качество)
+ * 
+ * @example cometVideoApi.setBandwidth({video:256, audio:32})
+ * 
+ * @param {object} opt
+ * @returns {object} текущее значение качества.
+ */
+cometVideoApi.setBandwidth = function(opt)
+{
+    if(opt && opt.video !== undefined)
+    {
+        cometVideoApi.opt.bandwidth_video = opt.video/1
+    }
+    
+    if(opt && opt.audio !== undefined)
+    {
+        cometVideoApi.opt.bandwidth_audio = opt.audio/1
+    }
+    
+    return {
+        video:cometVideoApi.opt.bandwidth_video,
+        audio:cometVideoApi.opt.bandwidth_audio,
+    }
+}
+
 cometVideoApi.ping = function(pipeName, lonelinessTimeout)
 {
     if(cometVideoApi._callPipes[pipeName].data.sys.stream == true
@@ -145,7 +174,7 @@ cometVideoApi.ping = function(pipeName, lonelinessTimeout)
     cometVideoApi._callPipes[pipeName].outTimeoutId = setTimeout(function()
     {
         console.info("Завершения звонка со статусом loneliness")
-        // return
+        return
         if(cometVideoApi.callEnd(pipeName, {action:"out", status:"loneliness"}))
         {
             cometVideoApi.hangup(cometVideoApi._callPipes[pipeName])
@@ -771,28 +800,41 @@ cometVideoApi.acceptCall = function(opt)
         else
         {
             navigator._getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-            // запрашиваем разрешение на доступ к поточному видео камеры
-            navigator._getUserMedia({audio: true, video: opt.type == 'video'}, function (stream)
+            
+            if(opt.type == 'none')
             {
-                console.log("Добавили вид себя")
-                if(opt.video_local)
-                {
-                    // получаем url поточного видео и устанавливаем как источник для video
-                    opt.video_local.src = window.URL.createObjectURL(stream);
-                }
-
-                    cometVideoApi.opt.activeCallEvent.selfStream = stream
-                    selfStream = stream
+                // Режим не запрашивать доступ к микрофону и камере.
+                cometVideoApi.opt.activeCallEvent.selfStream = stream
+                selfStream = stream
                 acceptThisCall()
-            }, function (err)
+            }
+            else
             {
+                // запрашиваем разрешение на доступ к поточному видео камеры
+                navigator._getUserMedia({audio: true, video: opt.type == 'video'}, function (stream)
+                {
+                    console.log("Добавили вид себя")
+                    if(opt.video_local)
+                    {
+                        // получаем url поточного видео и устанавливаем как источник для video
+                        opt.video_local.src = window.URL.createObjectURL(stream);
+                    }
+
+                        cometVideoApi.opt.activeCallEvent.selfStream = stream
+                        selfStream = stream
+                    acceptThisCall()
+                }, function (err)
+                {
+                    // @todo добавить режим чтоб не отключатчся если доступа нет.
+                    
                     console.error('что-то не так с медиастримом или пользователь запретил его использовать', err);
                     if(cometVideoApi.opt.activeCallEvent)
                     {
                         cometVideoApi.callEnd(cometVideoApi.opt.activeCallEvent.data.sys.callPipe, {action:"terminated", status:"no-media-stream", error:err})
                         cometVideoApi.hangup(cometVideoApi.opt.activeCallEvent)
                     }
-            });
+                });
+            }
         }
     })
 
@@ -967,7 +1009,7 @@ cometVideoApi._sipRegister = function(regOptions, callback)
         console.info("registrationFailed", e)
         if(cometVideoApi.opt.activeCallEvent)
         {
-            cometVideoApi.callEnd(cometVideoApi.opt.activeCallEvent.data.sys.callPipe, {action:"terminated", status:"registration Failure"})
+            cometVideoApi.callEnd(cometVideoApi.opt.activeCallEvent.data.sys.callPipe, {action:"terminated", status:"registration-failure"})
             cometVideoApi.hangup(cometVideoApi.opt.activeCallEvent)
         }
     });
@@ -1028,182 +1070,119 @@ cometVideoApi._sipCall = function(type, phoneNumber)
     var mediaConstraints = {'audio': true, 'video': type == 'video'}
  
     // запрашиваем разрешение на доступ к поточному видео камеры
-    navigator.getUserMedia(mediaConstraints, function (stream)
+    navigator.getUserMedia(mediaConstraints, function(stream)
     {
-        console.log("Получили доступ к стриму", mediaConstraints)
-        var options = {
-            'eventHandlers': eventHandlers,
-            //'extraHeaders': [ ],
-            'mediaConstraints': mediaConstraints,
-            'rtcOfferConstraints' : { offerToReceiveAudio : true, offerToReceiveVideo : true },
-            'mediaStream': stream, 
-            'pcConfig': {
-                'iceServers': [{'urls': ['stun:stun.l.google.com:19302']}]
+        cometVideoApi._sipCall_getUserMedia_success(stream, mediaConstraints, phoneNumber)
+    }, function(stream){
+        cometVideoApi._sipCall_getUserMedia_error(stream, mediaConstraints)
+    });
+
+}
+    
+cometVideoApi._sipCall_getUserMedia_success = function (stream, mediaConstraints, phoneNumber)
+{
+    console.log("Получили доступ к стриму", mediaConstraints)
+    cometVideoApi.opt.activeCallEvent.callStream = stream
+    var options = {
+        'eventHandlers': eventHandlers,
+        //'extraHeaders': [ ],
+        'mediaConstraints': mediaConstraints,
+        'rtcOfferConstraints' : { offerToReceiveAudio : true, offerToReceiveVideo : true },
+        'mediaStream': stream, 
+        'pcConfig': {
+            'iceServers': [{'urls': ['stun:stun.l.google.com:19302']}]
+        }
+    };
+
+    // Register callbacks to desired call events
+    var eventHandlers = {
+        // https://github.com/Ojero/jssip-demos/blob/master/tryit/js/gui.js
+        'ring':   function(e){ console.info("ring", e) },
+        'failure':   function(e){ console.info("failure", e) },
+        'answer':   function(e){ console.info("answer", e) },
+        'terminate':   function(e){ console.info("terminate", e) },
+        'error':   function(e){ console.info("error", e) },
+        'progress':   function(data){
+            console.info("progress", data)
+            // if (data.originator === 'remote') data.response.body = null; // https://groups.google.com/forum/#!topic/jssip/5lcrIREWYwU
+        },
+        'hold':   function(e){ console.info("hold", e) },
+        'unhold':   function(e){ console.info("unhold", e) },
+        'confirmed':  function(e)
+        {
+            // Attach local stream to selfView
+            console.info("confirmed", e)
+
+            //cometVideoApi.opt.activeCallEvent.call_options.video_local.src = window.URL.createObjectURL(session.connection.getLocalStreams()[0]);
+            //selfView.src = window.URL.createObjectURL(session.connection.getLocalStreams()[0]);
+        },
+        'addstream':  function(event)
+        {
+            eventaddstream = event
+            console.info("addstream", event)
+            if(!cometVideoApi.opt.activeCallEvent)
+            {
+                console.warn('Звонок уже не активен - peerconnection "addstream" event', event);
+                return;
             }
-        };
 
-        // Register callbacks to desired call events
-        var eventHandlers = {
-            // https://github.com/Ojero/jssip-demos/blob/master/tryit/js/gui.js
-            'ring':   function(e){ console.info("ring", e) },
-            'failure':   function(e){ console.info("failure", e) },
-            'answer':   function(e){ console.info("answer", e) },
-            'terminate':   function(e){ console.info("terminate", e) },
-            'error':   function(e){ console.info("error", e) },
-            'progress':   function(data){
-                console.info("progress", data)
-                // if (data.originator === 'remote') data.response.body = null; // https://groups.google.com/forum/#!topic/jssip/5lcrIREWYwU
-            },
-            'hold':   function(e){ console.info("hold", e) },
-            'unhold':   function(e){ console.info("unhold", e) },
-            'confirmed':  function(e)
+            var intervalId = setInterval(function()
             {
-                // Attach local stream to selfView
-                console.info("confirmed", e)
-
-                //cometVideoApi.opt.activeCallEvent.call_options.video_local.src = window.URL.createObjectURL(session.connection.getLocalStreams()[0]);
-                //selfView.src = window.URL.createObjectURL(session.connection.getLocalStreams()[0]);
-            },
-            'addstream':  function(event)
-            {
-                eventaddstream = event
-                console.info("addstream", event)
                 if(!cometVideoApi.opt.activeCallEvent)
                 {
-                    console.warn('Звонок уже не активен - peerconnection "addstream" event', event);
                     return;
                 }
 
-                var intervalId = setInterval(function()
+                if(!cometVideoApi.isCallStart(cometVideoApi.opt.activeCallEvent.data.sys.callPipe))
                 {
-                    if(!cometVideoApi.opt.activeCallEvent)
-                    {
-                        return;
-                    }
+                    return;
+                }
+                clearInterval(intervalId)
+                console.info('set streem to video src', event);
+                cometVideoApi.opt.activeCallEvent.call_options.video_remote.src = window.URL.createObjectURL(event.stream);
 
-                    if(!cometVideoApi.isCallStart(cometVideoApi.opt.activeCallEvent.data.sys.callPipe))
-                    {
-                        return;
-                    }
-                    clearInterval(intervalId)
-                    console.info('set streem to video src', event);
-                    cometVideoApi.opt.activeCallEvent.call_options.video_remote.src = window.URL.createObjectURL(event.stream);
+            }, 300)
 
-                }, 300)
+            // onactive
+            // onaddtrack
+            // onended
+            // oninactive
+            // onremovetrack
 
-                // onactive
-                // onaddtrack
-                // onended
-                // oninactive
-                // onremovetrack
-
-                cometVideoApi.callStart(cometVideoApi.opt.activeCallEvent.data.sys.callPipe, "self")
-            },
-            'ended':      function(e)
-            {
-                console.info("ended", e)
-            }
-        };
-
-        session = cometVideoApi.coolPhone.call('sip:'+phoneNumber+'@'+cometVideoApi.opt.activeCallEvent.data.sys.serverName, options);
-        for(var i in eventHandlers)
+            cometVideoApi.callStart(cometVideoApi.opt.activeCallEvent.data.sys.callPipe, "self")
+        },
+        'ended':      function(e)
         {
-            session.on(i, eventHandlers[i]);
+            console.info("ended", e)
         }
+    };
 
-        session.on('peerconnection', function(data) {
-            console.info("peerconnection", data)
-        });
-        session.on('progress', function(data) {
-            console.info("progress", data)
-        });
-        session.on('accepted', function(data) {
-            console.info("accepted", data)
-        });
-        session.on('confirmed', function(data) {
-            console.info("confirmed", data)
-        });
-        session.on('failed', function(data)
-        {
-            console.error("failed", data)
-            // console.log(data.message.data)
-            //return;
-            // Вызов завершения звонка по причине не удачи в подключении
-            tabSignal.emit('_cometVideoApi_terminated');
-            tabSignal.emit("media_removestream")
-
-            if(cometVideoApi.opt.activeCallEvent)
-            {
-                cometVideoApi.callEnd(cometVideoApi.opt.activeCallEvent.data.sys.callPipe, {action:"terminated", status:"terminated"})
-                cometVideoApi.hangup(cometVideoApi.opt.activeCallEvent)
-            }
-        });
-
-        session.on('ended', function(data) 
-        {
-            console.info("ended", data)
-            tabSignal.emit("media_removestream")
-            if(cometVideoApi.opt.activeCallEvent)
-            {
-                cometVideoApi.callEnd(cometVideoApi.opt.activeCallEvent.data.sys.callPipe, {action:"terminated", status:"terminated"})
-            }
-        });
-
-        session.on('newDTMF', function(data) {
-            console.info("newDTMF", data)
-        });
-        session.on('reinvite', function(data) {
-            console.info("reinvite", data)
-        });
-        session.on('update', function(data) {
-            console.info("update", data)
-        });
-        session.on('refer', function(data) {
-            console.info("refer", data)
-        });
-        session.on('replaces', function(data) {
-            console.info("replaces", data)
-        });
-        session.on('sdp', function(event) {
-            
-            // webrtc: bandwidth usage in chrome - https://github.com/muaz-khan/RTCMultiConnection/issues/23
-            // bandwidth (@todo Обратить внимание на то чтобы параметр b=AS был, а если его нет то добавлялся под записью a=mid:audio и a=mid:video)
-            // Проверить работу с b=CT:256 и b=AS:256 и сравнить.
-            // http://stackoverflow.com/questions/16712224/how-to-control-bandwidth-in-webrtc-video-call
-
-            console.info("sdp", event)
-            console.info("sdp old", event.sdp)
-            event.sdp = event.sdp.replace(/b=AS:[0-9]+\r\n/g, "") // CT | AS  https://tools.ietf.org/html/rfc4566#section-5.8
-            event.sdp = event.sdp.replace(/m=video(.*)\r\n/g, "m=video$1\r\nb=AS:"+cometVideoApi.opt.bandwidth_video+"\r\n")
-            event.sdp = event.sdp.replace(/m=audio(.*)\r\n/g, "m=audio$1\r\nb=AS:"+cometVideoApi.opt.bandwidth_audio+"\r\n")
-            console.info("sdp new", event.sdp)
-
-        });
-        session.on('getusermediafailed', function(data) {
-            console.error("getusermediafailed", data)
-        });
-
-        session.on('peerconnection:setremotedescriptionfailed', function(data) {
-            console.error("peerconnection:setremotedescriptionfailed")
-            console.log("peerconnection:setremotedescriptionfailed", data)
-        });
-
-        console.info("call session", session)
-        var peerconnection = session.connection;
-
-        //var localStream = peerconnection.getLocalStreams()[0];
-        //var remoteStream = peerconnection.getRemoteStreams()[0];
-
-        /*peerconnection.addEventListener('addstream', function(event)
-        {
-            console.info('peerconnection "addstream" event', event);
-        });*/
-
-    }, function ()
+    session = cometVideoApi.coolPhone.call('sip:'+phoneNumber+'@'+cometVideoApi.opt.activeCallEvent.data.sys.serverName, options);
+    for(var i in eventHandlers)
     {
-        console.log('что-то не так с медиастримом или пользователь запретил его использовать', mediaConstraints);
+        session.on(i, eventHandlers[i]);
+    }
+
+    session.on('peerconnection', function(data) {
+        console.info("peerconnection", data)
+    });
+    session.on('progress', function(data) {
+        console.info("progress", data)
+    });
+    session.on('accepted', function(data) {
+        console.info("accepted", data)
+    });
+    session.on('confirmed', function(data) {
+        console.info("confirmed", data)
+    });
+    session.on('failed', function(data)
+    {
+        console.error("failed", data)
+        // console.log(data.message.data)
+        //return;
         // Вызов завершения звонка по причине не удачи в подключении
         tabSignal.emit('_cometVideoApi_terminated');
+        tabSignal.emit("media_removestream")
 
         if(cometVideoApi.opt.activeCallEvent)
         {
@@ -1212,6 +1191,95 @@ cometVideoApi._sipCall = function(type, phoneNumber)
         }
     });
 
+    session.on('ended', function(data) 
+    {
+        console.info("ended", data)
+        tabSignal.emit("media_removestream")
+        if(cometVideoApi.opt.activeCallEvent)
+        {
+            cometVideoApi.callEnd(cometVideoApi.opt.activeCallEvent.data.sys.callPipe, {action:"terminated", status:"terminated"})
+        }
+    });
+
+    session.on('newDTMF', function(data) {
+        console.info("newDTMF", data)
+    });
+    session.on('reinvite', function(data) {
+        console.info("reinvite", data)
+    });
+    session.on('update', function(data) {
+        console.info("update", data)
+    });
+    session.on('refer', function(data) {
+        console.info("refer", data)
+    });
+    session.on('replaces', function(data) {
+        console.info("replaces", data)
+    });
+    session.on('sdp', function(event) {
+
+        // webrtc: bandwidth usage in chrome - https://github.com/muaz-khan/RTCMultiConnection/issues/23
+        // bandwidth (@todo Обратить внимание на то чтобы параметр b=AS был, а если его нет то добавлялся под записью a=mid:audio и a=mid:video)
+        // Проверить работу с b=CT:256 и b=AS:256 и сравнить.
+        // http://stackoverflow.com/questions/16712224/how-to-control-bandwidth-in-webrtc-video-call
+
+        console.info("sdp", event)
+        console.info("sdp old", event.sdp)
+        //event.sdp = event.sdp.replace(/b=AS:[0-9]+\r\n/g, "") // CT | AS  https://tools.ietf.org/html/rfc4566#section-5.8
+        window.oldSdp = event.sdp;
+
+        if(cometVideoApi.opt.bandwidth_video > 0)
+        {
+            event.sdp = event.sdp.replace(/b=AS:[0-9]+\r\n/g, "") 
+        }
+
+        if(cometVideoApi.opt.bandwidth_video > 0)
+        {
+            event.sdp = event.sdp.replace(/m=video(.*)\r\n/g, "m=video$1\r\nb=AS:"+cometVideoApi.opt.bandwidth_video+"\r\n")
+        }
+        if(cometVideoApi.opt.bandwidth_audio > 0)
+        { 
+            event.sdp = event.sdp.replace(/m=audio(.*)\r\n/g, "m=audio$1\r\nb=AS:"+cometVideoApi.opt.bandwidth_audio+"\r\n")
+        }
+
+        console.info("sdp set bandwidth", {audio:cometVideoApi.opt.bandwidth_audio, video:cometVideoApi.opt.bandwidth_video})
+
+        console.info("sdp new", event.sdp)
+
+    });
+    session.on('getusermediafailed', function(data) {
+        console.error("getusermediafailed", data)
+    });
+
+    session.on('peerconnection:setremotedescriptionfailed', function(data) {
+        console.error("peerconnection:setremotedescriptionfailed")
+        console.log("peerconnection:setremotedescriptionfailed", data)
+    });
+
+    console.info("call session", session)
+    var peerconnection = session.connection;
+
+    //var localStream = peerconnection.getLocalStreams()[0];
+    //var remoteStream = peerconnection.getRemoteStreams()[0];
+
+    /*peerconnection.addEventListener('addstream', function(event)
+    {
+        console.info('peerconnection "addstream" event', event);
+    });*/
+
+}
+
+cometVideoApi._sipCall_getUserMedia_error = function(mediaConstraints)
+{
+    console.log('что-то не так с медиастримом или пользователь запретил его использовать', mediaConstraints);
+    // Вызов завершения звонка по причине не удачи в подключении
+    tabSignal.emit('_cometVideoApi_terminated');
+
+    if(cometVideoApi.opt.activeCallEvent)
+    {
+        cometVideoApi.callEnd(cometVideoApi.opt.activeCallEvent.data.sys.callPipe, {action:"terminated", status:"terminated"})
+        cometVideoApi.hangup(cometVideoApi.opt.activeCallEvent)
+    }
 }
 
 /**
@@ -1371,6 +1439,36 @@ cometVideoApi.hangup = function(callInfo, doNotNotify)
                 break;
             }
         }
+    }
+
+    if(call && call.selfStream && call.selfStream.getTracks)
+    { 
+        AudioTracks =  call.selfStream.getAudioTracks();
+
+        AudioTracks.forEach(function(track) {
+          track.stop();
+        });
+        
+        VideoTracks =  call.selfStream.getVideoTracks();
+
+        VideoTracks.forEach(function(track) {
+          track.stop();
+        });
+    }
+     
+    if(call && call.callStream && call.callStream.getTracks)
+    { 
+        AudioTracks =  call.callStream.getAudioTracks();
+
+        AudioTracks.forEach(function(track) {
+          track.stop();
+        });
+        
+        VideoTracks =  call.callStream.getVideoTracks();
+
+        VideoTracks.forEach(function(track) {
+          track.stop();
+        });
     }
 
     // Мы выходим из звонка и уведомляем об этом

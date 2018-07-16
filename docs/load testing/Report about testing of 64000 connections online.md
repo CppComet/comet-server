@@ -6,7 +6,7 @@ At previous article we examined the [ how to conduct the stress testing.](/docs/
 
 
 ___
-The load of 64,000 is the maximum that will allow the operational system to create. If you want more, then you need to test one server from several machines with tsung at the same time. The TCP connection is unique and defined by the four [source ip, source port, dest ip, dest port], so you can create no more than 64,000 simultaneous connections between one machine and one server port. 
+The load of 64,000 is the maximum that will allow the operational system to create. If you want more then you need to test one server from several machines with tsung at the same time. The TCP connection is unique and defined by the four [source ip, source port, dest ip, dest port], so you can create no more than 64,000 simultaneous connections between one machine and one server port. 
 ___
 
 

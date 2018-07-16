@@ -138,7 +138,7 @@ function test_2_users_messages()
     connection1.query(query,
         function(error, result, fields)
         {
-            var query = "INSERT INTO users_messages (id, event, message)VALUES (99955, 'test1_users_messages', '"+JSON.stringify(juserdata)+"');";
+            query = "INSERT INTO users_messages (id, event, message)VALUES (99955, 'test1_users_messages', '"+JSON.stringify(juserdata)+"');";
             connection1.query(query,
                 function(error, result, fields)
                 {
@@ -147,7 +147,7 @@ function test_2_users_messages()
                         throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
                     }
 
-                    var query = "select * from users_messages where id = 99955";
+                    query = "select * from users_messages where id = 99955";
                     connection1.query(query,
                         function(error, result, fields)
                         {
@@ -161,7 +161,7 @@ function test_2_users_messages()
                                 throw new Error(JSON.stringify({test:"[js-test] Error (result.length != 3) in query:"+query, error:error, result:result, fields:fields }));
                             }
 
-                            var query = "DELETE FROM users_messages WHERE id = 99955;";
+                            query = "DELETE FROM users_messages WHERE id = 99955;";
                             connection1.query(query,
                                 function(error, result, fields)
                                 {
@@ -170,7 +170,7 @@ function test_2_users_messages()
                                         throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
                                     }
 
-                                    var query = "select * from users_messages where id = 99955";
+                                    query = "select * from users_messages where id = 99955";
                                     connection1.query(query,
                                         function(error, result, fields)
                                         {
@@ -277,7 +277,7 @@ function test_onAuth2()
     connection1.query(query,
         function(error, result, fields)
         {
-            var query = "INSERT INTO users_messages (id, event, message)VALUES (3, 'test_onAuth2', '"+JSON.stringify(juserdata)+"');";
+            query = "INSERT INTO users_messages (id, event, message)VALUES (3, 'test_onAuth2', '"+JSON.stringify(juserdata)+"');";
             connection1.query(query,
                 function(error, result, fields)
                 {
@@ -287,7 +287,7 @@ function test_onAuth2()
                     }
                     // добавить проверку селекта из users_messages
                     // перенести сюда код от строки 295
-                    var query = 'select * from users_messages where id = 3';
+                    query = 'select * from users_messages where id = 3';
                     connection1.query(query,
                         function(error, result, fields)
                         {
@@ -301,7 +301,7 @@ function test_onAuth2()
                                 throw new Error(JSON.stringify({test:"[js-test] Error ( result.length != 1 ) in query:"+query, error:error, result:result, fields:fields }));
                             }
 
-                            var query = 'delete from users_auth where id = 3';
+                            query = 'delete from users_auth where id = 3';
                             connection1.query(query,
                                 function(error, result, fields)
                                 {
@@ -310,7 +310,7 @@ function test_onAuth2()
                                         throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
                                     }
 
-                                    var query = "INSERT INTO users_auth (id, hash)VALUES (3, 'valid00000userHash');";
+                                    query = "INSERT INTO users_auth (id, hash)VALUES (3, 'valid00000userHash');";
                                     connection1.query(query,
                                         function(error, result, fields)
                                         {
@@ -318,7 +318,7 @@ function test_onAuth2()
                                             {
                                                 throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
                                             }
-                                            var query = 'select * from users_auth where id = 3';
+                                            query = 'select * from users_auth where id = 3';
                                             connection1.query(query,
                                                 function(error, result, fields)
                                                 {
@@ -616,7 +616,7 @@ function test_setUserData(user_id, rdata)
                 throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
             }
 
-            var query = 'select * from  users_data where id = '+user_id;
+            query = 'select * from  users_data where id = '+user_id;
             connection1.query(query,
                 function(error, result, fields)
                 {
@@ -831,7 +831,7 @@ function test_get_pipe_log()
             }
             console.log("[js-test] \x1b[1;32m test_get_pipe_log 1\x1b[0m", result);
 
-            var query = 'insert into pipes_messages(name, event, message)VALUES("'+pipe_name+'", "'+event_name+'", \''+JSON.stringify(juserdata)+'\');';
+            query = 'insert into pipes_messages(name, event, message)VALUES("'+pipe_name+'", "'+event_name+'", \''+JSON.stringify(juserdata)+'\');';
             connection1.query(query,
                 function(error, result, fields)
                 {
@@ -840,7 +840,7 @@ function test_get_pipe_log()
                         throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
                     }
 
-                    var query = 'insert into pipes_messages(name, event, message)VALUES("'+pipe_name+'", "'+event_name+'", \''+JSON.stringify(juserdata)+'\');';
+                    query = 'insert into pipes_messages(name, event, message)VALUES("'+pipe_name+'", "'+event_name+'", \''+JSON.stringify(juserdata)+'\');';
                     connection1.query(query,
                         function(error, result, fields)
                         {
@@ -933,7 +933,7 @@ function test_ql_subscription()
             }
         );
 
-        var query = 'SELECT * FROM pipes WHERE name = "'+pipe_name+'"; ';
+        query = 'SELECT * FROM pipes WHERE name = "'+pipe_name+'"; ';
         connection1.query(query,
             function(error, result, fields)
             {
@@ -966,7 +966,7 @@ function test_ql_subscription()
             juserdata.index = i
 
             // @todo добавить невалидные запросы и запросы в разных формах
-            var query = 'insert into pipes_messages(name, event, message)VALUES("'+pipe_name+'", "'+event_name+'", \''+JSON.stringify(juserdata)+'\');';
+            query = 'insert into pipes_messages(name, event, message)VALUES("'+pipe_name+'", "'+event_name+'", \''+JSON.stringify(juserdata)+'\');';
             connection1.query(query,
                 function(error, result, fields)
                 {
@@ -1003,7 +1003,7 @@ function test_ql_pipes_settings()
             }
             console.log("[js-test] \x1b[1;32m test_ql_pipes_settings 1\x1b[0m", result);
 
-            var query = 'SELECT * FROM pipes_settings WHERE name = "'+pipe_name+'" ';
+            query = 'SELECT * FROM pipes_settings WHERE name = "'+pipe_name+'" ';
             connection1.query(query,
                 function(error, result, fields)
                 {
@@ -1017,7 +1017,7 @@ function test_ql_pipes_settings()
                     //  Normal answer: { name: 'secret_pipe', length: '10' }
                     if(result.length != 1)
                     {
-                        throw new Error(JSON.stringify({test:"[js-test] Error (more then one line in result) in query:"+query, error:error, result:result, fields:fields }));
+                        throw new Error(JSON.stringify({test:"[js-test test_ql_pipes_settings] Error (more then one line in result) in query:"+query, error:error, result:result, fields:fields }));
                     }
 
                     if(result[0].length != "10")
@@ -1025,7 +1025,7 @@ function test_ql_pipes_settings()
                         throw new Error(JSON.stringify({test:"[js-test] Error (result[0].message != 10) in query:"+query, error:error, result:result, fields:fields }));
                     }
 
-                    var query = 'DELETE FROM pipes_messages WHERE name = "'+pipe_name+'" ';
+                    query = 'DELETE FROM pipes_messages WHERE name = "'+pipe_name+'" ';
                     connection1.query(query,
                         function(error, result, fields)
                         {
@@ -1035,7 +1035,7 @@ function test_ql_pipes_settings()
                             }
 
                             var text_message = "text message "+Math.random()
-                            var query = 'INSERT INTO pipes_messages (name, event, message)VALUES("'+pipe_name+'", "event_in_pipe", "'+text_message+'");';
+                            query = 'INSERT INTO pipes_messages (name, event, message)VALUES("'+pipe_name+'", "event_in_pipe", "'+text_message+'");';
                             connection1.query(query,
                                 function(error, result, fields)
                                 {
@@ -1045,7 +1045,7 @@ function test_ql_pipes_settings()
                                     }
 
                                     console.log("[js-test] \x1b[1;32m test_ql_pipes_settings 3\x1b[0m", result);
-                                    var query = 'SELECT * FROM pipes_messages WHERE name = "'+pipe_name+'" ';
+                                    query = 'SELECT * FROM pipes_messages WHERE name = "'+pipe_name+'" ';
                                     connection1.query(query,
                                         function(error, result, fields)
                                         {
@@ -1067,7 +1067,7 @@ function test_ql_pipes_settings()
 
                                             if(result.length != 1)
                                             {
-                                                throw new Error(JSON.stringify({test:"[js-test] Error (more then one line in result) in query:"+query, error:error, result:result, fields:fields }));
+                                                throw new Error(JSON.stringify({test:"[js-test test_ql_pipes_settings 2] Error (more then one line in result) in query:"+query, error:error, result:result, fields:fields }));
                                             }
 
                                             if(result[0].name != pipe_name)
@@ -1080,7 +1080,7 @@ function test_ql_pipes_settings()
                                                 throw new Error(JSON.stringify({test:"[js-test] Error (result[0].message != text_message) in query:"+query, error:error, result:result, fields:fields }));
                                             }
 
-                                            var query = 'DELETE FROM pipes_messages WHERE name = "'+pipe_name+'" ';
+                                            query = 'DELETE FROM pipes_messages WHERE name = "'+pipe_name+'" ';
                                             connection1.query(query,
                                                 function(error, result, fields)
                                                 {
@@ -1091,7 +1091,7 @@ function test_ql_pipes_settings()
 
                                                     console.log("[js-test] \x1b[1;32m test_ql_pipes_settings 5\x1b[0m", result);
                                                     var text_message = "text message "+Math.random()
-                                                    var query = 'INSERT INTO pipes_messages (name, event, message)VALUES("'+pipe_name+'", "event_in_pipe", "'+text_message+'");';
+                                                    query = 'INSERT INTO pipes_messages (name, event, message)VALUES("'+pipe_name+'", "event_in_pipe", "'+text_message+'");';
                                                     connection1.query(query,
                                                         function(error, result, fields)
                                                         {
@@ -1101,7 +1101,7 @@ function test_ql_pipes_settings()
                                                             }
 
                                                             console.log("[js-test] \x1b[1;32m test_ql_pipes_settings 3\x1b[0m", result);
-                                                            var query = 'SELECT * FROM pipes_messages WHERE name = "'+pipe_name+'" ';
+                                                            query = 'SELECT * FROM pipes_messages WHERE name = "'+pipe_name+'" ';
                                                             connection1.query(query,
                                                                 function(error, result, fields)
                                                                 {
@@ -1123,7 +1123,7 @@ function test_ql_pipes_settings()
 
                                                                     if(result.length != 1)
                                                                     {
-                                                                        throw new Error(JSON.stringify({test:"[js-test] Error (more then one line in result) in query:"+query, error:error, result:result, fields:fields }));
+                                                                        throw new Error(JSON.stringify({test:"[js-test test_ql_pipes_settings 3] Error (more then one line in result) in query:"+query, error:error, result:result, fields:fields }));
                                                                     }
 
                                                                     if(result[0].name != pipe_name)
@@ -1136,7 +1136,7 @@ function test_ql_pipes_settings()
                                                                         throw new Error(JSON.stringify({test:"[js-test] Error (result[0].message != text_message) in query:"+query, error:error, result:result, fields:fields }));
                                                                     }
 
-                                                                    var query = 'DELETE FROM pipes_settings WHERE name = "'+pipe_name+'" ';
+                                                                    query = 'DELETE FROM pipes_settings WHERE name = "'+pipe_name+'" ';
                                                                     connection1.query(query,
                                                                         function(error, result, fields)
                                                                         {
@@ -1146,7 +1146,7 @@ function test_ql_pipes_settings()
                                                                             }
 
                                                                             console.log("[js-test] \x1b[1;32m test_ql_pipes_settings 5\x1b[0m", result);
-                                                                            var query = 'SELECT * FROM pipes_messages WHERE name = "'+pipe_name+'" ';
+                                                                            query = 'SELECT * FROM pipes_messages WHERE name = "'+pipe_name+'" ';
                                                                             connection1.query(query,
                                                                                 function(error, result, fields)
                                                                                 {
