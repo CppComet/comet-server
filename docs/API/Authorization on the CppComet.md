@@ -1,7 +1,7 @@
 
 # Users’ authorization on the comet-server
 
-Besides of channels where each user, who know channel’s name, can subscribe it, here is an opportunity to authorize users on the comet-server and send private messages to users by their IDs.  User authorization involved several steps. The first step – it is sending user’s ID and a random hash in your system to the comet-server.
+Besides of channels where each user, who know a name of channel, can subscribe it, here is an opportunity to authorize users on the comet-server and to send private messages to users by their IDs.  User authorization involved several steps. The first step – it is sending user’s ID and a random hash in your system to the comet-server.
 
 
 ```
@@ -30,9 +30,9 @@ And now user can be successfully authorized on the comet-server.
 
 While messages from authorized users are sending by its ID ([insert query to table users_messages](/docs/API/CometQL/CometQL%20API)), messages is sending to all user’s devices (up to 16), where he is authorizing at this moment. It’s very convenient when some user has visited your site and has authorized here by more than one device.
   
-If some user at that moment is offline, than sent message is placed into a queue of messages and would be delivered when it user will be online.
+If some user at that moment is offline, then sent message is placed into a queue of messages and would be delivered when it user will be online.
 
-The main purpose of mentioned queue is delivering messages after a short-term user’s offline. For example, in those cases when user is updating some site’s page where was opened a connection, and this user goes offline approximately for one second.
+The main purpose of mentioned queue is delivering messages after a short-term user’s offline. For example, in those cases when user is updating some page in site where was opened a connection, and this user goes offline approximately for one second.
 
 # The subscription to receiving private messages
 In order to receiving private messages you should to subscribe to it. The subscription to messages with name of event “event1” from server is delivering in accordance to authorization data (by user’s ID) is carried out in the following way:
@@ -64,7 +64,7 @@ cometApi.onAuthFalill(function(){
 
 These functions will be called when authorization status will be changing. I.e. at least once an authorization will be successful or unsuccessful when connecting to comet server or while status will be changed. 
 
-Also you can call the function “isAuthorized” to determine authorization status.
+Also, you can call the function “isAuthorized” to determine authorization status.
 
 ```
 cometApi.isAuthorized()
@@ -80,6 +80,6 @@ The function “isAuthorized” may return 3 different values:
 [code of online demo](https://github.com/CppComet/auth-example) [online demo on github](https://cppcomet.github.io/auth-example/index.html) [Look in codepen.io](https://codepen.io/Levhav/pen/XaWLra)
 
 <html>
-See the Pen <a href='https://codepen.io/Levhav/pen/XaWLra/'>CppComet auth chat example</a> by Trapenok Victor (<a href='https://codepen.io/Levhav'>@Levhav</a>) on <a href='https://codepen.io'>CodePen</a>.
-
+<iframe height='800' scrolling='no' title='CppComet auth chat example' src='//codepen.io/Levhav/embed/XaWLra/?height=265&theme-id=dark&default-tab=js,result&embed-version=2' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'>See the Pen <a href='https://codepen.io/Levhav/pen/XaWLra/'>CppComet auth chat example</a> by Trapenok Victor (<a href='https://codepen.io/Levhav'>@Levhav</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
 </html>

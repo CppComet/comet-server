@@ -161,6 +161,7 @@ class Client_connection:public connection
     int web_user_data(thread_data* local_buf, char* event_data,int client, int len);
      
     int cgi_call(thread_data* local_buf, char* event_data,int client, int len);
+    int CometQL_call(thread_data* local_buf, char* event_data,int client, int len);
     
     bool online_incr(thread_data* local_buf);
     bool online_decr(thread_data* local_buf);

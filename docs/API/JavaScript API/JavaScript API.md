@@ -115,7 +115,7 @@ cometApi.subscription("msg.event_name", function(e){ console.log(e)})
 
 
 ___
-More details about authorization mechanism on comet server you and about private messages look in article “[User’s authorization on comet server](/docs/API/Authorization%20on%20the%20CppComet)”
+More details about authorization mechanism on comet server and about private messages you can look in article “[User’s authorization on comet server](/docs/API/Authorization%20on%20the%20CppComet)”
 ___
 
 
@@ -168,11 +168,11 @@ This type of channel is designed specifically to facilitate the creation of dyna
 Main article [list of online users](/docs/comet/faq/realtime-users-list)
 # Sending messages to channel from JS (pipes web_*)
 
-The function web_pipe_send lets from JavaScript send messages to channel bypassing your server (directly calls comet server). It allows resending messages between clients without loading your server. Also owing to direct call to comet server, delivery time of message from client to client is minimal.
+The function web_pipe_send allows sending messages from JavaScript to channel by passing your server (directly calls comet server). It allows resending messages between clients without loading your server. Also, owing to direct call to comet server, delivery time of message from client to client is minimal.
 
 
 ___
-Send messages to channel from JavaScript is able when name of channel begins with “web_”. CometQL does not have any limitations in this case.
+Sending messages to channel from JavaScript is able when name of channel begins with “web_”. CometQL does not have any limitations in this case.
 ___
 
 
@@ -189,7 +189,7 @@ cometApi.subscription("#channel_name", function(e){ console.log(e)})
 ```
 
 
-Since comet server supports users’ authorization, it automatically adds user id to message such a way that a sender can’t send foreign id. To deactivate this option, is needed to add symbol “@” before channel name which would accept message. In this case, delivered message would be look alike that it was send by non-authorized user.
+Since comet server supports users’ authorization, it automatically adds user id to message such a way that a sender can’t send foreign id. To deactivate this option, is needed to add symbol “@” before channel name which would accept message. In this case, delivered message would be look alike that it was sent by non-authorized user.
 
 ```
 cometApi.web_pipe_send("@web_pipe_name", "event_name", "message")
@@ -214,9 +214,9 @@ cometApi.web_pipe_send("@web_pipe_name", "event_name", "message")
 ```
 
 
-Field server_info.user_id in incoming message fills out by some information besides zero just if message was sent to channel from JavaScript API and sender was authorized on comet server. Also it contains sender’s user_id.
+Field server_info.user_id in incoming message fills out by some information besides zero just if message was sent to channel from JavaScript API and sender was authorized on comet server. Also, it contains sender’s user_id.
 # Getting the last messages from channel
-The comet server includes possibility to activate storing the last N messages mechanism for some channels.
+The comet server includes possibility to activated storing the last N messages mechanism for some channels.
 
 ___
 Logging of transferred messages may be activate by CometQL query to table “[pipes_settings](/docs/API/CometQL/CometQL%20API)”.
@@ -233,9 +233,9 @@ Delivered from history messages will have a property “history=true”.
 
 # Getting a number of subscribers
 
-The function “count_user_in_pipe” can helps to determine a number of subscribes for current channel.
+The function “count_user_in_pipe” can help to determine a number of subscribes for current channel.
 
-Also this function has the first argument – name of channel and the second is callback function which holds an answer.
+Also, this function has the first argument – name of channel and the second is callback function which holds an answer.
 
 ```
 
@@ -247,7 +247,7 @@ cometApi.count_users_in_pipe("web_chat_pipe", function(res)
 ```
 
 
-Besides of [CometQL query](/docs/API/CometQL/CometQL%20API), this function can show a number of subscribers only for those channels which name begins with “web_” (for example, for “web_chat_pipe” it will work but for “chat_pipe” – will not work). This limitation entered in order to be able to create such a channel which a number of subscribers can’t be accessible for anyone via JS API.
+Besides of [CometQL query](/docs/API/CometQL/CometQL%20API), this function can show a number of subscribers only for those channels which names begin with “web_” (for example, for “web_chat_pipe” it will work but for “chat_pipe” – will not work). This limitation entered in order to be able to create such a channel which a number of subscribers can’t be accessible for anyone via JS API.
  
 # Determination of authorization status on comet server
 
@@ -273,7 +273,7 @@ cometApi.onAuthFalill(function(){
 
 These functions will be called when authorization status will be changing. I.e. at least once an authorization will be successful or unsuccessful when connecting to comet server or while status will be changed. 
 
-Also you can call the function “isAuthorized” to determine authorization status.
+You can also call the function “isAuthorized” to determine authorization status.
 
 ```
 cometApi.isAuthorized()
@@ -281,7 +281,7 @@ cometApi.isAuthorized()
 
 The function “isAuthorized” may return 3 different values: 
   * false – authorization is not complete;
-  * true - authorization is complete;
+  * true – authorization is complete;
   * undefined – the status in undefined – this answer returns even before an attempt to connect to comet server.
 
 # Determination of master tab

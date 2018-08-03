@@ -60,7 +60,7 @@ systemctl enable comet.service
 ```
 
 
-After successes run server we can begin create chat. If you get error create issue in [github repository](https://github.com/Levhav/comet-server/issues).
+After successes run server we can begin create chat. If you get error, you should create issue in [github repository](https://github.com/Levhav/comet-server/issues).
 
 # Launch
 Run in console mode
@@ -182,7 +182,7 @@ server {
  
 Pay attention to what values of the port parameter are specified in the sections [ws] and [cometql] on these ports the comet server will wait for incoming connections.
 
-In the comet.ini example in the repository, the port parameter for connections from JavaScrip api is set to 8087
+In the comet.ini example in the repository, the port parameter for connections from JavaScrip api is set to 8087.
 This means that you need to connect like this:
 
 ```

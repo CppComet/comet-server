@@ -16,8 +16,8 @@ These names may be used to further extend functionality. And they will have what
 
 # Channels with special properties
 
-There are also channels with special properties, all of them below.
-  * msg - For the delivery of personal messages in accordance with the authorization data
+There are also channels with special properties, all of them are below.
+  * msg - for the delivery of personal messages in accordance with the authorization data
   * user_status_* - for automatic notification about the status of JS api users
   * web_* - Channels in which you can send messages from both CometQL and from JS api
   * track_* - for automatic notification JS api about what someone has subscribed or unsubscribed from this channel

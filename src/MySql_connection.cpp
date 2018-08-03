@@ -464,21 +464,21 @@ int MySql_connection::one_query(int client, int len, thread_data* local_buf, cha
                 TagLoger::warn(Log_MySqlServer, 0, "\x1b[1;33mQUERY[%d, len=%d][REPL]:%s\x1b[0m\n", _countUerys, queryLen, startQuery);
             }
 
-            pthread_mutex_lock(&QLParsing_mutex);
-            void* buff = QLParsing(startQuery, &local_buf->qInfo);
-
+            //pthread_mutex_lock(&QLParsing_mutex);
+            //void* buff = QLParsing(startQuery, &local_buf->qInfo);
+            void* buff = MySql_connection::CometQLParsing(startQuery, local_buf);
 
             if(local_buf->qInfo.hasError)
             {
-                TagLoger::error(Log_MySqlServer, 0, "\x1b[1;31mError query:%s\x1b[0m\n", startQuery);
+                //TagLoger::error(Log_MySqlServer, 0, "\x1b[1;31mError query:%s\x1b[0m\n", startQuery);
                 QLdeleteBuffer(buff, &local_buf->qInfo);
-                pthread_mutex_unlock(&QLParsing_mutex);
+                //pthread_mutex_unlock(&QLParsing_mutex);
 
                 Send_Err_Package(SQL_ERR_SYNTAX_ERROR, "Syntax error in query", PacketNomber+1, local_buf, this);
 
                 return 0;
             }
-            pthread_mutex_unlock(&QLParsing_mutex);
+            //pthread_mutex_unlock(&QLParsing_mutex);
             memcpy(startQuery, tmp, MAX_MESSAGE_SIZE);
 
             query_router(local_buf, PacketNomber);
@@ -1938,14 +1938,16 @@ int MySql_connection::sql_select_from_revoked_tokens(thread_data* local_buf, uns
         {
             continue;
         }
+        int nameLen = local_buf->qInfo.where.whereExprValue[idExprPos][i].tokLen;
+        token[nameLen] = 0;
 
         local_buf->stm.revoked_tokens_select->execute(dev_id, token);
         while(!local_buf->stm.revoked_tokens_select->fetch())
-        {
-            if(local_buf->sql.useColumn(1)) local_buf->sql.getValue(countRows, 1) = token;
+        { 
+            if(local_buf->sql.useColumn(0)) local_buf->sql.getValue(countRows, 0) = token;  
             countRows++;
         }
-        local_buf->stm.revoked_tokens_select->free();
+        local_buf->stm.revoked_tokens_select->free(); 
     }
 
     local_buf->sql.sendAllRowsAndHeaders(local_buf, PacketNomber, countRows, this);
@@ -1971,8 +1973,8 @@ int MySql_connection::sql_insert_into_revoked_tokens(thread_data* local_buf, uns
         return 0;
     }
 
-    char* token = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[1]]);
-    token[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[1]].tokLen] = 0;
+    char* token = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]]);
+    token[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]].tokLen] = 0;
     if(local_buf->stm.revoked_tokens_replace->execute(dev_id, token) < 0)
     {
         Send_Err_Package(SQL_ERR_INVALID_DATA, "Error in token", PacketNomber+1, local_buf, this);
@@ -2023,6 +2025,9 @@ int MySql_connection::sql_delete_from_revoked_tokens(thread_data* local_buf, uns
         {
             continue;
         }
+        
+        int nameLen = local_buf->qInfo.where.whereExprValue[idExprPos][i].tokLen;
+        token[nameLen] = 0;
 
         if(local_buf->stm.revoked_tokens_delete->execute(dev_id, token) < 0)
         {
@@ -3158,7 +3163,7 @@ int MySql_connection::sql_insert_into_conference(thread_data* local_buf, unsigne
         {"pipe", "msg"}
     };
 
-    TagLoger::error(Log_MySqlServer, 0, " >conference answer=%s", jmessage.dump());
+    TagLoger::error(Log_MySqlServer, 0, " >conference answer=%s", jmessage.dump().data());
     internalApi::cluster_send_to_user(local_buf, dev_id, user_id, jmessage);
 
     //local_buf->answer_buf.unlock();
@@ -3935,4 +3940,20 @@ void MySql_connection::addIntervalRoutine()
         local_buf->db.query_format("DELETE FROM `pipe_messages` where time < %d and pipe_name like 'trust_%%' ", time(0) - 120);
     });
 
+}
+
+void* MySql_connection::CometQLParsing(char* query, thread_data* local_buf)
+{   
+    pthread_mutex_lock(&QLParsing_mutex);
+    void* buff = QLParsing(query, &local_buf->qInfo);
+ 
+    if(local_buf->qInfo.hasError)
+    {
+        TagLoger::error(Log_MySqlServer, 0, "\x1b[1;31mError query:%s\x1b[0m\n", query);
+        pthread_mutex_unlock(&QLParsing_mutex); 
+        return NULL;
+    }
+    pthread_mutex_unlock(&QLParsing_mutex);
+ 
+    return buff;
 }

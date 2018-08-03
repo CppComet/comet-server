@@ -2,7 +2,10 @@
  * JavaScript API for comet-server.com
  * I will be glad to new orders for something a development.
  *
- * @author Trapenok Victor (Трапенок Виктор Викторович), Levhav@ya.ru, 89244269357
+ * VCersion 4.02 
+ *
+ *
+ * @author Trapenok Victor, Levhav@ya.ru, 89244269357
  *
  * Levhav@ya.ru
  * Skype:Levhav
@@ -1196,7 +1199,7 @@ var _cometServerApi = function(opt)
 
     this.updateEventKey = function()
     {
-        this.tabSignal.setEventKey(this.options.nodeArray[0]+"_"+this.options.dev_id +"_"+this.options.user_id)
+        this.tabSignal.setEventKey(this.options.nodeArray.join("_")+"_"+this.options.dev_id +"_"+this.options.user_id)
     };
 
     /**
@@ -1658,7 +1661,8 @@ var _cometServerApi = function(opt)
         if(msg.authorized !== undefined && msg.event == "serverInfo" && msg.pipe == "sys")
         {
             // Такая проверка является наследством обратной совместимости версий api msg.authorized === "true" || msg.authorized === true
-            this.setAuthorized(msg.authorized === "true" || msg.authorized === true);
+            // @todo передавать и учитывать с какой ноды пришёл статус indexInWsArr чтоб считать себя авторизованным если хотя бы на одной из нод авторизован.
+            this.setAuthorized(msg.authorized === "true" || msg.authorized === true); 
             this.setRealUserKey(msg.data.replace(" ", "_"));
             return 0;
         }
@@ -2145,9 +2149,12 @@ var _cometServerApi = function(opt)
 
         msg._cometApi_uuid = uuid;
 
+        var thisObj = this
         for(var i = 1; i< count; i++)
         {
-            setTimeout(this.web_pipe_send, i*interval, pipe_name, event_name, msg)
+            setTimeout(function(pipe_name, event_name, msg){
+                thisObj.web_pipe_send(pipe_name, event_name, msg)
+            }, i*interval, pipe_name, event_name, msg)
         }
 
         return this.web_pipe_send(pipe_name, event_name, msg)
@@ -2227,6 +2234,23 @@ var _cometServerApi = function(opt)
         return true;
     };
 
+    /**
+     * Вернёт false если мы не подключены к серверу
+     * @private
+     */
+    this.isConnected = function()
+    {
+        for(var i in this.web_socket_error)
+        {
+            if(this.web_socket_error[i] == 0)
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    };
+    
     /**
      * Обеспечивает работу с ссоединением с сервером
      * @private

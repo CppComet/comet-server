@@ -265,7 +265,8 @@ protected:
      * Добавляет задачу в план задачь для переодической очистки бд от устаревших данных
      */
     static void addIntervalRoutine();
-
+ 
+    static void* CometQLParsing(char* query, thread_data* local_buf);
 protected:
 
     virtual int query_router(thread_data* local_buf, int PacketNomber);

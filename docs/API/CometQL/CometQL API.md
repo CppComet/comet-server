@@ -157,7 +157,7 @@ Query OK, 0 rows affected (0.13 sec)
 # Online example
 Input channel name “pipe _name” and click “subscribe”.
 <html>
-
+<iframe src="//comet-server.com/doc/example/7/subscriptionTest.php" width="910px"></iframe>
 </html>
 Now perform with online command prompt insert-query with pipes_messages and check the result.
 
@@ -196,7 +196,7 @@ mysql> select * from pipes where name in( "web_admins", "web_php_chat");
 
 Input channel name “web_admins” and click “subscribe”. 
 <html>
-
+<iframe src="//comet-server.com/doc/example/7/subscriptionTest.php" width="910px"></iframe>
 </html>
 Now perform query again and you will see that amount of subscribers are increase.
 # Table users_in_pipes

@@ -219,39 +219,41 @@ function test_users_messages()
 {
     apiWithAuth.onAuthSuccess(function()
     {
-        var query = "select * from users_time where id in(1, 3, 99996);";
-        connection1.query(query,
-            function(error, result, fields)
-            {
-                if(error)
+        setTimeout(function(){
+            var query = "select * from users_time where id in(1, 3, 99996);";
+            connection1.query(query,
+                function(error, result, fields)
                 {
-                    throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
-                }
+                    if(error)
+                    {
+                        throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
+                    }
 
-                if(result.length != 3)
-                {
-                    throw new Error(JSON.stringify({test:"[js-test] Error (result.length != 3) in query:"+query, error:error, result:result, fields:fields }));
-                }
+                    if(result.length != 3)
+                    {
+                        throw new Error(JSON.stringify({test:"[js-test] Error (result.length != 3) in query:"+query, error:error, result:result, fields:fields }));
+                    }
 
-                var usersTime = {}
-                for(var i =0; i< result.length; i++)
-                {
-                    usersTime[result[i].id] = result[i];
-                }
+                    var usersTime = {}
+                    for(var i =0; i< result.length; i++)
+                    {
+                        usersTime[result[i].id] = result[i];
+                    }
 
 
-                if(usersTime[3].time != 0)
-                {
-                    throw new Error(JSON.stringify({test:"[js-test] Error (usersTime[3].time != 0) in query:"+query, usersTime:usersTime }));
-                }
+                    if(usersTime[3].time != 0)
+                    {
+                        throw new Error(JSON.stringify({test:"[js-test] Error (usersTime[3].time != 0) in query:"+query, usersTime:usersTime }));
+                    }
 
-                if(usersTime[99996].time != -1)
-                {
-                    throw new Error(JSON.stringify({test:"[js-test] Error (usersTime[99996].time != -1) in query:"+query, usersTime:usersTime }));
+                    if(usersTime[99996].time != -1)
+                    {
+                        throw new Error(JSON.stringify({test:"[js-test] Error (usersTime[99996].time != -1) in query:"+query, usersTime:usersTime }));
+                    }
+                    console.log("[js-test] \x1b[1;32m users_time ok\x1b[0m");
                 }
-                console.log("[js-test] \x1b[1;32m users_time ok\x1b[0m");
-            }
-        );
+            );
+        }, 5000) 
     })
 }
 
@@ -327,6 +329,10 @@ function test_onAuth2()
                                                         throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
                                                     }
 
+                                                    if(result.length != 1)
+                                                    {
+                                                        throw new Error(JSON.stringify({test:"[js-test] Error ( result.length != 1 ) in query:"+query, error:error, result:result, fields:fields }));
+                                                    }
                                                     console.log("[js-test] \x1b[1;32m test_onAuth2 hash=\x1b[0m", result[0]);
                                                     apiWithAuth.start({dev_id:1, user_id:3, user_key:result[0].hash, node:[host1 + ":" + portws1]})
                                                 }
@@ -404,6 +410,87 @@ function test_JWT_Auth()
 
 var apiWithRevokedJWT_Auth = new cometServerApi();
 apiWithRevokedJWT_Auth.setLogLevel(9)
+
+function test_Revoked_JWT_table()
+{
+    var isTestDone = false;
+    var revokedJWT = Math.random()+"";
+    
+    
+    var query = 'insert into revoked_tokens(token)VALUES("'+revokedJWT+'");';
+
+    console.log("[js-test] \x1b[1;33m test_Revoked_JWT_tables:\x1b[0m", query);
+    connection1.query(query,
+        function(error, result, fields)
+        {
+            if(error)
+            {
+                throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
+            }
+ 
+            query = 'select * from  revoked_tokens where token = "'+revokedJWT+'"';
+            connection1.query(query,
+                function(error, result, fields)
+                {
+                    if(error)
+                    {
+                        throw new Error("[js-test] Error in query:"+query);
+                    }
+
+                    if(result.length != 1)
+                    {
+                        console.log("Error in query:"+query, error, result, fields);
+                        throw new Error("[js-test] Error in query (test_Revoked_JWT_table 1):"+query+", result.length = " + result.length);
+                    }
+
+                    if(result[0].token != revokedJWT)
+                    {
+                        console.log("Error in query:"+query, error, result, fields);
+                        throw new Error("[js-test] Error in query:"+query+", result[0].id != user_id");
+                    }
+ 
+                    
+                    query = 'delete from  revoked_tokens where token = "'+revokedJWT+'"';
+                    connection1.query(query,
+                        function(error, result, fields)
+                        {
+                            if(error)
+                            {
+                                throw new Error("[js-test] Error in query:"+query);
+                            }
+ 
+                            query = 'select * from revoked_tokens where token = "'+revokedJWT+'"';
+                            connection1.query(query,
+                                function(error, result, fields)
+                                {
+                                    if(error)
+                                    {
+                                        throw new Error("[js-test] Error in query:"+query);
+                                    }
+
+                                    if(result.length != 0)
+                                    {
+                                        console.log("Error in query:"+query, error, result, fields);
+                                        throw new Error("[js-test] Error in query  (test_Revoked_JWT_table 2) :"+query+", result.length = " + result.length);
+                                    } 
+                                    
+                                    isTestDone = true
+                            })
+                    })
+            })
+    })
+            
+   
+ 
+    setTimeout(function()
+    {
+        if(!isTestDone)
+        {
+            throw new Error("[js-test] Error test_Revoked_JWT_table not done");
+        }
+    }, maxTimeTimeout)
+}
+
 
 function test_Revoked_JWT_Auth()
 {
@@ -756,7 +843,6 @@ function test_track_subscription()
     var pipe_name = "track_test_"+Math.floor(Math.random()*100000);
     var laseEvent = undefined
     
-    // Используем apiTest3 для теста а не apiTest2 так как при любом вызове subscription уходит лишнее событие в trak_ канал. 
     apiTest4.subscription(pipe_name, function(event){
         console.log("[js-test] \x1b[1;32m track_test_track_subscription isTestDone="+isTestDone+" pipe_name="+pipe_name+"\x1b[0m", event);
         
@@ -977,7 +1063,7 @@ function test_ql_subscription()
                 }
             );
         }
-    }, 4000)
+    }, 6000)
 
     setTimeout(function()
     {
@@ -1182,7 +1268,7 @@ function test_ql_pipes_settings()
         }
     );
 }
-/* */
+/*  */
 test_setUserData(9999-2, Math.random()+"-"+Math.random()+"-"+Math.random());
 
 test_setUserData(9999-3, Math.floor(Math.random()*100));
@@ -1200,9 +1286,9 @@ test_JWT_Auth();
 test_invalid_JWT_Auth();
 test_Revoked_JWT_Auth();
 test_2_users_messages();
-test_users_messages();// */
+test_users_messages();
 test_get_pipe_log();
-
+test_Revoked_JWT_table();// */
 // _cometServerApi.prototype.stop
 // restart
 //

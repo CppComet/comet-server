@@ -1,5 +1,5 @@
 FROM debian:9
-MAINTAINER Levhav@yandex.ru
+MAINTAINER Trapenok Victor <TrapenokVictor@yandex.ru>
 
 
 RUN apt-get update && apt-get install --assume-yes cmake make cpp gcc libssl-dev g++ pkg-config libmariadbclient-dev-compat mysql-client flex mailutils uuid-dev git wget
