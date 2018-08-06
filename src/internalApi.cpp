@@ -102,8 +102,18 @@ int internalApi::cluster_send_to_user(thread_data* local_buf, int dev_id, int us
     if(needSave != 0)
     {
         std::string event = jmessage["event"].get<std::string>();
-        std::string msg_data = jmessage["data"].get<std::string>();
         
+        std::string type_name(jmessage["data"].type_name());
+        std::string msg_data;
+        if(type_name.compare("string") == 0)
+        {
+            msg_data = jmessage["data"].get<std::string>();
+        }
+        else
+        {
+            msg_data = jmessage["data"].dump();
+        }
+         
         local_buf->stm.users_queue_insert->execute(uuid, (long int)time(NULL), dev_id, user_id, event.data(), msg_data.data(), 0);
     }
 

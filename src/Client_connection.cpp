@@ -285,7 +285,7 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
     TagTimer::add("Client_connection::subscription", t);
     return 0;
 }
-
+ 
 /**
  * Парсит url и возвращает указатель на web_session или 0 в случаии ошибки
  * А ещё проверяет заголовок Origin и отсекает запросы если они отправлены со значением Origin не соответсвующим списку разрешонных доменов.
@@ -299,9 +299,11 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
  */
 char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
 {
+   
     isAuthUser = false;
     char * mytext = local_buf->buf;
-    int ses_index = str_find(mytext,'=',300);
+     
+    int ses_index = str_find(mytext,'=',2000);
     if(ses_index == -1)
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [Session ID not found] \x1b[0m\n");
@@ -311,7 +313,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
 
     char * web_session = &mytext[ses_index+1];
 
-    int uid_index = str_find(mytext,'=',2,0,300);
+    int uid_index = str_find(mytext,'&',1,0,2000);
     if(uid_index == -1)
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mWrong WS request [No user ID found] \x1b[0m\n");
@@ -320,37 +322,39 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     }
 
 
-    web_user_id = read_long(mytext + uid_index,'&');
+    web_user_id = read_long(mytext + uid_index + strlen("myid="),'&');
+    //TagLoger::log(Log_ClientServer, 0, "\x1b[31m web_user_id=%d %s\x1b[0m\n", web_user_id, mytext + uid_index + strlen("myid="));
     if(web_user_id < 0 )
-    {
+    { 
         web_user_id = 0;
     }
 
-    int udev_id_index = str_find(mytext,'=',3,0,300);
+    int udev_id_index = str_find(mytext,'&',2,0,2000);
     if(udev_id_index == -1)
     {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] \x1b[0m\n");
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] [1] \x1b[0m\n");
         web_write_error( "Error code 406(Invalid request, no public key found [1])" , 406, local_buf);
         return NULL;
     }
 
 
-    web_user_dev_id = read_long(mytext + udev_id_index,'&');
+    web_user_dev_id = read_long(mytext + udev_id_index + strlen("devid="),'&');
+    //TagLoger::log(Log_ClientServer, 0, "\x1b[31m web_user_dev_id=%d %s\x1b[0m\n", web_user_dev_id, mytext + udev_id_index + strlen("devid="));
     if(web_user_dev_id < 0)
-    {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] \x1b[0m\n");
+    { 
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] [2] \x1b[0m\n");
         web_write_error( "Error code 406(Invalid request, no public key found [2])" , 406, local_buf);
         return NULL;
     }
 
     if(web_user_dev_id > devManager::instance()->getDevIndexSize())
     {
-        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] \x1b[0m\n");
+        TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] [3] \x1b[0m\n");
         web_write_error( "Error code 406(Invalid request, no public key found [3])" , 406, local_buf);
         return NULL;
     }
 
-    int version_index = str_find(mytext,'=',4,0,300);
+    int version_index = str_find(mytext,'&',3,0,2000);
     if(version_index == -1)
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No version of api client transferred] \x1b[0m\n");
@@ -359,7 +363,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     }
 
     int delta = 0;
-    client_major_version = read_int(mytext+version_index,'.', &delta);
+    client_major_version = read_int(mytext+version_index + strlen("v="),'.', &delta);
 
     if(client_major_version < 0)
     {
@@ -368,7 +372,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
         return NULL;
     }
 
-    client_minor_version = read_int(mytext+version_index + delta+1,'&');
+    client_minor_version = read_int(mytext+version_index + strlen("v=") + delta+1,'&');
 
     if(client_minor_version == -1)
     {
@@ -377,12 +381,12 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
         return NULL;
     }
 
-    int web_user_uuid_pos = str_find(mytext,'=',5,0,300);
-    if(web_user_uuid_pos != -1 && memcmp(mytext + web_user_uuid_pos - 5, "uuid=", 5) == 0)
+    int web_user_uuid_pos = str_find(mytext,'&',4,0,2000);
+    if(web_user_uuid_pos != -1 && memcmp(mytext + web_user_uuid_pos, "uuid=", strlen("uuid=")) == 0)
     {
-        strncpy(web_user_uuid, mytext+web_user_uuid_pos, USER_UUID_LEN);
-    }
-
+        strncpy(web_user_uuid, mytext+web_user_uuid_pos + strlen("uuid="), USER_UUID_LEN);
+    } 
+    
     bool host_error = true;
     int nHeader = 0;
     char* pos = mytext;
@@ -551,6 +555,8 @@ int Client_connection::msg_queue_send(int client, int len, thread_data* local_bu
  */
 int Client_connection::send_pipe_log(thread_data* local_buf, char* pipe_name, const char* MarkerName)
 {
+    TagLoger::log(Log_ClientServer, 0, "\x1b[1;32mssend_pipe_log:%s\x1b[0m\n", pipe_name );
+
     // Дополнительные данные в json отправляемые сервером.
     char addData[EVENT_NAME_LEN + 120] = "\"marker\":\"MarkerName\",\"history\":true";
     int addData_lenStart = strlen(addData);
@@ -567,8 +573,10 @@ int Client_connection::send_pipe_log(thread_data* local_buf, char* pipe_name, co
     }
 
     int i = 0;
-    if(!local_buf->stm.pipe_messages_select->execute(web_user_dev_id, pipe_name, 99))
+    auto res = local_buf->stm.pipe_messages_select->execute(web_user_dev_id, pipe_name, 99);
+    if(!res)
     {
+        TagLoger::log(Log_ClientServer, 0, "\x1b[1;32mssend_pipe_log:pipe_messages_select execute err[%d]\x1b[0m\n", res);
         return 0;
     }
 
@@ -583,11 +591,16 @@ int Client_connection::send_pipe_log(thread_data* local_buf, char* pipe_name, co
             {"user_id", local_buf->stm.pipe_messages_select->result_user_id},
             {"pipe", pipe_name}
         };
+        
+        TagLoger::log(Log_ClientServer, 0, "\x1b[1;32mssend msg data[%d]:%s\x1b[0m\n", i, local_buf->stm.pipe_messages_select->result_message );
+
 
         message(local_buf, jmessage);
         i++;
     }
     local_buf->stm.pipe_messages_select->free();
+
+    TagLoger::log(Log_ClientServer, 0, "\x1b[1;32mssend_pipe_log:pipe_messages_select send all [%d]\x1b[0m\n", i);
 
     return i;
 }
@@ -1040,6 +1053,13 @@ int Client_connection::web_socket_request_message(int client, int len, thread_da
         res = cgi_call(local_buf, (char*)(str_data + strlen("cgi_call") + 1), client, msg_data_len);
         if(res == -1) return -1;
     }
+    else if(memcmp( str_data, "CometQL_call", strlen("CometQL_call")) == 0)
+    {
+        local_buf->setThreadStatus('L');
+        TagLoger::log(Log_ClientServer, 0, "comand-cgi_call:\n" );
+        res = CometQL_call(local_buf, (char*)(str_data + strlen("CometQL_call") + 1), client, msg_data_len);
+        if(res == -1) return -1;
+    }
     else
     {
         TagLoger::error(Log_ClientServer, 0, "comand-undefined: len=%d [%s]\n", msg_data_len, str_data );
@@ -1086,6 +1106,8 @@ int Client_connection::log_statistics(thread_data* local_buf, const char* event_
  */
 int Client_connection::get_pipe_log(thread_data* local_buf, char* event_data,int client, int len)
 {
+    TagLoger::log(Log_ClientServer, 0, "\x1b[1;32msget_pipe_log:%s\x1b[0m\n", event_data );
+
     auto t = TagTimer::mtime();
     char *pipe_name = event_data;
     char* pMarker = checking_channel_name( local_buf, pipe_name);
@@ -1606,6 +1628,87 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
  */
 int Client_connection::cgi_call(thread_data* local_buf, char* event_data,int client, int len)
 {
+    return 0;
+}
+
+/**
+ * Для приёма и выполнения запросов к CometQL подписанных через jwt токен
+ * Формат сообщения:
+ * CometQL_call\n
+ * pMarker\n
+ * jwt_token
+ *
+ * @param local_buf
+ * @param event_data
+ * @param client
+ * @param len
+ * @return
+ */
+int Client_connection::CometQL_call(thread_data* local_buf, char* event_data,int client, int len)
+{ 
+    auto t = TagTimer::mtime();
+    char* pMarker = event_data;
+    char* end_pMarker = checking_channel_name( local_buf, pMarker);
+    if(end_pMarker == NULL)
+    {
+        nlohmann::json err = {
+            {
+                "data", {
+                            {"user_id", -1},
+                            {"user_data", ""},
+                            {"error", "Invalid marker name."},
+                        }
+            },
+            {"event", "error"},
+            {"pipe", "sys"}
+        };
+
+        message(local_buf, err);
+        TagTimer::add("Client_connection::web_user_data", t);
+        return 0;
+    }
+
+    *(end_pMarker) = 0;
+    end_pMarker++;
+    
+    std::string token = std::string(end_pMarker);
+    
+    std::string secret(appConf::instance()->get_chars("main", "password"));
+
+    secret.append(std::to_string(web_user_dev_id));
+    HS256Validator signer(secret);
+    
+    ExpValidator exp;
+    try {
+        // Decode and validate the token
+        nlohmann::json header, payload;
+
+        std::tie(header, payload) = JWT::Decode(token, &signer, &exp);
+        //std::cout << "Header: " << header << std::endl;
+        //std::cout << "Payload: " << payload << std::endl;
+ 
+        /*
+         * Тут выполнение запроса
+         * 
+         * if(payload["user_id"] != user_id)
+        {
+            TagLoger::debug(Log_UserItem, 0, "Validation failed user_id error:jwt-user_id=%d, user_id=%d\n", (int)payload["user_id"], user_id);
+            return false;
+        }*/
+        
+        
+        return false;
+
+    } catch (InvalidTokenError &tfe) {
+        // An invalid token
+        TagLoger::debug(Log_UserItem, 0, "Validation failed: %s [secret=%s, token=%s]\n", tfe.what(), secret.data(), token.data());
+    }
+    catch(...)
+    {
+        // handling for exceptions with any type
+        TagLoger::debug(Log_UserItem, 0, "Validation failed: secret=%s, token=%s\n", secret.data(), token.data());
+    }
+
     return 0;
 }
 
@@ -2424,95 +2527,7 @@ int Client_connection::web_write_error(const char* text, int code, thread_data* 
 
     return message(local_buf, err);
 }
-
-//int Client_connection::message(thread_data* local_buf, const char* msg, const char* name)
-//{
-//    return message(local_buf, msg, name, MESSAGE_TEXT, NULL);
-//}
-
-/**
- * Для отправки сообщений от имени канала человеку
- * @param msg сообщение
- * @param name имя канала
- * @param message_type тип ( MESSAGE_TEXT | MESSAGE_CLOSE)
- * @param server_data Данные от сервера
- */
-/*int Client_connection::message(thread_data* local_buf, const char* msg, const char* name, const char message_type, const char* server_data)
-{
-    int ret = 0;
-    // потокобезопасна при условии потокобезопасности функции web_write
-    if(name == NULL)
-    {
-        return message(local_buf, msg, "undefined", message_type, server_data);
-    }
-
-    if(server_data == NULL)
-    {
-        return message(local_buf, msg, name, message_type, "\"nodata\":true");
-    }
-
-    local_buf->setThreadStatus('m');
-    auto t = TagTimer::mtime();
-    int server_data_len = strlen(server_data) + 1;
-    TagLoger::log(Log_ClientServer, 0, "server_data_len->%d\n",server_data_len);
-
-    int msg_len = strlen(msg) + server_data_len;
-
-    TagLoger::log(Log_ClientServer, 0, "| Sending data message[web_user_id=%ld, msg_len=%d, connection_type=%d, fd=%d]\n", web_user_id, msg_len, connection_type, fd);
-
-    char* messge = local_buf->messge_buf.lock();
-    int answer_messge_len = 0;
-
-    int data_start = 2;
-    messge[0] = message_type;
-
-    int constTextLen = 0;
-
-    int pipe_len = strlen(name);
-
-    constTextLen = 21;
-    if(msg_len + pipe_len + constTextLen > 125)
-    {
-        data_start = 4;
-        unsigned short* p = (unsigned short*)messge;
-        messge[1] = (unsigned char)126;
-
-        p[1] = msg_len + pipe_len + constTextLen;
-
-        char t = messge[2];
-        messge[2] = messge[3];
-        messge[3] = t;
-    }
-    else
-    {
-        messge[1] = (msg_len + pipe_len + constTextLen) & 127;
-    }
-
-    snprintf(messge + data_start, local_buf->messge_buf.getSize() - data_start,"{\"data\":\"%s\",\"pipe\":\"%s\",%s}",msg, name, server_data);
-    answer_messge_len = msg_len + pipe_len + constTextLen + data_start;
-
-
-    TagLoger::log(Log_ClientServer, 0, "\x1b[33mmessage[len:%d|", answer_messge_len);
-    //printHexMin(messge, answer_messge_len, Log_ClientServer);
-
-    TagLoger::log(Log_ClientServer, 0, "]->write\x1b[0m");
-
-    if(web_write(messge, answer_messge_len)  < 0)
-    {
-        TagLoger::log(Log_ClientServer, 0, " >Client Failed to send data %d\n",this->fd);
-        ret = -1;
-    }
-
-    local_buf->messge_buf.unlock();
-
-    //delete messge;
-    devManager::instance()->getDevInfo(web_user_dev_id)->incrMessages();
-
-    // pthread_mutex_unlock(&message_mutex);
-    TagTimer::add("Client_connection::message", t);
-    return ret;
-}*/
-
+ 
 /**
  * Отправка сообщений в WS из nlohmann::json
  * {

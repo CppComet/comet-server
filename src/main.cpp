@@ -412,8 +412,6 @@ void cli_fork()
 
 #include <iostream>
 
-#include "jwt/jwt_all.h"
-using json = nlohmann::json;
 /**
  * valgrind --tool=memcheck --track-origins=yes --leak-check=yes ./cpp_comet
  * valgrind --tool=memcheck --track-origins=yes --leak-check=full --show-reachable=yes ./cpp_comet

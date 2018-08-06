@@ -1,0 +1,27 @@
+---
+# defaults file for kostyrevaa.highload
+highload_rmem_max: '16777216'
+highload_wmem_max: '16777216'
+highload_rmem_default: '16777216'
+highload_wmem_default: '16777216'
+highload_optmem_max: '40960'
+highload_tcp_rmem: '4096 87380 16777216'
+highload_tcp_wmem: '4096 65536 16777216'
+
+highload_ip_local_port_range: "1025 65000"
+highload_tcp_tw_reuse: '1'
+highload_tcp_tw_recycle: "0"
+
+
+highload_netdev_max_backlog: '50000'
+highload_tcp_max_syn_backlog: '30000'
+highload_tcp_max_tw_buckets: '2000000'
+highload_tcp_fin_timeout: '30'
+
+# Disable TCP slow start on idle connections
+highload_tcp_slow_start_after_idle: '0'
+
+# If your servers talk UDP, also up these limits
+highload_udp_rmem_min: '8192'
+highload_udp_wmem_min: '8192'
+highload_tune_udp: false

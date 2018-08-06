@@ -138,7 +138,7 @@ function test_2_users_messages()
     connection1.query(query,
         function(error, result, fields)
         {
-            var query = "INSERT INTO users_messages (id, event, message)VALUES (99955, 'test1_users_messages', '"+JSON.stringify(juserdata)+"');";
+            query = "INSERT INTO users_messages (id, event, message)VALUES (99955, 'test1_users_messages', '"+JSON.stringify(juserdata)+"');";
             connection1.query(query,
                 function(error, result, fields)
                 {
@@ -147,7 +147,7 @@ function test_2_users_messages()
                         throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
                     }
 
-                    var query = "select * from users_messages where id = 99955";
+                    query = "select * from users_messages where id = 99955";
                     connection1.query(query,
                         function(error, result, fields)
                         {
@@ -161,7 +161,7 @@ function test_2_users_messages()
                                 throw new Error(JSON.stringify({test:"[js-test] Error (result.length != 3) in query:"+query, error:error, result:result, fields:fields }));
                             }
 
-                            var query = "DELETE FROM users_messages WHERE id = 99955;";
+                            query = "DELETE FROM users_messages WHERE id = 99955;";
                             connection1.query(query,
                                 function(error, result, fields)
                                 {
@@ -170,7 +170,7 @@ function test_2_users_messages()
                                         throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
                                     }
 
-                                    var query = "select * from users_messages where id = 99955";
+                                    query = "select * from users_messages where id = 99955";
                                     connection1.query(query,
                                         function(error, result, fields)
                                         {
@@ -219,39 +219,41 @@ function test_users_messages()
 {
     apiWithAuth.onAuthSuccess(function()
     {
-        var query = "select * from users_time where id in(1, 3, 99996);";
-        connection1.query(query,
-            function(error, result, fields)
-            {
-                if(error)
+        setTimeout(function(){
+            var query = "select * from users_time where id in(1, 3, 99996);";
+            connection1.query(query,
+                function(error, result, fields)
                 {
-                    throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
-                }
+                    if(error)
+                    {
+                        throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
+                    }
 
-                if(result.length != 3)
-                {
-                    throw new Error(JSON.stringify({test:"[js-test] Error (result.length != 3) in query:"+query, error:error, result:result, fields:fields }));
-                }
+                    if(result.length != 3)
+                    {
+                        throw new Error(JSON.stringify({test:"[js-test] Error (result.length != 3) in query:"+query, error:error, result:result, fields:fields }));
+                    }
 
-                var usersTime = {}
-                for(var i =0; i< result.length; i++)
-                {
-                    usersTime[result[i].id] = result[i];
-                }
+                    var usersTime = {}
+                    for(var i =0; i< result.length; i++)
+                    {
+                        usersTime[result[i].id] = result[i];
+                    }
 
 
-                if(usersTime[3].time != 0)
-                {
-                    throw new Error(JSON.stringify({test:"[js-test] Error (usersTime[3].time != 0) in query:"+query, usersTime:usersTime }));
-                }
+                    if(usersTime[3].time != 0)
+                    {
+                        throw new Error(JSON.stringify({test:"[js-test] Error (usersTime[3].time != 0) in query:"+query, usersTime:usersTime }));
+                    }
 
-                if(usersTime[99996].time != -1)
-                {
-                    throw new Error(JSON.stringify({test:"[js-test] Error (usersTime[99996].time != -1) in query:"+query, usersTime:usersTime }));
+                    if(usersTime[99996].time != -1)
+                    {
+                        throw new Error(JSON.stringify({test:"[js-test] Error (usersTime[99996].time != -1) in query:"+query, usersTime:usersTime }));
+                    }
+                    console.log("[js-test] \x1b[1;32m users_time ok\x1b[0m");
                 }
-                console.log("[js-test] \x1b[1;32m users_time ok\x1b[0m");
-            }
-        );
+            );
+        }, 5000) 
     })
 }
 
@@ -277,7 +279,7 @@ function test_onAuth2()
     connection1.query(query,
         function(error, result, fields)
         {
-            var query = "INSERT INTO users_messages (id, event, message)VALUES (3, 'test_onAuth2', '"+JSON.stringify(juserdata)+"');";
+            query = "INSERT INTO users_messages (id, event, message)VALUES (3, 'test_onAuth2', '"+JSON.stringify(juserdata)+"');";
             connection1.query(query,
                 function(error, result, fields)
                 {
@@ -287,7 +289,7 @@ function test_onAuth2()
                     }
                     // добавить проверку селекта из users_messages
                     // перенести сюда код от строки 295
-                    var query = 'select * from users_messages where id = 3';
+                    query = 'select * from users_messages where id = 3';
                     connection1.query(query,
                         function(error, result, fields)
                         {
@@ -301,7 +303,7 @@ function test_onAuth2()
                                 throw new Error(JSON.stringify({test:"[js-test] Error ( result.length != 1 ) in query:"+query, error:error, result:result, fields:fields }));
                             }
 
-                            var query = 'delete from users_auth where id = 3';
+                            query = 'delete from users_auth where id = 3';
                             connection1.query(query,
                                 function(error, result, fields)
                                 {
@@ -310,7 +312,7 @@ function test_onAuth2()
                                         throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
                                     }
 
-                                    var query = "INSERT INTO users_auth (id, hash)VALUES (3, 'valid00000userHash');";
+                                    query = "INSERT INTO users_auth (id, hash)VALUES (3, 'valid00000userHash');";
                                     connection1.query(query,
                                         function(error, result, fields)
                                         {
@@ -318,7 +320,7 @@ function test_onAuth2()
                                             {
                                                 throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
                                             }
-                                            var query = 'select * from users_auth where id = 3';
+                                            query = 'select * from users_auth where id = 3';
                                             connection1.query(query,
                                                 function(error, result, fields)
                                                 {
@@ -327,6 +329,10 @@ function test_onAuth2()
                                                         throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
                                                     }
 
+                                                    if(result.length != 1)
+                                                    {
+                                                        throw new Error(JSON.stringify({test:"[js-test] Error ( result.length != 1 ) in query:"+query, error:error, result:result, fields:fields }));
+                                                    }
                                                     console.log("[js-test] \x1b[1;32m test_onAuth2 hash=\x1b[0m", result[0]);
                                                     apiWithAuth.start({dev_id:1, user_id:3, user_key:result[0].hash, node:[host1 + ":" + portws1]})
                                                 }
@@ -404,6 +410,87 @@ function test_JWT_Auth()
 
 var apiWithRevokedJWT_Auth = new cometServerApi();
 apiWithRevokedJWT_Auth.setLogLevel(9)
+
+function test_Revoked_JWT_table()
+{
+    var isTestDone = false;
+    var revokedJWT = Math.random()+"";
+    
+    
+    var query = 'insert into revoked_tokens(token)VALUES("'+revokedJWT+'");';
+
+    console.log("[js-test] \x1b[1;33m test_Revoked_JWT_tables:\x1b[0m", query);
+    connection1.query(query,
+        function(error, result, fields)
+        {
+            if(error)
+            {
+                throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
+            }
+ 
+            query = 'select * from  revoked_tokens where token = "'+revokedJWT+'"';
+            connection1.query(query,
+                function(error, result, fields)
+                {
+                    if(error)
+                    {
+                        throw new Error("[js-test] Error in query:"+query);
+                    }
+
+                    if(result.length != 1)
+                    {
+                        console.log("Error in query:"+query, error, result, fields);
+                        throw new Error("[js-test] Error in query (test_Revoked_JWT_table 1):"+query+", result.length = " + result.length);
+                    }
+
+                    if(result[0].token != revokedJWT)
+                    {
+                        console.log("Error in query:"+query, error, result, fields);
+                        throw new Error("[js-test] Error in query:"+query+", result[0].id != user_id");
+                    }
+ 
+                    
+                    query = 'delete from  revoked_tokens where token = "'+revokedJWT+'"';
+                    connection1.query(query,
+                        function(error, result, fields)
+                        {
+                            if(error)
+                            {
+                                throw new Error("[js-test] Error in query:"+query);
+                            }
+ 
+                            query = 'select * from revoked_tokens where token = "'+revokedJWT+'"';
+                            connection1.query(query,
+                                function(error, result, fields)
+                                {
+                                    if(error)
+                                    {
+                                        throw new Error("[js-test] Error in query:"+query);
+                                    }
+
+                                    if(result.length != 0)
+                                    {
+                                        console.log("Error in query:"+query, error, result, fields);
+                                        throw new Error("[js-test] Error in query  (test_Revoked_JWT_table 2) :"+query+", result.length = " + result.length);
+                                    } 
+                                    
+                                    isTestDone = true
+                            })
+                    })
+            })
+    })
+            
+   
+ 
+    setTimeout(function()
+    {
+        if(!isTestDone)
+        {
+            throw new Error("[js-test] Error test_Revoked_JWT_table not done");
+        }
+    }, maxTimeTimeout)
+}
+
 
 function test_Revoked_JWT_Auth()
 {
@@ -616,7 +703,7 @@ function test_setUserData(user_id, rdata)
                 throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
             }
 
-            var query = 'select * from  users_data where id = '+user_id;
+            query = 'select * from  users_data where id = '+user_id;
             connection1.query(query,
                 function(error, result, fields)
                 {
@@ -756,7 +843,6 @@ function test_track_subscription()
     var pipe_name = "track_test_"+Math.floor(Math.random()*100000);
     var laseEvent = undefined
     
-    // Используем apiTest3 для теста а не apiTest2 так как при любом вызове subscription уходит лишнее событие в trak_ канал. 
     apiTest4.subscription(pipe_name, function(event){
         console.log("[js-test] \x1b[1;32m track_test_track_subscription isTestDone="+isTestDone+" pipe_name="+pipe_name+"\x1b[0m", event);
         
@@ -831,7 +917,7 @@ function test_get_pipe_log()
             }
             console.log("[js-test] \x1b[1;32m test_get_pipe_log 1\x1b[0m", result);
 
-            var query = 'insert into pipes_messages(name, event, message)VALUES("'+pipe_name+'", "'+event_name+'", \''+JSON.stringify(juserdata)+'\');';
+            query = 'insert into pipes_messages(name, event, message)VALUES("'+pipe_name+'", "'+event_name+'", \''+JSON.stringify(juserdata)+'\');';
             connection1.query(query,
                 function(error, result, fields)
                 {
@@ -840,7 +926,7 @@ function test_get_pipe_log()
                         throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
                     }
 
-                    var query = 'insert into pipes_messages(name, event, message)VALUES("'+pipe_name+'", "'+event_name+'", \''+JSON.stringify(juserdata)+'\');';
+                    query = 'insert into pipes_messages(name, event, message)VALUES("'+pipe_name+'", "'+event_name+'", \''+JSON.stringify(juserdata)+'\');';
                     connection1.query(query,
                         function(error, result, fields)
                         {
@@ -933,7 +1019,7 @@ function test_ql_subscription()
             }
         );
 
-        var query = 'SELECT * FROM pipes WHERE name = "'+pipe_name+'"; ';
+        query = 'SELECT * FROM pipes WHERE name = "'+pipe_name+'"; ';
         connection1.query(query,
             function(error, result, fields)
             {
@@ -966,7 +1052,7 @@ function test_ql_subscription()
             juserdata.index = i
 
             // @todo добавить невалидные запросы и запросы в разных формах
-            var query = 'insert into pipes_messages(name, event, message)VALUES("'+pipe_name+'", "'+event_name+'", \''+JSON.stringify(juserdata)+'\');';
+            query = 'insert into pipes_messages(name, event, message)VALUES("'+pipe_name+'", "'+event_name+'", \''+JSON.stringify(juserdata)+'\');';
             connection1.query(query,
                 function(error, result, fields)
                 {
@@ -977,7 +1063,7 @@ function test_ql_subscription()
                 }
             );
         }
-    }, 4000)
+    }, 6000)
 
     setTimeout(function()
     {
@@ -1003,7 +1089,7 @@ function test_ql_pipes_settings()
             }
             console.log("[js-test] \x1b[1;32m test_ql_pipes_settings 1\x1b[0m", result);
 
-            var query = 'SELECT * FROM pipes_settings WHERE name = "'+pipe_name+'" ';
+            query = 'SELECT * FROM pipes_settings WHERE name = "'+pipe_name+'" ';
             connection1.query(query,
                 function(error, result, fields)
                 {
@@ -1017,7 +1103,7 @@ function test_ql_pipes_settings()
                     //  Normal answer: { name: 'secret_pipe', length: '10' }
                     if(result.length != 1)
                     {
-                        throw new Error(JSON.stringify({test:"[js-test] Error (more then one line in result) in query:"+query, error:error, result:result, fields:fields }));
+                        throw new Error(JSON.stringify({test:"[js-test test_ql_pipes_settings] Error (more then one line in result) in query:"+query, error:error, result:result, fields:fields }));
                     }
 
                     if(result[0].length != "10")
@@ -1025,7 +1111,7 @@ function test_ql_pipes_settings()
                         throw new Error(JSON.stringify({test:"[js-test] Error (result[0].message != 10) in query:"+query, error:error, result:result, fields:fields }));
                     }
 
-                    var query = 'DELETE FROM pipes_messages WHERE name = "'+pipe_name+'" ';
+                    query = 'DELETE FROM pipes_messages WHERE name = "'+pipe_name+'" ';
                     connection1.query(query,
                         function(error, result, fields)
                         {
@@ -1035,7 +1121,7 @@ function test_ql_pipes_settings()
                             }
 
                             var text_message = "text message "+Math.random()
-                            var query = 'INSERT INTO pipes_messages (name, event, message)VALUES("'+pipe_name+'", "event_in_pipe", "'+text_message+'");';
+                            query = 'INSERT INTO pipes_messages (name, event, message)VALUES("'+pipe_name+'", "event_in_pipe", "'+text_message+'");';
                             connection1.query(query,
                                 function(error, result, fields)
                                 {
@@ -1045,7 +1131,7 @@ function test_ql_pipes_settings()
                                     }
 
                                     console.log("[js-test] \x1b[1;32m test_ql_pipes_settings 3\x1b[0m", result);
-                                    var query = 'SELECT * FROM pipes_messages WHERE name = "'+pipe_name+'" ';
+                                    query = 'SELECT * FROM pipes_messages WHERE name = "'+pipe_name+'" ';
                                     connection1.query(query,
                                         function(error, result, fields)
                                         {
@@ -1067,7 +1153,7 @@ function test_ql_pipes_settings()
 
                                             if(result.length != 1)
                                             {
-                                                throw new Error(JSON.stringify({test:"[js-test] Error (more then one line in result) in query:"+query, error:error, result:result, fields:fields }));
+                                                throw new Error(JSON.stringify({test:"[js-test test_ql_pipes_settings 2] Error (more then one line in result) in query:"+query, error:error, result:result, fields:fields }));
                                             }
 
                                             if(result[0].name != pipe_name)
@@ -1080,7 +1166,7 @@ function test_ql_pipes_settings()
                                                 throw new Error(JSON.stringify({test:"[js-test] Error (result[0].message != text_message) in query:"+query, error:error, result:result, fields:fields }));
                                             }
 
-                                            var query = 'DELETE FROM pipes_messages WHERE name = "'+pipe_name+'" ';
+                                            query = 'DELETE FROM pipes_messages WHERE name = "'+pipe_name+'" ';
                                             connection1.query(query,
                                                 function(error, result, fields)
                                                 {
@@ -1091,7 +1177,7 @@ function test_ql_pipes_settings()
 
                                                     console.log("[js-test] \x1b[1;32m test_ql_pipes_settings 5\x1b[0m", result);
                                                     var text_message = "text message "+Math.random()
-                                                    var query = 'INSERT INTO pipes_messages (name, event, message)VALUES("'+pipe_name+'", "event_in_pipe", "'+text_message+'");';
+                                                    query = 'INSERT INTO pipes_messages (name, event, message)VALUES("'+pipe_name+'", "event_in_pipe", "'+text_message+'");';
                                                     connection1.query(query,
                                                         function(error, result, fields)
                                                         {
@@ -1101,7 +1187,7 @@ function test_ql_pipes_settings()
                                                             }
 
                                                             console.log("[js-test] \x1b[1;32m test_ql_pipes_settings 3\x1b[0m", result);
-                                                            var query = 'SELECT * FROM pipes_messages WHERE name = "'+pipe_name+'" ';
+                                                            query = 'SELECT * FROM pipes_messages WHERE name = "'+pipe_name+'" ';
                                                             connection1.query(query,
                                                                 function(error, result, fields)
                                                                 {
@@ -1123,7 +1209,7 @@ function test_ql_pipes_settings()
 
                                                                     if(result.length != 1)
                                                                     {
-                                                                        throw new Error(JSON.stringify({test:"[js-test] Error (more then one line in result) in query:"+query, error:error, result:result, fields:fields }));
+                                                                        throw new Error(JSON.stringify({test:"[js-test test_ql_pipes_settings 3] Error (more then one line in result) in query:"+query, error:error, result:result, fields:fields }));
                                                                     }
 
                                                                     if(result[0].name != pipe_name)
@@ -1136,7 +1222,7 @@ function test_ql_pipes_settings()
                                                                         throw new Error(JSON.stringify({test:"[js-test] Error (result[0].message != text_message) in query:"+query, error:error, result:result, fields:fields }));
                                                                     }
 
-                                                                    var query = 'DELETE FROM pipes_settings WHERE name = "'+pipe_name+'" ';
+                                                                    query = 'DELETE FROM pipes_settings WHERE name = "'+pipe_name+'" ';
                                                                     connection1.query(query,
                                                                         function(error, result, fields)
                                                                         {
@@ -1146,7 +1232,7 @@ function test_ql_pipes_settings()
                                                                             }
 
                                                                             console.log("[js-test] \x1b[1;32m test_ql_pipes_settings 5\x1b[0m", result);
-                                                                            var query = 'SELECT * FROM pipes_messages WHERE name = "'+pipe_name+'" ';
+                                                                            query = 'SELECT * FROM pipes_messages WHERE name = "'+pipe_name+'" ';
                                                                             connection1.query(query,
                                                                                 function(error, result, fields)
                                                                                 {
@@ -1182,7 +1268,7 @@ function test_ql_pipes_settings()
         }
     );
 }
-/* */
+/*  */
 test_setUserData(9999-2, Math.random()+"-"+Math.random()+"-"+Math.random());
 
 test_setUserData(9999-3, Math.floor(Math.random()*100));
@@ -1200,9 +1286,9 @@ test_JWT_Auth();
 test_invalid_JWT_Auth();
 test_Revoked_JWT_Auth();
 test_2_users_messages();
-test_users_messages();// */
+test_users_messages();
 test_get_pipe_log();
-
+test_Revoked_JWT_table();// */
 // _cometServerApi.prototype.stop
 // restart
 //

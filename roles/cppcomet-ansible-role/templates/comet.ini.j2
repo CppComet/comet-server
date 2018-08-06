@@ -1,0 +1,108 @@
+[main]
+
+node_name = {{ cppcomet_node_name }}
+useQueryLoger = {{ cppcomet_useQueryLoger }} 
+
+base_dir = {{ cppcomet_base_dir }} 
+
+; пароль для доступа к api комет сервера
+password = {{ cppcomet_password }} 
+
+; Объём буфера для сообщения
+; Много ставить не надо, комет сервер не расчитан на передачу больших сообщений
+buf_size = {{ cppcomet_buf_size }} 
+
+; Максимальное значение размера памяти для Client_connection::fragment_buf
+; Должно быть больше 0
+; По достижении этого значения соединение просто закрывается
+fragment_buf_max_size = {{ cppcomet_fragment_buf_max_size }}
+
+; Начальное значение размера памяти для Client_connection::fragment_buf Должно быть больше 0
+fragment_buf_size = {{ cppcomet_fragment_buf_size }}
+
+; Объём буфера для подготовки ответного сообщения
+answer_buf_size = {{ cppcomet_answer_buf_size }}
+
+pidfile = /var/run/cppcomet.pid ; адрес для pid файла (не менять без нужды)
+
+[db]
+host = {{ cppcomet_db_host }}
+user = {{ cppcomet_db_user }}
+password = {{ cppcomet_db_password }}
+name = {{ cppcomet_db_name }}
+port = {{ cppcomet_db_port }}
+
+[ws]
+ip = {{ cppcomet_ws_ip }}
+;backlog = 10000
+;epoll_size = 100000
+thread_num = {{ cppcomet_ws_thread_num }}
+statistics = {{ cppcomet_statistics }}
+port = {{ cppcomet_ws_port }}
+uptimeTestInterval = 600 ; Интервал для проверок uptime у соединений (так же за одно выправляет значение счётчика пользователей онлайн)
+maxUptime = 0 ; Максимально значение uptime после которого конект отключается.
+
+[cometql]
+ip = {{ cppcomet_cometql_ip }}
+;backlog = 1000
+;epoll_size = 10000
+thread_num = {{ cppcomet_cometql_thread_num }}
+statistics = {{ cppcomet_statistics }}
+port = {{ cppcomet_cometql_port }}
+uptimeTestInterval = 600  
+maxUptime = 0  
+
+
+;[freeswitch]
+;ip
+;backlog
+;epoll_size
+;thread_num
+;statistics
+;port
+
+
+[mysqlproxy]
+ip = {{ cppcomet_mysqlproxy_ip }}
+;backlog = 1000
+;epoll_size = 10000
+thread_num = {{ cppcomet_mysqlproxy_thread_num }}
+statistics = {{ cppcomet_statistics }}
+port = {{ cppcomet_mysqlproxy_port }}
+uptimeTestInterval = 600  
+maxUptime = 0  
+
+;[statistics]
+;to_log = true   ; Вывод замеров о нагрузке в лог  
+;host = example.com
+;email = me@example.com
+;interval = 3600
+
+[content-type]
+
+js = application/javascript
+
+;[sip]
+;pipesalt = fFg34F3nf4n3fGF
+;freeswitch = []Server=app.comet-server.ru,Pwd=ClueCon,WSport=7443,Port=8021
+
+[log]
+level = {{ cppcomet_log_level }}
+
+Any                     = 500
+TagLoger                = 500
+appConf                 = 500
+pipeCommands            = 500
+statistics              = 500
+removeOldConnections    = 500
+MySqlServer             = 500
+UserIndex               = 500
+UserItem                = 500
+ClientServer            = 500
+ServerServer            = 500
+SimpleRedisClient       = 500
+tcpServer               = 500
+CometQLCluster          = 500
+devManager              = 500
+FreeswitchServer        = 500
+dbLink                  = 500

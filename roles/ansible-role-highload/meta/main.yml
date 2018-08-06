@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: Aleksandr Kostyrev
+  description: Configures a server for highload
+  license: BSD
+  min_ansible_version: 1.9
+
+  platforms:
+  - name: EL
+    versions:
+    - 6
+
+  categories:
+  - system
+
+dependencies: []

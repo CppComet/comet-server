@@ -330,8 +330,9 @@ public:
         
         memcpy(param_message, message, message_length);
         param_message_length = message_length;
-        
-        
+         
+        TagLoger::debug(Log_dbLink, 0, "\x1b[33mstm_users_queue_insert user_id=%d param_event=%s, param_message=%s\x1b[0m\n", user_id, param_event, param_message);
+         
         int res =  stmBase::insert();
         
         TagTimer::add("dbLink::stm_users_queue_insert", t);
@@ -1837,12 +1838,7 @@ public:
         
         memcpy(param_data, data, data_length);
         param_data_length = data_length;
-        
-        printf("param_data=%s", param_data);
-        printf("param_data_length=%ld", param_data_length);
-        printf("param_dev_id=%ld", param_dev_id);
-        
-        
+         
         int res =  stmBase::insert();
         
         TagTimer::add("dbLink::stm_users_data_replace", t);
@@ -1926,7 +1922,7 @@ public:
                 result_data = new char[appConf::instance()->get_int("db", "buf_size")+1];
                 result_data_length = appConf::instance()->get_int("db", "buf_size");
             }
-                bzero(result_data, result_data_length+1);
+            bzero(result_data, result_data_length+1);
             
             setParamsCount(2);
 
@@ -1969,6 +1965,8 @@ public:
         // https://docs.oracle.com/cd/E17952_01/mysql-5.5-en/mysql-stmt-fetch.html
         param_dev_id = dev_id;
         param_user_id = user_id;
+ 
+        bzero(result_data, result_data_length+1);
 
         
         bool res =  stmBase::select();
@@ -2082,10 +2080,9 @@ public:
         }
         bzero(param_token, MAX_JWT_LEN+1);
         memcpy(param_token, token, param_token_length);
-         
-        printf("param_token=%s", param_token);
-        printf("param_token_length=%ld", param_token_length);
-        printf("param_dev_id=%ld", param_dev_id);
+        
+        TagLoger::debug(Log_dbLink, 0, "\x1b[1;31mstm_revoked_tokens_replace param_token=%s\x1b[0m\n", token);
+        TagLoger::debug(Log_dbLink, 0, "\x1b[1;31mstm_revoked_tokens_replace param_token=%s, param_dev_id=%ld\x1b[0m\n", param_token, param_dev_id);
         
         
         int res =  stmBase::insert();
@@ -2168,7 +2165,7 @@ class stm_revoked_tokens_select: public stmBase{
 
     friend stmMapper;
     unsigned long param_dev_id = 0;
-    
+
     char          param_token[MAX_JWT_LEN+1]; 
     unsigned long param_token_length = MAX_JWT_LEN;
     
@@ -2185,7 +2182,7 @@ public:
         if(!isInited)
         {
             isInited = true;
-           
+             
             setParamsCount(2);
 
             int i = 0;
@@ -2196,8 +2193,8 @@ public:
             param[i].length         = 0;
 
             i++;
-            param[i].buffer_type    = MYSQL_TYPE_LONG;
-            param[i].buffer         = (void *)param_token;
+            param[i].buffer_type    = MYSQL_TYPE_STRING;
+            param[i].buffer         = (void *)&param_token;
             param[i].is_unsigned    = 0;
             param[i].is_null        = 0;
             param[i].length         = &param_token_length;
@@ -2226,7 +2223,7 @@ public:
         
         // https://docs.oracle.com/cd/E17952_01/mysql-5.5-en/mysql-stmt-fetch.html
         param_dev_id = dev_id;
-        
+
         param_token_length = strlen(token);
         if(param_token_length > MAX_JWT_LEN)
         {
@@ -2234,7 +2231,7 @@ public:
         }
         bzero(param_token, MAX_JWT_LEN+1);
         memcpy(param_token, token, param_token_length);
-
+       
         
         bool res =  stmBase::select();
         
@@ -2246,18 +2243,6 @@ public:
     /**
      * Извлекает результаты селекта построчно.
      * @return 0 если успех или MYSQL_NO_DATA или MYSQL_DATA_TRUNCATED и -1 если ошибка
-     * 
-     * @example 
-        local_buf->stm.users_auth_select->execute(dev_id, user_id);
-        if(local_buf->stm.users_auth_select->fetch() != 0)
-        {
-            // Не найден результат
-            return false;
-        }
-
-        local_buf->stm.users_auth_select->result_hash; // Найден результат
-
-        local_buf->stm.users_auth_select->free();
      */
     int fetch()
     {

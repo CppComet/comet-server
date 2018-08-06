@@ -1,0 +1,69 @@
+---
+- hosts: all  
+  vars:
+#    git_ee_repo_url: "https://****:****@gitlab.com/Levhav/star-comet"  
+#    git_ce_repo_url: "https://***:***@github.com/CppComet/comet-server" 
+#    git_ee_branch: master
+#    git_ce_branch: master
+#    git_branch
+  remote_user: root
+   
+  # Запускать тесты в докере на разных ос
+  # Проверять кластер
+  # Выплёвывать .deb и .rpm файлы на выходе
+  # Выплёвывать данные покрытия тестами в лог через grep и в веб перекладывая статику в доступное для nginx место
+  
+  tasks: 
+    
+    - name: add nodejs
+      raw: curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+      
+    - name: Installing deps
+      apt:
+        name: cmake,make,cpp,gcc,libssl-dev,g++,nginx,pkg-config,libmariadbclient-dev-compat,mysql-client,flex,mailutils,uuid-dev,git,wget,nodejs,build-essential,lcov,valgrind
+        state: present
+ 
+    - name: Make backup dir
+      raw: mkdir /root/cppcomet-back  --parent
+      
+    - name: Config backup
+      raw: date +"/root/cppcomet-back/cppcomet-%s" | xargs cp /usr/bin/cppcomet  
+      
+   # Получение кода
+    - name: Git clone
+      raw: rm -rf /tmp/CppComet-last && mkdir /tmp/CppComet-last && cd /tmp/CppComet-last && git clone -q -b master {{git_cppcomet_repo_url}} ./
+      
+    - name: Cmake Build
+      raw: cd /tmp/CppComet-last && cmake .
+      
+    - name: Make Build
+      raw: cd /tmp/CppComet-last && make
+      
+    - name: Config copy
+      raw: cp /etc/comet-server/comet.ini /tmp/CppComet-last/comet.ini
+      
+    - name: Install
+      raw: cd /tmp/CppComet-last && make install
+      
+    - name: restart
+      raw: service comet restart
+      
+    # Тесты версии
+    - name: Add +x
+      raw: chmod +x /tmp/CppComet-last/coverage/fulltests.sh
+      
+    - name: Installing deps
+      shell: 
+        chdir: /tmp/CppComet-last/coverage
+        cmd: npm install istanbul websocket mysql
+     
+    - name: Run tests 
+      shell: 
+        chdir: /tmp/CppComet-last/coverage
+        cmd: ./onlyJsTests.sh > /tmp/last-js-test.log
+      ignore_errors: yes
+      
+    - name: cat tests log
+      raw: cat /tmp/last-js-test.log | grep -A 4 "Coverage summary" 
+        
+       

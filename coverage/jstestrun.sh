@@ -1,6 +1,11 @@
 #!/bin/bash
 
 printf """\n \
+\n \
+setInterval(function (){\n \
+    console.log('[1s spend]');\n \
+}, 1000)\n \
+\n \
 setTimeout(function(){ \n \
 """ > ./test-cov.js
 
@@ -28,7 +33,7 @@ setTimeout(function(){\n \
 
 
 # Начало всех тестов через 2 секунды после запуска комет сервера.
-printf """\n }, 10000)""" >> ./test-cov.js
+printf """\n }, 1000)""" >> ./test-cov.js
 
 istanbul cover ./test-cov.js 
 

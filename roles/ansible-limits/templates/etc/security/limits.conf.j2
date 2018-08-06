@@ -1,0 +1,6 @@
+# {{ ansible_managed }}
+
+# <domain> <type> <item> <value>
+{% for item in item.value %}
+{{ item.domain }} {{ item.type }} {{ item.item }} {{ item.value }}
+{% endfor %}

@@ -1,0 +1,30 @@
+<include>
+  <!-- Preprocessor Variables
+       These are introduced when configuration strings must be consistent across modules. 
+       NOTICE: YOU CAN NOT COMMENT OUT AN X-PRE-PROCESS line, Remove the line instead.
+       
+       WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING 
+       
+       YOU SHOULD CHANGE THIS default_password value if you don't want to be subject to any
+       toll fraud in the future.  It's your responsibility to secure your own system.
+       
+       This default config is used to demonstrate the feature set of FreeSWITCH.
+       
+       WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING 
+  -->
+  <X-PRE-PROCESS cmd="set" data="default_password=FSmegaPassword"/>
+  
+  <!--
+      This setting is what sets the default domain FreeSWITCH will use if all else fails.
+      
+      FreeSWICH will default to $${local_ip_v4} unless changed.  Changing this setting does 
+      affect the sip authentication.  Please review conf/directory/default.xml for more
+      information on this topic.
+  -->
+  <X-PRE-PROCESS cmd="set" data="local_ip_v4=194.67.208.213"/>
+ 
+  <X-PRE-PROCESS cmd="set" data="xml_curl_gateway_url=http://app.comet-server.ru:84"/> 
+  
+  <X-PRE-PROCESS cmd="set" data="esl_password=${default_password}"/>
+  
+</include>
