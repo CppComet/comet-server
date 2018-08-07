@@ -165,7 +165,7 @@ cometApi.Subscription("track_online.unsubscription", function(msg)
 
 
 This type of channel is designed specifically to facilitate the creation of dynamically updated lists of online users.
-Main article [list of online users](/docs/comet/faq/realtime-users-list)
+Main article [list of online users](/docs//Subscription%20to%20update%20the%20list%20of%20users%20online)
 # Sending messages to channel from JS (pipes web_*)
 
 The function web_pipe_send allows sending messages from JavaScript to channel by passing your server (directly calls comet server). It allows resending messages between clients without loading your server. Also, owing to direct call to comet server, delivery time of message from client to client is minimal.

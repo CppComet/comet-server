@@ -2065,12 +2065,12 @@ public:
     { 
     }
 
-    int execute(unsigned long dev_id, const char* token)
+    int execute(unsigned long dev_id, const char* token, unsigned long time)
     {
         auto t = TagTimer::mtime();
         
         param_dev_id = dev_id;
-        param_time = 9999999999;
+        param_time = time;
         
         
         param_token_length = strlen(token);

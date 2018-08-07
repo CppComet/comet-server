@@ -605,9 +605,9 @@ void tcpServer<connectionType>::loop(const tcpServer_loop_data<connectionType>* 
                     bm.set_th_status(d->thread_id,'2');
 
                     // Вставка объекта соединения в std::map чтоб объект можно было найти по его client_id
-                    map_index_lock(client_id);
+                    auto key = map_index_lock(client_id);
                     getMapToUserId(client_id).insert(std::pair<int, CP<connectionType>>(client_id, clientObj));
-                    map_index_unlock(client_id);
+                    map_index_unlock_by_key(key);
 
                     bm.set_th_status(d->thread_id,'3');
 
@@ -644,19 +644,26 @@ void tcpServer<connectionType>::loop(const tcpServer_loop_data<connectionType>* 
 
     delete[] events;
 }
-
+ 
 template< class connectionType >
 int tcpServer<connectionType>::map_index_lock(int client_id)
 {
-    return pthread_mutex_lock(&request_mutex[client_id%map_index_size]);
+    int key = client_id%map_index_size;
+    if(key >= 0)
+    {
+        pthread_mutex_lock(&request_mutex[key]);
+        return key;
+    }
+    
+    return -1;
 }
 
 template< class connectionType >
-int tcpServer<connectionType>::map_index_unlock(int client_id)
+int tcpServer<connectionType>::map_index_unlock_by_key(int key)
 {
-    return pthread_mutex_unlock(&request_mutex[client_id%map_index_size]);
+    return pthread_mutex_unlock(&request_mutex[key]);
 }
-
+ 
     /**
      * Удаляет соединение из epoll
      */
@@ -690,7 +697,7 @@ void tcpServer<connectionType>::deleteClientFromMap(CP<connectionType> clientObj
     {
         return;
     }
-    map_index_lock(client_id);
+    auto key = map_index_lock(client_id);
 
     auto it = getMapToUserId(client_id).find(client_id);
     if( it != getMapToUserId(client_id).end() )
@@ -702,7 +709,7 @@ void tcpServer<connectionType>::deleteClientFromMap(CP<connectionType> clientObj
         TagLoger::error(Log_tcpServer, 0, "\x1b[31mS%d:Could not find user %d in map_index\x1b[0m\n",this->id, client_id);
     }
 
-    map_index_unlock(client_id);
+    map_index_unlock_by_key(key);
 }
 
 /**
@@ -780,12 +787,12 @@ void tcpServer<connectionType>::deleteClient(int client_id, thread_data* local_b
     }
     local_buf->setThreadStatus('4');
 
-    map_index_lock(client_id);
+    auto key = map_index_lock(client_id);
     auto it = getMapToUserId(client_id).find(client_id);
     if( it != getMapToUserId(client_id).end() )
     {
         CP<connectionType> clientObj = it->second;
-        map_index_unlock(client_id);
+        map_index_unlock_by_key(key);
 
         local_buf->setThreadStatus('5');
         TagLoger::debug(Log_tcpServer, 0, "S%d:call deleteClient client_id=%\n",this->id, client_id);
@@ -793,7 +800,7 @@ void tcpServer<connectionType>::deleteClient(int client_id, thread_data* local_b
         return;
     }
 
-    map_index_unlock(client_id);
+    map_index_unlock_by_key(key);
     local_buf->setThreadStatus('6');
 }
 
@@ -867,16 +874,20 @@ template< class connectionType >
 template< class connectionType >
     CP<connectionType> tcpServer<connectionType>::get(int client_id)
     {
-        map_index_lock(client_id);
+        auto key = map_index_lock(client_id);
+        if(key == -1)
+        {
+            return NULL;
+        }
 
         auto it = getMapToUserId(client_id).find(client_id);
         if( it != getMapToUserId(client_id).end() )
         {
-            map_index_unlock(client_id);
+            map_index_unlock_by_key(key);
             return it->second;
         }
 
-        map_index_unlock(client_id);
+        map_index_unlock_by_key(key);
         return NULL;
     }
 

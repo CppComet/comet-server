@@ -14,48 +14,71 @@
   # Выплёвывать данные покрытия тестами в лог через grep и в веб перекладывая статику в доступное для nginx место
   
   tasks: 
-    
-    - name: add nodejs
-      raw: curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
-      
+     
+    - name: Update
+      apt: update_cache=yes
+
     - name: Installing deps
       apt:
-        name: cmake,make,cpp,gcc,libssl-dev,g++,nginx,pkg-config,libmariadbclient-dev-compat,mysql-client,flex,mailutils,uuid-dev,git,wget,nodejs,build-essential,lcov,valgrind
+        name: curl,wget
         state: present
- 
+  
+    - name: add nodejs
+      shell:  
+        cmd: curl -sL https://deb.nodesource.com/setup_6.x | bash - 
+       
+    - name: Update
+      apt: update_cache=yes
+
+    - name: Installing deps
+      apt:
+        name: cmake,make,cpp,gcc,libssl-dev,g++,nginx,pkg-config,libmariadbclient-dev-compat,mysql-client,flex,mailutils,uuid-dev,git,curl,wget,nodejs,build-essential,lcov,valgrind
+        state: present
+  
     - name: Make backup dir
-      raw: mkdir /root/cppcomet-back  --parent
+      shell:  
+        cmd: mkdir /root/cppcomet-back  --parent
       
     - name: Config backup
       raw: date +"/root/cppcomet-back/cppcomet-%s" | xargs cp /usr/bin/cppcomet  
       
-   # Получение кода
+    # Получение кода
     - name: Git clone
-      raw: rm -rf /tmp/CppComet-last && mkdir /tmp/CppComet-last && cd /tmp/CppComet-last && git clone -q -b master {{git_cppcomet_repo_url}} ./
+      raw: rm -rf /tmp/CppComet-last && mkdir /tmp/CppComet-last && cd /tmp/CppComet-last && git clone -q -b {{git_cppcomet_repo_brunch}} {{git_cppcomet_repo_url}} ./
       
-    - name: Cmake Build
-      raw: cd /tmp/CppComet-last && cmake .
-      
+    - name: Cmake Build 
+      shell: 
+        chdir: /tmp/CppComet-last
+        cmd: cmake .
+        
+       
     - name: Make Build
-      raw: cd /tmp/CppComet-last && make
-      
+      shell: 
+        chdir: /tmp/CppComet-last
+        cmd: make
+               
     - name: Config copy
-      raw: cp /etc/comet-server/comet.ini /tmp/CppComet-last/comet.ini
-      
+      shell:  
+        cmd: cp /etc/comet-server/comet.ini /tmp/CppComet-last/comet.ini
+       
     - name: Install
-      raw: cd /tmp/CppComet-last && make install
-      
+      shell: 
+        chdir: /tmp/CppComet-last
+        cmd: make install
+       
     - name: restart
-      raw: service comet restart
+      shell:  
+        cmd: service comet restart
       
-    # Тесты версии
+    # Тесты версии 
     - name: Add +x
-      raw: chmod +x /tmp/CppComet-last/coverage/fulltests.sh
+      shell:  
+        cmd: chmod +x /tmp/CppComet-last/coverage/fulltests.sh 
       
     - name: Installing deps
       shell: 
         chdir: /tmp/CppComet-last/coverage
-        cmd: npm install istanbul websocket mysql
+        cmd: npm install -g istanbul websocket mysql
      
     - name: Run tests 
       shell: 

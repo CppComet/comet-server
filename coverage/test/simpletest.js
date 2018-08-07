@@ -680,7 +680,7 @@ function test_getUserData()
     {
         if(!isTestDone)
         {
-            throw new Error("[js-test] Error test_getUserData not done");
+            throw new Error("[js-test] Error test_getUserData not done isTestDone="+isTestDone);
         }
     }, maxTimeTimeout)
 }
@@ -702,11 +702,14 @@ function test_setUserData(user_id, rdata)
             {
                 throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
             }
-
+            isTestDone += 1;
             query = 'select * from  users_data where id = '+user_id;
+            console.log("Test query:"+query );
+            
             connection1.query(query,
                 function(error, result, fields)
                 {
+                    isTestDone += 1;
                     if(error)
                     {
                         throw new Error("[js-test] Error in query:"+query);
@@ -762,7 +765,7 @@ function test_setUserData(user_id, rdata)
                             throw new Error("[js-test] Error getUserData filed `user_data` != juserdata.rand ");
                         }
 
-                        isTestDone = 1;
+                        isTestDone += 1;
                         console.log("[js-test] \x1b[1;32m test_getUserData ok\x1b[0m");
 
                     })
@@ -774,11 +777,11 @@ function test_setUserData(user_id, rdata)
 
     setTimeout(function()
     {
-        if(isTestDone != 1)
+        if(isTestDone != 3)
         {
-            throw new Error("[js-test] Error test_getUserData not done");
+            throw new Error("[js-test] Error test_setUserData not done isTestDone="+isTestDone);
         }
-    }, 10000)
+    }, maxTimeTimeout)
 }
 
 function test_web_pipe_send()

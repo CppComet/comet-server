@@ -2,7 +2,7 @@
  * JavaScript API for comet-server.com
  * I will be glad to new orders for something a development.
  *
- * VCersion 4.02 
+ * VCersion 4.03
  *
  *
  * @author Trapenok Victor, Levhav@ya.ru, 89244269357
@@ -2066,7 +2066,7 @@ var _cometServerApi = function(opt)
             return false;
         }
 
-        if(!/^web_/.test(pipe_name))
+        if(!/^web_/.test(pipe_name) || !/^webauth_/.test(pipe_name))
         {
             console.error("Invalid channel name `"+pipe_name+"`. The channel should begin with web_", pipe_name);
             return;

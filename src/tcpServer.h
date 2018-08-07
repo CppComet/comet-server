@@ -142,8 +142,8 @@ class tcpServer: public intervalLoopObject
     int map_index_size = 101;
     pthread_mutex_t* request_mutex;
 
-    int map_index_lock(int client_id);
-    int map_index_unlock(int client_id);
+    int map_index_lock(int client_id); 
+    int map_index_unlock_by_key(int key);
     
     /**
      *  @todo Заменить std::map на std::unordered_map так как он быстрее http://forum.vingrad.ru/topic-341520.html
