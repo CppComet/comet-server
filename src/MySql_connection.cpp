@@ -2031,9 +2031,7 @@ int MySql_connection::sql_insert_into_revoked_tokens(thread_data* local_buf, uns
                 TagLoger::log(Log_MySqlServer, 0, "Connection ID not found\n");
             }
         }
-
-        return false;
-
+ 
     } catch (InvalidTokenError &tfe) {
         // An invalid token
         TagLoger::debug(Log_UserItem, 0, "Validation failed: %s [secret=%s, token=%s]\n", tfe.what(), secret.data(), token);

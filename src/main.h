@@ -77,8 +77,8 @@
  */
 #define  MAX_CONECTION_ON_USER_ID 16
 
-#define MYSQL_SERVERNAME "CppComet enterprise 4.03"
-#define MYSQL_SYSTEMVARIBLE "CppComet enterprise 4.03 (comet-server.com, support@comet-server.com)"
+#define MYSQL_SERVERNAME "CppComet enterprise 4.04"
+#define MYSQL_SYSTEMVARIBLE MYSQL_SERVERNAME "(comet-server.com, support@comet-server.com)"
 
 
 

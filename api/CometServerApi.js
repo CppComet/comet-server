@@ -2,7 +2,7 @@
  * JavaScript API for comet-server.com
  * I will be glad to new orders for something a development.
  *
- * VCersion 4.03
+ * Version 4.06
  *
  *
  * @author Trapenok Victor, Levhav@ya.ru, 89244269357
@@ -362,7 +362,7 @@ var _cometServerApi = function(opt)
     /**
      * @private
      */
-    this.version = "4.02";
+    this.version = "4.06";
 
     /**
      * @private
@@ -401,7 +401,7 @@ var _cometServerApi = function(opt)
     /**
      * @private
      */
-    this.in_conect_to_server = false;
+    //this.in_conect_to_server = false;
 
     /**
      * @private
@@ -851,19 +851,19 @@ var _cometServerApi = function(opt)
         return this.tabSignal.disconnect(slotName, sigName);
     };
 
-
+    var localArr_uuid = {}
     this.addUUID = function(uuid)
     {
         var d = new Date();
         try{
-            window['localStorage']['_cometApi_uuid'+uuid] = d.getTime();
+            localArr_uuid[uuid] = d.getTime();
         }catch (e){}
     };
 
     this.testUUID = function(uuid)
     {
         try{
-            return window['localStorage']['_cometApi_uuid'+uuid]
+            return localArr_uuid[uuid]
         }catch (e){}
     };
 
@@ -873,14 +873,7 @@ var _cometServerApi = function(opt)
         var time = d.getTime();
 
         try{
-            for(var i in window['localStorage'])
-            {
-                if(/^_cometApi_uuid/.test(i) && window['localStorage'][i] < time - 1000*60*3  )
-                {
-                    // Удаляет старые записи из localStorage, чтоб они там не хранились более 3 минуты
-                    delete window['localStorage'][i]
-                }
-            }
+            localArr_uuid = {}
         }catch (e){}
     };
 
@@ -1279,6 +1272,7 @@ var _cometServerApi = function(opt)
 
     this.stop = function()
     {
+        this.options.isStart = false;
         if(this.isMaster())
         {
             this.in_abort = true;
@@ -1312,7 +1306,7 @@ var _cometServerApi = function(opt)
      * @note не гарантирует правильное переподключение при смене адреса для подключения. Только смена логина и пароля.
      */
     this.restart = function(opt)
-    {
+    { 
         this.updateEventKey()
         if(opt !== undefined)
         {
@@ -1456,13 +1450,13 @@ var _cometServerApi = function(opt)
         if(this.LogLevel) console.log("[js-api] setAsMaster");
 
         //  для уведомления всех остальных вкладок о своём превосходстве
-        thisObj.tabSignal.emitAll('comet_msg_master_signal', {custom_id:this.custom_id});
+        //thisObj.tabSignal.emitAll('comet_msg_master_signal', {custom_id:this.custom_id});
         thisObj.tabSignal.emitAll('comet_msg_new_master');                                // для уведомления всех что надо переподписатся @todo реализовать переподписку событий
         var masterSignalIntervalId = setInterval(function()                         // Поставим таймер для уведомления всех остальных вкладок о своём превосходстве
         {
             // Передаём идентификатор своей вкладки на тот случай если вдруг по ошибки ещё одна из вкладок возомнит себя мастером
             // То та вкладка у кторой идентификатор меньше уступит право быть мастер вкладкой той вкладке у которой идентификатор больше
-            thisObj.tabSignal.emitAll('comet_msg_master_signal', {custom_id:thisObj.custom_id})
+            //thisObj.tabSignal.emitAll('comet_msg_master_signal', {custom_id:thisObj.custom_id})
         }, this.start_timer/6);
 
         // Подписываемся на уведомления о том что кто то возомнил себя бастер вкладкой для того чтоб вовремя уладить конфликт двоевластия
@@ -2066,7 +2060,7 @@ var _cometServerApi = function(opt)
             return false;
         }
 
-        if(!/^web_/.test(pipe_name) || !/^webauth_/.test(pipe_name))
+        if(!/^web_/.test(pipe_name) && !/^webauth_/.test(pipe_name))
         {
             console.error("Invalid channel name `"+pipe_name+"`. The channel should begin with web_", pipe_name);
             return;
@@ -2240,7 +2234,7 @@ var _cometServerApi = function(opt)
      */
     this.isConnected = function()
     {
-        for(var i in this.web_socket_error)
+        for(var i = 0; i< this.web_socket_error.length; i++)
         {
             if(this.web_socket_error[i] == 0)
             {
@@ -2259,14 +2253,14 @@ var _cometServerApi = function(opt)
     {
         var thisObj = this;
 
-        if(this.in_conect_to_server)
-        {
-            if(this.LogLevel) console.log("[js-api] Connection to the server is already installed.");
-            return;
-        }
+        //if(this.in_conect_to_server)
+        //{
+        //    if(this.LogLevel) console.log("[js-api] Connection to the server is already installed.");
+        //    return;
+        //}
 
         if(this.LogLevel) console.log("[js-api] Connecting to the server");
-        this.in_conect_to_server = true;
+        //this.in_conect_to_server = true;
         if(!this.isMaster()) this.setAsMaster();
 
         if(this.UseWebSocket())
@@ -2447,6 +2441,17 @@ var _cometServerApi = function(opt)
                     if(thisObj.LogLevel) console.log("[js-api] Error " + error.message);
 
                 };
+            }
+            
+            if(thisObj.socketArray)
+            {
+                for(var i = 0; i< this.socketArray.length; i++)
+                {
+                    if(thisObj.socketArray[i])
+                    {
+                        thisObj.socketArray[i].close();
+                    }
+                }
             }
 
             thisObj.socketArray = [];
