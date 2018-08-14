@@ -1976,6 +1976,12 @@ int MySql_connection::sql_insert_into_revoked_tokens(thread_data* local_buf, uns
     char* token = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]]);
     token[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]].tokLen] = 0;
   
+    if(local_buf->stm.revoked_tokens_replace->execute(dev_id, token, 9999999) < 0)
+    {
+        Send_Err_Package(SQL_ERR_INVALID_DATA, "Error in token", PacketNomber+1, local_buf, this);
+        return 0;
+    }
+
     ExpValidator exp;
 
     std::string secret(appConf::instance()->get_chars("main", "password"));
@@ -1994,12 +2000,6 @@ int MySql_connection::sql_insert_into_revoked_tokens(thread_data* local_buf, uns
         std::tie(header, payload) = JWT::Decode(token, &signer, &exp);
         //std::cout << "Header: " << header << std::endl;
         //std::cout << "Payload: " << payload << std::endl;
-
-        if(local_buf->stm.revoked_tokens_replace->execute(dev_id, token, 9999999) < 0)
-        {
-            Send_Err_Package(SQL_ERR_INVALID_DATA, "Error in token", PacketNomber+1, local_buf, this);
-            return 0;
-        }
 
         int userId = payload["user_id"];
 
