@@ -1217,7 +1217,6 @@ var _cometServerApi = function(opt)
      */
     this.start = function(opt, callBack)
     {
-        this.updateEventKey()
         this.options.isStart = true;
 
         if(opt !== undefined)
@@ -1272,6 +1271,8 @@ var _cometServerApi = function(opt)
             }
         }
 
+	    this.updateEventKey();
+
         this.in_abort = false;
         this.conect(callBack);
         return true;
@@ -1313,7 +1314,6 @@ var _cometServerApi = function(opt)
      */
     this.restart = function(opt)
     {
-        this.updateEventKey()
         if(opt !== undefined)
         {
             for(var key in opt)
@@ -1321,6 +1321,8 @@ var _cometServerApi = function(opt)
                 this.options[key] = opt[key];
             }
         }
+
+	    this.updateEventKey();
 
         if(!this.options.isStart)
         {
