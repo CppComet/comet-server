@@ -2,7 +2,7 @@
  * JavaScript API for comet-server.com
  * I will be glad to new orders for something a development.
  *
- * Version 4.06
+ * Version 4.07
  *
  *
  * @author Trapenok Victor, Levhav@ya.ru, 89244269357
@@ -362,7 +362,7 @@ var _cometServerApi = function(opt)
     /**
      * @private
      */
-    this.version = "4.06";
+    this.version = "4.07";
 
     /**
      * @private
@@ -1210,7 +1210,6 @@ var _cometServerApi = function(opt)
      */
     this.start = function(opt, callBack)
     {
-        this.updateEventKey()
         this.options.isStart = true;
 
         if(opt !== undefined)
@@ -1265,6 +1264,7 @@ var _cometServerApi = function(opt)
             }
         }
 
+        this.updateEventKey()
         this.in_abort = false;
         this.conect(callBack);
         return true;
@@ -1307,7 +1307,6 @@ var _cometServerApi = function(opt)
      */
     this.restart = function(opt)
     { 
-        this.updateEventKey()
         if(opt !== undefined)
         {
             for(var key in opt)
@@ -1316,6 +1315,7 @@ var _cometServerApi = function(opt)
             }
         }
 
+        this.updateEventKey()
         if(!this.options.isStart)
         {
             return this.start(opt);
