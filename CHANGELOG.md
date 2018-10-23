@@ -5,6 +5,10 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v4.4
+BUG FIXES:
+ * Fix 1 critical bugs in webauth_* pipes
+ 
 ## v4.0
 BUG FIXES:
  * Fix 2 critical bugs

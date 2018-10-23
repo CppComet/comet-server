@@ -143,7 +143,7 @@ if( !window._tabSignal)
          *  @eName string - имя события
          *  использование .emit('любое название события', [ Параметры события ])
          */
-        this.emit/*All*/ = function (signal_name, param)
+        this.emitAll = function (signal_name, param)
         {
             this.emit(signal_name, param);
 
