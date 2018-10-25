@@ -140,7 +140,7 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
     // @FixMe Перепроверить всё общение по протоколу ещё раз так как не валидный пакет может убить систему!
 
 
-    
+
     // если len = 0 то соединение закрыто.
     if(TagLoger::isLog(Log_MySqlServer, TAGLOG_LOG))
     {
@@ -202,30 +202,30 @@ int MySql_connection::request(int client, int len, thread_data* local_buf)
             return res;
         }
 
-        current_position += PacketLen + 4; 
-        delta += PacketLen + 4; 
+        current_position += PacketLen + 4;
+        delta += PacketLen + 4;
         part++;
     }while(len > delta);
-    
-    
+
+
     return 0;
 }
 
 int MySql_connection::one_query(int client, int len, thread_data* local_buf, char* data)
 {
     auto t = TagTimer::mtime();
-   
+
     char* p = data;
-    
+
     // PacketLen
-    unsigned int PacketLen = 0; 
+    unsigned int PacketLen = 0;
     char* pl = (char*)&PacketLen;
     pl[0] = p[0];
     pl[1] = p[1];
     pl[2] = p[2];
     pl[3] = 0;
     p+=3;
-    
+
     // PacketNomber
     unsigned char PacketNomber = *p;
     p++;
@@ -525,7 +525,7 @@ int MySql_connection::one_query(int client, int len, thread_data* local_buf, cha
     return -1;
 }
 
-    
+
 int MySql_connection::query_router(thread_data* local_buf, int PacketNomber)
 {
     if(local_buf->qInfo.command == TOK_SHOW)
@@ -816,10 +816,10 @@ bool MySql_connection::sql_use_db(char* db_name)
         }
     }
 
-   
+
 
     TagLoger::log(Log_MySqlServer, 0, "\x1b[1;31mError: set api_version `%s`\x1b[0m", db_name);
- 
+
     return false;
 }
 
@@ -1943,11 +1943,11 @@ int MySql_connection::sql_select_from_revoked_tokens(thread_data* local_buf, uns
 
         local_buf->stm.revoked_tokens_select->execute(dev_id, token);
         while(!local_buf->stm.revoked_tokens_select->fetch())
-        { 
-            if(local_buf->sql.useColumn(0)) local_buf->sql.getValue(countRows, 0) = token;  
+        {
+            if(local_buf->sql.useColumn(0)) local_buf->sql.getValue(countRows, 0) = token;
             countRows++;
         }
-        local_buf->stm.revoked_tokens_select->free(); 
+        local_buf->stm.revoked_tokens_select->free();
     }
 
     local_buf->sql.sendAllRowsAndHeaders(local_buf, PacketNomber, countRows, this);
@@ -1975,10 +1975,71 @@ int MySql_connection::sql_insert_into_revoked_tokens(thread_data* local_buf, uns
 
     char* token = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]]);
     token[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]].tokLen] = 0;
-    if(local_buf->stm.revoked_tokens_replace->execute(dev_id, token) < 0)
+  
+    if(local_buf->stm.revoked_tokens_replace->execute(dev_id, token, 9999999) < 0)
     {
         Send_Err_Package(SQL_ERR_INVALID_DATA, "Error in token", PacketNomber+1, local_buf, this);
         return 0;
+    }
+
+    ExpValidator exp;
+
+    std::string secret(appConf::instance()->get_chars("main", "password"));
+
+    secret.append(std::to_string(dev_id));
+    HS256Validator signer(secret);
+
+    // https://jwt.io/
+    // Now let's use these validators to parse and verify the token we created
+    // in the previous example
+
+    try {
+        // Decode and validate the token
+        nlohmann::json header, payload;
+
+        std::tie(header, payload) = JWT::Decode(token, &signer, &exp);
+        //std::cout << "Header: " << header << std::endl;
+        //std::cout << "Payload: " << payload << std::endl;
+
+        int userId = payload["user_id"];
+
+        if(devManager::instance()->getDevInfo(dev_id)->index->delete_hash(local_buf, userId))
+        {
+            int *conection_id = devManager::instance()->getDevInfo(dev_id)->index->get_conection_id(local_buf, userId);
+            if(conection_id != NULL)
+            {
+                for(int j=0; j< MAX_CONECTION_ON_USER_ID; j++)
+                {
+                    if( conection_id[j] == 0 )
+                    {
+                        continue;
+                    }
+
+                    CP<Client_connection> r = tcpServer <Client_connection>::instance()->get(conection_id[j]);
+                    if(r && r->web_user_dev_id == dev_id)
+                    {
+                        tcpServer <Client_connection>::instance()->deleteClient(r->getfd(), local_buf);
+                    }
+                    else
+                    {
+                        TagLoger::log(Log_MySqlServer, 0, "Connection object is not found\n");
+                    }
+                }
+            }
+            else
+            {
+                TagLoger::log(Log_MySqlServer, 0, "Connection ID not found\n");
+            }
+        }
+ 
+    } catch (InvalidTokenError &tfe) {
+        // An invalid token
+        TagLoger::debug(Log_UserItem, 0, "Validation failed: %s [secret=%s, token=%s]\n", tfe.what(), secret.data(), token);
+    }
+    catch(...)
+    {
+        // handling for exceptions with any type
+        TagLoger::debug(Log_UserItem, 0, "Validation failed: secret=%s, token=%s\n", secret.data(), token);
     }
 
     /**
@@ -2025,7 +2086,7 @@ int MySql_connection::sql_delete_from_revoked_tokens(thread_data* local_buf, uns
         {
             continue;
         }
-        
+
         int nameLen = local_buf->qInfo.where.whereExprValue[idExprPos][i].tokLen;
         token[nameLen] = 0;
 
@@ -3943,17 +4004,17 @@ void MySql_connection::addIntervalRoutine()
 }
 
 void* MySql_connection::CometQLParsing(char* query, thread_data* local_buf)
-{   
+{
     pthread_mutex_lock(&QLParsing_mutex);
     void* buff = QLParsing(query, &local_buf->qInfo);
- 
+
     if(local_buf->qInfo.hasError)
     {
         TagLoger::error(Log_MySqlServer, 0, "\x1b[1;31mError query:%s\x1b[0m\n", query);
-        pthread_mutex_unlock(&QLParsing_mutex); 
+        pthread_mutex_unlock(&QLParsing_mutex);
         return NULL;
     }
     pthread_mutex_unlock(&QLParsing_mutex);
- 
+
     return buff;
 }

@@ -77,6 +77,10 @@
  */
 #define  MAX_CONECTION_ON_USER_ID 16
 
+#define MYSQL_SERVERNAME "CppComet enterprise 4.04"
+#define MYSQL_SYSTEMVARIBLE MYSQL_SERVERNAME "(comet-server.com, support@comet-server.com)"
+
+
 
 /*
 #define printBase printf("\x1b[0m")
@@ -113,7 +117,7 @@
                     <table id='center'>\
                             <tr style='vertical-align: top;'>\
                                 <td style='  padding-left: 10px;'> \
-                                        <div style='font-size: 30px;  font-weight: bold;'>CppComet</div>\
+                                        <div style='font-size: 30px;  font-weight: bold;'>" MYSQL_SERVERNAME "</div>\
                                             For more information, see <a href='http://comet-server.com' target='_blank'>comet-server.com</a> and support@comet-server.com\
                                     </td>\
                             </tr>\
@@ -121,10 +125,6 @@
     </body>\
     </html>" 
   
-#define MYSQL_SERVERNAME "CppComet enterprise 4.02"
-#define MYSQL_SYSTEMVARIBLE "CppComet enterprise 4.02 (comet-server.com, support@comet-server.com)"
-
-
 #define maxValue( a, b ) ( (a) > (b) ? (a) : (b) )
 #define minValue( a, b ) ( (a) < (b) ? (a) : (b) )
 

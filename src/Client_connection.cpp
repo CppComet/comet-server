@@ -343,15 +343,17 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     if(web_user_dev_id < 0)
     { 
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] [2] \x1b[0m\n");
-        web_write_error( "Error code 406(Invalid request, no public key found [2])" , 406, local_buf);
-        return NULL;
+        //web_write_error( "Error code 406(Invalid request, no public key found [2])" , 406, local_buf);
+        //return NULL;
+        web_user_dev_id = 0;
     }
 
     if(web_user_dev_id > devManager::instance()->getDevIndexSize())
     {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] [3] \x1b[0m\n");
-        web_write_error( "Error code 406(Invalid request, no public key found [3])" , 406, local_buf);
-        return NULL;
+        //web_write_error( "Error code 406(Invalid request, no public key found [3])" , 406, local_buf);
+        //return NULL;
+        web_user_dev_id = 0;
     }
 
     int version_index = str_find(mytext,'&',3,0,2000);
@@ -1425,13 +1427,35 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
     auto t = TagTimer::mtime();
     int set_user_id = web_user_id;
     char* name = event_data;
-    if(memcmp(name, "@web_", 5) == 0)
+    if(memcmp(name, "@web_", strlen("@web_")) == 0)
     {
         // Не добавлять к сообщению id отправителя
         set_user_id = 0;
         name++;
     }
-    else if(memcmp(name, "web_", 4) != 0)
+    else if(memcmp(name, "webauth_", strlen("webauth_")) == 0)
+    {
+        if(web_user_id <= 0)
+        {
+            TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mweb_pipe_msg_v2 Invalid user auth for [name=%s]\x1b[0m\n", name);
+            // @todo добавить ссылку на описание ошибки
+            nlohmann::json err = {
+                {
+                    "data", {
+                                {"number_messages", -1},
+                                {"error", "[webauth_pipe_msg2] Invalid user auth. In to channel with name like webauth_* can not send messages anonim users"},
+                            }
+                },
+                {"event", "error"},
+                {"pipe", "sys"}
+            };
+
+            message(local_buf, err);
+            TagTimer::add("Client_connection::web_pipe_msg_v2", t);
+            return 0;
+        }
+    }
+    else if(memcmp(name, "web_", strlen("web_")) != 0 )
     {
         TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mweb_pipe_msg_v2 Invalid channel name [name=%s]\x1b[0m\n", name);
         // @todo добавить ссылку на описание ошибки
@@ -1455,6 +1479,7 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
     if( p == 0)
     {
         TagTimer::add("Client_connection::web_pipe_msg_v2", t);
+        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mweb_pipe_msg_v2 checking_channel_name error [name=%s]\x1b[0m\n", name);
         return 0;
     }
     *p = 0;
@@ -1466,6 +1491,7 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
     if( p == 0)
     {
         TagTimer::add("Client_connection::web_pipe_msg_v2", t);
+        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mweb_pipe_msg_v2 checking_event_name error [event_name=%s]\x1b[0m\n", event_name);
         return 0;
     }
 
@@ -1491,6 +1517,7 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
 
         message(local_buf, err);
         TagTimer::add("Client_connection::web_pipe_msg_v2", t);
+        TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mweb_pipe_msg_v2 checking_auth_type error [auth_type=%s]\x1b[0m\n", auth_type);
         return 0;
     }
 
@@ -1509,12 +1536,7 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
 
     TagLoger::log(Log_ClientServer, 0, "json_msg:%s\n", local_buf->answer_buf.getData());
     PipeLog::addToLog(local_buf, web_user_dev_id, name, event_name, set_user_id , msg, strlen(msg));
-
-    // Дополнительные данные в json отправляемые сервером.
-    char addData[EVENT_NAME_LEN + 64];
-    snprintf(addData, EVENT_NAME_LEN + 64, "\"event_name\":\"%s\",\"user_id\":%d", event_name, set_user_id);
-
-
+ 
     CP<Pipe> pipe = devManager::instance()->getDevInfo(web_user_dev_id)->findPipe(std::string(name));
     int num_msg = 0;
     if(!pipe.isNULL())
@@ -1547,15 +1569,23 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
                     }
                     else
                     {
-                        TagLoger::log(Log_ClientServer, 0, "send_result[%d]->%d\n", conection_id, send_result );
-                        pipe->erase(conection_id);
+                        TagLoger::warn(Log_ClientServer, 0, "send_result[%d]->%d\n", conection_id, send_result );
+                        //pipe->erase(conection_id);
                         num_fail++;
                     }
                 }
             }
             else
             {
-                pipe->erase(conection_id);
+                if(r)
+                {
+                    TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mweb_pipe_msg_v2 checking r->web_user_dev_id(%d) == web_user_dev_id(%d) error\x1b[0m\n", r->web_user_dev_id, web_user_dev_id);
+                }
+                else
+                {
+                    TagLoger::warn(Log_ClientServer, 0, "\x1b[1;31mweb_pipe_msg_v2 checking r(NULL) == web_user_dev_id(%d) error\x1b[0m\n", web_user_dev_id);
+                }
+                //pipe->erase(conection_id);
                 num_fail++;
             }
             it = it->Next();

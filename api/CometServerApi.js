@@ -2,7 +2,7 @@
  * JavaScript API for comet-server.com
  * I will be glad to new orders for something a development.
  *
- * VCersion 4.02 
+ * Version 4.08
  *
  *
  * @author Trapenok Victor, Levhav@ya.ru, 89244269357
@@ -289,7 +289,7 @@ if( !window._tabSignal)
             return undefined
         };
 
-        this.send_emit = this.emitAll; // Для совместимости с прошлой версией.
+        this.send_emit = this.emit/*All*/; // Для совместимости с прошлой версией.
 
         var thisTabSignalObj = this;
         this.init = true;
@@ -362,7 +362,7 @@ var _cometServerApi = function(opt)
     /**
      * @private
      */
-    this.version = "4.02";
+    this.version = "4.08";
 
     /**
      * @private
@@ -401,7 +401,7 @@ var _cometServerApi = function(opt)
     /**
      * @private
      */
-    this.in_conect_to_server = false;
+    //this.in_conect_to_server = false;
 
     /**
      * @private
@@ -851,19 +851,19 @@ var _cometServerApi = function(opt)
         return this.tabSignal.disconnect(slotName, sigName);
     };
 
-
+    var localArr_uuid = {}
     this.addUUID = function(uuid)
     {
         var d = new Date();
         try{
-            window['localStorage']['_cometApi_uuid'+uuid] = d.getTime();
+            localArr_uuid[uuid] = d.getTime();
         }catch (e){}
     };
 
     this.testUUID = function(uuid)
     {
         try{
-            return window['localStorage']['_cometApi_uuid'+uuid]
+            return localArr_uuid[uuid]
         }catch (e){}
     };
 
@@ -873,14 +873,7 @@ var _cometServerApi = function(opt)
         var time = d.getTime();
 
         try{
-            for(var i in window['localStorage'])
-            {
-                if(/^_cometApi_uuid/.test(i) && window['localStorage'][i] < time - 1000*60*3  )
-                {
-                    // Удаляет старые записи из localStorage, чтоб они там не хранились более 3 минуты
-                    delete window['localStorage'][i]
-                }
-            }
+            localArr_uuid = {}
         }catch (e){}
     };
 
@@ -1051,7 +1044,7 @@ var _cometServerApi = function(opt)
         else
         {
             // Мы slave вкладка
-            thisObj.tabSignal.emitAll('comet_msg_slave_add_subscription_and_restart',this.subscription_array.join("\n"))
+            thisObj.tabSignal.emit/*All*/('comet_msg_slave_add_subscription_and_restart',this.subscription_array.join("\n"))
         }
         return sigId;
     };
@@ -1271,8 +1264,7 @@ var _cometServerApi = function(opt)
             }
         }
 
-	    this.updateEventKey();
-
+        this.updateEventKey()
         this.in_abort = false;
         this.conect(callBack);
         return true;
@@ -1280,6 +1272,7 @@ var _cometServerApi = function(opt)
 
     this.stop = function()
     {
+        this.options.isStart = false;
         if(this.isMaster())
         {
             this.in_abort = true;
@@ -1302,7 +1295,7 @@ var _cometServerApi = function(opt)
         }
         else
         {
-            this.tabSignal.emitAll('comet_msg_slave_signal_stop')
+            this.tabSignal.emit/*All*/('comet_msg_slave_signal_stop')
         }
     };
 
@@ -1313,7 +1306,7 @@ var _cometServerApi = function(opt)
      * @note не гарантирует правильное переподключение при смене адреса для подключения. Только смена логина и пароля.
      */
     this.restart = function(opt)
-    {
+    { 
         if(opt !== undefined)
         {
             for(var key in opt)
@@ -1322,8 +1315,7 @@ var _cometServerApi = function(opt)
             }
         }
 
-	    this.updateEventKey();
-
+        this.updateEventKey()
         if(!this.options.isStart)
         {
             return this.start(opt);
@@ -1353,7 +1345,7 @@ var _cometServerApi = function(opt)
         }
         else
         {
-            this.tabSignal.emitAll('comet_msg_slave_signal_restart', opt);
+            this.tabSignal.emit/*All*/('comet_msg_slave_signal_restart', opt);
         }
     };
 
@@ -1391,14 +1383,14 @@ var _cometServerApi = function(opt)
                     setTimeout(function()
                     {
                         // Отправляем сигнал запрашивающий статус авторизации у мастер вкладки так как пришёл сигнал с неопределённым статусом
-                        thisObj.tabSignal.emitAll('__comet_get_authorized_status');
+                        thisObj.tabSignal.emit/*All*/('__comet_get_authorized_status');
                     }, 200)
                 }
                 thisObj.setAuthorized(param)
             });
 
             // Отправляем сигнал запрашивающий статус авторизации у мастер вкладки
-            thisObj.tabSignal.emitAll('__comet_get_authorized_status');
+            thisObj.tabSignal.emit/*All*/('__comet_get_authorized_status');
         });
 
         // Подключаемся на уведомления от других вкладок о том что сервер работает, если за this.start_timer милисекунд уведомление произойдёт то отменим поставленый ранее таймер
@@ -1458,13 +1450,13 @@ var _cometServerApi = function(opt)
         if(this.LogLevel) console.log("[js-api] setAsMaster");
 
         //  для уведомления всех остальных вкладок о своём превосходстве
-        thisObj.tabSignal.emitAll('comet_msg_master_signal', {custom_id:this.custom_id});
-        thisObj.tabSignal.emitAll('comet_msg_new_master');                                // для уведомления всех что надо переподписатся @todo реализовать переподписку событий
+        //thisObj.tabSignal.emit/*All*/('comet_msg_master_signal', {custom_id:this.custom_id});
+        thisObj.tabSignal.emit/*All*/('comet_msg_new_master');                                // для уведомления всех что надо переподписатся @todo реализовать переподписку событий
         var masterSignalIntervalId = setInterval(function()                         // Поставим таймер для уведомления всех остальных вкладок о своём превосходстве
         {
             // Передаём идентификатор своей вкладки на тот случай если вдруг по ошибки ещё одна из вкладок возомнит себя мастером
             // То та вкладка у кторой идентификатор меньше уступит право быть мастер вкладкой той вкладке у которой идентификатор больше
-            thisObj.tabSignal.emitAll('comet_msg_master_signal', {custom_id:thisObj.custom_id})
+            //thisObj.tabSignal.emit/*All*/('comet_msg_master_signal', {custom_id:thisObj.custom_id})
         }, this.start_timer/6);
 
         // Подписываемся на уведомления о том что кто то возомнил себя бастер вкладкой для того чтоб вовремя уладить конфликт двоевластия
@@ -1556,7 +1548,7 @@ var _cometServerApi = function(opt)
         // подключение на сигнал запроса статуса авторизации на комет сервере  от других вкладок
         thisObj.tabSignal.connect('comet_master_tab', '__comet_get_authorized_status', function(p,arg)
         {
-            thisObj.tabSignal.emitAll("__comet_authorized", thisObj.isAuthorized())
+            thisObj.tabSignal.emit/*All*/("__comet_authorized", thisObj.isAuthorized())
         });
 
         // Раз в пять минут удаляем старые данные из localStorage
@@ -1585,7 +1577,7 @@ var _cometServerApi = function(opt)
 
         if(this.isMaster())
         {
-            this.tabSignal.emitAll("__comet_authorized", this.authorized_status)
+            this.tabSignal.emit/*All*/("__comet_authorized", this.authorized_status)
         }
     };
 
@@ -1810,31 +1802,31 @@ var _cometServerApi = function(opt)
         if(msg.pipe != undefined)
         {
             // Если свойство pipe определено то это сообщение из канала.
-            this.tabSignal.emitAll(msg.pipe, result_msg);
+            this.tabSignal.emit/*All*/(msg.pipe, result_msg);
 
             if(msg.event !== undefined && ( typeof msg.event === "string" || typeof msg.event === "number" ) )
             {
-                this.tabSignal.emitAll(msg.pipe+"."+msg.event, result_msg)
+                this.tabSignal.emit/*All*/(msg.pipe+"."+msg.event, result_msg)
             }
         }
         else if(msg.event !== undefined && ( typeof msg.event === "string" || typeof msg.event === "number" ) )
         {
             // Сообщение доставленое по id с указанием msg.event
-            this.tabSignal.emitAll("msg."+msg.event, result_msg);
-            this.tabSignal.emitAll("msg", result_msg)
+            this.tabSignal.emit/*All*/("msg."+msg.event, result_msg);
+            this.tabSignal.emit/*All*/("msg", result_msg)
         }
         else
         {
             // Сообщение доставленое по id без указания msg.event
-            this.tabSignal.emitAll("msg", result_msg)
+            this.tabSignal.emit/*All*/("msg", result_msg)
         }
 
         if(msg.marker)
         {
-            this.tabSignal.emitAll(msg.marker, result_msg);
+            this.tabSignal.emit/*All*/(msg.marker, result_msg);
         }
 
-        this.tabSignal.emitAll("comet_server_msg", result_msg);
+        this.tabSignal.emit/*All*/("comet_server_msg", result_msg);
         return 1;
     };
 
@@ -1919,7 +1911,7 @@ var _cometServerApi = function(opt)
             // Отправка запроса на отправку сообщения мастервкладке
             if(this.send_msg_subscription !== false)
             {
-                this.tabSignal.emitAll('comet_msg_slave_add_subscription_and_restart',this.send_msg_subscription);
+                this.tabSignal.emit/*All*/('comet_msg_slave_add_subscription_and_restart',this.send_msg_subscription);
                 this.send_msg_subscription = false;
             }
 
@@ -1927,7 +1919,7 @@ var _cometServerApi = function(opt)
             {
                 for(var i = 0; i < this.send_msg_queue.length; i++)
                 {
-                    this.tabSignal.emitAll('comet_msg_slave_send_msg',this.send_msg_queue[i]);
+                    this.tabSignal.emit/*All*/('comet_msg_slave_send_msg',this.send_msg_queue[i]);
                 }
                 this.send_msg_queue = []
             }
@@ -2011,7 +2003,7 @@ var _cometServerApi = function(opt)
         else if(this.isMaster() === false)
         {
             if(this.LogLevel > 3 ) console.log("[js-api] isMaster:false");
-            this.tabSignal.emitAll('comet_msg_slave_send_msg',msg);
+            this.tabSignal.emit/*All*/('comet_msg_slave_send_msg',msg);
         }
         else if(this.isMaster())
         {
@@ -2068,7 +2060,7 @@ var _cometServerApi = function(opt)
             return false;
         }
 
-        if(!/^web_/.test(pipe_name))
+        if(!/^web_/.test(pipe_name) && !/^webauth_/.test(pipe_name))
         {
             console.error("Invalid channel name `"+pipe_name+"`. The channel should begin with web_", pipe_name);
             return;
@@ -2242,7 +2234,7 @@ var _cometServerApi = function(opt)
      */
     this.isConnected = function()
     {
-        for(var i in this.web_socket_error)
+        for(var i = 0; i< this.web_socket_error.length; i++)
         {
             if(this.web_socket_error[i] == 0)
             {
@@ -2261,14 +2253,14 @@ var _cometServerApi = function(opt)
     {
         var thisObj = this;
 
-        if(this.in_conect_to_server)
-        {
-            if(this.LogLevel) console.log("[js-api] Connection to the server is already installed.");
-            return;
-        }
+        //if(this.in_conect_to_server)
+        //{
+        //    if(this.LogLevel) console.log("[js-api] Connection to the server is already installed.");
+        //    return;
+        //}
 
         if(this.LogLevel) console.log("[js-api] Connecting to the server");
-        this.in_conect_to_server = true;
+        //this.in_conect_to_server = true;
         if(!this.isMaster()) this.setAsMaster();
 
         if(this.UseWebSocket())
@@ -2450,6 +2442,17 @@ var _cometServerApi = function(opt)
 
                 };
             }
+            
+            if(thisObj.socketArray)
+            {
+                for(var i = 0; i< this.socketArray.length; i++)
+                {
+                    if(thisObj.socketArray[i])
+                    {
+                        thisObj.socketArray[i].close();
+                    }
+                }
+            }
 
             thisObj.socketArray = [];
             var random_node = thisObj.options.user_id % thisObj.options.nodeArray.length;
@@ -2574,7 +2577,7 @@ var _cometServerApi = function(opt)
         if(this.in_try_conect)
         {
             if(this.LogLevel) console.log("[js-api] The connection to the server is already installed on another tab");
-            this.tabSignal.emitAll('comet_msg_slave_signal_start');
+            this.tabSignal.emit/*All*/('comet_msg_slave_signal_start');
             return false;
         }
 

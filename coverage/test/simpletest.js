@@ -196,6 +196,41 @@ function test_2_users_messages()
     );
 }
 
+function test_short_users_messages()
+{
+    var isTestDone = 0;
+ 
+    let msg = ""
+    for(let i=0; i<60; i++)
+    {
+        msg+=""+i%9;
+        let query = "INSERT INTO users_messages (id, event, message)VALUES (3, 'user', '"+msg+"');";
+        connection1.query(query,
+            function(error, result, fields)
+            {
+                if(error)
+                {
+                    throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
+                } 
+            }
+        ); 
+    }
+    
+    apiWithAuth.subscription("msg.user", function(event)
+    {
+        isTestDone += 1
+        console.log("[js-test] \x1b[1;32m test_short_users_messages (apiWithAuth.subscription test_short_users_messages) ok\x1b[0m"); 
+    })
+
+    setTimeout(function()
+    {
+        if(isTestDone != 60)
+        {
+            throw new Error("[js-test] Error test_short_users_messages not done (isTestDone="+isTestDone+")");
+        }
+    }, 58000)
+}
+
 /**
  *
  * use db_35
@@ -680,7 +715,7 @@ function test_getUserData()
     {
         if(!isTestDone)
         {
-            throw new Error("[js-test] Error test_getUserData not done");
+            throw new Error("[js-test] Error test_getUserData not done isTestDone="+isTestDone);
         }
     }, maxTimeTimeout)
 }
@@ -702,11 +737,14 @@ function test_setUserData(user_id, rdata)
             {
                 throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
             }
-
+            isTestDone += 1;
             query = 'select * from  users_data where id = '+user_id;
+            console.log("Test query:"+query );
+            
             connection1.query(query,
                 function(error, result, fields)
                 {
+                    isTestDone += 1;
                     if(error)
                     {
                         throw new Error("[js-test] Error in query:"+query);
@@ -762,7 +800,7 @@ function test_setUserData(user_id, rdata)
                             throw new Error("[js-test] Error getUserData filed `user_data` != juserdata.rand ");
                         }
 
-                        isTestDone = 1;
+                        isTestDone += 1;
                         console.log("[js-test] \x1b[1;32m test_getUserData ok\x1b[0m");
 
                     })
@@ -774,11 +812,11 @@ function test_setUserData(user_id, rdata)
 
     setTimeout(function()
     {
-        if(isTestDone != 1)
+        if(isTestDone != 3)
         {
-            throw new Error("[js-test] Error test_getUserData not done");
+            throw new Error("[js-test] Error test_setUserData not done isTestDone="+isTestDone);
         }
-    }, 10000)
+    }, maxTimeTimeout)
 }
 
 function test_web_pipe_send()
@@ -988,10 +1026,11 @@ function test_ql_subscription()
         isTestDone += 1;
         console.log("[js-test] \x1b[1;32m test_ql_subscription ok\x1b[0m");
     })
-
+    
+    var query;
     setTimeout(function()
     {
-        var query = 'SELECT * FROM users_in_pipes WHERE name = "'+pipe_name+'"; ';
+        query = 'SELECT * FROM users_in_pipes WHERE name = "'+pipe_name+'"; ';
         connection1.query(query,
             function(error, result, fields)
             {
@@ -1288,7 +1327,8 @@ test_Revoked_JWT_Auth();
 test_2_users_messages();
 test_users_messages();
 test_get_pipe_log();
-test_Revoked_JWT_table();// */
+test_Revoked_JWT_table();
+test_short_users_messages();// */
 // _cometServerApi.prototype.stop
 // restart
 //
