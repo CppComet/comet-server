@@ -5,10 +5,16 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
-## v4.4
+## v4.05
+IMPROVEMENTS:
+ * Add field `message_send_time` to pipe_log output in js api
+BUG FIXES:
+ * Fix docker image ports for FreeSwitch
+
+## v4.04
 BUG FIXES:
  * Fix 1 critical bugs in webauth_* pipes
- 
+
 ## v4.0
 BUG FIXES:
  * Fix 2 critical bugs
@@ -16,38 +22,38 @@ IMPROVEMENTS:
  * Add support for JWT tokens
  * Add support multi databases and query like `use db_2ё
  * Add tests in Node JS
-  
+
 ## v3.38
 BUG FIXES:
  * add make install instruction
-  
+
 ## v3.37
 BUG FIXES:
  * bug fix for dev_id=0
  * bug fix for users_data js api call
-  
+
 ## v3.36
-  
+
 FEATURES:
  * add table users_data
- * add table revoked_tokens 
+ * add table revoked_tokens
  * add jwt support
  * add web_pipe_count command for track_* pipes
  * add multi db
- 
+
 ## v3.35
- 
+
 BUG FIXES:
  * bug `Table doesn't exist` for table `conference_members`
- 
+
 ## v3.34
- 
+
 FEATURES:
  * video api 1.01
- * add table users_data 
- 
+ * add table users_data
+
 ## v3.33
- 
+
 FEATURES:
  * video api 1.0
 
@@ -55,7 +61,7 @@ BUG FIXES:
  * fixed bug with large mysql packets
 
 ## v3.32
- 
+
 FEATURES:
  * now we can work with may FreeSwitch servers
 
@@ -66,9 +72,9 @@ IMPROVEMENTS:
 ## v3.31
 
 BUG FIXES:
- 
+
  * errors in history strigs and db connections
- 
+
 ## v3.30
 
 BUG FIXES:
@@ -76,9 +82,9 @@ BUG FIXES:
  * fix bug in cmake files
  * errors when restart mysql server
  * fix bug #36 CometServerApi.js:824 Invalid pipe name subscription web_chat_pipe chatControl
- * fix bug #35 _cometServerApi.prototype.send_msg("pipe_log\n"+pipe_name+"\n"+marker+"\n"); 
- * fix bug #34 tabSignal.connect is not a function 
-  
+ * fix bug #35 _cometServerApi.prototype.send_msg("pipe_log\n"+pipe_name+"\n"+marker+"\n");
+ * fix bug #34 tabSignal.connect is not a function
+
 ## v3.29
 
 BUG FIXES:
@@ -89,7 +95,7 @@ IMPROVEMENTS:
 
  * add parametr connection_attempts to section db
  * rebild docs in .md files and impruve links in docs
- 
+
 
 ## v3.28
 
@@ -97,7 +103,7 @@ BUG FIXES:
 
  * fix bug in star and stop scripts
  * fix bug in stats
- 
+
 
 ## v3.26
 
@@ -131,7 +137,7 @@ IMPROVEMENTS:
 IMPROVEMENTS:
 
 * Allowed adding spaces after section name in .ini file
- 
+
 BUG FIXES:
 
  * Was rename parameter `benchmark` to `statistics`
