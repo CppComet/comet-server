@@ -1918,13 +1918,26 @@ int MySql_connection::sql_select_from_revoked_tokens(thread_data* local_buf, uns
 
     int idExprPos = local_buf->sql.expressionsPositions[0];
 
-    if(idExprPos == -1)
-    {
-        Send_Err_Package(SQL_ERR_WHERE_EXPRESSIONS, "Selection without transferring the requested values of the primary key is not supported", PacketNomber+1, local_buf, this);
-        return 0;
-    }
 
     int countRows = 0;
+    if(idExprPos == -1)
+    {
+        if(local_buf->db.query_format("SELECT `token` FROM `revoked_tokens` WHERE dev_id = %d ", dev_id))
+        {
+            auto result = mysql_store_result(local_buf->db.getLink());
+
+            MYSQL_ROW row;
+            while((row = mysql_fetch_row(result)))
+            {
+                if(local_buf->sql.useColumn(0)) local_buf->sql.getValue(countRows, 0) = row[0];
+                countRows++;
+            }
+            mysql_free_result(result);
+        }
+
+        local_buf->sql.sendAllRowsAndHeaders(local_buf, PacketNomber, countRows, this);
+        return 0;
+    }
     for(int i=0; i< MAX_EXPRESSIONS_VALUES; i++)
     {
         if(local_buf->qInfo.where.whereExprValue[idExprPos][i].isNull())
@@ -1975,7 +1988,7 @@ int MySql_connection::sql_insert_into_revoked_tokens(thread_data* local_buf, uns
 
     char* token = local_buf->qInfo.tokStart(local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]]);
     token[local_buf->qInfo.arg_insert.values[local_buf->sql.columPositions[0]].tokLen] = 0;
-  
+
     if(local_buf->stm.revoked_tokens_replace->execute(dev_id, token, 9999999) < 0)
     {
         Send_Err_Package(SQL_ERR_INVALID_DATA, "Error in token", PacketNomber+1, local_buf, this);
@@ -2031,7 +2044,7 @@ int MySql_connection::sql_insert_into_revoked_tokens(thread_data* local_buf, uns
                 TagLoger::log(Log_MySqlServer, 0, "Connection ID not found\n");
             }
         }
- 
+
     } catch (InvalidTokenError &tfe) {
         // An invalid token
         TagLoger::debug(Log_UserItem, 0, "Validation failed: %s [secret=%s, token=%s]\n", tfe.what(), secret.data(), token);
@@ -2530,7 +2543,8 @@ int MySql_connection::sql_insert_into_pipes_messages(thread_data* local_buf, uns
             "data", message
         },
         {"event", pipe_event},
-        {"pipe", pipe_name}
+        {"pipe", pipe_name},
+        {"message_send_time", (long int)time(NULL)}
     };
 
     TagLoger::log(Log_MySqlServer, 0, "message:%s\n", message);

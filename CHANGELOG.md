@@ -5,6 +5,18 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v4.07 
+BUG FIXES:
+ * Fix tests
+
+
+## v4.07
+IMPROVEMENTS:
+ * allow get all revoked_tokens in one query
+BUG FIXES:
+ * Fix 1 critical bugs (now we can send big answer in CometQL)
+
+
 ## v4.05
 IMPROVEMENTS:
  * Add field `message_send_time` to pipe_log output in js api

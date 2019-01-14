@@ -1,4 +1,7 @@
 
+#ifndef MAIN_H
+
+#define MAIN_H
 
 //#define CE_VERSION
 
@@ -37,7 +40,7 @@
 #define	PIPE_NAME_LEN           64
 #define	EVENT_NAME_LEN          64
 
-# define ARRAY_BUFFER_SIZE 64
+#define ARRAY_BUFFER_SIZE 64
 
 #define DEV_KEY_LEN 64
 #define DEV_URL_LEN 255
@@ -77,8 +80,10 @@
  */
 #define  MAX_CONECTION_ON_USER_ID 16
 
-#define MYSQL_SERVERNAME "CppComet community 4.05 (AGPL license)"
+
+#define MYSQL_SERVERNAME "CppComet community 4.08 (AGPL license)"
 #define MYSQL_SYSTEMVARIBLE MYSQL_SERVERNAME "(comet-server.com, support@comet-server.com)"
+
 
 
 
@@ -131,3 +136,4 @@
 #include "TagTimer.h"
 #include "TagLoger.h"
 
+#endif // MAIN_H

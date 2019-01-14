@@ -19,6 +19,7 @@ git clone https://github.com/Levhav/comet-server
 cd comet-server
 cmake .
 make
+make install
 
 ```
 
@@ -67,7 +68,7 @@ Run in console mode
 
 ```
 
-./cpp_comet
+./cppcomet
 
 ```
 

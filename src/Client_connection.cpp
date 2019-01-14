@@ -93,7 +93,8 @@ int Client_connection::un_subscription(thread_data* local_buf)
                                 }
                     },
                     {"event", "unsubscription"},
-                    {"pipe", subscriptions[i]}
+                    {"pipe", subscriptions[i]},
+                    {"message_send_time", (long int)time(NULL)}
                 };
 
                 // Канал track_* уведомляет автаматически всех подписчиков о изменении их количества
@@ -138,7 +139,8 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         TagLoger::error(Log_ClientServer, 0, "\x1b[1;31mToo many letters[%d]\x1b[0m\n", event_data_len);
@@ -180,7 +182,8 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
                                 }
                     },
                     {"event", "error"},
-                    {"pipe", "sys"}
+                    {"pipe", "sys"},
+                    {"message_send_time", (long int)time(NULL)}
                 };
 
 
@@ -214,7 +217,8 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
                                 }
                     },
                     {"event", "subscription"},
-                    {"pipe", subscriptions[i]}
+                    {"pipe", subscriptions[i]},
+                    {"message_send_time", (long int)time(NULL)}
                 };
 
                 internalApi::send_event_to_pipe(local_buf, web_user_dev_id, jmessage);
@@ -272,7 +276,8 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
                             }
                 },
                 {"event", "error"},
-                {"pipe", "sys"}
+                {"pipe", "sys"},
+                {"message_send_time", (long int)time(NULL)}
             };
 
             TagLoger::error(Log_ClientServer, 0, "\x1b[1;31mChannel name is too long [%s]\x1b[0m\n", start_subscription_name);
@@ -534,7 +539,8 @@ int Client_connection::msg_queue_send(int client, int len, thread_data* local_bu
             },
             {"event", local_buf->stm.users_queue_select->result_event},
             {"fromQueue", true},
-            {"pipe", "msg"}
+            {"pipe", "msg"},
+            {"message_send_time", local_buf->stm.users_queue_select->result_time}
         };
 
         message(local_buf, jmessage);
@@ -628,7 +634,8 @@ int Client_connection::send_pipe_count(thread_data* local_buf, char* pipe_name, 
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         // @todo добавить ссылку на описание ошибки
@@ -681,7 +688,8 @@ int Client_connection::send_pipe_count(thread_data* local_buf, char* pipe_name, 
         },
         {"event", "user_in_pipe"},
         {"marker", MarkerName},
-        {"pipe", "_answer_pipe_count"}
+        {"pipe", "_answer_pipe_count"},
+        {"message_send_time", (long int)time(NULL)}
     };
 
     message(local_buf, jmessage);
@@ -738,7 +746,8 @@ int Client_connection::web_socket_request(int client, int len, thread_data* loca
                 {"pipe", "sys"},
                 {"event", "serverInfo"},
                 {"server", MYSQL_SERVERNAME},
-                {"authorized", true}
+                {"authorized", true},
+                {"message_send_time", (long int)time(NULL)}
             };
             message(local_buf, jmessage);
         }
@@ -749,7 +758,8 @@ int Client_connection::web_socket_request(int client, int len, thread_data* loca
                 {"pipe", "sys"},
                 {"event", "serverInfo"},
                 {"server", MYSQL_SERVERNAME},
-                {"authorized", true}
+                {"authorized", true},
+                {"message_send_time", (long int)time(NULL)}
             };
             message(local_buf, jmessage);
         }
@@ -765,7 +775,8 @@ int Client_connection::web_socket_request(int client, int len, thread_data* loca
             {"pipe", "sys"},
             {"event", "serverInfo"},
             {"server", MYSQL_SERVERNAME},
-            {"authorized", false}
+            {"authorized", false},
+            {"message_send_time", (long int)time(NULL)}
         };
         message(local_buf, jmessage);
 
@@ -1126,7 +1137,8 @@ int Client_connection::get_pipe_log(thread_data* local_buf, char* event_data,int
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1151,7 +1163,8 @@ int Client_connection::get_pipe_log(thread_data* local_buf, char* event_data,int
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1170,7 +1183,8 @@ int Client_connection::get_pipe_log(thread_data* local_buf, char* event_data,int
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1217,7 +1231,8 @@ int Client_connection::get_user_last_online_time(thread_data* local_buf, char* e
                     }
         },
         {"event", event},
-        {"pipe", "_answer_user_status"}
+        {"pipe", "_answer_user_status"},
+        {"message_send_time", (long int)time(NULL)}
     };
 
     message(local_buf, jmessage);
@@ -1248,7 +1263,8 @@ int Client_connection::get_pipe_count(thread_data* local_buf, char* event_data,i
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1270,7 +1286,8 @@ int Client_connection::get_pipe_count(thread_data* local_buf, char* event_data,i
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1294,7 +1311,8 @@ int Client_connection::get_pipe_count(thread_data* local_buf, char* event_data,i
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1331,7 +1349,8 @@ char* Client_connection::checking_channel_name(thread_data* local_buf, const cha
                                 }
                     },
                     {"event", "error"},
-                    {"pipe", "sys"}
+                    {"pipe", "sys"},
+                    {"message_send_time", (long int)time(NULL)}
                 };
 
                 message(local_buf, err);
@@ -1350,7 +1369,8 @@ char* Client_connection::checking_channel_name(thread_data* local_buf, const cha
                             }
                 },
                 {"event", "error"},
-                {"pipe", "sys"}
+                {"pipe", "sys"},
+                {"message_send_time", (long int)time(NULL)}
             };
 
             message(local_buf, err);
@@ -1383,7 +1403,8 @@ char* Client_connection::checking_event_name(thread_data* local_buf, const char*
                                 }
                     },
                     {"event", "error"},
-                    {"pipe", "sys"}
+                    {"pipe", "sys"},
+                    {"message_send_time", (long int)time(NULL)}
                 };
 
                 message(local_buf, err);
@@ -1401,7 +1422,8 @@ char* Client_connection::checking_event_name(thread_data* local_buf, const char*
                             }
                 },
                 {"event", "error"},
-                {"pipe", "sys"}
+                {"pipe", "sys"},
+                {"message_send_time", (long int)time(NULL)}
             };
 
             message(local_buf, err);
@@ -1448,7 +1470,8 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
                             }
                 },
                 {"event", "error"},
-                {"pipe", "sys"}
+                {"pipe", "sys"},
+                {"message_send_time", (long int)time(NULL)}
             };
 
             message(local_buf, err);
@@ -1468,7 +1491,8 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1513,7 +1537,8 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1559,7 +1584,8 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
                         {"data", local_buf->answer_buf.getData()},
                         {"pipe", name},
                         {"event", event_name},
-                        {"user_id", set_user_id}
+                        {"user_id", set_user_id},
+                        {"message_send_time", (long int)time(NULL)}
                     };
                     int send_result = r->message(local_buf, jmessage);
 
@@ -1628,7 +1654,8 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
                     }
         },
         {"event", "answer"},
-        {"pipe", rdname}
+        {"pipe", rdname},
+        {"message_send_time", (long int)time(NULL)}
     };
 
     if(message(local_buf, jmessgae) < 0)
@@ -1691,7 +1718,8 @@ int Client_connection::CometQL_call(thread_data* local_buf, char* event_data,int
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1771,7 +1799,8 @@ int Client_connection::web_user_data(thread_data* local_buf, char* event_data,in
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1796,7 +1825,8 @@ int Client_connection::web_user_data(thread_data* local_buf, char* event_data,in
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1816,7 +1846,8 @@ int Client_connection::web_user_data(thread_data* local_buf, char* event_data,in
             },
             {"pipe", "_answer"},
             {"event", "answer"},
-            {"marker", pMarker}
+            {"marker", pMarker},
+            {"message_send_time", (long int)time(NULL)}
         };
         message(local_buf, jmessage);
     }
@@ -1831,7 +1862,8 @@ int Client_connection::web_user_data(thread_data* local_buf, char* event_data,in
             },
             {"pipe", "_answer"},
             {"event", "answer"},
-            {"marker", pMarker}
+            {"marker", pMarker},
+            {"message_send_time", (long int)time(NULL)}
         };
         message(local_buf, jmessage);
     }
@@ -1872,7 +1904,8 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1948,7 +1981,8 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
         {"pipe", "_answer"},
         {"event", "answer"},
         {"marker", marker},
-        {"_info", "answer for track_pipe_users"}
+        {"_info", "answer for track_pipe_users"},
+        {"message_send_time", (long int)time(NULL)}
     };
 
     if(message(local_buf, jmessage) < 0)
@@ -2552,7 +2586,8 @@ int Client_connection::web_write_error(const char* text, int code, thread_data* 
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
 

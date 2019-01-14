@@ -108,31 +108,31 @@ public:
 class sqlExpression
 {
 public:
-    
+
     // Таблица значений переменных key->value
     //std::map<std::string, MySqlResulValue>* vars;
-    
+
     /**
      * Содержит количество выражений
      */
     int tokensCount = 0;
-    
+
     tokPlace exprTokens[MAX_EXPRESSIONS_COUNT]; // Токены токенов по порядку в выражении
     int exprTokensTypes[MAX_EXPRESSIONS_COUNT]; // Типы токенов по порядку в выражении
-    
-    
+
+
     bool isMatch(){
-        
+
     }
-    
+
     MySqlResulValue getValue(){
-        
+
     }
-       
+
     sqlExpression operator = (sqlExpression exp){
         return exp;
     }
-    
+
     sqlExpression* operator = (sqlExpression* exp){
         return exp;
     }
@@ -250,7 +250,7 @@ public:
      * Содержит список выбираемых колонок
      */
     tokPlace selectedColumns[MAX_COLUMNS_COUNT];
-    
+
     /**
      * Содержит количество выбираемых колонок выражений
      */
@@ -284,7 +284,7 @@ class QueryData
 {
 public:
     char* StartQury = NULL;
-    
+
     sqlExpression* currentExpression;
 
     /**
@@ -443,13 +443,13 @@ public:
 
         return columPositions[column] != -1;
     }
- 
-    /** 
-     * @param line Номер строки 
+
+    /**
+     * @param line Номер строки
      * @return Вернёт ссылку на память для данных строки в таблице
      */
     MySqlResulValue* getMapRow(int line)
-    { 
+    {
         auto it = mapValues.find(line);
         if( it != mapValues.end())
         {
@@ -462,7 +462,7 @@ public:
 
         return row;
     }
-    
+
     /**
      *
      * @param line Номер строки
@@ -476,32 +476,9 @@ public:
             column = MAX_COLUMNS_COUNT - 1;
             TagLoger::trace(Log_MySqlServer, 0, "\x1b[1;31mNot enough memory for the field column=%d, MAX_COLUMNS_COUNT=%d\x1b[0m", column, MAX_COLUMNS_COUNT);
         }
- 
+
         return getMapRow(line)[columPositions[column]];
     }
-
-    /**
-     *
-     * @param line Номер строки
-     * @param column Номер колонки
-     * @return Вернёт ссылку на память для данных ячейки
-     
-    MySqlResulValue& getValue(int line, int column)
-    {
-        if(line >= MAX_LINES_IN_ANSWER)
-        {
-            line = MAX_LINES_IN_ANSWER - 1;
-            TagLoger::trace(Log_MySqlServer, 0, "\x1b[1;31mNot enough memory for the line row=%d, MAX_LINES_IN_ANSWER=%d\x1b[0m", line, MAX_LINES_IN_ANSWER);
-        }
-
-        if(column >= MAX_COLUMNS_COUNT)
-        {
-            column = MAX_COLUMNS_COUNT - 1;
-            TagLoger::trace(Log_MySqlServer, 0, "\x1b[1;31mNot enough memory for the field column=%d, MAX_COLUMNS_COUNT=%d\x1b[0m", column, MAX_COLUMNS_COUNT);
-        }
-
-        return values[line][columPositions[column]];
-    }*/
 
     /**
      * Подсчитывает количество колонок в ответе на запрос.
@@ -520,40 +497,6 @@ public:
 
         return count;
     }
-
-    /**
-     * @param PacketNomber номер пакета
-     * @param buff буфер в который складываются значения
-     * @param count количество строк которые надо вывести
-     * @param qInfo
-     * @param buffSize Объём буфера.
-     * @param realSendPackage количество реально добавленых в буфер mysql пакетов
-     * @return количество занятых байт в буфере
-     *
-     * @note В ответе не будет более чем MAX_LINES_IN_ANSWER строк и сумарный их вес не будет более чем buffSize
-     * @note Если в параметр count передать больше строк чем было запронено в qInfo то оставшиеся будут содержать непонятно что а не нули.
-    
-    int rowsToBuff(unsigned int PacketNomber, char* buff, int count, QueryData &qInfo, int buffSize, int &realSendPackage)
-    {
-        int numColumns = countColumns();
-        char* answer = buff;
-
-        realSendPackage = 0;
-        for(int i=qInfo.limit.start; (i < MAX_LINES_IN_ANSWER && i < count && (i< qInfo.limit.rows || qInfo.limit.rows == 0 )); i++)
-        {
-            if(numColumns * MAX_COLUMN_SIZE >=  buffSize - (answer - buff))
-            {
-                // Не хватило памяти в буфере вернём то что поместилось.
-                printf("There was not enough memory in the buffer to return what was fit. row=%d, buffSize=%d, free=%ld\n", i, buffSize, buffSize - (answer - buff));
-                return answer - buff;
-            }
-
-            answer += RowPackage(numColumns, values[i], ++PacketNomber, answer);
-            realSendPackage++;
-        }
-
-        return answer - buff;
-    } */
 
     /**
      * @param PacketNomber номер пакета
