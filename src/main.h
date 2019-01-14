@@ -1,6 +1,9 @@
 
+#ifndef MAIN_H
 
-//#define CE_VERSION  
+#define MAIN_H
+
+//#define CE_VERSION
 
 
 #define MAIN_BUF_SIZE 10384
@@ -8,12 +11,12 @@
 
 #define MAIN_NODE_NAME "NoName"
 #define HTTP_BASE_DIR "/var/www/CppComet"
- 
 
-#define NULL_IP "0.0.0.0" 
- 
-#define NODE_NAME "NoName" 
-#define MAIN_BACKLOG_SIZE 1024 
+
+#define NULL_IP "0.0.0.0"
+
+#define NODE_NAME "NoName"
+#define MAIN_BACKLOG_SIZE 1024
 #define MAIN_EPOLL_SIZE 10000
 #define MAIN_DEV_INDEX_SIZE "100000"
 
@@ -21,23 +24,23 @@
  * Надо ли вообще проверять с какого урла пишёл запрос.
  */
 #define testUrl
-  
+
 /**
  * Режим сборки для однопользовательского режима работы
- */ 
+ */
 // #define monoURL { "chat.lovelama.ru", "lovelama.net", "lovelama.ru", "www.lovelama.net", "www.lovelama.ru" }
 // #define monoUrlsCount 4
 
 // #define monoURL "78.47.206.108,inparadise.info,demo.inparadise.info,n2.comet-server.com,chat.inparadise.info,demo-chat.inparadise.info,int.dev,social-chat.comet-server.com,chat.emed24.ru"
 // #define monoUrlsCount 8
-       
+
 /**
- * Максимальная длина имени канала 
+ * Максимальная длина имени канала
  */
-#define	PIPE_NAME_LEN           64 
+#define	PIPE_NAME_LEN           64
 #define	EVENT_NAME_LEN          64
-  
-# define ARRAY_BUFFER_SIZE 64
+
+#define ARRAY_BUFFER_SIZE 64
 
 #define DEV_KEY_LEN 64
 #define DEV_URL_LEN 255
@@ -77,8 +80,10 @@
  */
 #define  MAX_CONECTION_ON_USER_ID 16
 
-#define MYSQL_SERVERNAME "CppComet enterprise 4.04"
+
+#define MYSQL_SERVERNAME "CppComet community 4.08 (AGPL license)"
 #define MYSQL_SYSTEMVARIBLE MYSQL_SERVERNAME "(comet-server.com, support@comet-server.com)"
+
 
 
 
@@ -94,7 +99,7 @@
 #define printGreen printf("\x1b[32m")
 #define printBGreen printf("\x1b[1;32m")
  */
-   
+
     #define logoPage "<!DOCTYPE html>\
     <html>\
     <head>\
@@ -123,11 +128,12 @@
                             </tr>\
             </table>\
     </body>\
-    </html>" 
-  
+    </html>"
+
 #define maxValue( a, b ) ( (a) > (b) ? (a) : (b) )
 #define minValue( a, b ) ( (a) < (b) ? (a) : (b) )
 
 #include "TagTimer.h"
 #include "TagLoger.h"
 
+#endif // MAIN_H

@@ -89,11 +89,12 @@ int Client_connection::un_subscription(thread_data* local_buf)
                     {
                         "data", {
                                     {"user_id", web_user_id},
-                                    {"uuid", web_user_uuid}, 
+                                    {"uuid", web_user_uuid},
                                 }
                     },
                     {"event", "unsubscription"},
-                    {"pipe", subscriptions[i]}
+                    {"pipe", subscriptions[i]},
+                    {"message_send_time", (long int)time(NULL)}
                 };
 
                 // Канал track_* уведомляет автаматически всех подписчиков о изменении их количества
@@ -138,7 +139,8 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         TagLoger::error(Log_ClientServer, 0, "\x1b[1;31mToo many letters[%d]\x1b[0m\n", event_data_len);
@@ -180,7 +182,8 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
                                 }
                     },
                     {"event", "error"},
-                    {"pipe", "sys"}
+                    {"pipe", "sys"},
+                    {"message_send_time", (long int)time(NULL)}
                 };
 
 
@@ -193,7 +196,7 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
 
             // В замен sadd_printf
             local_buf->setThreadStatus('i');
-            
+
             subscriptions[i] = start_subscription_name;
             TagLoger::log(Log_ClientServer, 0, "subscriptions[%d]=[%s]\n", i, start_subscription_name);
 
@@ -214,7 +217,8 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
                                 }
                     },
                     {"event", "subscription"},
-                    {"pipe", subscriptions[i]}
+                    {"pipe", subscriptions[i]},
+                    {"message_send_time", (long int)time(NULL)}
                 };
 
                 internalApi::send_event_to_pipe(local_buf, web_user_dev_id, jmessage);
@@ -254,7 +258,7 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
                 }
                 local_buf->stm.pipe_messages_select->free();
             }*/
-            
+
             devManager::instance()->getDevInfo(web_user_dev_id)->getPipe(std::string(start_subscription_name))->insert(fd);
 
             p++;
@@ -272,7 +276,8 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
                             }
                 },
                 {"event", "error"},
-                {"pipe", "sys"}
+                {"pipe", "sys"},
+                {"message_send_time", (long int)time(NULL)}
             };
 
             TagLoger::error(Log_ClientServer, 0, "\x1b[1;31mChannel name is too long [%s]\x1b[0m\n", start_subscription_name);
@@ -285,7 +290,7 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
     TagTimer::add("Client_connection::subscription", t);
     return 0;
 }
- 
+
 /**
  * Парсит url и возвращает указатель на web_session или 0 в случаии ошибки
  * А ещё проверяет заголовок Origin и отсекает запросы если они отправлены со значением Origin не соответсвующим списку разрешонных доменов.
@@ -299,10 +304,10 @@ int Client_connection::ws_subscription(thread_data* local_buf, char* event_data,
  */
 char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
 {
-   
+
     isAuthUser = false;
     char * mytext = local_buf->buf;
-     
+
     int ses_index = str_find(mytext,'=',2000);
     if(ses_index == -1)
     {
@@ -325,7 +330,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     web_user_id = read_long(mytext + uid_index + strlen("myid="),'&');
     //TagLoger::log(Log_ClientServer, 0, "\x1b[31m web_user_id=%d %s\x1b[0m\n", web_user_id, mytext + uid_index + strlen("myid="));
     if(web_user_id < 0 )
-    { 
+    {
         web_user_id = 0;
     }
 
@@ -341,7 +346,7 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     web_user_dev_id = read_long(mytext + udev_id_index + strlen("devid="),'&');
     //TagLoger::log(Log_ClientServer, 0, "\x1b[31m web_user_dev_id=%d %s\x1b[0m\n", web_user_dev_id, mytext + udev_id_index + strlen("devid="));
     if(web_user_dev_id < 0)
-    { 
+    {
         TagLoger::log(Log_ClientServer, 0, "\x1b[31mInvalid request [No identifier dev_id found] [2] \x1b[0m\n");
         //web_write_error( "Error code 406(Invalid request, no public key found [2])" , 406, local_buf);
         //return NULL;
@@ -387,8 +392,8 @@ char* Client_connection::parse_url(int client, int len, thread_data* local_buf)
     if(web_user_uuid_pos != -1 && memcmp(mytext + web_user_uuid_pos, "uuid=", strlen("uuid=")) == 0)
     {
         strncpy(web_user_uuid, mytext+web_user_uuid_pos + strlen("uuid="), USER_UUID_LEN);
-    } 
-    
+    }
+
     bool host_error = true;
     int nHeader = 0;
     char* pos = mytext;
@@ -534,7 +539,8 @@ int Client_connection::msg_queue_send(int client, int len, thread_data* local_bu
             },
             {"event", local_buf->stm.users_queue_select->result_event},
             {"fromQueue", true},
-            {"pipe", "msg"}
+            {"pipe", "msg"},
+            {"message_send_time", local_buf->stm.users_queue_select->result_time}
         };
 
         message(local_buf, jmessage);
@@ -591,9 +597,10 @@ int Client_connection::send_pipe_log(thread_data* local_buf, char* pipe_name, co
             {"event", local_buf->stm.pipe_messages_select->result_event},
             {"fromQueue", true},
             {"user_id", local_buf->stm.pipe_messages_select->result_user_id},
-            {"pipe", pipe_name}
+            {"pipe", pipe_name},
+            {"message_send_time", local_buf->stm.pipe_messages_select->result_time}
         };
-        
+
         TagLoger::log(Log_ClientServer, 0, "\x1b[1;32mssend msg data[%d]:%s\x1b[0m\n", i, local_buf->stm.pipe_messages_select->result_message );
 
 
@@ -627,7 +634,8 @@ int Client_connection::send_pipe_count(thread_data* local_buf, char* pipe_name, 
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         // @todo добавить ссылку на описание ошибки
@@ -680,7 +688,8 @@ int Client_connection::send_pipe_count(thread_data* local_buf, char* pipe_name, 
         },
         {"event", "user_in_pipe"},
         {"marker", MarkerName},
-        {"pipe", "_answer_pipe_count"}
+        {"pipe", "_answer_pipe_count"},
+        {"message_send_time", (long int)time(NULL)}
     };
 
     message(local_buf, jmessage);
@@ -737,7 +746,8 @@ int Client_connection::web_socket_request(int client, int len, thread_data* loca
                 {"pipe", "sys"},
                 {"event", "serverInfo"},
                 {"server", MYSQL_SERVERNAME},
-                {"authorized", true}
+                {"authorized", true},
+                {"message_send_time", (long int)time(NULL)}
             };
             message(local_buf, jmessage);
         }
@@ -748,7 +758,8 @@ int Client_connection::web_socket_request(int client, int len, thread_data* loca
                 {"pipe", "sys"},
                 {"event", "serverInfo"},
                 {"server", MYSQL_SERVERNAME},
-                {"authorized", true}
+                {"authorized", true},
+                {"message_send_time", (long int)time(NULL)}
             };
             message(local_buf, jmessage);
         }
@@ -764,7 +775,8 @@ int Client_connection::web_socket_request(int client, int len, thread_data* loca
             {"pipe", "sys"},
             {"event", "serverInfo"},
             {"server", MYSQL_SERVERNAME},
-            {"authorized", false}
+            {"authorized", false},
+            {"message_send_time", (long int)time(NULL)}
         };
         message(local_buf, jmessage);
 
@@ -1125,7 +1137,8 @@ int Client_connection::get_pipe_log(thread_data* local_buf, char* event_data,int
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1150,7 +1163,8 @@ int Client_connection::get_pipe_log(thread_data* local_buf, char* event_data,int
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1169,7 +1183,8 @@ int Client_connection::get_pipe_log(thread_data* local_buf, char* event_data,int
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1216,7 +1231,8 @@ int Client_connection::get_user_last_online_time(thread_data* local_buf, char* e
                     }
         },
         {"event", event},
-        {"pipe", "_answer_user_status"}
+        {"pipe", "_answer_user_status"},
+        {"message_send_time", (long int)time(NULL)}
     };
 
     message(local_buf, jmessage);
@@ -1247,7 +1263,8 @@ int Client_connection::get_pipe_count(thread_data* local_buf, char* event_data,i
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1269,7 +1286,8 @@ int Client_connection::get_pipe_count(thread_data* local_buf, char* event_data,i
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1293,7 +1311,8 @@ int Client_connection::get_pipe_count(thread_data* local_buf, char* event_data,i
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1330,7 +1349,8 @@ char* Client_connection::checking_channel_name(thread_data* local_buf, const cha
                                 }
                     },
                     {"event", "error"},
-                    {"pipe", "sys"}
+                    {"pipe", "sys"},
+                    {"message_send_time", (long int)time(NULL)}
                 };
 
                 message(local_buf, err);
@@ -1349,7 +1369,8 @@ char* Client_connection::checking_channel_name(thread_data* local_buf, const cha
                             }
                 },
                 {"event", "error"},
-                {"pipe", "sys"}
+                {"pipe", "sys"},
+                {"message_send_time", (long int)time(NULL)}
             };
 
             message(local_buf, err);
@@ -1382,7 +1403,8 @@ char* Client_connection::checking_event_name(thread_data* local_buf, const char*
                                 }
                     },
                     {"event", "error"},
-                    {"pipe", "sys"}
+                    {"pipe", "sys"},
+                    {"message_send_time", (long int)time(NULL)}
                 };
 
                 message(local_buf, err);
@@ -1400,7 +1422,8 @@ char* Client_connection::checking_event_name(thread_data* local_buf, const char*
                             }
                 },
                 {"event", "error"},
-                {"pipe", "sys"}
+                {"pipe", "sys"},
+                {"message_send_time", (long int)time(NULL)}
             };
 
             message(local_buf, err);
@@ -1419,7 +1442,7 @@ char* Client_connection::checking_event_name(thread_data* local_buf, const char*
  * @param event_data
  * @param client
  * @param len
- * @return 
+ * @return
  * @todo добавить маркер можно в версию v3
  */
 int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,int client, int len)
@@ -1447,7 +1470,8 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
                             }
                 },
                 {"event", "error"},
-                {"pipe", "sys"}
+                {"pipe", "sys"},
+                {"message_send_time", (long int)time(NULL)}
             };
 
             message(local_buf, err);
@@ -1467,7 +1491,8 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1512,7 +1537,8 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1536,7 +1562,7 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
 
     TagLoger::log(Log_ClientServer, 0, "json_msg:%s\n", local_buf->answer_buf.getData());
     PipeLog::addToLog(local_buf, web_user_dev_id, name, event_name, set_user_id , msg, strlen(msg));
- 
+
     CP<Pipe> pipe = devManager::instance()->getDevInfo(web_user_dev_id)->findPipe(std::string(name));
     int num_msg = 0;
     if(!pipe.isNULL())
@@ -1558,7 +1584,8 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
                         {"data", local_buf->answer_buf.getData()},
                         {"pipe", name},
                         {"event", event_name},
-                        {"user_id", set_user_id}
+                        {"user_id", set_user_id},
+                        {"message_send_time", (long int)time(NULL)}
                     };
                     int send_result = r->message(local_buf, jmessage);
 
@@ -1627,7 +1654,8 @@ int Client_connection::web_pipe_msg_v2(thread_data* local_buf, char* event_data,
                     }
         },
         {"event", "answer"},
-        {"pipe", rdname}
+        {"pipe", rdname},
+        {"message_send_time", (long int)time(NULL)}
     };
 
     if(message(local_buf, jmessgae) < 0)
@@ -1675,7 +1703,7 @@ int Client_connection::cgi_call(thread_data* local_buf, char* event_data,int cli
  * @return
  */
 int Client_connection::CometQL_call(thread_data* local_buf, char* event_data,int client, int len)
-{ 
+{
     auto t = TagTimer::mtime();
     char* pMarker = event_data;
     char* end_pMarker = checking_channel_name( local_buf, pMarker);
@@ -1690,7 +1718,8 @@ int Client_connection::CometQL_call(thread_data* local_buf, char* event_data,int
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1700,14 +1729,14 @@ int Client_connection::CometQL_call(thread_data* local_buf, char* event_data,int
 
     *(end_pMarker) = 0;
     end_pMarker++;
-    
+
     std::string token = std::string(end_pMarker);
-    
+
     std::string secret(appConf::instance()->get_chars("main", "password"));
 
     secret.append(std::to_string(web_user_dev_id));
     HS256Validator signer(secret);
-    
+
     ExpValidator exp;
     try {
         // Decode and validate the token
@@ -1716,17 +1745,17 @@ int Client_connection::CometQL_call(thread_data* local_buf, char* event_data,int
         std::tie(header, payload) = JWT::Decode(token, &signer, &exp);
         //std::cout << "Header: " << header << std::endl;
         //std::cout << "Payload: " << payload << std::endl;
- 
+
         /*
          * Тут выполнение запроса
-         * 
+         *
          * if(payload["user_id"] != user_id)
         {
             TagLoger::debug(Log_UserItem, 0, "Validation failed user_id error:jwt-user_id=%d, user_id=%d\n", (int)payload["user_id"], user_id);
             return false;
         }*/
-        
-        
+
+
         return false;
 
     } catch (InvalidTokenError &tfe) {
@@ -1770,7 +1799,8 @@ int Client_connection::web_user_data(thread_data* local_buf, char* event_data,in
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1795,7 +1825,8 @@ int Client_connection::web_user_data(thread_data* local_buf, char* event_data,in
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
@@ -1815,7 +1846,8 @@ int Client_connection::web_user_data(thread_data* local_buf, char* event_data,in
             },
             {"pipe", "_answer"},
             {"event", "answer"},
-            {"marker", pMarker}
+            {"marker", pMarker},
+            {"message_send_time", (long int)time(NULL)}
         };
         message(local_buf, jmessage);
     }
@@ -1830,7 +1862,8 @@ int Client_connection::web_user_data(thread_data* local_buf, char* event_data,in
             },
             {"pipe", "_answer"},
             {"event", "answer"},
-            {"marker", pMarker}
+            {"marker", pMarker},
+            {"message_send_time", (long int)time(NULL)}
         };
         message(local_buf, jmessage);
     }
@@ -1871,17 +1904,18 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
         message(local_buf, err);
         return 0;
     }
- 
+
     json usersarr = json::array();
-    
-    
-    bool hasData = false; 
+
+
+    bool hasData = false;
     TagLoger::log(Log_ClientServer, 0, "track_pipe_users pipe:%s\n", pipe_name);
     CP<Pipe> pipe = devManager::instance()->getDevInfo(web_user_dev_id)->findPipe(std::string(pipe_name));
     if(!pipe.isNULL())
@@ -1895,17 +1929,17 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
             CP<Client_connection> r = tcpServer <Client_connection>::instance()->get(conection_id);
             if(r && r->web_user_dev_id == web_user_dev_id)
             {
-                // @todo simpleTask отдавать всем не uuid а его солёный хеш. 
+                // @todo simpleTask отдавать всем не uuid а его солёный хеш.
                 hasData = true;
                 nlohmann::json juser = {
                     {"user_id", r->web_user_id},
                     {"uuid", r->web_user_uuid}
                 };
-                TagLoger::log(Log_ClientServer, 0, "track_pipe_users add info %d:%s", r->web_user_id, r->web_user_uuid); 
+                TagLoger::log(Log_ClientServer, 0, "track_pipe_users add info %d:%s", r->web_user_id, r->web_user_uuid);
                 usersarr.push_back(juser);
             }
 
-            it = it->Next(); 
+            it = it->Next();
         }
     }
 
@@ -1925,21 +1959,21 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
             auto result = mysql_store_result(link->getLink());
 
             while((row = mysql_fetch_row(result)))
-            { 
+            {
                 nlohmann::json juser = {
                     {"user_id", row[0]},
                     {"uuid", row[1]}
                 };
-                TagLoger::log(Log_ClientServer, 0, "track_pipe_users[from wsCluster] add info %s:%s", row[0], row[0]); 
-                
-                usersarr.push_back(juser); 
+                TagLoger::log(Log_ClientServer, 0, "track_pipe_users[from wsCluster] add info %s:%s", row[0], row[0]);
+
+                usersarr.push_back(juser);
                 hasData = true;
             }
             mysql_free_result(result);
             it++;
         }
     }
-  
+
     nlohmann::json jmessage = {
         {
             "data", usersarr
@@ -1947,9 +1981,10 @@ int Client_connection::track_pipe_users(thread_data* local_buf, char* event_data
         {"pipe", "_answer"},
         {"event", "answer"},
         {"marker", marker},
-        {"_info", "answer for track_pipe_users"}
+        {"_info", "answer for track_pipe_users"},
+        {"message_send_time", (long int)time(NULL)}
     };
- 
+
     if(message(local_buf, jmessage) < 0)
     {
         return -1;
@@ -2449,7 +2484,7 @@ int Client_connection::set_offline(thread_data* local_buf)
     //pthread_mutex_lock(&request_mutex);
     isOnLine = false;
     isAuthUser = false;
-    
+
     if(web_user_dev_id >= 0)
     {
         devManager::instance()->getDevInfo(web_user_dev_id)->index->un_link(local_buf, web_user_id, fd);
@@ -2551,13 +2586,14 @@ int Client_connection::web_write_error(const char* text, int code, thread_data* 
                         }
             },
             {"event", "error"},
-            {"pipe", "sys"}
+            {"pipe", "sys"},
+            {"message_send_time", (long int)time(NULL)}
         };
 
 
     return message(local_buf, err);
 }
- 
+
 /**
  * Отправка сообщений в WS из nlohmann::json
  * {
@@ -2570,21 +2606,21 @@ int Client_connection::message(thread_data* local_buf, nlohmann::json jmessage)
 {
     if(client_major_version < 4)
     {
-        std::string msg_old = jmessage.dump(); 
-        jmessage["event_name"] = jmessage["event"]; 
-        jmessage["api_data"] = "for major_version < 4"; 
-         
+        std::string msg_old = jmessage.dump();
+        jmessage["event_name"] = jmessage["event"];
+        jmessage["api_data"] = "for major_version < 4";
+
         std::string pipe = jmessage["pipe"].get<std::string>();
-         
+
         if(!jmessage["data"].is_string() && !jmessage["data"].is_number() && pipe.compare("msg") != 0)
         {
-            std::string datastring = jmessage["data"].dump(); 
-            jmessage["data"] = datastring; 
+            std::string datastring = jmessage["data"].dump();
+            jmessage["data"] = datastring;
         }
-        
-        std::string msg_new = jmessage.dump(); 
+
+        std::string msg_new = jmessage.dump();
     }
-    
+
     std::string msg = jmessage.dump();
     return message(local_buf, msg.data(), msg.length(), MESSAGE_TEXT);
 }

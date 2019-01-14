@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #include "MySqlProtocol.h"
- 
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -20,36 +20,38 @@
 #include "TagLoger.h"
 #include "connection.h"
 
+#define MYSQL_PACKET_DELIMETER 256
+
 int OK_Package(unsigned int PacketNomber, char* buff)
 {
     memcpy(buff,OK_Package_Nomber2, sizeof(OK_Package_Nomber2));
-    buff[3] = PacketNomber % 255;
+    buff[3] = PacketNomber % MYSQL_PACKET_DELIMETER;
     return sizeof(OK_Package_Nomber2);
 }
 
 int OK_Package(LengthEncodedInteger affectedRows, LengthEncodedInteger lastInsertId, unsigned int PacketNomber, char* buff)
-{  
+{
     return OK_Package(affectedRows, lastInsertId, 0, PacketNomber, buff);
 }
 
 int OK_Package(LengthEncodedInteger affectedRows, LengthEncodedInteger lastInsertId, const char* status,  unsigned int PacketNomber, char* buff)
-{  
-    // Отправляем пакет описания 1 колонки 
+{
+    // Отправляем пакет описания 1 колонки
     char* answer = buff;
 
     // первые 3 байта — длина пакета
     answer+=3;
 
     // четвертый байт — номер пакета.
-    *answer = PacketNomber % 255;
+    *answer = PacketNomber % MYSQL_PACKET_DELIMETER;
     answer+=1;
-    
+
     *answer = 0x00;
     answer+=1;
-    
+
     answer+= affectedRows.setToBuff(answer);
     answer+= lastInsertId.setToBuff(answer);
-    
+
     *answer = 0x00; // Status Flags
     answer+=1;
     *answer = 0x02; // Status Flags
@@ -59,7 +61,7 @@ int OK_Package(LengthEncodedInteger affectedRows, LengthEncodedInteger lastInser
     answer+=1;
     *answer = 0x00; // number of warnings
     answer+=1;
-    
+
     if(status != 0)
     {
         int textLen = strlen(status);
@@ -71,28 +73,29 @@ int OK_Package(LengthEncodedInteger affectedRows, LengthEncodedInteger lastInser
         *answer = 0x00;
         answer+=1;
     }
-    
+
     int dataLen = answer - buff;
     int TmpDataLen = dataLen - 4;
     memcpy(buff,  &TmpDataLen, 3); //  Длина пакета
-    
+
     //printHex(buff, dataLen);
 
-    return dataLen; 
+    return dataLen;
 }
 
 int EOF_Package(unsigned int PacketNomber, char* buff)
 {
     memcpy(buff,EOF_Package_Nomber2, sizeof(EOF_Package_Nomber2));
-    buff[3] = PacketNomber % 255;
+    buff[3] = PacketNomber % MYSQL_PACKET_DELIMETER;
+    TagLoger::debug(Log_MySqlServer, 0, "EOF_Package PacketNomber=%d(%d)\n", PacketNomber, (PacketNomber%MYSQL_PACKET_DELIMETER));
     return sizeof(EOF_Package_Nomber2);
 }
- 
+
 int Err_Package(short errorCode, const char* errorText, unsigned int PacketNomber, char* buff)
 {
     // @todo Добавить возможность задать состояние https://dev.mysql.com/doc/refman/5.5/en/error-messages-server.html
-    
-    /**  
+
+    /**
      * Error: 1021 SQLSTATE: HY000 (ER_DISK_FULL)
      * Error: 1024 SQLSTATE: HY000 (ER_ERROR_ON_READ)
      * Error: 1026 SQLSTATE: HY000 (ER_ERROR_ON_WRITE)
@@ -106,25 +109,25 @@ int Err_Package(short errorCode, const char* errorText, unsigned int PacketNombe
     };
 
     memcpy(buff,Err_Package, sizeof(Err_Package));
-    buff[3] = PacketNomber % 255;
-    
+    buff[3] = PacketNomber % MYSQL_PACKET_DELIMETER;
+
     memcpy(buff + 5,&errorCode, 2); // error-code
-    
+
     int textLen = strlen(errorText);
     memcpy(buff + sizeof(Err_Package), errorText, textLen); // human readable error message
-     
+
     int TmpDataLen = sizeof(Err_Package) + textLen - 4;
     memcpy(buff,  &TmpDataLen, 3); //  Длина пакета
-    
-    
+
+
     memcpy(buff + 8,  "HY000", 5);
     /*int i=0;
     int count = 12;
-    if( rand() % count == i++)         memcpy(buff + 8,  " *_* ", 5); //  Смаил прикола ради.    
-    else if( rand() % count == i++)    memcpy(buff + 8,  " +_+ ", 5); //  Смаил прикола ради.  
-    else if( rand() % count == i++)    memcpy(buff + 8,  " -_- ", 5); //  Смаил прикола ради.  
-    else if( rand() % count == i++)    memcpy(buff + 8,  " @_@ ", 5); //  Смаил прикола ради.  
-    else if( rand() % count == i++)    memcpy(buff + 8,  " T_T ", 5); //  Смаил прикола ради.  
+    if( rand() % count == i++)         memcpy(buff + 8,  " *_* ", 5); //  Смаил прикола ради.
+    else if( rand() % count == i++)    memcpy(buff + 8,  " +_+ ", 5); //  Смаил прикола ради.
+    else if( rand() % count == i++)    memcpy(buff + 8,  " -_- ", 5); //  Смаил прикола ради.
+    else if( rand() % count == i++)    memcpy(buff + 8,  " @_@ ", 5); //  Смаил прикола ради.
+    else if( rand() % count == i++)    memcpy(buff + 8,  " T_T ", 5); //  Смаил прикола ради.
     else if( rand() % count == i++)    memcpy(buff + 8,  " o_O ", 5); //  Смаил прикола ради.
     else if( rand() % count == i++)    memcpy(buff + 8,  " ^_^ ", 5); //  Смаил прикола ради.
     else if( rand() % count == i++)    memcpy(buff + 8,  " *-* ", 5); //  Смаил прикола ради.
@@ -140,47 +143,47 @@ int LengthEncodedInteger::getSize()
     if(abs(value) < pow(2,16)) return 3;
     if(abs(value) < pow(2,24)) return 4;
     if(abs(value) < pow(2,64)) return 9;
-     
-    printf("error LengthEncodedInteger is %lld\n", value); 
+
+    printf("error LengthEncodedInteger is %lld\n", value);
     return 9;
 }
 
 int LengthEncodedInteger::setToBuff(char* buff)
-{ 
-    return setToBuff(value, buff); 
+{
+    return setToBuff(value, buff);
 }
 
 int LengthEncodedInteger::setToBuff(long long value, char* buff)
-{ 
+{
     memcpy(buff, &value, 1);
     if(abs(value) < 251)
     {
         return 1;
     }
-    
+
     if(abs(value) < pow(2,16))
     {
         *buff = 0xfc;
         memcpy(buff+1, &value, 3);
         return 3;
     }
-    
+
     if(abs(value) < pow(2,24))
     {
         *buff = 0xfd;
         memcpy(buff+1, &value, 4);
         return 5;
     }
-    
+
     if(abs(value) < pow(2,64))
     {
-        TagLoger::trace(Log_MySqlServer, 0,"warning LengthEncodedInteger is %lld (9)\n", value);  
+        TagLoger::trace(Log_MySqlServer, 0,"warning LengthEncodedInteger is %lld (9)\n", value);
         *buff = 0xfe;
         memcpy(buff+1, &value, 8); // @todo уточнить можноли так чтоб 9 байт
         return 9;
     }
-    
-    printf("error LengthEncodedInteger is %lld (>9)\n", value); 
+
+    printf("error LengthEncodedInteger is %lld (>9)\n", value);
     return 1;
 }
 
@@ -194,9 +197,9 @@ int LengthEncodedInteger::setToBuff(long long value, char* buff)
  */
 int CountColumPackage(unsigned char ColumNumber, unsigned int PacketNomber, char* buff)
 {
-    // Отправляем пакет с количеством колонок  
+    // Отправляем пакет с количеством колонок
     unsigned char columCount[] = {   0x01, 0x00, 0x00// первые 3 байта — длина пакета
-                                         , (const unsigned char)(PacketNomber % 255) // четвертый байт — номер пакета.
+                                         , (const unsigned char)(PacketNomber % MYSQL_PACKET_DELIMETER) // четвертый байт — номер пакета.
                                          , (const unsigned char)(ColumNumber) // Количество колонок
     };
     memcpy(buff, columCount, sizeof(columCount));
@@ -212,21 +215,21 @@ int CountColumPackage(unsigned char ColumNumber, unsigned int PacketNomber, char
  * @return Длина пакета ( сдвиг от начала buff и до конца описания колонки )
  */
 int RowPackage(unsigned char ColumNumber, MySqlResulValue* values, unsigned int PacketNomber, char* buff)
-{ 
+{
     // Отправляем пакет строки
 
-    // Отправляем пакет описания 1 колонки 
+    // Отправляем пакет описания 1 колонки
     char* answer = buff;
 
     // первые 3 байта — длина пакета
     answer+=3;
 
     // четвертый байт — номер пакета.
-    *answer = PacketNomber % 255;
+    *answer = PacketNomber % MYSQL_PACKET_DELIMETER;
     answer+=1;
 
     for(int i =0; i< ColumNumber; i++)
-    { 
+    {
         int delta = values[i].toPackage(answer);
         answer += delta;
     }
@@ -246,7 +249,7 @@ int RowPackage(unsigned char ColumNumber, MySqlResulValue* values, unsigned int 
  * @param PacketNomber номер пакета который должен будет указан в описании колонки.
  * @param buff
  * @return Длина пакета ( сдвиг от начала buff и до конца описания колонки )
- * 
+ *
  * @Note Увеличивает  PacketNomber по формуле PacketNomber = PacketNomber + 2 + ColumNumber
  */
 int HeadAnswer(unsigned char ColumNumber, const MySqlResultset_ColumDef* columns, unsigned int &PacketNomber, char* buff)
@@ -264,7 +267,7 @@ int HeadAnswer(unsigned char ColumNumber, const MySqlResultset_ColumDef* columns
     delta = EOF_Package(++PacketNomber, p);
     p += delta;
     return p - buff;
-} 
+}
 
 
 MySqlResultset_ColumDef::MySqlResultset_ColumDef()
@@ -273,7 +276,7 @@ MySqlResultset_ColumDef::MySqlResultset_ColumDef()
 }
 
 MySqlResultset_ColumDef::MySqlResultset_ColumDef(const char* text)
-{ 
+{
     bzero(column_name, MAX_COLUMN_NAME_LENGTH);
     int data_len = strlen(text);
     if(data_len > 250)
@@ -281,11 +284,11 @@ MySqlResultset_ColumDef::MySqlResultset_ColumDef(const char* text)
         TagLoger::error(Log_MySqlServer, 0, "MySqlResultset_ColumDef не доделан до работы со строками длинее 250 символов\n");
         data_len = 250;
     }
-    memcpy(column_name, text, data_len); 
+    memcpy(column_name, text, data_len);
 }
 
 MySqlResultset_ColumDef::MySqlResultset_ColumDef(const char* text, int data_len)
-{  
+{
     setName(text, data_len);
 }
 
@@ -297,19 +300,20 @@ void MySqlResultset_ColumDef::setName(const char* text, int data_len)
         TagLoger::error(Log_MySqlServer, 0, "MySqlResultset_ColumDef не доделан до работы со строками длинее 250 символов\n");
         data_len = 250;
     }
-    memcpy(column_name, text, data_len); 
+    memcpy(column_name, text, data_len);
 }
-    
+
 int MySqlResultset_ColumDef::toPackage(unsigned int PacketNomber, char* buff) const
 {
-    // Отправляем пакет описания 1 колонки 
+    // Отправляем пакет описания 1 колонки
     char* answer = buff;
 
     // первые 3 байта — длина пакета
     answer+=3;
 
     // четвертый байт — номер пакета.
-    *answer = PacketNomber % 255;
+    *answer = PacketNomber % MYSQL_PACKET_DELIMETER;
+    TagLoger::debug(Log_MySqlServer, 0, "MySqlResultset_ColumDef PacketNomber=%d(%d)\n", PacketNomber, (PacketNomber%MYSQL_PACKET_DELIMETER));
     answer+=1;
 
     // lenenc_str catalog (always "def")
@@ -399,7 +403,7 @@ char* MySqlResultset_ColumDef::operator = (const char* text)
         data_len = 250;
     }
     clear();
-    memcpy(column_name, text, data_len); 
+    memcpy(column_name, text, data_len);
     return column_name;
 }
 
@@ -408,23 +412,23 @@ MySqlResulValue::MySqlResulValue()
     longData = NULL;
     bzero(data, 255);
 }
-    
+
 int MySqlResulValue::toPackage(char* buff)
-{ 
+{
     if(type == MYSQL_PROTOCOL_TYPE_VAR_STRING)
     {
         if(longData != NULL)
-        { 
-            int delta = LengthEncodedInteger::setToBuff(longDataLen, buff); 
+        {
+            int delta = LengthEncodedInteger::setToBuff(longDataLen, buff);
             buff += delta;
-            memcpy(buff,longData, longDataLen); 
+            memcpy(buff,longData, longDataLen);
             return longDataLen+delta;
         }
-        
+
         int data_len = strlen(data);
         *buff = data_len;
         buff++;
-        memcpy(buff,data, data_len); 
+        memcpy(buff,data, data_len);
         return data_len+1;
     }
 
@@ -445,32 +449,32 @@ char* MySqlResulValue::clear()
 }
 
 char* MySqlResulValue::operator = (const char* text)
-{ 
+{
     if(text == NULL)
     {
         return setValue(text, 0);
     }
-    
+
     return setValue(text, strlen(text));
 }
 
 char* MySqlResulValue::setValue(const char* text, int data_len)
-{  
+{
     clear();
     if(text == NULL || data_len == 0)
     {
         return NULL;
     }
-    
+
     if(data_len > 250)
-    { 
+    {
         longDataLen = data_len;
         longData = new char[data_len+1];
-        memcpy(longData, text, data_len); 
+        memcpy(longData, text, data_len);
         return longData;
     }
-    
-    memcpy(data, text, data_len); 
+
+    memcpy(data, text, data_len);
     return data;
 }
 
@@ -495,7 +499,7 @@ char* MySqlResulValue::operator = (const float value)
     snprintf(data, 250, "%f", value);
     return data;
 }
- 
+
 char* MySqlResulValue::operator = (const char value)
 {
     clear();
@@ -507,7 +511,7 @@ char* MySqlResulValue::operator = (const bool value)
 {
     clear();
     if(value)
-    {  
+    {
         data[0] = '1';
     }
     else
@@ -516,7 +520,7 @@ char* MySqlResulValue::operator = (const bool value)
     }
     return data;
 }
- 
+
 MySqlResulValue::operator char* ()
 {
     if(longData != NULL)
@@ -540,13 +544,13 @@ char& MySqlResulValue::operator[] (int key)
     if(longData != NULL)
     {
         if(longDataLen <= key)
-        { 
+        {
             TagLoger::error(Log_MySqlServer, 0, "MySqlResulValue::operator[%d] больше longDataLen=%d\n", key, longDataLen);
-            return longData[longDataLen-1]; 
+            return longData[longDataLen-1];
         }
         return longData[key];
     }
-    
+
     return data[key];
 }
 

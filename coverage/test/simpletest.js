@@ -26,7 +26,7 @@ PAYLOAD:
 var validJWT   = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1LCJleHAiOjk5ODMzMTEyMDB9.jXeCiNOA1eKLiLwcA2bkyaFZOhewvt81FCIfF278aO8";
 var revokedJWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1LCJleHAiOjk5ODM0ODQwMDB9.8VU1bBHa0sFVOqH19tnV3YOy7Y23aOCaCpMDzqAB64g";
 var invalidJWT   = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjk5ODMzMTEyMDB9.aIh8RCsv1W5dHmTNVDKfHxVaerpuLBz0l-5IBLIhro0";
-var maxTimeTimeout = 28000
+//var testTimeTimeout = 28000
 
 // mysql -h127.0.0.1 -uroot -pCometQLPassword -DCometQL_v1 -P3311 --skip-ssl
 var connection1 = mysql.createConnection({
@@ -199,27 +199,27 @@ function test_2_users_messages()
 function test_short_users_messages()
 {
     var isTestDone = 0;
- 
+
     let msg = ""
     for(let i=0; i<60; i++)
     {
         msg+=""+i%9;
-        let query = "INSERT INTO users_messages (id, event, message)VALUES (3, 'user', '"+msg+"');";
+        let query = "INSERT INTO users_messages (id, event, message)VALUES (5, 'user', '"+msg+"');";
         connection1.query(query,
             function(error, result, fields)
             {
                 if(error)
                 {
                     throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
-                } 
+                }
             }
-        ); 
+        );
     }
-    
-    apiWithAuth.subscription("msg.user", function(event)
+
+    apiWithJWT_Auth.subscription("msg.user", function(event)
     {
         isTestDone += 1
-        console.log("[js-test] \x1b[1;32m test_short_users_messages (apiWithAuth.subscription test_short_users_messages) ok\x1b[0m"); 
+        console.log("[js-test] \x1b[1;32m test_short_users_messages (apiWithAuth.subscription test_short_users_messages) ok\x1b[0m");
     })
 
     setTimeout(function()
@@ -228,7 +228,7 @@ function test_short_users_messages()
         {
             throw new Error("[js-test] Error test_short_users_messages not done (isTestDone="+isTestDone+")");
         }
-    }, 58000)
+    }, testTimeTimeout)
 }
 
 /**
@@ -288,7 +288,7 @@ function test_users_messages()
                     console.log("[js-test] \x1b[1;32m users_time ok\x1b[0m");
                 }
             );
-        }, 5000) 
+        }, 5000)
     })
 }
 
@@ -307,10 +307,10 @@ function test_onAuth2()
             throw new Error("[js-test] Error test_users_messages not done ( event.data.rand != juserdata.rand )", event);
         }
         isTestDone += 1
-        console.log("[js-test] \x1b[1;32m test_onAuth2 (apiWithAuth.subscription test_onAuth2) ok\x1b[0m"); 
+        console.log("[js-test] \x1b[1;32m test_onAuth2 (apiWithAuth.subscription test_onAuth2) ok\x1b[0m");
     })
 
-    var query = "DELETE FROM users_messages WHERE id = 3;";
+    var query = "DELETE FROM users_messages WHERE id = 3";
     connection1.query(query,
         function(error, result, fields)
         {
@@ -335,7 +335,12 @@ function test_onAuth2()
 
                             if(result.length != 1)
                             {
-                                throw new Error(JSON.stringify({test:"[js-test] Error ( result.length != 1 ) in query:"+query, error:error, result:result, fields:fields }));
+                                throw new Error(JSON.stringify({
+                                    test:"[js-test] Error ( result.length != 1 )(result.length="+result.length+") in query:"+query,
+                                    error:error,
+                                    result:result,
+                                    fields:fields
+                                }));
                             }
 
                             query = 'delete from users_auth where id = 3';
@@ -400,7 +405,7 @@ function test_onAuth2()
         {
             throw new Error("[js-test] Error test_onAuth2 not done (isTestDone="+isTestDone+")");
         }
-    }, 28000)
+    }, testTimeTimeout)
 }
 
 var apiWithJWT_Auth = new cometServerApi();
@@ -440,7 +445,7 @@ function test_JWT_Auth()
         {
             throw new Error("[js-test] Error test_JWT_Auth not done");
         }
-    }, maxTimeTimeout)
+    }, testTimeTimeout)
 }
 
 var apiWithRevokedJWT_Auth = new cometServerApi();
@@ -450,8 +455,8 @@ function test_Revoked_JWT_table()
 {
     var isTestDone = false;
     var revokedJWT = Math.random()+"";
-    
-    
+
+
     var query = 'insert into revoked_tokens(token)VALUES("'+revokedJWT+'");';
 
     console.log("[js-test] \x1b[1;33m test_Revoked_JWT_tables:\x1b[0m", query);
@@ -462,7 +467,7 @@ function test_Revoked_JWT_table()
             {
                 throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
             }
- 
+
             query = 'select * from  revoked_tokens where token = "'+revokedJWT+'"';
             connection1.query(query,
                 function(error, result, fields)
@@ -483,8 +488,8 @@ function test_Revoked_JWT_table()
                         console.log("Error in query:"+query, error, result, fields);
                         throw new Error("[js-test] Error in query:"+query+", result[0].id != user_id");
                     }
- 
-                    
+
+
                     query = 'delete from  revoked_tokens where token = "'+revokedJWT+'"';
                     connection1.query(query,
                         function(error, result, fields)
@@ -493,7 +498,7 @@ function test_Revoked_JWT_table()
                             {
                                 throw new Error("[js-test] Error in query:"+query);
                             }
- 
+
                             query = 'select * from revoked_tokens where token = "'+revokedJWT+'"';
                             connection1.query(query,
                                 function(error, result, fields)
@@ -507,23 +512,23 @@ function test_Revoked_JWT_table()
                                     {
                                         console.log("Error in query:"+query, error, result, fields);
                                         throw new Error("[js-test] Error in query  (test_Revoked_JWT_table 2) :"+query+", result.length = " + result.length);
-                                    } 
-                                    
+                                    }
+
                                     isTestDone = true
                             })
                     })
             })
     })
-            
-   
- 
+
+
+
     setTimeout(function()
     {
         if(!isTestDone)
         {
             throw new Error("[js-test] Error test_Revoked_JWT_table not done");
         }
-    }, maxTimeTimeout)
+    }, testTimeTimeout)
 }
 
 
@@ -563,7 +568,7 @@ function test_Revoked_JWT_Auth()
         {
             throw new Error("[js-test] Error test_Revoked_JWT_Auth not done");
         }
-    }, maxTimeTimeout)
+    }, testTimeTimeout)
 }
 
 var apiWithinvalidJWT_Auth = new cometServerApi();
@@ -591,7 +596,7 @@ function test_invalid_JWT_Auth()
         {
             throw new Error("[js-test] Error test_Revoked_JWT_Auth not done");
         }
-    }, maxTimeTimeout)
+    }, testTimeTimeout)
 }
 
 function test_onAuth()
@@ -638,7 +643,7 @@ function test_onAuth()
         {
             throw new Error("[js-test] Error test_onAuth not done");
         }
-    }, maxTimeTimeout)
+    }, testTimeTimeout)
 }
 
 function test_getTrackPipeUsers()
@@ -678,7 +683,7 @@ function test_getTrackPipeUsers()
         {
             throw new Error("[js-test] Error getTrackPipeUsers not done");
         }
-    }, maxTimeTimeout)
+    }, testTimeTimeout)
 }
 
 function test_getUserData()
@@ -717,7 +722,7 @@ function test_getUserData()
         {
             throw new Error("[js-test] Error test_getUserData not done isTestDone="+isTestDone);
         }
-    }, maxTimeTimeout)
+    }, testTimeTimeout)
 }
 
 function test_setUserData(user_id, rdata)
@@ -740,7 +745,7 @@ function test_setUserData(user_id, rdata)
             isTestDone += 1;
             query = 'select * from  users_data where id = '+user_id;
             console.log("Test query:"+query );
-            
+
             connection1.query(query,
                 function(error, result, fields)
                 {
@@ -816,7 +821,7 @@ function test_setUserData(user_id, rdata)
         {
             throw new Error("[js-test] Error test_setUserData not done isTestDone="+isTestDone);
         }
-    }, maxTimeTimeout)
+    }, testTimeTimeout)
 }
 
 function test_web_pipe_send()
@@ -839,39 +844,47 @@ function test_web_pipe_send()
         console.log("[js-test] \x1b[1;32m test_web_pipe_send ok\x1b[0m");
     })
 
+    var sended = 0
     setTimeout(function()
     {
         // apiTest1.web_pipe_send("web_test."+rand, "test1", rand) // Ломает тест. Выяснить от чего.
-        apiTest1.web_pipe_send("web_test.t1"+rand, rand)
-
+        apiTest1.web_pipe_send("web_test.t1"+rand, rand
+                    +"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                    +"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        sended++;
         for(var i = 0; i< send; i++)
         {
-            apiTest1.web_pipe_send("web_test."+rand, rand)
+            apiTest1.web_pipe_send("web_test."+rand, rand
+                    +"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                    +"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            sended++;
         }
 
-        if(apiTest1.web_pipe_send("test1."+rand, rand))
+        if(apiTest1.web_pipe_send("test1."+rand, rand
+                    +"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                    +"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"))
         {
             throw new Error("[js-test] Error web_pipe_send allow send to pipe `test1`");
         }
-    }, 1000)
+    }, testTimeTimeout/4+1000)
 
     setTimeout(function()
     {
-        if(isTestDone == send + 1)
+        if(isTestDone != sended)
         {
-            throw new Error("[js-test] Error test_web_pipe_send not done");
+            throw new Error("[js-test] Error test_web_pipe_send not done sended=" + sended+" isTestDone="+isTestDone);
         }
-    }, maxTimeTimeout)
+    }, testTimeTimeout)
 }
 
 if(apiTest2.getTabUUID() != apiTest2.getTabUUID())
-{ 
-    throw new Error(JSON.stringify({error:"[js-test] Error apiTest2.getTabUUID() != apiTest2.getTabUUID()"})); 
+{
+    throw new Error(JSON.stringify({error:"[js-test] Error apiTest2.getTabUUID() != apiTest2.getTabUUID()"}));
 }
 
 if(apiTest2.getUUID() != apiTest2.getUUID())
-{ 
-    throw new Error(JSON.stringify({error:"[js-test] Error apiTest2.getUUID() != apiTest2.getUUID()"})); 
+{
+    throw new Error(JSON.stringify({error:"[js-test] Error apiTest2.getUUID() != apiTest2.getUUID()"}));
 }
 
 function test_track_subscription()
@@ -880,47 +893,47 @@ function test_track_subscription()
 
     var pipe_name = "track_test_"+Math.floor(Math.random()*100000);
     var laseEvent = undefined
-    
+
     apiTest4.subscription(pipe_name, function(event){
         console.log("[js-test] \x1b[1;32m track_test_track_subscription isTestDone="+isTestDone+" pipe_name="+pipe_name+"\x1b[0m", event);
-        
+
         if(event.server_info.event == "unsubscription")
         {
             return;
         }
-         
+
         if(event.data.uuid != apiTest3.getUUID())
         {
-            throw new Error(JSON.stringify({error:"[js-test] Error (event.data.uuid != apiTest3.getUUID()) test_track_subscription not done isTestDone="+isTestDone, 
+            throw new Error(JSON.stringify({error:"[js-test] Error (event.data.uuid != apiTest3.getUUID()) test_track_subscription not done isTestDone="+isTestDone,
                 event:event,
                 laseEvent:laseEvent,
                 apiTest3_TabUUID:apiTest3.getUUID()
-            })); 
+            }));
         }
-        
+
         isTestDone += 1;
         if(isTestDone > 1)
         {
-            throw new Error(JSON.stringify({error:"[js-test] Error (isTestDone > 1) test_track_subscription not done isTestDone="+isTestDone, 
+            throw new Error(JSON.stringify({error:"[js-test] Error (isTestDone > 1) test_track_subscription not done isTestDone="+isTestDone,
                 event:event,
                 laseEvent:laseEvent,
                 apiTest3:apiTest3.getUUID()
-            })); 
-        }  
-        
+            }));
+        }
+
         laseEvent = event
     })
 
     setTimeout(function()
     {
-        apiTest3.subscription(pipe_name, function(event){ 
-            
+        apiTest3.subscription(pipe_name, function(event){
+
             if(event.server_info.event == "unsubscription")
             {
                 return;
             }
 
-            throw new Error(JSON.stringify({error:"[js-test] Error (in apiTest3 ) test_track_subscription not done isTestDone="+isTestDone, event:event})); 
+            throw new Error(JSON.stringify({error:"[js-test] Error (in apiTest3 ) test_track_subscription not done isTestDone="+isTestDone, event:event}));
         })
     }, 2000)/**/
 
@@ -930,7 +943,7 @@ function test_track_subscription()
         {
             throw new Error("[js-test] Error (isTestDone == 1) test_track_subscription not done isTestDone="+isTestDone);
         }
-    }, maxTimeTimeout)
+    }, testTimeTimeout)
 }
 
 function test_get_pipe_log()
@@ -974,6 +987,9 @@ function test_get_pipe_log()
                             }
 
                             apiTest1.subscription(pipe_name+"."+event_name, function(event){
+
+                                console.log("[js-test] \x1b[1;32m test_get_pipe_log message_send_time\x1b[0m "+ JSON.stringify(event));
+                                // message_send_time
                                 isTestDone += 1;
                                 console.log("[js-test] \x1b[1;32m test_get_pipe_log ok\x1b[0m");
                                 // @todo добавить валидацию ответа
@@ -999,7 +1015,7 @@ function test_get_pipe_log()
         {
             throw new Error("[js-test] Error test_get_pipe_log not done isTestDone="+isTestDone);
         }
-    }, maxTimeTimeout)
+    }, testTimeTimeout)
 }
 
 
@@ -1008,9 +1024,10 @@ function test_ql_subscription()
     var isTestDone = 0;
 
     var pipe_name = "tttest_"+Math.floor(Math.random()*10000);
-    var messages = 20;  
+    var messages = 20;
     var event_name = "evt";
-    var rdata = Math.random()+"ABC"
+    var rdata = Math.random()+"ABCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             +"ABCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 
     var juserdata = {
         rand:rdata+""
@@ -1022,11 +1039,11 @@ function test_ql_subscription()
         {
             throw new Error(JSON.stringify({error:"[js-test] Error test_ql_subscription not done ( event.data.rand != juserdata.rand )", event:event}));
         }
-        
+
         isTestDone += 1;
         console.log("[js-test] \x1b[1;32m test_ql_subscription ok\x1b[0m");
     })
-    
+
     var query;
     setTimeout(function()
     {
@@ -1038,23 +1055,23 @@ function test_ql_subscription()
                 {
                     throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
                 }
-                
+
                 if(result.length != 1)
                 {
                     throw new Error(JSON.stringify({test:"[js-test] Error (result.length != 1) in query:"+query, error:error, result:result, fields:fields }));
                 }
-                 
+
                 if(result[0]["name"] != pipe_name)
                 {
                     throw new Error(JSON.stringify({test:"[js-test] Error (result[0][name] != pipe_name) in query:"+query, error:error, result:result, fields:fields }));
                 }
-                
+
                 if(result[0]["user_uuid"] != apiTest1.getUUID())
                 {
                     throw new Error(JSON.stringify({test:"[js-test] Error (result[0][user_uuid] != apiTest1.getUUID()) in query:"+query, error:error, result:result, fields:fields }));
                 }
-                
-                console.log("[js-test] \x1b[1;32m users_in_pipes\x1b[0m"); 
+
+                console.log("[js-test] \x1b[1;32m users_in_pipes\x1b[0m");
             }
         );
 
@@ -1066,23 +1083,23 @@ function test_ql_subscription()
                 {
                     throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
                 }
-                
+
                 if(result.length != 1)
                 {
                     throw new Error(JSON.stringify({test:"[js-test] Error (result.length != 1) in query:"+query, error:error, result:result, fields:fields }));
                 }
-                 
+
                 if(result[0]["name"] != pipe_name)
                 {
                     throw new Error(JSON.stringify({test:"[js-test] Error (result[0][name] != pipe_name) in query:"+query, error:error, result:result, fields:fields }));
                 }
-                
+
                 if(result[0]["users"] != 1)
                 {
                     throw new Error(JSON.stringify({test:"[js-test] Error (result[0][users] != 1) in query:"+query, error:error, result:result, fields:fields }));
                 }
-                
-                console.log("[js-test] \x1b[1;32m users_in_pipes\x1b[0m"); 
+
+                console.log("[js-test] \x1b[1;32m users_in_pipes\x1b[0m");
             }
         );
 
@@ -1102,7 +1119,7 @@ function test_ql_subscription()
                 }
             );
         }
-    }, 6000)
+    }, testTimeTimeout/5)
 
     setTimeout(function()
     {
@@ -1110,7 +1127,7 @@ function test_ql_subscription()
         {
             throw new Error("[js-test] Error test_ql_subscription not done isTestDone=" + isTestDone);
         }
-    }, maxTimeTimeout)
+    }, testTimeTimeout)
 }
 
 function test_ql_pipes_settings()
@@ -1284,7 +1301,7 @@ function test_ql_pipes_settings()
                                                                                     {
                                                                                         throw new Error(JSON.stringify({test:"[js-test] Error (result.length != 0) in query:"+query, error:error, result:result, fields:fields }));
                                                                                     }
-                                                                                    
+
                                                                                     console.log("[js-test] \x1b[1;32m test_ql_pipes_settings 7\x1b[0m");
                                                                                 }
                                                                             );
@@ -1307,10 +1324,50 @@ function test_ql_pipes_settings()
         }
     );
 }
-/*  */
+
+
+
+function test_mysql_bigAnswer(querysCount = 300, prefix = '')
+{
+    var query = 'insert into revoked_tokens(token)VALUES("querys'+prefix+querysCount+'");';
+
+    console.log("[js-test] \x1b[1;33m test_mysql_bigAnswer:\x1b[0m", query);
+    connection1.query(query,
+        function(error, result, fields)
+        {
+            if(error)
+            {
+                throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
+            }
+            if(querysCount > 0)
+            {
+               test_mysql_bigAnswer(querysCount -1, prefix)
+            }
+        }
+    );
+}
+
+function test_mysql_bigAnswer( )
+{
+    query = 'SELECT * FROM revoked_tokens';
+    connection1.query(query,
+        function(error, result, fields)
+        {
+            if(error)
+            {
+                throw new Error(JSON.stringify({test:"[js-test] Error in query:"+query, error:error, result:result, fields:fields }));
+            }
+
+            console.log("[js-test] \x1b[1;32m test_mysql_bigAnswer\x1b[0mresult.length="+result.length);
+        }
+    );
+}
+
+/**/
 test_setUserData(9999-2, Math.random()+"-"+Math.random()+"-"+Math.random());
 
 test_setUserData(9999-3, Math.floor(Math.random()*100));
+
 test_onAuth();
 test_web_pipe_send();
 test_getTrackPipeUsers();
@@ -1328,7 +1385,14 @@ test_2_users_messages();
 test_users_messages();
 test_get_pipe_log();
 test_Revoked_JWT_table();
-test_short_users_messages();// */
+test_short_users_messages();
+
+/*
+test_mysql_bigAnswer(300, "A")
+test_mysql_bigAnswer(300, "B")
+test_mysql_bigAnswer(300, "C") */
+
+test_mysql_bigAnswer(); // /* */
 // _cometServerApi.prototype.stop
 // restart
 //

@@ -1,0 +1,14 @@
+view:
+    fields:
+     git_ee_repo_url:                                                           # EE_VERSION
+      title: "git ee repo url"                                                  # EE_VERSION
+      default: "https://Levhav:ser32poHJKL@gitlab.com/Levhav/star-comet.git"    # EE_VERSION
+      format: string                                                            # EE_VERSION
+      help: "git ee repo url"                                                   # EE_VERSION
+    playbooks:
+     "make-ce.yml":                                                             # EE_VERSION
+      title: "make-ce.yml"                                                      # EE_VERSION
+      help: "make-ce.yml"                                                       # EE_VERSION
+     "highload-host.yml":
+      title: "highload host"
+      help: "Unset limits for opened connections"
