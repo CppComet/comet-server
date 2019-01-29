@@ -1,0 +1,15 @@
+---
+- hosts: all 
+  tasks:
+    - name: Git clone ce
+      raw: rm -rf /tmp/CppComet-CE && mkdir /tmp/CppComet-CE && cd /tmp/CppComet-CE && git clone -b {{git_branch}} {{git_ce_repo_url}} ./
+
+    - name: docker build
+      shell:
+        chdir: /tmp/CppComet-CE
+        cmd: docker build -t cppcomet/cppcomet .
+
+    - name: docker push
+      shell:
+        chdir: /tmp/CppComet-CE
+        cmd: docker push cppcomet/cppcomet
