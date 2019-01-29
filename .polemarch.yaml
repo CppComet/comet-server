@@ -1,16 +1,6 @@
 view:
     fields:
-     git_ee_repo_url:                                                           # EE_VERSION
-      title: "git ee repo url"                                                  # EE_VERSION
-      default: "https://Levhav:ser32poHJKL@gitlab.com/Levhav/star-comet.git"    # EE_VERSION
-      format: string                                                            # EE_VERSION
-      help: "git ee repo url"                                                   # EE_VERSION
 
-     git_ce_repo_url:                                                           # EE_VERSION
-      title: "git ce repo url"                                                  # EE_VERSION
-      default: "https://Levhav:Zse32poH@github.com/CppComet/comet-server"       # EE_VERSION
-      format: string                                                            # EE_VERSION
-      help: "git ce repo url"                                                   # EE_VERSION
 
      git_cppcomet_repo_url:
       title: "CppComet GIT"
@@ -25,17 +15,8 @@ view:
       help: "GIT branch"
 
     playbooks:
-     "make-ce.yml":                                                             # EE_VERSION
-      title: "Подготовить релиз и тесты"                                        # EE_VERSION
-      help: "Выложит всё в alfa ветку и прогонит тесты (make-ce.yml)"           # EE_VERSION
 
-     "new-ce-release.yml":                                                      # EE_VERSION
-      title: "Подготовить релиз без тестов"                                     # EE_VERSION
-      help: "Выложит всё в alfa ветку"                                          # EE_VERSION
 
-     "upload-to-docker-hub.yml":                                                # EE_VERSION
-      title: "Выложить на Docker Hub"                                           # EE_VERSION
-      help: "upload-to-docker-hub.yml"                                          # EE_VERSION
 
      "highload-host.yml":
       title: "Make highload host"
