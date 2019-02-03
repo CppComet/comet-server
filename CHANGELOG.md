@@ -5,6 +5,11 @@ FEATURES:
 IMPROVEMENTS:
 BUG FIXES:
 
+## v4.09
+BUG FIXES:
+ * Fix bug in db connections CR_COMMANDS_OUT_OF_SYNC
+
+
 ## v4.08
 BUG FIXES:
  * Fix tests

@@ -124,6 +124,19 @@ int stmBase::insert()
     if (mysql_stmt_execute(stmt) != 0)
     {
         int error_code = mysql_stmt_errno(stmt);
+        
+        // Возможно тут тоже надо добавить проверку на CR_COMMANDS_OUT_OF_SYNC 
+        if(error_code == CR_COMMANDS_OUT_OF_SYNC)
+        {
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;33mmysql_stmt_execute insert (warn[0]) errno=%d\x1b[0m", error_code);
+            fetch();
+            free();
+  
+            
+            mysql_stmt_execute(stmt);
+            error_code = mysql_stmt_errno(stmt);
+        }
+ 
         if( error_code != CR_SERVER_LOST && error_code != ER_UNKNOWN_STMT_HANDLER && error_code != ER_SERVER_SHUTDOWN)
         {
             TagLoger::trace(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_execute(insert), (1) failed - %s [errno=%d]\x1b[0m\n", mysql_stmt_error(stmt), mysql_stmt_errno(stmt));
@@ -171,7 +184,18 @@ bool stmBase::select()
     if (mysql_stmt_execute(stmt))
     {
         int error_code = mysql_stmt_errno(stmt);
-         
+        
+        if(error_code == CR_COMMANDS_OUT_OF_SYNC)
+        {
+            TagLoger::error(Log_dbLink, 0, "\x1b[1;33mmysql_stmt_execute select (warn[0]) errno=%d\x1b[0m", error_code);
+            
+            fetch();
+            free();
+  
+            mysql_stmt_execute(stmt);
+            error_code = mysql_stmt_errno(stmt);
+        }
+
         if( error_code != CR_SERVER_LOST && error_code != ER_UNKNOWN_STMT_HANDLER && error_code != ER_SERVER_SHUTDOWN)
         {
             TagLoger::trace(Log_dbLink, 0, "\x1b[1;31mmysql_stmt_execute(select), (1) failed - %s [errno=%d]\x1b[0m\n", mysql_stmt_error(stmt), mysql_stmt_errno(stmt));
@@ -306,7 +330,7 @@ bool dbLink::init(std::string connectionString)
                 Port = std::stoi(paramValue);
             }catch(...)
             {
-                printf("\x1b[1;31mexeption in parsing Port value Port=%s\x1b[0m\n", paramValue.data());
+                printf("\x1b[1;31mexeption in parsing Port value Port=%s\x1b[0m\n", (char*)paramValue.data());
                 return false;
             } 
         }

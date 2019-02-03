@@ -24,16 +24,7 @@
  * Надо ли вообще проверять с какого урла пишёл запрос.
  */
 #define testUrl
-
-/**
- * Режим сборки для однопользовательского режима работы
- */
-// #define monoURL { "chat.lovelama.ru", "lovelama.net", "lovelama.ru", "www.lovelama.net", "www.lovelama.ru" }
-// #define monoUrlsCount 4
-
-// #define monoURL "78.47.206.108,inparadise.info,demo.inparadise.info,n2.comet-server.com,chat.inparadise.info,demo-chat.inparadise.info,int.dev,social-chat.comet-server.com,chat.emed24.ru"
-// #define monoUrlsCount 8
-
+ 
 /**
  * Максимальная длина имени канала
  */
@@ -81,7 +72,7 @@
 #define  MAX_CONECTION_ON_USER_ID 16
 
 
-#define MYSQL_SERVERNAME "CppComet community 4.08 (AGPL license)"
+#define MYSQL_SERVERNAME "CppComet community 4.09 (AGPL license)"
 #define MYSQL_SYSTEMVARIBLE MYSQL_SERVERNAME "(comet-server.com, support@comet-server.com)"
 
 
