@@ -23,3 +23,12 @@ For build use command
 
 For run use command
 cd .. && docker run -v $(pwd):/cppcomet -p=8087:8087 -p=3305:3305 -p=3316:3316 -it debian-dev:latest bash
+
+
+## Dependes
+
+`sudo apt install npm valgrind`
+
+`sudo npm install websocket`
+`sudo npm install mysql`
+`sudo npm install -g istanbul`
