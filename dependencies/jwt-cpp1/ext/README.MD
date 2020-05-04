@@ -1,1 +1,0 @@
-Directory containing dependent modules

@@ -1,6 +1,0 @@
-# defaults file for limits
----
-limits_pam_files:
-  - /etc/pam.d/common-session
-  - /etc/pam.d/common-session-noninteractive
-limits_conf_d_files: {}

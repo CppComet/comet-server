@@ -1,3 +1,0 @@
-- hosts: all 
-  roles:  
-    - { role: cppcomet-ansible-role }
