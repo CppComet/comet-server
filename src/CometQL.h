@@ -122,11 +122,11 @@ public:
 
 
     bool isMatch(){
-
+       return false;
     }
 
     MySqlResulValue getValue(){
-
+	return MySqlResulValue();
     }
 
     sqlExpression operator = (sqlExpression exp){
