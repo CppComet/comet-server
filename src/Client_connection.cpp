@@ -1295,7 +1295,7 @@ int Client_connection::get_pipe_count(thread_data* local_buf, char* event_data,i
         return 0;
     }
 
-    if( pMarker > 0 && end_pMarker > 0)
+    if( (long)pMarker > 0 && (long)end_pMarker > 0)
     {
         *end_pMarker = 0;
         send_pipe_count(local_buf, pipe_name, pMarker);

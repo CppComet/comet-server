@@ -1947,7 +1947,7 @@ int MySql_connection::sql_select_from_revoked_tokens(thread_data* local_buf, uns
         }
 
         char* token = local_buf->qInfo.where.whereExprValue[idExprPos][i].Start(local_buf->qInfo);
-        if(token <= 0)
+        if((long)token <= 0)
         {
             continue;
         }
@@ -2095,7 +2095,7 @@ int MySql_connection::sql_delete_from_revoked_tokens(thread_data* local_buf, uns
         }
 
         char* token = local_buf->qInfo.where.whereExprValue[idExprPos][i].Start(local_buf->qInfo);
-        if(token <= 0)
+        if((long)token <= 0)
         {
             continue;
         }
