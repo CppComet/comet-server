@@ -9,6 +9,7 @@
 #ifndef DBLINK_H
 #define	DBLINK_H
 
+#define my_bool bool
 
 class stmMapper;
 class dbLink;
@@ -55,7 +56,7 @@ protected:
      */
     bool free();
     
-    bool virtual prepare(dbLink *mysql){}
+    bool virtual prepare(dbLink *mysql){ return false; }
     
 public:
     MYSQL_STMT *getSTMT()

@@ -7,6 +7,7 @@
 
 #include <list>     // подключаем заголовок списка 
 #include <functional>
+#include <pthread.h>
 
 class thread_data;
 class intervalLoop;
