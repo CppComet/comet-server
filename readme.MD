@@ -5,6 +5,10 @@
 
 Comet server is written in C++, for storing data using MySQL.   
 
+# Project status
+
+In the project has implemented all the functions that the author intended. The project is not dead, bug-reports and requests for new functionality are accepted as before.  
+
 # Features
 
 Comet technology – allows sending arbitrary messages to client through server initiative
