@@ -80,8 +80,20 @@ For send message to demo chat use this query:
 INSERT INTO pipes_messages (name, event, message)VALUES("web_MainPageChat", "", '{ "text":"My text","name":"My name"}' );
 ```
 
-License
-----
+# 💡 Help
+
+As the [author of CppComet](https://www.linkedin.com/in/victor-trapenok/) and an engineer with expertise in FullStack, DevOps, Kubernetes, and cloud architecture, I offer:
+- 🔧 Consultations.
+- 🚀 Guidance for building multi-tenant SaaS solutions.
+- 💡 Best practices for cluster management and CI/CD pipelines.
+
+[Let’s Connect!](https://www.linkedin.com/in/victor-trapenok/)
+
+# My other project
+
+🚀 [U-store - cloud SaaS store template](https://github.com/unifie-cloud/u-store)
+
+# 🛡️ License 
 
 GNU AGPLv3
 
